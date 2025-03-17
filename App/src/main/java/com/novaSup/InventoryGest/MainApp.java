@@ -1,6 +1,6 @@
 package com.novaSup.InventoryGest;
 
-import com.novaSup.InventoryGest.utils.PathsFXML;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
