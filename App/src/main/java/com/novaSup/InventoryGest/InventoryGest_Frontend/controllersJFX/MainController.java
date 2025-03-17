@@ -1,4 +1,4 @@
-package com.novaSup.InventoryGest.InventoryGest_Frontend.controllers;
+package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;

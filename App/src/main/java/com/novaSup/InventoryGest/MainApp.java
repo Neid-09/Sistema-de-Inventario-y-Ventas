@@ -28,7 +28,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MAIN_FXML));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.TEST_REGISTER));
         loader.setControllerFactory(springContext::getBean); // Inyecta controladores con Spring
         Scene scene = new Scene(loader.load());
         stage.setScene(scene);
