@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" alignment="CENTER"
+      xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.UserControllerFX">
+
+    <Label text="Registro de Usuarios" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Nombre:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Correo:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="txtCorreo" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Teléfono:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="txtTelefono" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Contraseña:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <PasswordField fx:id="txtContraseña" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Rol:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <ComboBox fx:id="cmbRol" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+    </GridPane>
+
+    <HBox spacing="10">
+        <Button text="Registrar" onAction="#registrarUsuario"/>
+        <Button text="Actualizar" onAction="#actualizarUsuario"/>
+        <Button text="Eliminar" onAction="#eliminarUsuario"/>
+    </HBox>
+
+    <TableView fx:id="tablaUsuarios" prefWidth="400">
+        <columns>
+            <TableColumn text="ID" fx:id="colId" prefWidth="50"/>
+            <TableColumn text="Nombre" fx:id="colNombre" prefWidth="100"/>
+            <TableColumn text="Correo" fx:id="colCorreo" prefWidth="120"/>
+            <TableColumn text="Teléfono" fx:id="colTelefono" prefWidth="100"/>
+            <TableColumn text="Rol" fx:id="colRol" prefWidth="80"/>
+        </columns>
+    </TableView>
+
+</VBox>

@@ -13,7 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 @SpringBootApplication
 public class MainApp extends Application {
 
-    private static ConfigurableApplicationContext springContext;
+    public static ConfigurableApplicationContext springContext;
     private static Stage primaryStage;
 
     public static void main(String[] args) {
@@ -28,7 +28,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MAIN_FXML));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.LOGIN_FXML));
         loader.setControllerFactory(springContext::getBean); // Inyecta controladores con Spring
         Scene scene = new Scene(loader.load());
         stage.setScene(scene);
