@@ -288,7 +288,17 @@ public class UserControllerFX {
             txtCorreo.setText(usuarioSeleccionado.getCorreo());
             txtTelefono.setText(usuarioSeleccionado.getTelefono());
             txtContraseña.setText(usuarioSeleccionado.getContraseña());
-            cmbRol.getSelectionModel().select(usuarioSeleccionado.getRol());
+
+            // Seleccionar el rol por ID en lugar de por objeto
+            Rol rolUsuario = usuarioSeleccionado.getRol();
+            if (rolUsuario != null) {
+                for (Rol rol : cmbRol.getItems()) {
+                    if (rol.getIdRol().equals(rolUsuario.getIdRol())) {
+                        cmbRol.getSelectionModel().select(rol);
+                        break;
+                    }
+                }
+            }
         }
     }
 

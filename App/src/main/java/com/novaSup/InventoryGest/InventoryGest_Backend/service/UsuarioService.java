@@ -41,7 +41,14 @@ public class UsuarioService {
                     u.setCorreo(usuario.getCorreo());
                     u.setTelefono(usuario.getTelefono());
                     u.setContraseña(usuario.getContraseña());
-                    u.setRol(usuario.getRol());
+
+                    // Buscar y asignar el rol por su ID
+                    if (usuario.getIdRol() != null) {
+                        Rol rol = rolRepository.findById(usuario.getIdRol())
+                                .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + usuario.getIdRol()));
+                        u.setRol(rol);
+                    }
+
                     return usuarioRepository.save(u);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -50,4 +57,16 @@ public class UsuarioService {
     public void eliminarUsuario(int id) {
         usuarioRepository.deleteById(id);
     }
+
+    public Usuario autenticarUsuario(String correo, String contraseña) {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con correo: " + correo));
+
+        if (!contraseña.equals(usuario.getContraseña())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        return usuario;
+    }
+
 }

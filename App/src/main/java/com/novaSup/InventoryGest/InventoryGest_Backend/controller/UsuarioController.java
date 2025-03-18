@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -42,5 +43,22 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminarUsuario(@PathVariable int id) {
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Usuario> loginUsuario(@RequestBody Map<String, String> credentials) {
+        try {
+            String correo = credentials.get("correo");
+            String contraseña = credentials.get("contraseña");
+
+            if (correo == null || contraseña == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            Usuario usuario = usuarioService.autenticarUsuario(correo, contraseña);
+            return ResponseEntity.ok(usuario);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(null); // Unauthorized
+        }
     }
 }
