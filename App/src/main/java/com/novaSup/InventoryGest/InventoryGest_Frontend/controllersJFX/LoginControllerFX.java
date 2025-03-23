@@ -1,6 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -38,6 +39,15 @@ public class LoginControllerFX {
     private PasswordField txtPassword;
 
     private final String API_URL = "http://localhost:8080/usuarios/login";
+
+    @FXML
+    public void initialize() {
+        // Se ejecuta al cargar la ventana
+        Platform.runLater(() -> {
+            Stage stage = (Stage) txtEmail.getScene().getWindow();
+            stage.setResizable(false);
+        });
+    }
 
     @FXML
     void iniciarSesion(ActionEvent event) {

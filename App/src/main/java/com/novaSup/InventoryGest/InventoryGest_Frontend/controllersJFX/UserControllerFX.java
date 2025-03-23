@@ -68,9 +68,12 @@ public class UserControllerFX {
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colRol.setCellValueFactory(new PropertyValueFactory<>("rol") {
 
+        /*El primer getRol() navega desde Usuario hasta el objeto Rol relacionado
+           El segundo getRol() extrae el nombre del rol (campo String rol) desde el objeto Rol*/
+
             @Override
             public SimpleStringProperty call(TableColumn.CellDataFeatures<Usuario, String> param) {
-                return new SimpleStringProperty(param.getValue().getRol().getNombre());
+                return new SimpleStringProperty(param.getValue().getRol().getRol());
             }
 
         });
@@ -322,7 +325,12 @@ public class UserControllerFX {
             // Validar respuesta HTTP
             if (connection.getResponseCode() == 204) {
                 System.out.println("¡Usuario eliminado exitosamente!");
-                cargarUsuarios(); // Recargar la lista de usuarios
+                // Recargar la lista de usuarios
+                cargarUsuarios();
+
+                limpiarCampos();
+
+
             } else {
                 System.err.println("Error al eliminar el usuario: " + connection.getResponseCode());
             }
