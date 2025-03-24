@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="views.ControlStockProducto"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <!--
+    PASO A SEGUIR DESDE AQUI :)
+    Modelo FX: Crear EntradaProductoFX
+    Servicio FX: Crear IEntradaProductoService y EntradaProductoServiceImplFX
+    Controlador FX: Crear EntradaProductoControllerFX
+    Vista FXML: Crear una interfaz para visualizar y gestionar entradas
+    Integración con el menú principal-->
+
+</AnchorPane>

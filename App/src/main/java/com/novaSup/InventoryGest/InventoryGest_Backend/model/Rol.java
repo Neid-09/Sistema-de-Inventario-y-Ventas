@@ -1,7 +1,5 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,11 +15,11 @@ public class Rol {
     private Integer idRol;
 
     @Column(unique = true, nullable = false)
-    private String nombre;
+    private String rol;
 
     @Override
     public String toString() {
-        return nombre;
+        return rol;
     }
 
 }

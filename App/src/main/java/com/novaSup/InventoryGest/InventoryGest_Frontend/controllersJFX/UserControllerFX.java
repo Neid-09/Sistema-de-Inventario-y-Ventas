@@ -1,49 +1,42 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Rol;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.springframework.stereotype.Controller;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 
 @Controller
 public class UserControllerFX {
 
     @FXML
-    private ComboBox<Rol> cmbRol; // Cambiado a ComboBox<Rol> para almacenar objetos Rol
+    private ComboBox<RolFX> cmbRol;
 
     @FXML
-    private TableColumn<Usuario, Integer> colId;
+    private TableColumn<UsuarioFX, Integer> colId;
 
     @FXML
-    private TableColumn<Usuario, String> colNombre;
+    private TableColumn<UsuarioFX, String> colNombre;
 
     @FXML
-    private TableColumn<Usuario, String> colCorreo;
+    private TableColumn<UsuarioFX, String> colCorreo;
 
     @FXML
-    private TableColumn<Usuario, String> colTelefono;
+    private TableColumn<UsuarioFX, String> colTelefono;
 
     @FXML
-    private TableColumn<Usuario, String> colRol;
+    private TableColumn<UsuarioFX, String> colRol;
 
     @FXML
-    private TableView<Usuario> tablaUsuarios;
+    private TableView<UsuarioFX> tablaUsuarios;
 
     @FXML
     private PasswordField txtContraseña;
@@ -57,37 +50,30 @@ public class UserControllerFX {
     @FXML
     private TextField txtTelefono;
 
+    // Usamos la interfaz en lugar de la implementación directa
+    private final IUsuarioService usuarioService = new UsuarioServiceImplFX();
+
     @FXML
     public void initialize() {
-        cargarRoles();  // Cargar roles en el ComboBox
-        cargarUsuarios(); // Cargar usuarios en la tabla
+        cargarRoles();
+        cargarUsuarios();
 
         colId.setCellValueFactory(new PropertyValueFactory<>("idUsuario"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
-        colRol.setCellValueFactory(new PropertyValueFactory<>("rol") {
+        colRol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRol().getRol()));
 
-            @Override
-            public SimpleStringProperty call(TableColumn.CellDataFeatures<Usuario, String> param) {
-                return new SimpleStringProperty(param.getValue().getRol().getNombre());
-            }
-
-        });
-
-        // Vincular el método seleccionarUsuario al evento de selección de la tabla
         tablaUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 seleccionarUsuario();
             }
         });
-
     }
 
     @FXML
     void registrarUsuario(ActionEvent event) {
         try {
-            // Validar que se hayan llenado todos los campos
             if (txtNombre.getText().isEmpty() || txtCorreo.getText().isEmpty()
                     || txtTelefono.getText().isEmpty() || txtContraseña.getText().isEmpty()
                     || cmbRol.getSelectionModel().isEmpty()) {
@@ -95,83 +81,27 @@ public class UserControllerFX {
                 return;
             }
 
-            // Crear objeto JSON con los datos ingresados
             String nombre = txtNombre.getText();
             String correo = txtCorreo.getText();
             String telefono = txtTelefono.getText();
             String contraseña = txtContraseña.getText();
+            RolFX rolSeleccionado = cmbRol.getSelectionModel().getSelectedItem();
 
-            // Obtener el objeto Rol seleccionado para usar su idRol
-            Rol rolSeleccionado = cmbRol.getSelectionModel().getSelectedItem();
-            int idRol = rolSeleccionado.getIdRol();
+            UsuarioFX nuevoUsuario = new UsuarioFX(null, nombre, correo, telefono, contraseña, rolSeleccionado);
+            usuarioService.registrarUsuario(nuevoUsuario);
 
-            // Crear JSON para enviar al backend
-            String usuarioJson = String.format(
-                    "{\"nombre\": \"%s\", \"correo\": \"%s\", \"telefono\": \"%s\", \"contraseña\": \"%s\", \"idRol\": %d}",
-                    nombre, correo, telefono, contraseña, idRol
-            );
-
-            // Conexión al backend
-            String url = "http://localhost:8080/usuarios/registrar";
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-
-            // Enviar datos
-            connection.getOutputStream().write(usuarioJson.getBytes());
-
-            // Procesar respuesta
-            if (connection.getResponseCode() == 200) {
-                System.out.println("¡Usuario registrado exitosamente!");
-                limpiarCampos();
-            } else {
-                System.err.println("Error al registrar el usuario: " + connection.getResponseCode());
-            }
-
-            connection.disconnect();
+            System.out.println("¡Usuario registrado exitosamente!");
+            limpiarCampos();
+            cargarUsuarios();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        cargarUsuarios();
-
     }
 
-    /**
-     * Método para cargar roles desde la API del backend
-     */
     private void cargarRoles() {
         try {
-            // URL del endpoint del backend
-            String url = "http://localhost:8080/roles";
-
-            // Crear conexión al backend
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-
-            // Leer la respuesta
-            if (connection.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                // Deserializar la respuesta JSON en una lista de objetos Rol
-                ObjectMapper mapper = new ObjectMapper();
-                List<Rol> roles = mapper.readValue(response.toString(),
-                        mapper.getTypeFactory().constructCollectionType(List.class, Rol.class)); // Lista de Roles
-
-                // Poblar el ComboBox con los objetos Rol
-                cmbRol.setItems(FXCollections.observableArrayList(roles));
-            } else {
-                System.err.println("Error al obtener roles: " + connection.getResponseCode());
-            }
+            List<RolFX> roles = usuarioService.obtenerRoles();
+            cmbRol.setItems(FXCollections.observableArrayList(roles));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -179,44 +109,13 @@ public class UserControllerFX {
 
     private void cargarUsuarios() {
         try {
-            // URL del endpoint para listar usuarios
-            String url = "http://localhost:8080/usuarios/listar";
-
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-
-            // Validar respuesta HTTP
-            if (connection.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                // Mapear respuesta JSON a una lista de Usuarios
-                ObjectMapper mapper = new ObjectMapper();
-                List<Usuario> usuarios = mapper.readValue(response.toString(),
-                        mapper.getTypeFactory().constructCollectionType(List.class, Usuario.class));
-
-                // Poblar la tabla con la lista de usuarios
-                tablaUsuarios.setItems(FXCollections.observableArrayList(usuarios));
-
-            } else {
-                System.err.println("Error al obtener los usuarios: " + connection.getResponseCode());
-            }
+            List<UsuarioFX> usuarios = usuarioService.obtenerUsuarios();
+            tablaUsuarios.setItems(FXCollections.observableArrayList(usuarios));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
-    /**
-     * Método para limpiar los campos después de un registro exitoso
-     */
     private void limpiarCampos() {
         txtNombre.clear();
         txtCorreo.clear();
@@ -228,13 +127,12 @@ public class UserControllerFX {
     @FXML
     void actualizarUsuario(ActionEvent event) {
         try {
-            Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+            UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
             if (usuarioSeleccionado == null) {
                 System.err.println("Por favor selecciona un usuario para actualizar.");
                 return;
             }
 
-            // Validar que se hayan llenado todos los campos
             if (txtNombre.getText().isEmpty() || txtCorreo.getText().isEmpty()
                     || txtTelefono.getText().isEmpty() || txtContraseña.getText().isEmpty()
                     || cmbRol.getSelectionModel().isEmpty()) {
@@ -242,39 +140,18 @@ public class UserControllerFX {
                 return;
             }
 
-            // Crear objeto JSON con los datos actualizados
             String nombre = txtNombre.getText();
             String correo = txtCorreo.getText();
             String telefono = txtTelefono.getText();
             String contraseña = txtContraseña.getText();
-            Rol rolSeleccionado = cmbRol.getSelectionModel().getSelectedItem();
-            int idRol = rolSeleccionado.getIdRol();
+            RolFX rolSeleccionado = cmbRol.getSelectionModel().getSelectedItem();
 
-            String usuarioJson = String.format(
-                    "{\"nombre\": \"%s\", \"correo\": \"%s\", \"telefono\": \"%s\", \"contraseña\": \"%s\", \"idRol\": %d}",
-                    nombre, correo, telefono, contraseña, idRol
-            );
+            UsuarioFX usuarioActualizado = new UsuarioFX(usuarioSeleccionado.getIdUsuario(), nombre, correo, telefono, contraseña, rolSeleccionado);
+            usuarioService.actualizarUsuario(usuarioSeleccionado.getIdUsuario(), usuarioActualizado);
 
-            // Conexión al backend
-            String url = "http://localhost:8080/usuarios/actualizar/" + usuarioSeleccionado.getIdUsuario();
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("PUT");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setDoOutput(true);
-
-            // Enviar datos
-            connection.getOutputStream().write(usuarioJson.getBytes());
-
-            // Procesar respuesta
-            if (connection.getResponseCode() == 200) {
-                System.out.println("¡Usuario actualizado exitosamente!");
-                limpiarCampos();
-                cargarUsuarios(); // Recargar la lista de usuarios
-            } else {
-                System.err.println("Error al actualizar el usuario: " + connection.getResponseCode());
-            }
-
-            connection.disconnect();
+            System.out.println("¡Usuario actualizado exitosamente!");
+            limpiarCampos();
+            cargarUsuarios();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -282,17 +159,16 @@ public class UserControllerFX {
 
     @FXML
     void seleccionarUsuario() {
-        Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
         if (usuarioSeleccionado != null) {
             txtNombre.setText(usuarioSeleccionado.getNombre());
             txtCorreo.setText(usuarioSeleccionado.getCorreo());
             txtTelefono.setText(usuarioSeleccionado.getTelefono());
             txtContraseña.setText(usuarioSeleccionado.getContraseña());
 
-            // Seleccionar el rol por ID en lugar de por objeto
-            Rol rolUsuario = usuarioSeleccionado.getRol();
+            RolFX rolUsuario = usuarioSeleccionado.getRol();
             if (rolUsuario != null) {
-                for (Rol rol : cmbRol.getItems()) {
+                for (RolFX rol : cmbRol.getItems()) {
                     if (rol.getIdRol().equals(rolUsuario.getIdRol())) {
                         cmbRol.getSelectionModel().select(rol);
                         break;
@@ -305,32 +181,18 @@ public class UserControllerFX {
     @FXML
     void eliminarUsuario(ActionEvent event) {
         try {
-            // Obtener el usuario seleccionado en la tabla
-            Usuario usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+            UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
             if (usuarioSeleccionado == null) {
                 System.err.println("Por favor selecciona un usuario para eliminar.");
                 return;
             }
 
-            // URL del endpoint para eliminar usuario
-            String url = "http://localhost:8080/usuarios/eliminar/" + usuarioSeleccionado.getIdUsuario();
-
-            // Crear conexión al backend
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestMethod("DELETE");
-
-            // Validar respuesta HTTP
-            if (connection.getResponseCode() == 204) {
-                System.out.println("¡Usuario eliminado exitosamente!");
-                cargarUsuarios(); // Recargar la lista de usuarios
-            } else {
-                System.err.println("Error al eliminar el usuario: " + connection.getResponseCode());
-            }
-
-            connection.disconnect();
+            usuarioService.eliminarUsuario(usuarioSeleccionado.getIdUsuario());
+            System.out.println("¡Usuario eliminado exitosamente!");
+            cargarUsuarios();
+            limpiarCampos();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }

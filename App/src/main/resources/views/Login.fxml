@@ -4,31 +4,39 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.shape.Rectangle?>
-<?import javafx.scene.text.Font?>
-
 
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.LoginControllerFX">
-   <children>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#8cbbe8" height="362.0" layoutX="92.0" layoutY="20.0" stroke="BLACK" strokeType="INSIDE" width="425.0" />
-      <Label layoutX="274.0" layoutY="41.0" prefHeight="27.0" prefWidth="53.0" text="Login" textAlignment="CENTER" textFill="WHITE">
-         <font>
-            <Font size="20.0" />
-         </font>
-      </Label>
-      <Label layoutX="116.0" layoutY="116.0" text="Email:">
-         <font>
-            <Font size="16.0" />
-         </font>
-      </Label>
-      <Label layoutX="116.0" layoutY="191.0" text="Contraseña:">
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Label>
-      <TextField fx:id="txtEmail" layoutX="220.0" layoutY="116.0" prefHeight="26.0" prefWidth="275.0" promptText="Ingresa el email" style="-fx-background-color: white;" />
-      <PasswordField fx:id="txtPassword" layoutX="220.0" layoutY="189.0" prefHeight="26.0" prefWidth="275.0" promptText="Ingresa tu contraseña" style="-fx-background-color: white;" />
-      <Button fx:id="btnLogin" layoutX="254.0" layoutY="278.0" mnemonicParsing="false" onAction="#iniciarSesion" text="Iniciar sesion" />
-   </children>
+   <HBox prefHeight="400.0" prefWidth="600.0">
+
+      <StackPane prefWidth="300.0">
+         <children>
+            <ImageView fitHeight="399.0" fitWidth="318.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../img/Login/imgLogin.jpg" />
+               </image>
+            </ImageView>
+         </children>
+      </StackPane>
+
+      <VBox alignment="CENTER" prefWidth="300.0" spacing="15.0" style="-fx-background-color: #ffffff;">
+         <padding>
+            <Insets bottom="40" left="20" right="20" top="40" />
+         </padding>
+
+         <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Bienvenido !" />
+         <TextField fx:id="txtEmail" promptText="Nombre de usuario" />
+         <PasswordField fx:id="txtPassword" promptText="Contraseña" />
+         <Hyperlink text="Olvido la contraseña?(TODAVIA)" />
+         <Button fx:id="btnLogin" onAction="#iniciarSesion" prefWidth="120.0" style="-fx-background-color: #7ca84d; -fx-text-fill: white;" text="INICIAR SESION" />
+      </VBox>
+
+   </HBox>
 </AnchorPane>
