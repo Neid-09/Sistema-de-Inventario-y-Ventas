@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ProductoControllerFX">
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <!-- Título -->
+    <top>
+        <Label text="Gestión de Productos" BorderPane.alignment="CENTER">
+            <font>
+                <Font size="20.0" />
+            </font>
+        </Label>
+    </top>
+
+    <!-- Centro: Formulario + Tabla -->
+    <center>
+        <HBox spacing="30.0">
+
+            <!-- Formulario -->
+            <VBox spacing="10.0">
+                <children>
+                    <Label text="ID (Auto)" />
+                    <TextField fx:id="txtId" editable="false" />
+
+                    <Label text="Nombre" />
+                    <TextField fx:id="txtNombre" />
+
+                    <Label text="Descripción" />
+                    <TextArea fx:id="txtDescripcion" prefRowCount="3" wrapText="true" />
+
+                    <Label text="Precio" />
+                    <TextField fx:id="txtPrecio" />
+
+                    <Label text="Stock" />
+                    <TextField fx:id="txtStock" />
+                </children>
+            </VBox>
+
+            <!-- Tabla -->
+            <TableView fx:id="tablaProductos" prefWidth="500.0">
+                <columns>
+                    <TableColumn fx:id="colId" prefWidth="60.0" text="ID" />
+                    <TableColumn fx:id="colNombre" prefWidth="120.0" text="Nombre" />
+                    <TableColumn fx:id="colDescripcion" prefWidth="112.0" text="Descripción" />
+                    <TableColumn fx:id="colPrecio" prefWidth="118.0" text="Precio" />
+                    <TableColumn fx:id="colStock" prefWidth="80.0" text="Stock" />
+                </columns>
+            </TableView>
+
+        </HBox>
+    </center>
+
+    <!-- Botones abajo -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
+            <children>
+                <Button fx:id="btnGuardar" onAction="#guardarProducto" text="Guardar" />
+                <Button fx:id="btnActualizar" onAction="#actualizarProducto" text="Actualizar" />
+                <Button fx:id="btnEliminar" onAction="#eliminarProducto" text="Eliminar" />
+                <Button fx:id="btnLimpiar" onAction="#limpiarCampos" text="Limpiar" />
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

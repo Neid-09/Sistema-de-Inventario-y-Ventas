@@ -1,5 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoginService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -12,17 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.novaSup.InventoryGest.MainApp.springContext;
 
@@ -38,11 +31,11 @@ public class LoginControllerFX {
     @FXML
     private PasswordField txtPassword;
 
-    private final String API_URL = "http://localhost:8080/usuarios/login";
+    // Usamos la interfaz en lugar de la implementación directa
+    private final ILoginService loginService = new LoginServiceImplFX();
 
     @FXML
     public void initialize() {
-        // Se ejecuta al cargar la ventana
         Platform.runLater(() -> {
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             stage.setResizable(false);
@@ -59,34 +52,14 @@ public class LoginControllerFX {
         }
 
         try {
-            // Preparar datos para la petición
-            Map<String, String> credentials = new HashMap<>();
-            credentials.put("correo", txtEmail.getText());
-            credentials.put("contraseña", txtPassword.getText());
+            boolean autenticado = loginService.autenticarUsuario(
+                    txtEmail.getText(), txtPassword.getText());
 
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<Map<String, String>> request = new HttpEntity<>(credentials, headers);
-
-            // Enviar petición al backend
-            ResponseEntity<?> response = restTemplate.postForEntity(API_URL, request, Object.class);
-
-            if (response.getStatusCode().is2xxSuccessful()) {
-                // Autenticación exitosa - navegar a la pantalla de registro
-                cargarPantallaRegistro();
+            if (autenticado) {
+                cargarMenuPrincipal();
             } else {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error de autenticación",
-                        "No se pudo iniciar sesión. Verifica tus credenciales.");
-            }
-        } catch (HttpClientErrorException e) {
-            if (e.getRawStatusCode() == 401) {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de autenticación",
                         "Usuario o contraseña incorrectos");
-            } else {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                        "Error de conexión con el servidor: " + e.getMessage());
             }
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
@@ -94,23 +67,23 @@ public class LoginControllerFX {
         }
     }
 
-    private void cargarPantallaRegistro() {
+    private void cargarMenuPrincipal() {
         try {
-            // Obtener el stage actual
             Stage stage = (Stage) btnLogin.getScene().getWindow();
-
-            // Cargar la vista de registro de usuarios
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.REGISTER));
-            loader.setControllerFactory(springContext::getBean); // Para que Spring inyecte los controladores
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
+            loader.setControllerFactory(springContext::getBean);
             Parent root = loader.load();
 
-            // Cambiar a la nueva escena
+            // Obtén el controlador y establece el nombre de usuario
+            MenuPrincipalControllerFX controlador = loader.getController();
+            controlador.establecerUsuario(txtEmail.getText());
+
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar la pantalla de registro: " + e.getMessage());
+                    "No se pudo cargar el menú principal: " + e.getMessage());
         }
     }
 
