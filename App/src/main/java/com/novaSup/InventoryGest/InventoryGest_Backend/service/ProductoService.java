@@ -11,4 +11,5 @@ public interface ProductoService {
     Producto guardar(Producto producto);
     void eliminar(Integer id);
     Optional<Producto> actualizarStock(Integer id, Integer cantidad);
+    Optional<Producto> desactivarProducto(Integer id);
 }

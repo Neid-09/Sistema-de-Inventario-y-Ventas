@@ -4,15 +4,24 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import org.springframework.stereotype.Controller;
 
+import java.io.IOException;
 import java.util.List;
+
+import static com.novaSup.InventoryGest.MainApp.springContext;
 
 @Controller
 public class UserControllerFX {
@@ -50,11 +59,38 @@ public class UserControllerFX {
     @FXML
     private TextField txtTelefono;
 
+    @FXML
+    private Button btnRegistrar;
+
+    @FXML
+    private Button btnActualizar;
+
+    @FXML
+    private Button btnEliminar;
+
     // Usamos la interfaz en lugar de la implementación directa
     private final IUsuarioService usuarioService = new UsuarioServiceImplFX();
 
     @FXML
     public void initialize() {
+
+        Platform.runLater(() -> {
+            Stage stage = (Stage) tablaUsuarios.getScene().getWindow();
+            stage.setResizable(true);
+        });
+
+        // Configurar estado inicial de botones
+        btnActualizar.setDisable(true);
+        btnEliminar.setDisable(true);
+
+        // Configurar selección de tabla
+        tablaUsuarios.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        seleccionarUsuario();
+                    }
+                });
+
         cargarRoles();
         cargarUsuarios();
 
@@ -77,7 +113,7 @@ public class UserControllerFX {
             if (txtNombre.getText().isEmpty() || txtCorreo.getText().isEmpty()
                     || txtTelefono.getText().isEmpty() || txtContraseña.getText().isEmpty()
                     || cmbRol.getSelectionModel().isEmpty()) {
-                System.err.println("Por favor rellena todos los campos.");
+                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Por favor rellena todos los campos.");
                 return;
             }
 
@@ -90,10 +126,11 @@ public class UserControllerFX {
             UsuarioFX nuevoUsuario = new UsuarioFX(null, nombre, correo, telefono, contraseña, rolSeleccionado);
             usuarioService.registrarUsuario(nuevoUsuario);
 
-            System.out.println("¡Usuario registrado exitosamente!");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "¡Usuario registrado exitosamente!");
             limpiarCampos();
             cargarUsuarios();
         } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al registrar usuario: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -116,27 +153,20 @@ public class UserControllerFX {
         }
     }
 
-    private void limpiarCampos() {
-        txtNombre.clear();
-        txtCorreo.clear();
-        txtTelefono.clear();
-        txtContraseña.clear();
-        cmbRol.getSelectionModel().clearSelection();
-    }
 
     @FXML
     void actualizarUsuario(ActionEvent event) {
         try {
             UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
             if (usuarioSeleccionado == null) {
-                System.err.println("Por favor selecciona un usuario para actualizar.");
+                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Por favor selecciona un usuario para actualizar.");
                 return;
             }
 
             if (txtNombre.getText().isEmpty() || txtCorreo.getText().isEmpty()
                     || txtTelefono.getText().isEmpty() || txtContraseña.getText().isEmpty()
                     || cmbRol.getSelectionModel().isEmpty()) {
-                System.err.println("Por favor rellena todos los campos.");
+                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Por favor rellena todos los campos.");
                 return;
             }
 
@@ -149,32 +179,38 @@ public class UserControllerFX {
             UsuarioFX usuarioActualizado = new UsuarioFX(usuarioSeleccionado.getIdUsuario(), nombre, correo, telefono, contraseña, rolSeleccionado);
             usuarioService.actualizarUsuario(usuarioSeleccionado.getIdUsuario(), usuarioActualizado);
 
-            System.out.println("¡Usuario actualizado exitosamente!");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "¡Usuario actualizado exitosamente!");
             limpiarCampos();
             cargarUsuarios();
         } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al actualizar usuario: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 
     @FXML
     void seleccionarUsuario() {
         UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
         if (usuarioSeleccionado != null) {
+            // Cargar datos en los campos
             txtNombre.setText(usuarioSeleccionado.getNombre());
             txtCorreo.setText(usuarioSeleccionado.getCorreo());
             txtTelefono.setText(usuarioSeleccionado.getTelefono());
             txtContraseña.setText(usuarioSeleccionado.getContraseña());
+            cmbRol.setValue(usuarioSeleccionado.getRol());
 
-            RolFX rolUsuario = usuarioSeleccionado.getRol();
-            if (rolUsuario != null) {
-                for (RolFX rol : cmbRol.getItems()) {
-                    if (rol.getIdRol().equals(rolUsuario.getIdRol())) {
-                        cmbRol.getSelectionModel().select(rol);
-                        break;
-                    }
-                }
-            }
+            // Gestionar estado de botones
+            btnRegistrar.setDisable(true);
+            btnActualizar.setDisable(false);
+            btnEliminar.setDisable(false);
         }
     }
 
@@ -183,16 +219,68 @@ public class UserControllerFX {
         try {
             UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
             if (usuarioSeleccionado == null) {
-                System.err.println("Por favor selecciona un usuario para eliminar.");
+                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Por favor selecciona un usuario para eliminar.");
                 return;
             }
 
-            usuarioService.eliminarUsuario(usuarioSeleccionado.getIdUsuario());
-            System.out.println("¡Usuario eliminado exitosamente!");
-            cargarUsuarios();
-            limpiarCampos();
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmacion.setTitle("Confirmar eliminación");
+            confirmacion.setHeaderText(null);
+            confirmacion.setContentText("¿Estás seguro de que deseas eliminar este usuario?");
+
+            if (confirmacion.showAndWait().get() == ButtonType.OK) {
+                usuarioService.eliminarUsuario(usuarioSeleccionado.getIdUsuario());
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "¡Usuario eliminado exitosamente!");
+                cargarUsuarios();
+                limpiarCampos();
+            }
         } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al eliminar usuario: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void limpiarCampos() {
+        // Limpiar todos los campos
+        txtNombre.clear();
+        txtCorreo.clear();
+        txtTelefono.clear();
+        txtContraseña.clear();
+        cmbRol.getSelectionModel().clearSelection();
+
+        // Deseleccionar fila de la tabla
+        tablaUsuarios.getSelectionModel().clearSelection();
+
+        // Restablecer estado de botones
+        btnRegistrar.setDisable(false);
+        btnActualizar.setDisable(true);
+        btnEliminar.setDisable(true);
+    }
+
+    @FXML
+    void cerrarGestionUsuarios(ActionEvent event) {
+        try {
+            // Obtener el Stage actual desde el evento
+            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+
+            // Cargar la vista del menú principal
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
+
+            // Usar el contexto de Spring para la inyección de dependencias
+            loader.setControllerFactory(springContext::getBean);
+            Parent root = loader.load();
+
+            // Crear nueva escena y mostrarla
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            Alert alerta = new Alert(Alert.AlertType.ERROR);
+            alerta.setTitle("Error");
+            alerta.setHeaderText(null);
+            alerta.setContentText("No se pudo cargar la pantalla del menú principal: " + e.getMessage());
+            alerta.showAndWait();
         }
     }
 }

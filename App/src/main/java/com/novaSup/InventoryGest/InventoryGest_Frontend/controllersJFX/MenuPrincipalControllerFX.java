@@ -1,6 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,6 +34,15 @@ public class MenuPrincipalControllerFX {
 
     @FXML
     private Label lblUsuario;
+
+    // En MenuPrincipalControllerFX, añade al método initialize():
+    @FXML
+    public void initialize() {
+        Platform.runLater(() -> {
+            Stage stage = (Stage) lblUsuario.getScene().getWindow();
+            stage.setResizable(true);
+        });
+    }
 
     @FXML
     void cerrarSesion(ActionEvent event) {

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.EntradaProductoControllerFX">
+
+    <!--
+    PASO A SEGUIR DESDE AQUI :)
+    Modelo FX: Crear EntradaProductoFX
+    Servicio FX: Crear IEntradaProductoService y EntradaProductoServiceImplFX
+    Controlador FX: Crear EntradaProductoControllerFX
+    Vista FXML: Crear una interfaz para visualizar y gestionar entradas
+    Integración con el menú principal-->
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <top>
+        <VBox spacing="10">
+            <Label text="Historial de Movimientos de Stock" BorderPane.alignment="CENTER">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
+
+            <!-- Filtros aquí -->
+            <HBox spacing="10.0">
+                <ComboBox fx:id="cmbProducto" promptText="Filtrar por producto" />
+                <DatePicker fx:id="dpFechaDesde" promptText="Desde" />
+                <DatePicker fx:id="dpFechaHasta" promptText="Hasta" />
+                <ComboBox fx:id="cmbTipoMovimiento" promptText="Tipo movimiento" />
+                <Button fx:id="btnFiltrar" onAction="#filtrarHistorial" text="Filtrar" />
+                <Button fx:id="btnLimpiarFiltros" onAction="#limpiarFiltros" text="Limpiar" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <TableView fx:id="tablaHistorial">
+            <columns>
+                <TableColumn fx:id="colIdEntrada" prefWidth="100.0" text="ID Entrada" />
+                <!--<TableColumn fx:id="colIdProducto" prefWidth="100.0" text="ID Producto" />-->
+                <TableColumn fx:id="colPrecioUnitario" prefWidth="100.0" text="Precio Unitario" />
+                <TableColumn fx:id="colNombreP" prefWidth="100.0" text="Nombre" />
+                <TableColumn fx:id="colCantidad" prefWidth="100.0" text="Cantidad" />
+                <TableColumn fx:id="colFecha" prefWidth="100.0" text="Fecha" />
+                <TableColumn fx:id="colTipoMovimiento" prefWidth="100.0" text="Tipo de movimiento" />
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER">
+            <children>
+                <Button fx:id="btnCerrarHistorial" onAction="#cerrarHistorial" text="Volver 🏡" />
+            </children>
+        </HBox>
+    </bottom>
+
+</BorderPane>
