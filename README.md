@@ -13,7 +13,8 @@ Aplicación de escritorio desarrollada con Java 21 y JavaFX para la gestión de 
 ### 1. Descargar JavaFX SDK 23.0.2
 
 Descárgalo desde [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/) y descomprímelo en una ruta local.  
-![img.png](img.png)
+![Captura de pantalla 2025-03-25 215016](https://github.com/user-attachments/assets/f9861bee-29b7-4fcb-a5a4-4f4dc52ca730)
+
 Recomendado: `C:\javafx-sdk-23.0.2`
 
 ---
