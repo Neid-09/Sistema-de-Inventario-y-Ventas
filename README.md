@@ -22,10 +22,12 @@ Recomendado: `C:\javafx-sdk-23.0.2`
 - **Cuando se inie por primera vez el proyecto aceptar todo lo que aparece (en intellij no se en otros IDE) son dependencias**
 - **Una vez descargadas las dependencias ir a MainApp y hacer la configuration de arranque**
 #### 🧩 Ir a: `Run > Edit Configurations...`
-![img_1.png](img_1.png)
+![Captura de pantalla 2025-03-25 215121](https://github.com/user-attachments/assets/104c4eff-9284-4bbe-adc7-44ebd4cfd1b6)
+
 
 1. Selecciona tu configuración de arranque(Deberia de estar) o crea una nueva de tipo **Application**.
-    - ![img_5.png](img_5.png)
+    - ![Captura de pantalla 2025-03-25 220616](https://github.com/user-attachments/assets/7ccccc58-dc04-4dc5-8e0a-dd9399e3aaaa)
+
 2. Establece:
     - **Main class**: `com.novaSup.InventoryGest.MainApp`
 3. En el campo **VM options**, añade: 
