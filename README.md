@@ -39,5 +39,56 @@ Recomendado: `C:libreias\java\javafx-sdk-23.0.2`
 4. Ya configurado
   - ![image](https://github.com/user-attachments/assets/36e81190-a00b-4a25-9d2e-a56ee62557db)
 
+### 3. Configurar la base de datos
+## 🗃️ Base de Datos `appd2` – MySQL 9.2 (Uso con Workbench)
+
+Este proyecto utiliza la base de datos local llamada **`appd2`**. A continuación, se detallan los pasos para importar y exportar la base de datos utilizando **MySQL Workbench**, sin necesidad de comandos de consola.
+
+---
+
+### 🧩 Requisitos
+
+- Tener instalado **MySQL 9.2**
+- Tener **MySQL Workbench** configurado y conectado al servidor local(Primero instalar MySQL y configurarlo)
+- Contar con el archivo `backup_appd2.sql` (ubicado en la carpeta `/database` del proyecto)
+
+---
+
+### 📥 Importar base de datos en Workbench
+
+1. Abre **MySQL Workbench** y conéctate a tu servidor local.(Si colocaron contraseña, se las pedira)
+2. Crear una base de datos que se llame `appd2`
+   => Comando sql para crear la base de datso:`CREATE DATABASE appd2`
+   Actualizar con:
+   Doble clic sobre la base de datos
+3. En la barra superior, ve a **"SERVER" > "Data importa"**.
+4. Marcar `Import from Self-Contained File` y ubicar la ruta del proyecto.
+   Busca y selecciona el archivo:  
+   `database/backup_appd2.sql`
+5. Una vez seleccionada la ruta ir a Default Schema to be Imported To y seleccionar `appd2`.
+6. Sola dar a `Star Import`.
+
+---
+
+### 📤 Exportar base de datos desde Workbench
+
+1. En el panel izquierdo, haz clic d2 veces sobre `appd2`.
+2. Ve a la barra superior: **"Server" > "Data Export"**.
+3. En **"Schemas"**, selecciona `appd2`.
+4. Marca:
+   - ✅ *Export to Self-Contained File*
+   - Ruta: `database/backup_appd2.sql`
+5. Haz clic en **Start Export**.
+
+---
+
+### ⚠️ Recomendaciones
+
+- **Siempre realiza un respaldo antes de modificar la base.**
+- Comparte únicamente el archivo `backup_appd2.sql`.
+- No subas archivos de sistema como `.ibd`, `.frm` o carpetas internas de MySQL.
+
+
+
 ### ==con eso deberia funcionar== 
 ### ==Para dudas consultar con el analista== 
