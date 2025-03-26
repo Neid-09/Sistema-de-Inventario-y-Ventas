@@ -37,7 +37,7 @@ public class ProductoServiceImplFX implements IProductoService {
 
     @Override
     public ProductoFX guardar(String nombre, String descripcion, BigDecimal precio, Integer stock) throws Exception {
-        ProductoDTO productoDTO = new ProductoDTO(null, nombre, descripcion, precio, stock);
+        ProductoDTO productoDTO = new ProductoDTO(null, nombre, descripcion, precio, stock, true);
         String json = objectMapper.writeValueAsString(productoDTO);
         String respuesta = HttpClient.post(API_URL, json);
         ProductoDTO productoGuardado = objectMapper.readValue(respuesta, ProductoDTO.class);
@@ -46,7 +46,7 @@ public class ProductoServiceImplFX implements IProductoService {
 
     @Override
     public ProductoFX actualizar(Integer id, String nombre, String descripcion, BigDecimal precio, Integer stock) throws Exception {
-        ProductoDTO productoDTO = new ProductoDTO(id, nombre, descripcion, precio, stock);
+        ProductoDTO productoDTO = new ProductoDTO(id, nombre, descripcion, precio, stock, true);
         String json = objectMapper.writeValueAsString(productoDTO);
         String respuesta = HttpClient.put(API_URL + "/" + id, json);
         ProductoDTO productoActualizado = objectMapper.readValue(respuesta, ProductoDTO.class);
@@ -56,6 +56,12 @@ public class ProductoServiceImplFX implements IProductoService {
     @Override
     public void eliminar(Integer id) throws Exception {
         HttpClient.delete(API_URL + "/" + id);
+    }
+
+    @Override
+    public void desactivarProducto(Integer id) throws Exception {
+        // Llamar al endpoint para desactivar el producto
+        HttpClient.patch(API_URL + "/" + id + "/desactivar");
     }
 
     @Override
@@ -71,7 +77,8 @@ public class ProductoServiceImplFX implements IProductoService {
                 dto.nombre,
                 dto.descripcion,
                 dto.precio,
-                dto.stock
+                dto.stock,
+                dto.estado
         );
     }
 
@@ -82,15 +89,17 @@ public class ProductoServiceImplFX implements IProductoService {
         public String descripcion;
         public BigDecimal precio;
         public Integer stock;
+        public Boolean estado;
 
         public ProductoDTO() {}
 
-        public ProductoDTO(Integer idProducto, String nombre, String descripcion, BigDecimal precio, Integer stock) {
+        public ProductoDTO(Integer idProducto, String nombre, String descripcion, BigDecimal precio, Integer stock, Boolean estado) {
             this.idProducto = idProducto;
             this.nombre = nombre;
             this.descripcion = descripcion;
             this.precio = precio;
             this.stock = stock;
+            this.estado = estado;
         }
     }
 }

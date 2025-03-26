@@ -59,4 +59,12 @@ public class ProductoController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    // Nuevo endpoint para desactivar productos
+    @PatchMapping("/{id}/desactivar")
+    public ResponseEntity<Producto> desactivarProducto(@PathVariable Integer id) {
+        return productoService.desactivarProducto(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

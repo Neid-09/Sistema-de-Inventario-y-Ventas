@@ -2,6 +2,8 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,4 +27,10 @@ public class EntradaProducto {
 
     @Column
     private LocalDateTime fecha = LocalDateTime.now();
+
+    @Column(name = "tipo_movimiento", nullable = false)
+    private String tipoMovimiento;
+
+    @Column(name = "precio_unitario", nullable = false)
+    private BigDecimal precioUnitario;
 }

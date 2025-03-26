@@ -59,4 +59,12 @@ public class ProductoServiceImpl implements ProductoService {
             return productoActualizado;
         });
     }
+
+    @Override
+    public Optional<Producto> desactivarProducto(Integer id) {
+        return obtenerPorId(id).map(producto -> {
+            producto.setEstado(false);
+            return guardar(producto);
+        });
+    }
 }
