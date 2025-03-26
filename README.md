@@ -35,5 +35,9 @@ Recomendado: `C:libreias\java\javafx-sdk-23.0.2`
 3. En el campo **VM options**, añade: 
 
     - **VM OPTIONS**: `--module-path "LA RUTA DEL SDK en comillas" --add-modules javafx.controls,javafx.fxml`.
+    - En la carpeta javafx-sdk-23.0.2 nos ubicamos en lib, y apartir de ahi copiamos la ruta
+4. Ya configurado
+  - ![image](https://github.com/user-attachments/assets/36e81190-a00b-4a25-9d2e-a56ee62557db)
+
 ### ==con eso deberia funcionar== 
 ### ==Para dudas consultar con el analista== 
