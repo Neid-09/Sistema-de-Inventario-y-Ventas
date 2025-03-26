@@ -56,19 +56,24 @@ Este proyecto utiliza la base de datos local llamada **`appd2`**. A continuació
 
 ### 📥 Importar base de datos en Workbench
 
-1. Abre **MySQL Workbench** y conéctate a tu servidor local.(Si colocaron contraseña, se las pedira)
+1. Abre **MySQL Workbench** como administrador y conéctate a tu servidor local.(Si colocaron contraseña, se las pedira)
 2. Crear una base de datos que se llame `appd2`
    => Comando sql para crear la base de datso:`CREATE DATABASE appd2`
    Actualizar con:
+   ![image](https://github.com/user-attachments/assets/ed6b537a-57bf-4d89-b67d-d5974bcb65f5)
+
    Doble clic sobre la base de datos
-3. En la barra superior, ve a **"SERVER" > "Data importa"**.
-4. Marcar `Import from Self-Contained File` y ubicar la ruta del proyecto.
+4. En la barra superior, ve a **"SERVER" > "Data import"**.
+5. Marcar `Import from Self-Contained File` y ubicar la ruta del proyecto.
    Busca y selecciona el archivo:  
    `database/backup_appd2.sql`
-5. Una vez seleccionada la ruta ir a Default Schema to be Imported To y seleccionar `appd2`.
-6. Sola dar a `Star Import`.
+6. Una vez seleccionada la ruta ir a Default Schema to be Imported To y seleccionar `appd2`.
+7. Sola dar a `Star Import`.
 
 ---
+### TANTO PARA IMPORTAR COMO EXPORTAR SI NO LES APARECE CLICK SOBRE LO SIGUIENTE
+![image](https://github.com/user-attachments/assets/785438b0-d374-4bd0-bcc1-26016b19b1ef)
+
 
 ### 📤 Exportar base de datos desde Workbench
 
@@ -86,6 +91,8 @@ Este proyecto utiliza la base de datos local llamada **`appd2`**. A continuació
 
 - **Siempre realiza un respaldo antes de modificar la base.**
 - Comparte únicamente el archivo `backup_appd2.sql`.
+  ![image](https://github.com/user-attachments/assets/d2d78310-1a55-4017-b906-5877931da289)
+
 - No subas archivos de sistema como `.ibd`, `.frm` o carpetas internas de MySQL.
 
 
