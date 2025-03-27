@@ -1,5 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -41,7 +42,18 @@ public class MenuPrincipalControllerFX {
         Platform.runLater(() -> {
             Stage stage = (Stage) lblUsuario.getScene().getWindow();
             stage.setResizable(true);
+
+            // Aplicar permisos
+            aplicarPermisos();
         });
+    }
+
+    private void aplicarPermisos() {
+        // Mostrar/ocultar botones según permisos
+        btnUsuarios.setVisible(LoginServiceImplFX.tienePermiso("ver_usuarios"));
+        btnProductos.setVisible(LoginServiceImplFX.tienePermiso("ver_productos"));
+
+        // Aquí puedes agregar más verificaciones de permisos
     }
 
     @FXML

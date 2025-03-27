@@ -1,114 +1,152 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util;
 
-
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
-import java.time.Duration;
+import java.nio.charset.StandardCharsets;
 
 public class HttpClient {
 
-    private static final java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
-            .version(java.net.http.HttpClient.Version.HTTP_2)
-            .followRedirects(java.net.http.HttpClient.Redirect.NORMAL)
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
+    // Método GET sin encabezados
+    public static String get(String urlStr) throws IOException {
+        return get(urlStr, null, null);
+    }
 
-
-    public static String get(String urlStr) throws Exception {
-        URL url = new URL(urlStr);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    // Método GET con encabezados
+    public static String get(String urlStr, String headerName, String headerValue) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
         connection.setRequestMethod("GET");
-        connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("Content-Type", "application/json");
 
-        int responseCode = connection.getResponseCode();
-        if (responseCode < 200 || responseCode >= 300) {
-            throw new RuntimeException("Error HTTP: " + responseCode);
+        // Añadir encabezado si se proporciona
+        if (headerName != null && headerValue != null) {
+            connection.setRequestProperty(headerName, headerValue);
         }
 
         return leerRespuesta(connection);
     }
 
-    public static String post(String urlStr, String jsonBody) throws Exception {
-        URL url = new URL(urlStr);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    // Método POST sin encabezados
+    public static String post(String urlStr, String jsonBody) throws IOException {
+        return post(urlStr, jsonBody, null, null);
+    }
+
+    // Método POST con encabezados
+    public static String post(String urlStr, String jsonBody, String headerName, String headerValue) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/json");
+
+        // Añadir encabezado si se proporciona
+        if (headerName != null && headerValue != null) {
+            connection.setRequestProperty(headerName, headerValue);
+        }
+
         connection.setDoOutput(true);
 
-        connection.getOutputStream().write(jsonBody.getBytes());
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode < 200 || responseCode >= 300) {
-            throw new RuntimeException("Error HTTP: " + responseCode);
+        // Escribir el cuerpo JSON
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
         }
 
         return leerRespuesta(connection);
     }
 
-    public static String put(String urlStr, String jsonBody) throws Exception {
-        URL url = new URL(urlStr);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    // Método PUT sin encabezados
+    public static String put(String urlStr, String jsonBody) throws IOException {
+        return put(urlStr, jsonBody, null, null);
+    }
+
+    // Método PUT con encabezados
+    public static String put(String urlStr, String jsonBody, String headerName, String headerValue) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
         connection.setRequestMethod("PUT");
         connection.setRequestProperty("Content-Type", "application/json");
+
+        // Añadir encabezado si se proporciona
+        if (headerName != null && headerValue != null) {
+            connection.setRequestProperty(headerName, headerValue);
+        }
+
         connection.setDoOutput(true);
 
-        connection.getOutputStream().write(jsonBody.getBytes());
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode < 200 || responseCode >= 300) {
-            throw new RuntimeException("Error HTTP: " + responseCode);
+        // Escribir el cuerpo JSON
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
         }
 
         return leerRespuesta(connection);
     }
 
-    public static void delete(String urlStr) throws Exception {
-        URL url = new URL(urlStr);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    // Método DELETE sin encabezados
+    public static String delete(String urlStr) throws IOException {
+        return delete(urlStr, null, null);
+    }
+
+    // Método DELETE con encabezados
+    public static String delete(String urlStr, String headerName, String headerValue) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
         connection.setRequestMethod("DELETE");
+        connection.setRequestProperty("Content-Type", "application/json");
 
-        if (connection.getResponseCode() != 204) {
-            throw new RuntimeException("Error HTTP: " + connection.getResponseCode());
-        }
-    }
-
-    public static String patch(String urlStr, String jsonBody) throws Exception {
-        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                .uri(URI.create(urlStr))
-                .method("PATCH", jsonBody != null ?
-                        java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody) :
-                        java.net.http.HttpRequest.BodyPublishers.noBody())
-                .header("Content-Type", "application/json")
-                .build();
-
-        java.net.http.HttpResponse<String> response =
-                client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new RuntimeException("Error HTTP: " + response.statusCode());
+        // Añadir encabezado si se proporciona
+        if (headerName != null && headerValue != null) {
+            connection.setRequestProperty(headerName, headerValue);
         }
 
-        return response.body();
+        return leerRespuesta(connection);
     }
 
-    public static String patch(String urlStr) throws Exception {
-        return patch(urlStr, null);
+    // Método PATCH sin cuerpo (para operaciones que no requieren datos)
+    public static String patch(String urlStr) throws IOException {
+        return patch(urlStr, "{}", null, null);
     }
 
+    // Método PATCH sin encabezados
+    public static String patch(String urlStr, String jsonBody) throws IOException {
+        return patch(urlStr, jsonBody, null, null);
+    }
 
-    private static String leerRespuesta(HttpURLConnection connection) throws Exception {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        StringBuilder response = new StringBuilder();
-        String line;
+    // Método PATCH con encabezados
+    public static String patch(String urlStr, String jsonBody, String headerName, String headerValue) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
 
-        while ((line = reader.readLine()) != null) {
-            response.append(line);
+        // Configurar para usar PATCH - Requiere esta configuración especial
+        connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        // Añadir encabezado si se proporciona
+        if (headerName != null && headerValue != null) {
+            connection.setRequestProperty(headerName, headerValue);
         }
-        reader.close();
 
-        return response.toString();
+        connection.setDoOutput(true);
+
+        // Escribir el cuerpo JSON
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+
+        return leerRespuesta(connection);
+    }
+
+    // Método auxiliar para leer la respuesta
+    private static String leerRespuesta(HttpURLConnection connection) throws IOException {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder response = new StringBuilder();
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            return response.toString();
+        }
     }
 }

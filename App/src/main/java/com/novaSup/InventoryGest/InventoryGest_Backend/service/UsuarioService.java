@@ -9,4 +9,5 @@ public interface UsuarioService {
     Usuario actualizarUsuario(int id, Usuario usuario);
     void eliminarUsuario(int id);
     Usuario autenticarUsuario(String correo, String contraseña);
+    Usuario obtenerUsuarioPorId(int id);
 }
