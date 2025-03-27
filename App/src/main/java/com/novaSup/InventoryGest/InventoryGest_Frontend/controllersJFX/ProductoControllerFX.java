@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
@@ -100,7 +101,6 @@ public class ProductoControllerFX implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         Platform.runLater(() -> {
             Stage stage = (Stage) tablaProductos.getScene().getWindow();
             stage.setResizable(true);
@@ -109,6 +109,20 @@ public class ProductoControllerFX implements Initializable {
         configurarColumnas();
         cargarProductos();
         configurarSeleccionTabla();
+
+        // Depurar permisos
+        System.out.println("¿Tiene permiso crear_productos? " + LoginServiceImplFX.tienePermiso("crear_productos"));
+
+        // Verificar si hay variación en el nombre del permiso
+        System.out.println("¿Tiene permiso crear_producto? " + LoginServiceImplFX.tienePermiso("crear_producto"));
+
+
+        // Verificar permisos para mostrar/ocultar controles según rol
+        btnGuardar.setVisible(LoginServiceImplFX.tienePermiso("crear_producto"));
+        btnActualizar.setVisible(LoginServiceImplFX.tienePermiso("editar_producto"));
+        btnEliminar.setVisible(LoginServiceImplFX.tienePermiso("eliminar_producto"));
+        btnAumentarStock.setVisible(LoginServiceImplFX.tienePermiso("registrar_entrada"));
+        btnDisminuirStock.setVisible(LoginServiceImplFX.tienePermiso("registrar_salida"));
 
         // Hacer el campo de stock no editable
         txtStock.setEditable(true);
@@ -172,6 +186,13 @@ public class ProductoControllerFX implements Initializable {
     @FXML
     void guardarProducto(ActionEvent event) {
         try {
+            // Verificar si el usuario tiene permiso para crear productos
+            if (!LoginServiceImplFX.tienePermiso("crear_producto")) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error de permisos",
+                        "No tienes permiso para crear productos");
+                return;
+            }
+
             // Obtener valores de los campos
             String nombre = txtNombre.getText().trim();
             String descripcion = txtDescripcion.getText().trim();
@@ -199,6 +220,13 @@ public class ProductoControllerFX implements Initializable {
                 return;
             }
 
+            // Si hay stock inicial, verificar si tiene permiso para registrar entrada
+            if (stock > 0 && !LoginServiceImplFX.tienePermiso("registrar_entrada")) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error de permisos",
+                        "No tienes permiso para registrar entrada de stock");
+                return;
+            }
+
             // Guardar el producto con stock inicial 0
             ProductoFX productoGuardado = productoServiceFX.guardar(nombre, descripcion, precio, 0);
 
@@ -219,6 +247,7 @@ public class ProductoControllerFX implements Initializable {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Formato inválido en campos numéricos");
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al guardar: " + e.getMessage());
+            e.printStackTrace(); // Para ver el error completo en la consola
         }
     }
 

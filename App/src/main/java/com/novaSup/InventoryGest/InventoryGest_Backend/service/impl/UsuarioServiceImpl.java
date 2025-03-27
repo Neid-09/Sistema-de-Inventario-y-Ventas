@@ -61,16 +61,31 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    @Override
     public Usuario autenticarUsuario(String correo, String contraseña) {
         Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con correo: " + correo));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (!contraseña.equals(usuario.getContraseña())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
+        // Cargar el rol con sus permisos (fetch EAGER hace que no sea necesario código adicional)
         return usuario;
+    }
+
+    // Método auxiliar para verificar permisos
+    @Override
+    public Usuario obtenerUsuarioPorId(int id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    public boolean tienePermiso(Usuario usuario, String nombrePermiso) {
+        if (usuario != null && usuario.getRol() != null && usuario.getRol().getPermisos() != null) {
+            return usuario.getRol().getPermisos().stream()
+                    .anyMatch(permiso -> permiso.getNombre().equals(nombrePermiso));
+        }
+        return false;
     }
 
 }

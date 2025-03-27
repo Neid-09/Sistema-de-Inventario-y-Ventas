@@ -32,7 +32,7 @@ public class MainApp extends Application {
         loader.setControllerFactory(springContext::getBean); // Inyecta controladores con Spring
         Scene scene = new Scene(loader.load());
         stage.setScene(scene);
-        stage.setTitle("Mi App");
+        stage.setTitle("InventoryGest");
         stage.show();
     }
 

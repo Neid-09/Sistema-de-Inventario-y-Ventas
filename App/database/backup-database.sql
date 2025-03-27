@@ -32,7 +32,7 @@ CREATE TABLE `entradas_productos` (
   PRIMARY KEY (`id_entrada`),
   KEY `id_producto` (`id_producto`),
   CONSTRAINT `entradas_productos_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,8 +41,34 @@ CREATE TABLE `entradas_productos` (
 
 LOCK TABLES `entradas_productos` WRITE;
 /*!40000 ALTER TABLE `entradas_productos` DISABLE KEYS */;
-INSERT INTO `entradas_productos` VALUES (1,1,25,'2025-03-25 03:42:40','ENTRADA',5000.00),(2,1,10,'2025-03-25 04:52:47','SALIDA',5000.00),(3,1,100,'2025-03-25 04:54:00','ENTRADA',2000.00);
+INSERT INTO `entradas_productos` VALUES (1,1,25,'2025-03-25 03:42:40','ENTRADA',5000.00),(2,1,10,'2025-03-25 04:52:47','SALIDA',5000.00),(3,1,100,'2025-03-25 04:54:00','ENTRADA',2000.00),(4,1,10,'2025-03-27 05:48:42','SALIDA',2000.00),(5,1,5,'2025-03-27 05:48:49','SALIDA',2000.00),(6,2,30,'2025-03-27 05:50:20','ENTRADA',5000.00),(7,2,10,'2025-03-27 07:02:16','ENTRADA',5000.00),(8,3,50,'2025-03-27 07:06:31','ENTRADA',10000.00);
 /*!40000 ALTER TABLE `entradas_productos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `permisos`
+--
+
+DROP TABLE IF EXISTS `permisos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `permisos` (
+  `id_permiso` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  PRIMARY KEY (`id_permiso`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `permisos`
+--
+
+LOCK TABLES `permisos` WRITE;
+/*!40000 ALTER TABLE `permisos` DISABLE KEYS */;
+INSERT INTO `permisos` VALUES (1,'crear_usuario','Permite crear nuevos usuarios en el sistema'),(2,'ver_usuarios','Permite ver la lista de usuarios del sistema'),(3,'editar_usuario','Permite modificar la información de usuarios existentes'),(4,'eliminar_usuario','Permite eliminar usuarios del sistema'),(5,'gestionar_roles','Permite crear, modificar y asignar permisos a roles'),(6,'gestionar_permisos','Permite crear y eliminar permisos en el sistema'),(7,'registrar_entrada','Permite registrar entradas de productos al inventario'),(8,'registrar_salida','Permite registrar salidas de productos del inventario'),(9,'ver_movimientos','Permite ver el historial de movimientos de inventario'),(10,'crear_producto','Permite registrar nuevos productos en el inventario'),(11,'ver_productos','Permite ver el catálogo de productos'),(12,'editar_producto','Permite modificar la información de productos'),(13,'eliminar_producto','Permite eliminar productos del catálogo');
+/*!40000 ALTER TABLE `permisos` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -60,7 +86,7 @@ CREATE TABLE `productos` (
   `stock` int(11) NOT NULL,
   `estado` tinyint(1) DEFAULT 1,
   PRIMARY KEY (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +95,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,'Avena','[AÑADIR DESCRIPCION]',2000.00,115,1);
+INSERT INTO `productos` VALUES (1,'Avena','AVAENA 100% NATURAL',3000.00,100,1),(2,'Panela','100% caña',5000.00,40,1),(3,'Pan integral','Es integral',10000.00,50,1);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -99,6 +125,33 @@ INSERT INTO `roles` VALUES (1,'Administrador'),(2,'Vendedor');
 UNLOCK TABLES;
 
 --
+-- Table structure for table `roles_permisos`
+--
+
+DROP TABLE IF EXISTS `roles_permisos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `roles_permisos` (
+  `id_rol` int(11) NOT NULL,
+  `id_permiso` int(11) NOT NULL,
+  PRIMARY KEY (`id_rol`,`id_permiso`),
+  KEY `id_permiso` (`id_permiso`),
+  CONSTRAINT `roles_permisos_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id_rol`),
+  CONSTRAINT `roles_permisos_ibfk_2` FOREIGN KEY (`id_permiso`) REFERENCES `permisos` (`id_permiso`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `roles_permisos`
+--
+
+LOCK TABLES `roles_permisos` WRITE;
+/*!40000 ALTER TABLE `roles_permisos` DISABLE KEYS */;
+INSERT INTO `roles_permisos` VALUES (1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),(1,12),(1,13),(2,8),(2,9),(2,11);
+/*!40000 ALTER TABLE `roles_permisos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `usuarios`
 --
 
@@ -116,7 +169,7 @@ CREATE TABLE `usuarios` (
   UNIQUE KEY `correo` (`correo`),
   KEY `id_rol` (`id_rol`),
   CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`id_rol`) REFERENCES `roles` (`id_rol`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -125,7 +178,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (2,'Andres','Botina','123','123',2),(9,'Neider','neider@','1333312','123',1),(10,'Leonel','Leonel@','313','123',2),(12,'Daniel Macias','daniel@gmail.com','3132','123',1),(16,'vendedor1','vendedor1','33333','123',2);
+INSERT INTO `usuarios` VALUES (2,'Andres','Botina','123','123',1),(9,'Neider','neider@','1333312','123',1),(10,'Leonel','Leonel@','313','123',2),(17,'Daniel','daniel','331313','123',2),(18,'admin','admin','123','admin',1);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -138,4 +191,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-26 10:35:16
+-- Dump completed on 2025-03-26 21:58:19
