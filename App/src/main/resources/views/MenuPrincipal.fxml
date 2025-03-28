@@ -2,49 +2,231 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX">
-
-    <padding>
-        <Insets bottom="30.0" left="20.0" right="20.0" top="30.0" />
-    </padding>
-
-    <!-- Título y bienvenida -->
+<?import javafx.scene.layout.StackPane?>
+<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX">
+    <!--TOP-->
     <top>
-        <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+        <HBox fx:id="topBar" alignment="CENTER_LEFT" prefHeight="60.0" spacing="20" style="-fx-background-color: #f4f4f4; -fx-padding: 10 20;">
             <children>
-                <Label fx:id="lblTitle" style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Almacén D2 - Panel Principal" />
-                <Label fx:id="lblUsuario" style="-fx-font-size: 16px;" text="Bienvenido, [Usuario]" />
+
+                <!-- Espacio para el logo -->
+                <ImageView fitHeight="51.0" fitWidth="100.0" preserveRatio="true">
+                    <image>
+                        <Image url="@../img/menuPrincipal/logoProvicional.jpg" />
+                    </image>
+                </ImageView>
+
+
+                <!-- Nombre del sistema centrado con expansión -->
+                <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Sistema de Ventas D2">
+                    <HBox.margin>
+                        <Insets left="20" />
+                    </HBox.margin>
+                </Label>
+
+
+                <!-- Relleno flexible para empujar el perfil a la derecha -->
+                <Pane HBox.hgrow="ALWAYS" />
+
+                <!-- Perfil de usuario (puede ser imagen + nombre + botón cerrar sesión) -->
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                        <image>
+                            <Image url="@../img/menuPrincipal/user.png" />
+                        </image>
+                    </ImageView>
+                    <Label fx:id="lblUsuario" style="-fx-font-weight: bold;" text="[INSERTAR NOMBRE]" />
+                    <Button fx:id="btnCerrarSesion" onAction="#cerrarSesion" text="Cerrar sesión" />
+                </HBox>
+
             </children>
-            <padding>
-                <Insets bottom="20.0" />
-            </padding>
-        </VBox>
+        </HBox>
     </top>
 
-    <!-- Botones principales -->
-    <center>
-        <VBox alignment="CENTER" spacing="30.0" BorderPane.alignment="CENTER">
+
+    <!-- PANEL LATERAL IZQUIERDO AZUL -->
+    <left>
+        <VBox alignment="CENTER" prefWidth="250.0" spacing="10" style="-fx-background-color: #083671;" xmlns:fx="http://javafx.com/fxml">
             <children>
-                <HBox alignment="CENTER" spacing="40.0">
-                    <children>
-                        <Button fx:id="btnUsuarios" onAction="#irGestionUsuarios" prefHeight="120.0" prefWidth="250.0" style="-fx-font-size: 16px;" text="Gestión de Usuarios" />
-                        <Button fx:id="btnProductos" onAction="#irGestionProductos" prefHeight="120.0" prefWidth="250.0" style="-fx-font-size: 16px;" text="Gestión de Productos" />
-                    </children>
-                </HBox>
+
+                <Button text="🏠 Inicio" onAction="#volverAlInicio"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;" />
+                <!-- Más botones de módulos debajo -->
+
+                <!-- VENDER -->
+                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/vender.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="VENDER" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- REPORTE VENTAS -->
+                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/reporteVentas.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="REPORTE VENTAS" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- INVENTARIO -->
+                <Button fx:id="btnProductos" onAction="#irGestionProductos" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/inventario.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="INVENTARIO" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- CONSULTA -->
+                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/consulta.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="CONSULTA" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- CREDITO/CLIENTES -->
+                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/clienteCreditos.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="CREDITO/CLIENTES" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- MAS VENDIDO -->
+                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/masVendido.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="MAS VENDIDO" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- ENTRADAS/SALIDAS -->
+                <Button fx:id="btnVerHistorial" onAction="#verHistorialStock" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/entradaSalidas.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="ENTRADAS/SALIDAS" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- GARANTIAS/SERVICIOS -->
+                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/garantiasServicios.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="GARANTIAS/SERVICIOS" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
+                <!-- CONFIGURAR -->
+                <Button fx:id="btnConfiguracion" onAction="#irConfiguracion" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../img/menuPrincipal/configuraciones.png" />
+                                    </image>
+                                </ImageView>
+                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="CONFIGURAR" />
+                            </children>
+                        </HBox>
+                    </graphic>
+                </Button>
+
             </children>
         </VBox>
+    </left>
+
+
+
+    <!-- CENTRO -->
+    <center>
+        <!--CARGAR CADA MODULO-->
+        <StackPane fx:id="modulosDinamicos" />
     </center>
 
+    <!-- FOOTER (BOTTOM) -->
     <bottom>
-        <Button fx:id="btnCerrarSesion" onAction="#cerrarSesion" prefWidth="150.0" text="Cerrar Sesión" BorderPane.alignment="CENTER">
-            <BorderPane.margin>
-                <Insets top="20.0" />
-            </BorderPane.margin>
-        </Button>
+        <HBox alignment="CENTER" prefHeight="50.0" spacing="20" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
+            <children>
+
+                <Label text="ROL: []" />
+
+            </children>
+        </HBox>
     </bottom>
+
 </BorderPane>

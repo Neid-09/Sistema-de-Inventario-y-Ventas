@@ -60,12 +60,4 @@
         </TableView>
     </center>
 
-    <bottom>
-        <HBox alignment="CENTER">
-            <children>
-                <Button fx:id="btnCerrarHistorial" onAction="#cerrarHistorial" text="Volver 🏡" />
-            </children>
-        </HBox>
-    </bottom>
-
 </BorderPane>

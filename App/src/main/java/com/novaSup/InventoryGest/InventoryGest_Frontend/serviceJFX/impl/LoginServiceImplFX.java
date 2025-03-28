@@ -8,6 +8,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoginService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -59,10 +60,12 @@ public class LoginServiceImplFX implements ILoginService {
             );
 
             return true; // Si llegamos aquí, la autenticación fue exitosa
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("401")) {
+        } catch (IOException e) {
+            if (e.getMessage() != null && e.getMessage().contains("code: 401")) {
+                // Convertir el error 401 en un resultado falso en lugar de una excepción
                 return false;
             }
+            // Propagar otras excepciones
             throw e;
         }
     }
