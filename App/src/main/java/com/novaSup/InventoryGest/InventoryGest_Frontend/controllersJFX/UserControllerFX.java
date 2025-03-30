@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -75,8 +76,10 @@ public class UserControllerFX {
     public void initialize() {
 
         Platform.runLater(() -> {
-            Stage stage = (Stage) tablaUsuarios.getScene().getWindow();
-            stage.setResizable(true);
+            if (tablaUsuarios.getScene() != null && tablaUsuarios.getScene().getWindow() != null) {
+                Stage stage = (Stage) tablaUsuarios.getScene().getWindow();
+                stage.setResizable(true);
+            }
         });
 
         // Configurar estado inicial de botones
@@ -261,26 +264,34 @@ public class UserControllerFX {
     @FXML
     void cerrarGestionUsuarios(ActionEvent event) {
         try {
-            // Obtener el Stage actual desde el evento
-            Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+            // Obtener el Stage actual
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-            // Cargar la vista del menú principal
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
+            // Obtener el controlador del MenuPrincipal desde userData
+            MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
 
-            // Usar el contexto de Spring para la inyección de dependencias
-            loader.setControllerFactory(springContext::getBean);
-            Parent root = loader.load();
+            if (menuController != null) {
+                // Cargar el módulo de configuración en el panel
+                menuController.cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+            } else {
+                // Alternativa por si no encontramos el controlador
+                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia",
+                        "No se encontró el controlador principal. Usando método alternativo.");
 
-            // Crear nueva escena y mostrarla
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
+                loader.setControllerFactory(springContext::getBean);
+                Parent root = loader.load();
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+
+                // Obtener el controlador del menú y cargar la configuración
+                MenuPrincipalControllerFX controller = loader.getController();
+                controller.cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+                stage.show();
+            }
         } catch (IOException e) {
-            Alert alerta = new Alert(Alert.AlertType.ERROR);
-            alerta.setTitle("Error");
-            alerta.setHeaderText(null);
-            alerta.setContentText("No se pudo cargar la pantalla del menú principal: " + e.getMessage());
-            alerta.showAndWait();
+            mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                    "No se pudo regresar a la configuración: " + e.getMessage());
         }
     }
 }

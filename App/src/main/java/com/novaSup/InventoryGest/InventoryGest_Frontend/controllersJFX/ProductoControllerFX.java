@@ -491,48 +491,5 @@ public class ProductoControllerFX implements Initializable {
         }
     }
 
-    @FXML
-    void verHistorialStock(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.CONTROLSTOCK_FXML));
-            loader.setControllerFactory(springContext::getBean);
-
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Historial de Movimientos");
-            stage.setScene(scene);
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-
-            // Refrescar la tabla de productos
-            cargarProductos();
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo abrir la ventana de historial: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void cerrarGestionProductos(ActionEvent event) {
-        try {
-            // Obtener el Stage actual desde el botón
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // Cargar la vista del menú principal
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
-
-            // Usar el contexto de Spring para la inyección de dependencias
-            loader.setControllerFactory(springContext::getBean);
-            Parent root = loader.load();
-
-            // Crear nueva escena y mostrarla
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar la pantalla del menú principal: " + e.getMessage());
-        }
-    }
 
 }

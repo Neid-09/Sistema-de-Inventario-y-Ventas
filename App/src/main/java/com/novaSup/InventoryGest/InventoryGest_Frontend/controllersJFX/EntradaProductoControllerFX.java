@@ -5,12 +5,17 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProducto
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -18,6 +23,7 @@ import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDate;
@@ -25,6 +31,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import static com.novaSup.InventoryGest.MainApp.springContext;
 
 @Component
 public class EntradaProductoControllerFX implements Initializable {
@@ -85,14 +93,39 @@ public class EntradaProductoControllerFX implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        Platform.runLater(() -> {
-            Stage stage = (Stage) tablaHistorial.getScene().getWindow();
-            stage.setResizable(true);
-        });
+        // Configurar componentes que no dependen del Stage
         configurarColumnas();
         configurarComboBoxes();
         cargarProductos();
         cargarHistorial();
+
+        // Un enfoque más robusto para manejar la configuración de la ventana
+        Platform.runLater(() -> {
+            try {
+                if (tablaHistorial.getScene() != null && tablaHistorial.getScene().getWindow() != null) {
+                    Stage stage = (Stage) tablaHistorial.getScene().getWindow();
+                    stage.setResizable(true);
+                } else {
+                    // Agregar un listener que se activará cuando la escena esté disponible
+                    tablaHistorial.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                        if (newScene != null) {
+                            Platform.runLater(() -> {
+                                try {
+                                    Stage stage = (Stage) newScene.getWindow();
+                                    if (stage != null) {
+                                        stage.setResizable(true);
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("Error al configurar ventana: " + e.getMessage());
+                                }
+                            });
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                System.err.println("Error en inicialización: " + e.getMessage());
+            }
+        });
     }
 
     private void configurarColumnas() {
@@ -206,11 +239,6 @@ public class EntradaProductoControllerFX implements Initializable {
         cargarHistorial();
     }
 
-    @FXML
-    void cerrarHistorial(ActionEvent event) {
-        Stage stage = (Stage) btnCerrarHistorial.getScene().getWindow();
-        stage.close();
-    }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = new Alert(tipo);
