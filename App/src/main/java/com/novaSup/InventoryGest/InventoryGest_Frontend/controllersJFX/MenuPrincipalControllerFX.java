@@ -80,6 +80,11 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     @FXML
+    void irVender(ActionEvent event) {
+        cargarModuloEnPanel(PathsFXML.VENDER_FXML);
+    }
+
+    @FXML
     void irGestionProductos(ActionEvent event) {
         cargarModuloEnPanel(PathsFXML.CRUD_PRDUCTOS);
     }

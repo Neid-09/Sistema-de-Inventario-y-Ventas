@@ -63,7 +63,7 @@
                 <!-- Más botones de módulos debajo -->
 
                 <!-- VENDER -->
-                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnVender" onAction="#irVender" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
