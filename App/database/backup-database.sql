@@ -16,6 +16,65 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `clientes`
+--
+
+DROP TABLE IF EXISTS `clientes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `clientes` (
+  `id_cliente` int(11) NOT NULL AUTO_INCREMENT,
+  `documento` varchar(20) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `celular` varchar(20) DEFAULT NULL,
+  `correo` varchar(100) DEFAULT NULL,
+  `direccion` varchar(150) DEFAULT NULL,
+  PRIMARY KEY (`id_cliente`),
+  UNIQUE KEY `documento` (`documento`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `clientes`
+--
+
+LOCK TABLES `clientes` WRITE;
+/*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `detalle_venta`
+--
+
+DROP TABLE IF EXISTS `detalle_venta`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `detalle_venta` (
+  `id_detalle` int(11) NOT NULL AUTO_INCREMENT,
+  `id_venta` int(11) NOT NULL,
+  `id_producto` int(11) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) GENERATED ALWAYS AS (`cantidad` * `precio_unitario`) STORED,
+  PRIMARY KEY (`id_detalle`),
+  KEY `id_venta` (`id_venta`),
+  KEY `id_producto` (`id_producto`),
+  CONSTRAINT `detalle_venta_ibfk_1` FOREIGN KEY (`id_venta`) REFERENCES `ventas` (`id_venta`),
+  CONSTRAINT `detalle_venta_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `detalle_venta`
+--
+
+LOCK TABLES `detalle_venta` WRITE;
+/*!40000 ALTER TABLE `detalle_venta` DISABLE KEYS */;
+/*!40000 ALTER TABLE `detalle_venta` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `entradas_productos`
 --
 
@@ -32,7 +91,7 @@ CREATE TABLE `entradas_productos` (
   PRIMARY KEY (`id_entrada`),
   KEY `id_producto` (`id_producto`),
   CONSTRAINT `entradas_productos_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +100,7 @@ CREATE TABLE `entradas_productos` (
 
 LOCK TABLES `entradas_productos` WRITE;
 /*!40000 ALTER TABLE `entradas_productos` DISABLE KEYS */;
-INSERT INTO `entradas_productos` VALUES (1,1,25,'2025-03-25 03:42:40','ENTRADA',5000.00),(2,1,10,'2025-03-25 04:52:47','SALIDA',5000.00),(3,1,100,'2025-03-25 04:54:00','ENTRADA',2000.00),(4,1,10,'2025-03-27 05:48:42','SALIDA',2000.00),(5,1,5,'2025-03-27 05:48:49','SALIDA',2000.00),(6,2,30,'2025-03-27 05:50:20','ENTRADA',5000.00),(7,2,10,'2025-03-27 07:02:16','ENTRADA',5000.00),(8,3,50,'2025-03-27 07:06:31','ENTRADA',10000.00);
+INSERT INTO `entradas_productos` VALUES (1,1,25,'2025-03-25 03:42:40','ENTRADA',5000.00),(2,1,10,'2025-03-25 04:52:47','SALIDA',5000.00),(3,1,100,'2025-03-25 04:54:00','ENTRADA',2000.00),(4,1,10,'2025-03-27 05:48:42','SALIDA',2000.00),(5,1,5,'2025-03-27 05:48:49','SALIDA',2000.00),(6,2,30,'2025-03-27 05:50:20','ENTRADA',5000.00),(7,2,10,'2025-03-27 07:02:16','ENTRADA',5000.00),(8,3,50,'2025-03-27 07:06:31','ENTRADA',10000.00),(9,4,50,'2025-03-28 22:15:40','ENTRADA',5000.00),(10,4,20,'2025-03-28 22:16:36','SALIDA',5000.00),(11,4,50,'2025-03-28 22:19:14','ENTRADA',4000.00);
 /*!40000 ALTER TABLE `entradas_productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -80,13 +139,15 @@ DROP TABLE IF EXISTS `productos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `productos` (
   `id_producto` int(11) NOT NULL AUTO_INCREMENT,
+  `codigo` varchar(50) DEFAULT NULL,
   `nombre` varchar(100) NOT NULL,
   `descripcion` text DEFAULT NULL,
   `precio` decimal(10,2) NOT NULL,
   `stock` int(11) NOT NULL,
   `estado` tinyint(1) DEFAULT 1,
-  PRIMARY KEY (`id_producto`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  PRIMARY KEY (`id_producto`),
+  UNIQUE KEY `codigo` (`codigo`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,7 +156,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,'Avena','AVAENA 100% NATURAL',3000.00,100,1),(2,'Panela','100% caña',5000.00,40,1),(3,'Pan integral','Es integral',10000.00,50,1);
+INSERT INTO `productos` VALUES (1,'A001','Avena','AVAENA 100% NATURAL',3000.00,100,1),(2,'A002','Panela','100% caña',5000.00,40,1),(3,'A003','Pan integral','Es integral',10000.00,50,1),(4,'A004','Azucar','33333',4000.00,80,1);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,6 +242,37 @@ LOCK TABLES `usuarios` WRITE;
 INSERT INTO `usuarios` VALUES (2,'Andres','Botina','123','123',1),(9,'Neider','neider@','1333312','123',1),(10,'Leonel','Leonel@','313','123',2),(17,'Daniel','daniel','331313','123',2),(18,'admin','admin','123','admin',1);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `ventas`
+--
+
+DROP TABLE IF EXISTS `ventas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ventas` (
+  `id_venta` int(11) NOT NULL AUTO_INCREMENT,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id_cliente` int(11) NOT NULL,
+  `id_vendedor` int(11) NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `tipo_pago` varchar(50) NOT NULL,
+  PRIMARY KEY (`id_venta`),
+  KEY `id_cliente` (`id_cliente`),
+  KEY `id_vendedor` (`id_vendedor`),
+  CONSTRAINT `ventas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
+  CONSTRAINT `ventas_ibfk_2` FOREIGN KEY (`id_vendedor`) REFERENCES `usuarios` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ventas`
+--
+
+LOCK TABLES `ventas` WRITE;
+/*!40000 ALTER TABLE `ventas` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ventas` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -191,4 +283,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-26 21:58:19
+-- Dump completed on 2025-03-30 14:42:17
