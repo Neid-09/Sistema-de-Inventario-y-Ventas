@@ -104,30 +104,26 @@ public class UsuarioServiceImpl implements UsuarioService {
      */
     @Override
     public boolean tienePermiso(Usuario usuario, String nombrePermiso) {
-        if (usuario == null) {
-            return false;
-        }
-
-        // Si el usuario es administrador, conceder todos los permisos automáticamente
-        if (usuario.getRol() != null && "Administrador".equalsIgnoreCase(usuario.getRol().getNombre())) {
-            return true;
-        }
-
-        // Verificar permisos personalizados del usuario
+        // 1. Verificar primero en permisos personalizados (tienen prioridad)
         boolean tienePermisoPersonalizado = usuario.getPermisosPersonalizados().stream()
                 .anyMatch(p -> p.getNombre().equals(nombrePermiso));
 
         if (tienePermisoPersonalizado) {
-            return true;
+            return true; // Si está explícitamente asignado, tiene el permiso
         }
 
-        // Verificar permisos del rol del usuario
-        if (usuario.getRol() != null && usuario.getRol().getPermisos() != null) {
+        // 2. Si no tiene un permiso personalizado, verificar permisos del rol
+        if (usuario.getRol() != null) {
             return usuario.getRol().getPermisos().stream()
                     .anyMatch(p -> p.getNombre().equals(nombrePermiso));
         }
 
         return false;
+    }
+
+    public boolean existenUsuariosConRol(Integer idRol) {
+        // Implementar lógica para verificar si hay usuarios con el rol especificado
+        return usuarioRepository.countByRolIdRol(idRol) > 0;
     }
 
     /**

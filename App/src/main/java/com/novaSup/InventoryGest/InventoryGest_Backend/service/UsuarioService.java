@@ -13,4 +13,6 @@ public interface UsuarioService {
     Usuario obtenerUsuarioPorId(int id);
     boolean tienePermiso(Usuario usuario, String nombrePermiso);
     List<Permiso> obtenerTodosLosPermisos(Usuario usuario);
+    boolean existenUsuariosConRol(Integer idRol);
+
 }

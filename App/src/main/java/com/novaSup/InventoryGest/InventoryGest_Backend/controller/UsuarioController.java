@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -110,6 +107,33 @@ public class UsuarioController {
         try {
             Usuario usuario = usuarioService.obtenerUsuarioPorId(usuarioId);
             return ResponseEntity.ok(((UsuarioServiceImpl) usuarioService).obtenerTodosLosPermisos(usuario));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{usuarioId}/permisos-disponibles")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_usuarios')")
+    public ResponseEntity<?> obtenerPermisosDisponibles(@PathVariable Integer usuarioId) {
+        try {
+            Usuario usuario = usuarioService.obtenerUsuarioPorId(usuarioId);
+            Map<String, Object> resultado = new HashMap<>();
+
+            // 1. Permisos del rol
+            Set<Permiso> permisosRol = usuario.getRol() != null ?
+                    usuario.getRol().getPermisos() : new HashSet<>();
+
+            // 2. Permisos personalizados
+            Set<Permiso> permisosPersonalizados = usuario.getPermisosPersonalizados();
+
+            // 3. Todos los permisos disponibles
+            List<Permiso> todosLosPermisos = permisoRepository.findAll();
+
+            resultado.put("permisosRol", permisosRol);
+            resultado.put("permisosPersonalizados", permisosPersonalizados);
+            resultado.put("todosLosPermisos", todosLosPermisos);
+
+            return ResponseEntity.ok(resultado);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
