@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
@@ -14,8 +15,6 @@ import java.util.List;
 
 /**
  * Implementación del servicio de usuarios para la interfaz gráfica.
- * Proporciona métodos para la gestión de usuarios y roles mediante
- * comunicación con la API REST del backend.
  */
 public class UsuarioServiceImplFX implements IUsuarioService {
 
@@ -26,170 +25,163 @@ public class UsuarioServiceImplFX implements IUsuarioService {
 
     /**
      * Obtiene la lista de roles disponibles en el sistema.
-     *
-     * @return Lista de objetos RolFX
-     * @throws Exception Si ocurre un error durante la comunicación con el backend
      */
     @Override
     public List<RolFX> obtenerRoles() throws Exception {
-        String jsonResponse = HttpClient.get(
-                BASE_URL + "/roles",
-                HEADER_USUARIO_ID,
-                getUsuarioIdAutenticado().toString()
-        );
+        try {
+            // Ya no necesitamos enviar el encabezado usuario-id
+            String response = HttpClient.get(BASE_URL + "/roles");
 
-        List<RolFX> roles = new ArrayList<>();
-        JsonNode rolesArray = mapper.readTree(jsonResponse);
+            JsonNode rolesNode = mapper.readTree(response);
+            List<RolFX> roles = new ArrayList<>();
 
-        for (JsonNode roleNode : rolesArray) {
-            RolFX rol = new RolFX(
-                    roleNode.get("idRol").asInt(),
-                    roleNode.get("rol").asText()
-            );
-            roles.add(rol);
+            for (JsonNode rolNode : rolesNode) {
+                if (rolNode == null) continue;
+
+                Integer idRol = rolNode.has("idRol") ? rolNode.get("idRol").asInt() : null;
+                String nombre = rolNode.has("nombre") ? rolNode.get("nombre").asText() : "";
+
+                roles.add(new RolFX(idRol, nombre));
+            }
+
+            return roles;
+        } catch (Exception e) {
+            String mensaje = e.getMessage() != null ? e.getMessage() : "Sin mensaje de error";
+            logger.error("Error al obtener roles: {}", mensaje);
+            throw new Exception("Error al obtener roles: " + mensaje);
         }
-
-        return roles;
     }
+
+
 
     /**
      * Obtiene la lista de todos los usuarios registrados.
-     *
-     * @return Lista de objetos UsuarioFX
-     * @throws Exception Si ocurre un error durante la comunicación con el backend
      */
     @Override
     public List<UsuarioFX> obtenerUsuarios() throws Exception {
-        String jsonResponse = HttpClient.get(
-                BASE_URL + "/usuarios/listar",
-                HEADER_USUARIO_ID,
-                getUsuarioIdAutenticado().toString()
-        );
+        try {
+            // Ya no necesitamos enviar el encabezado usuario-id
+            String response = HttpClient.get(BASE_URL + "/usuarios");
 
-        List<UsuarioFX> usuarios = new ArrayList<>();
-        JsonNode usuariosArray = mapper.readTree(jsonResponse);
+            JsonNode usuariosNode = mapper.readTree(response);
+            List<UsuarioFX> usuarios = new ArrayList<>();
 
-        for (JsonNode usuarioNode : usuariosArray) {
-            usuarios.add(convertirJsonAUsuario(usuarioNode));
+            for (JsonNode usuarioNode : usuariosNode) {
+                try {
+                    UsuarioFX usuario = convertirDeJSON(usuarioNode);
+                    usuarios.add(usuario);
+                } catch (Exception e) {
+                    logger.error("Error procesando usuario: {}", e.getMessage());
+                }
+            }
+            return usuarios;
+        } catch (Exception e) {
+            String mensaje = e.getMessage() != null ? e.getMessage() : "Sin mensaje de error";
+            logger.error("Error al obtener usuarios: {}", mensaje);
+            throw new Exception("Error al obtener usuarios: " + mensaje);
         }
-
-        return usuarios;
     }
 
     /**
      * Registra un nuevo usuario en el sistema.
-     *
-     * @param usuario Objeto UsuarioFX con los datos del usuario a registrar
-     * @return El objeto UsuarioFX con los datos del usuario registrado
-     * @throws Exception Si ocurre un error durante la comunicación con el backend
      */
     @Override
     public UsuarioFX registrarUsuario(UsuarioFX usuario) throws Exception {
-        String jsonBody = crearJsonUsuario(usuario);
-        String jsonResponse = HttpClient.post(
-                BASE_URL + "/usuarios/registrar",
-                jsonBody,
-                HEADER_USUARIO_ID,
-                getUsuarioIdAutenticado().toString()
-        );
+        try {
+            // Convertir objeto a JSON
+            ObjectNode usuarioDTO = mapper.createObjectNode();
+            usuarioDTO.put("nombre", usuario.getNombre());
+            usuarioDTO.put("correo", usuario.getCorreo());
+            usuarioDTO.put("telefono", usuario.getTelefono());
+            usuarioDTO.put("contraseña", usuario.getContraseña());
 
-        return procesarRespuestaUsuario(jsonResponse);
+            // Agregar ID del rol si existe
+            if (usuario.getRol() != null && usuario.getRol().getIdRol() != null) {
+                usuarioDTO.put("idRol", usuario.getRol().getIdRol());
+            }
+
+            // Realizar petición HTTP (HttpClient añadirá automáticamente el token JWT)
+            String response = HttpClient.post(
+                    BASE_URL + "/usuarios",
+                    mapper.writeValueAsString(usuarioDTO)
+            );
+
+            // Procesar respuesta
+            JsonNode usuarioNode = mapper.readTree(response);
+            return convertirDeJSON(usuarioNode);
+        } catch (Exception e) {
+            throw new Exception("Error al registrar usuario: " + e.getMessage());
+        }
     }
 
     /**
      * Actualiza los datos de un usuario existente.
-     *
-     * @param id ID del usuario a actualizar
-     * @param usuario Objeto UsuarioFX con los nuevos datos del usuario
-     * @return El objeto UsuarioFX actualizado
-     * @throws Exception Si ocurre un error durante la comunicación con el backend
      */
     @Override
     public UsuarioFX actualizarUsuario(Integer id, UsuarioFX usuario) throws Exception {
-        String jsonBody = crearJsonUsuario(usuario);
-        String jsonResponse = HttpClient.put(
-                BASE_URL + "/usuarios/actualizar/" + id,
-                jsonBody,
-                HEADER_USUARIO_ID,
-                getUsuarioIdAutenticado().toString()
-        );
+        try {
+            // Convertir objeto a JSON
+            ObjectNode usuarioDTO = mapper.createObjectNode();
+            usuarioDTO.put("nombre", usuario.getNombre());
+            usuarioDTO.put("correo", usuario.getCorreo());
+            usuarioDTO.put("telefono", usuario.getTelefono());
 
-        return procesarRespuestaUsuario(jsonResponse);
+            // Solo incluir contraseña si no está vacía
+            if (usuario.getContraseña() != null && !usuario.getContraseña().isEmpty()) {
+                usuarioDTO.put("contraseña", usuario.getContraseña());
+            }
+
+            // Agregar ID del rol si existe
+            if (usuario.getRol() != null && usuario.getRol().getIdRol() != null) {
+                usuarioDTO.put("idRol", usuario.getRol().getIdRol());
+            }
+
+            // Realizar petición HTTP (ahora sin encabezado usuario-id)
+            String response = HttpClient.put(
+                    BASE_URL + "/usuarios/" + id,
+                    mapper.writeValueAsString(usuarioDTO)
+            );
+
+            // Procesar respuesta
+            JsonNode usuarioNode = mapper.readTree(response);
+            return convertirDeJSON(usuarioNode);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar usuario: " + e.getMessage());
+        }
     }
 
     /**
      * Elimina un usuario del sistema.
-     *
-     * @param id ID del usuario a eliminar
-     * @throws Exception Si ocurre un error durante la comunicación con el backend
      */
     @Override
     public void eliminarUsuario(Integer id) throws Exception {
-        HttpClient.delete(
-                BASE_URL + "/usuarios/eliminar/" + id,
-                HEADER_USUARIO_ID,
-                getUsuarioIdAutenticado().toString()
-        );
+        try {
+            // El HttpClient ya enviará el token automáticamente
+            HttpClient.delete(BASE_URL + "/usuarios/" + id);
+        } catch (Exception e) {
+            throw new Exception("Error al eliminar usuario: " + e.getMessage());
+        }
     }
 
     /**
-     * Crea una cadena JSON con los datos del usuario.
-     *
-     * @param usuario Objeto UsuarioFX del cual extraer los datos
-     * @return Cadena con formato JSON para enviar al servidor
+     * Método auxiliar para convertir JSON a objeto UsuarioFX
      */
-    private String crearJsonUsuario(UsuarioFX usuario) {
-        return String.format(
-                "{\"nombre\": \"%s\", \"correo\": \"%s\", \"telefono\": \"%s\", \"contraseña\": \"%s\", \"idRol\": %d}",
-                usuario.getNombre(),
-                usuario.getCorreo(),
-                usuario.getTelefono(),
-                usuario.getContraseña(),
-                usuario.getRol().getIdRol()
-        );
-    }
+    private UsuarioFX convertirDeJSON(JsonNode usuarioNode) {
+        Integer idUsuario = usuarioNode.has("idUsuario") ? usuarioNode.get("idUsuario").asInt() : null;
+        String nombre = usuarioNode.has("nombre") ? usuarioNode.get("nombre").asText() : "";
+        String correo = usuarioNode.has("correo") ? usuarioNode.get("correo").asText() : "";
+        String telefono = usuarioNode.has("telefono") ? usuarioNode.get("telefono").asText() : "";
+        String contraseña = usuarioNode.has("contraseña") ? usuarioNode.get("contraseña").asText() : "";
 
-    /**
-     * Procesa la respuesta JSON del servidor convirtiéndola en un objeto UsuarioFX.
-     *
-     * @param jsonResponse Respuesta JSON recibida del servidor
-     * @return Objeto UsuarioFX con los datos de la respuesta
-     * @throws Exception Si ocurre un error durante el procesamiento del JSON
-     */
-    private UsuarioFX procesarRespuestaUsuario(String jsonResponse) throws Exception {
-        JsonNode usuarioNode = mapper.readTree(jsonResponse);
-        return convertirJsonAUsuario(usuarioNode);
-    }
+        // Procesar datos del rol
+        RolFX rol = null;
+        if (usuarioNode.has("rol") && !usuarioNode.get("rol").isNull()) {
+            JsonNode rolNode = usuarioNode.get("rol");
+            Integer idRol = rolNode.has("idRol") ? rolNode.get("idRol").asInt() : null;
+            String nombreRol = rolNode.has("nombre") ? rolNode.get("nombre").asText() : "";
+            rol = new RolFX(idRol, nombreRol);
+        }
 
-    /**
-     * Convierte un nodo JSON a un objeto UsuarioFX.
-     *
-     * @param usuarioNode Nodo JSON que contiene los datos del usuario
-     * @return Objeto UsuarioFX con los datos extraídos del JSON
-     */
-    private UsuarioFX convertirJsonAUsuario(JsonNode usuarioNode) {
-        JsonNode rolNode = usuarioNode.get("rol");
-        RolFX rol = new RolFX(
-                rolNode.get("idRol").asInt(),
-                rolNode.get("rol").asText()
-        );
-
-        return new UsuarioFX(
-                usuarioNode.get("idUsuario").asInt(),
-                usuarioNode.get("nombre").asText(),
-                usuarioNode.get("correo").asText(),
-                usuarioNode.get("telefono").asText(),
-                usuarioNode.get("contraseña").asText(),
-                rol
-        );
-    }
-
-    /**
-     * Obtiene el ID del usuario actualmente autenticado.
-     *
-     * @return ID del usuario autenticado
-     */
-    private Integer getUsuarioIdAutenticado() {
-        return LoginServiceImplFX.getUsuarioActual().getIdUsuario();
+        return new UsuarioFX(idUsuario, nombre, correo, telefono, contraseña, rol);
     }
 }

@@ -21,11 +21,33 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.obtenerTodos());
     }
 
+    @GetMapping("/activos")
+    public ResponseEntity<List<Producto>> listarProductosActivos() {
+        return ResponseEntity.ok(productoService.obtenerActivos());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Producto> obtenerProducto(@PathVariable Integer id) {
         return productoService.obtenerPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/codigo/{codigo}")
+    public ResponseEntity<Producto> obtenerProductoPorCodigo(@PathVariable String codigo) {
+        return productoService.obtenerPorCodigo(codigo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/categoria/{idCategoria}")
+    public ResponseEntity<List<Producto>> obtenerProductosPorCategoria(@PathVariable Integer idCategoria) {
+        return ResponseEntity.ok(productoService.obtenerPorCategoria(idCategoria));
+    }
+
+    @GetMapping("/stock-bajo")
+    public ResponseEntity<List<Producto>> obtenerProductosConStockBajo() {
+        return ResponseEntity.ok(productoService.obtenerConStockBajo());
     }
 
     @PostMapping
@@ -60,10 +82,16 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Nuevo endpoint para desactivar productos
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Producto> desactivarProducto(@PathVariable Integer id) {
         return productoService.desactivarProducto(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<Producto> activarProducto(@PathVariable Integer id) {
+        return productoService.activarProducto(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -223,7 +223,7 @@
         <HBox alignment="CENTER" prefHeight="50.0" spacing="20" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
             <children>
 
-                <Label text="ROL: []" />
+                <Label fx:id="lblRol" text="ROL: []" />
 
             </children>
         </HBox>

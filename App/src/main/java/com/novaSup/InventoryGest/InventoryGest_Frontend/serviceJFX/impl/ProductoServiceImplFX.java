@@ -61,15 +61,15 @@ public class ProductoServiceImplFX implements IProductoService {
     @Override
     public void desactivarProducto(Integer id) throws Exception {
         // Llamar al endpoint para desactivar el producto
-        HttpClient.patch(API_URL + "/" + id + "/desactivar");
+        //HttpClient.patch(API_URL + "/" + id + "/desactivar");
     }
 
-    @Override
+/*    @Override
     public ProductoFX actualizarStock(Integer id, Integer cantidad) throws Exception {
         String respuesta = HttpClient.patch(API_URL + "/" + id + "/stock?cantidad=" + cantidad);
         ProductoDTO productoActualizado = objectMapper.readValue(respuesta, ProductoDTO.class);
         return convertirAProductoFX(productoActualizado);
-    }
+    }*/
 
     private ProductoFX convertirAProductoFX(ProductoDTO dto) {
         return new ProductoFX(

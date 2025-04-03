@@ -1,5 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,15 +27,18 @@ public class ConfiguracionControllerFX {
 
     @FXML
     public void irGestionUsuarios(ActionEvent event) {
-        try {
-            // Obtener el Stage actual
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        // Verificación más robusta de permisos
+        if (!LoginServiceImplFX.tienePermiso("gestionar_usuarios")) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acceso denegado",
+                    "No tienes permisos para acceder a la gestión de usuarios.");
+            return;
+        }
 
-            // Obtener el controlador del MenuPrincipal desde userData
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
 
             if (menuController != null) {
-                // Usar el método del controlador del MenuPrincipal para cargar la vista
                 menuController.cargarModuloEnPanel(PathsFXML.CRUD_USERS);
             } else {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error",

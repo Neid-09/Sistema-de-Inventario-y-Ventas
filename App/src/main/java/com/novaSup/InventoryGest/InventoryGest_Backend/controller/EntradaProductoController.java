@@ -2,8 +2,10 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.EntradaProducto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Proveedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.EntradaProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,9 @@ public class EntradaProductoController {
 
     @Autowired
     private ProductoService productoService;
+
+    @Autowired
+    private ProveedorService proveedorService;
 
     @GetMapping
     public ResponseEntity<List<EntradaProducto>> obtenerTodasLasEntradas() {
@@ -120,10 +125,25 @@ public class EntradaProductoController {
         entrada.setCantidad(movimientoDTO.cantidad);
         entrada.setFecha(LocalDateTime.now());
         entrada.setTipoMovimiento(movimientoDTO.tipoMovimiento);
+        entrada.setMotivo(movimientoDTO.motivo);
 
-        entrada.setPrecioUnitario(movimientoDTO.precioUnitario != null ?
-                movimientoDTO.precioUnitario :
-                producto.getPrecio());
+        // Asignar proveedor si es una entrada
+        if ("ENTRADA".equalsIgnoreCase(movimientoDTO.tipoMovimiento) && movimientoDTO.idProveedor != null) {
+            Proveedor proveedor = proveedorService.obtenerPorId(movimientoDTO.idProveedor)
+                    .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
+            entrada.setProveedor(proveedor);
+        }
+
+        // Usar precio específico según el tipo de movimiento
+        if (movimientoDTO.precioUnitario != null) {
+            entrada.setPrecioUnitario(movimientoDTO.precioUnitario);
+        } else {
+            if ("ENTRADA".equalsIgnoreCase(movimientoDTO.tipoMovimiento)) {
+                entrada.setPrecioUnitario(producto.getPrecioCosto());
+            } else {
+                entrada.setPrecioUnitario(producto.getPrecioVenta());
+            }
+        }
 
         // Actualizar stock del producto
         if ("ENTRADA".equalsIgnoreCase(movimientoDTO.tipoMovimiento)) {
@@ -146,8 +166,10 @@ public class EntradaProductoController {
 // Actualizar MovimientoDTO
     private static class MovimientoDTO {
         public Integer idProducto;
+        public Integer idProveedor; // Nuevo campo
         public Integer cantidad;
         public String tipoMovimiento;
-        public BigDecimal precioUnitario; // Nuevo campo
+        public BigDecimal precioUnitario;
+        public String motivo; // Nuevo campo
     }
 }

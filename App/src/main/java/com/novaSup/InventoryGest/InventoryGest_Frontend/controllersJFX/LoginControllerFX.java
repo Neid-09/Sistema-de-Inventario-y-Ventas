@@ -62,16 +62,21 @@ public class LoginControllerFX {
                         "Usuario o contraseña incorrectos");
             }
         } catch (Exception e) {
-            // Captura específicamente errores HTTP 401 para mostrar mensaje amigable
-            if (e.getMessage() != null && e.getMessage().contains("code: 401")) {
+            // Mostrar mensaje amigable para credenciales inválidas
+            if (e.getMessage() != null &&
+                    (e.getMessage().contains("Credenciales inválidas") ||
+                            e.getMessage().contains("code: 400") ||
+                            e.getMessage().contains("code: 401"))) {
+
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de autenticación",
                         "Usuario o contraseña incorrectos");
             } else {
-                // Para otros errores, muestra un mensaje más genérico
+                // Para otros errores de conexión
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de conexión",
                         "No se pudo conectar con el servidor. Intente nuevamente más tarde.");
-                // Log del error real para depuración
-                System.err.println("Error de autenticación: " + e.getMessage());
+
+                // Log del error para depuración
+                System.err.println("Error de conexión: " + e.getMessage());
             }
         }
     }

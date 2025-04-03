@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
@@ -72,42 +73,131 @@ public class UserControllerFX {
     // Usamos la interfaz en lugar de la implementación directa
     private final IUsuarioService usuarioService = new UsuarioServiceImplFX();
 
+    private UsuarioFX usuarioSeleccionado;
+
     @FXML
     public void initialize() {
-
         Platform.runLater(() -> {
-            if (tablaUsuarios.getScene() != null && tablaUsuarios.getScene().getWindow() != null) {
-                Stage stage = (Stage) tablaUsuarios.getScene().getWindow();
-                stage.setResizable(true);
+            try {
+                // Verificar información del usuario para depuración
+                if (LoginServiceImplFX.getUsuarioActual() != null) {
+                    String nombreRol = LoginServiceImplFX.getUsuarioActual().getRol() != null ?
+                            LoginServiceImplFX.getUsuarioActual().getRol().getNombre() : "sin rol";
+                    System.out.println("Usuario actual: " + LoginServiceImplFX.getUsuarioActual().getNombre() +
+                            " - Rol: " + nombreRol);
+                }
+
+                // Verificar explícitamente el permiso
+                boolean tienePermiso = LoginServiceImplFX.tienePermiso("gestionar_usuarios");
+                System.out.println("¿Tiene permiso para gestionar_usuarios? " + tienePermiso);
+
+                if (!tienePermiso) {
+                    mostrarAlerta(Alert.AlertType.WARNING, "Acceso Denegado",
+                            "No tienes permisos para acceder a la gestión de usuarios.");
+                    volverAConfiguracion();
+                    return;
+                }
+
+                // Si tiene permiso, continuar con la inicialización normal
+                configurarColumnas();
+                configurarSeleccion();
+                configurarBotonesPorPermisos();
+                cargarRoles();
+                cargarUsuarios();
+            } catch (Exception e) {
+                // Manejo de errores
+                mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                        "Error al inicializar la gestión de usuarios: " + e.getMessage());
+                volverAConfiguracion();
             }
         });
+    }
 
-        // Configurar estado inicial de botones
-        btnActualizar.setDisable(true);
-        btnEliminar.setDisable(true);
+    // Método para configurar los botones según permisos
+    private void configurarBotonesPorPermisos() {
+        btnRegistrar.setVisible(LoginServiceImplFX.tienePermiso("crear_usuario"));
+        btnRegistrar.setManaged(btnRegistrar.isVisible());
 
-        // Configurar selección de tabla
-        tablaUsuarios.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldSelection, newSelection) -> {
-                    if (newSelection != null) {
-                        seleccionarUsuario();
-                    }
-                });
+        btnActualizar.setVisible(LoginServiceImplFX.tienePermiso("editar_usuario"));
+        btnActualizar.setManaged(btnActualizar.isVisible());
 
-        cargarRoles();
-        cargarUsuarios();
+        btnEliminar.setVisible(LoginServiceImplFX.tienePermiso("eliminar_usuario"));
+        btnEliminar.setManaged(btnEliminar.isVisible());
+    }
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("idUsuario"));
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
-        colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
-        colRol.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRol().getRol()));
+    /**
+     * Verifica si el usuario tiene alguno de los permisos necesarios para gestionar usuarios
+     */
+    /**
+     * Verifica si el usuario tiene alguno de los permisos necesarios para gestionar usuarios
+     */
+    private boolean tienePermisosGestionUsuarios() {
+        boolean tienePermiso = LoginServiceImplFX.tienePermiso("gestionar_usuarios");
 
+        // Verificar permiso explícito para ver usuarios si el permiso general no está presente
+        if (!tienePermiso) {
+            tienePermiso = LoginServiceImplFX.tienePermiso("ver_usuarios");
+        }
+
+        return tienePermiso;
+    }
+
+    /**
+     * Configura las columnas de la tabla de usuarios
+     */
+    private void configurarColumnas() {
+        // Configuración para cada columna
+        colId.setCellValueFactory(cellData -> cellData.getValue().idUsuarioProperty().asObject());
+        colNombre.setCellValueFactory(cellData -> cellData.getValue().nombreProperty());
+        colCorreo.setCellValueFactory(cellData -> cellData.getValue().correoProperty());
+        colTelefono.setCellValueFactory(cellData -> cellData.getValue().telefonoProperty());
+        colRol.setCellValueFactory(cellData -> new SimpleStringProperty(
+                cellData.getValue().getRol() != null ? cellData.getValue().getRol().getNombre() : ""));
+    }
+
+    /**
+     * Configura el manejo de la selección de filas en la tabla
+     */
+    private void configurarSeleccion() {
         tablaUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
+            // Actualizar la UI según la selección
+            usuarioSeleccionado = newSelection;
+            boolean haySeleccion = (newSelection != null);
+
+            // Activar/desactivar botones según permisos y selección
+            btnActualizar.setDisable(!haySeleccion || !LoginServiceImplFX.tienePermiso("editar_usuario"));
+            btnEliminar.setDisable(!haySeleccion || !LoginServiceImplFX.tienePermiso("eliminar_usuario"));
+
+            // Cargar los datos del usuario seleccionado en el formulario
+            if (haySeleccion) {
                 seleccionarUsuario();
             }
         });
+    }
+
+    /**
+     * Muestra mensaje de acceso denegado y redirige a configuración
+     */
+    private void mostrarMensajeAccesoDenegado() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Acceso Denegado");
+        alert.setHeaderText(null);
+        alert.setContentText("No tienes los permisos necesarios para acceder a la gestión de usuarios.");
+        alert.showAndWait();
+
+        volverAConfiguracion();
+    }
+
+    /**
+     * Maneja errores mostrando un mensaje apropiado
+     */
+    private void manejarError(String mensaje, Exception e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje + ": " + e.getMessage());
+        alert.showAndWait();
+        e.printStackTrace();
     }
 
     @FXML
@@ -152,7 +242,35 @@ public class UserControllerFX {
             List<UsuarioFX> usuarios = usuarioService.obtenerUsuarios();
             tablaUsuarios.setItems(FXCollections.observableArrayList(usuarios));
         } catch (Exception e) {
-            e.printStackTrace();
+            String mensajeError = e.getMessage().toLowerCase();
+
+            // Manejar específicamente error de permisos
+            if (mensajeError.contains("403") || mensajeError.contains("permisos")) {
+                Platform.runLater(() -> {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Acceso denegado",
+                            "No tienes permisos para gestionar usuarios");
+                    volverAConfiguracion();
+                });
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                        "Error al cargar usuarios: " + e.getMessage());
+            }
+        }
+    }
+
+    // Método auxiliar para regresar a la pantalla de configuración
+    private void regresarAConfiguracion() {
+        try {
+            // Ahora ejecutamos esto cuando la interfaz ya está completamente inicializada
+            if (tablaUsuarios.getScene() != null && tablaUsuarios.getScene().getWindow() != null) {
+                Stage stage = (Stage) tablaUsuarios.getScene().getWindow();
+                MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
+                if (menuController != null) {
+                    menuController.cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -261,11 +379,25 @@ public class UserControllerFX {
         btnEliminar.setDisable(true);
     }
 
-    @FXML
-    void cerrarGestionUsuarios(ActionEvent event) {
+
+    /**
+     * Vuelve a la pantalla de configuración de forma segura
+     * @param event Evento que disparó la acción (opcional)
+     */
+    private void volverAConfiguracion(ActionEvent event) {
         try {
-            // Obtener el Stage actual
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage stage;
+
+            // Obtener el Stage según el contexto disponible
+            if (event != null) {
+                stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            } else if (tablaUsuarios.getScene() != null) {
+                stage = (Stage) tablaUsuarios.getScene().getWindow();
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                        "No se pudo determinar la ventana actual.");
+                return;
+            }
 
             // Obtener el controlador del MenuPrincipal desde userData
             MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
@@ -289,9 +421,21 @@ public class UserControllerFX {
                 controller.cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
                 stage.show();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo regresar a la configuración: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
+
+    // Método público que recibe el evento
+    @FXML
+    void cerrarGestionUsuarios(ActionEvent event) {
+        volverAConfiguracion(event);
+    }
+
+    // Sobrecarga para llamadas internas sin evento
+    private void volverAConfiguracion() {
+        volverAConfiguracion(null);
     }
 }

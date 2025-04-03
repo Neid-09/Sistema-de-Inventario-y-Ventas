@@ -10,6 +10,6 @@ public interface IProductoService {
     ProductoFX guardar(String nombre, String descripcion, BigDecimal precio, Integer stock) throws Exception;
     ProductoFX actualizar(Integer id, String nombre, String descripcion, BigDecimal precio, Integer stock) throws Exception;
     void eliminar(Integer id) throws Exception;
-    ProductoFX actualizarStock(Integer id, Integer cantidad) throws Exception;
+    //ProductoFX actualizarStock(Integer id, Integer cantidad) throws Exception;
     void desactivarProducto(Integer id) throws Exception;
 }

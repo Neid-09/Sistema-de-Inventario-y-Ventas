@@ -1,5 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -28,7 +29,22 @@ public class MenuPrincipalControllerFX implements Initializable {
     private Label lblUsuario;
 
     @FXML
+    private Label lblRol;
+
+    @FXML
     private Button btnCerrarSesion;
+
+    @FXML
+    private Button btnVender;
+
+    @FXML
+    private Button btnProductos;
+
+    @FXML
+    private Button btnVerHistorial;
+
+    @FXML
+    private Button btnConfiguracion;
 
     @FXML
     private StackPane modulosDinamicos;
@@ -47,11 +63,44 @@ public class MenuPrincipalControllerFX implements Initializable {
                 // Cargar el módulo de inicio por defecto
                 cargarModuloEnPanel(PathsFXML.INICIO_FXML);
 
+                // Configurar visibilidad de botones según permisos
+                configurarPermisosMenu();
 
+                // IMPORTANTE: Verificar que lblRol no sea nulo antes de usarlo
+                if (lblRol != null) {
+                    if (LoginServiceImplFX.getUsuarioActual() != null &&
+                            LoginServiceImplFX.getUsuarioActual().getRol() != null) {
+                        lblRol.setText("ROL: " + LoginServiceImplFX.getUsuarioActual().getRol().getNombre());
+                    }
+                } else {
+                    System.err.println("Error: lblRol es nulo en initialize");
+                }
             } catch (Exception e) {
                 System.err.println("Error en inicialización: " + e.getMessage());
+                e.printStackTrace();
             }
         });
+    }
+
+
+
+    private void configurarPermisosMenu() {
+        // Configurar botones según permisos
+        btnVender.setVisible(LoginServiceImplFX.tienePermiso("crear_venta"));
+        btnVender.setManaged(LoginServiceImplFX.tienePermiso("crear_venta"));
+
+        btnProductos.setVisible(LoginServiceImplFX.tienePermiso("gestionar_productos") ||
+                LoginServiceImplFX.tienePermiso("ver_productos"));
+        btnProductos.setManaged(LoginServiceImplFX.tienePermiso("gestionar_productos") ||
+                LoginServiceImplFX.tienePermiso("ver_productos"));
+
+        btnVerHistorial.setVisible(LoginServiceImplFX.tienePermiso("ver_stock") ||
+                LoginServiceImplFX.tienePermiso("gestionar_stock"));
+        btnVerHistorial.setManaged(LoginServiceImplFX.tienePermiso("ver_stock") ||
+                LoginServiceImplFX.tienePermiso("gestionar_stock"));
+
+        btnConfiguracion.setVisible(LoginServiceImplFX.tienePermiso("gestionar_configuracion"));
+        btnConfiguracion.setManaged(LoginServiceImplFX.tienePermiso("gestionar_configuracion"));
     }
 
     public void establecerUsuario(String usuario) {
@@ -81,21 +130,43 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     @FXML
     void irVender(ActionEvent event) {
+        if (!LoginServiceImplFX.tienePermiso("crear_venta")) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acceso denegado",
+                    "No tienes permisos para acceder al módulo de ventas.");
+            return;
+        }
         cargarModuloEnPanel(PathsFXML.VENDER_FXML);
     }
 
     @FXML
     void irGestionProductos(ActionEvent event) {
+        if (!LoginServiceImplFX.tienePermiso("gestionar_productos") &&
+                !LoginServiceImplFX.tienePermiso("ver_productos")) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acceso denegado",
+                    "No tienes permisos para acceder al módulo de productos.");
+            return;
+        }
         cargarModuloEnPanel(PathsFXML.CRUD_PRDUCTOS);
     }
 
     @FXML
     void verHistorialStock(ActionEvent event) {
+        if (!LoginServiceImplFX.tienePermiso("ver_stock") &&
+                !LoginServiceImplFX.tienePermiso("gestionar_stock")) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acceso denegado",
+                    "No tienes permisos para acceder al historial de stock.");
+            return;
+        }
         cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
     }
 
     @FXML
     void irConfiguracion(ActionEvent event) {
+        if (!LoginServiceImplFX.tienePermiso("gestionar_configuracion")) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Acceso denegado",
+                    "No tienes permisos para acceder a la configuración.");
+            return;
+        }
         cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
     }
 

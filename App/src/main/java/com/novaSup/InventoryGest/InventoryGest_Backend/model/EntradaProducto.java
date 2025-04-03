@@ -22,6 +22,10 @@ public class EntradaProducto {
     @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
 
+    @ManyToOne
+    @JoinColumn(name = "id_proveedor")
+    private Proveedor proveedor;
+
     @Column(nullable = false)
     private Integer cantidad;
 
@@ -33,4 +37,7 @@ public class EntradaProducto {
 
     @Column(name = "precio_unitario", nullable = false)
     private BigDecimal precioUnitario;
+
+    @Column(name = "motivo")
+    private String motivo;
 }
