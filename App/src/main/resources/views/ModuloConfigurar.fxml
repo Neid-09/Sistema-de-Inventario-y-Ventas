@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="400" prefWidth="600" spacing="20" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ConfiguracionControllerFX">
+<VBox alignment="TOP_CENTER" prefHeight="400" prefWidth="600" spacing="20" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ConfigurarControllerFX">
 
     <padding>
         <Insets bottom="30" left="30" right="30" top="30" />
@@ -19,6 +19,7 @@
     </Label>
 
     <Button fx:id="btnGestionarUsuarios" onAction="#irGestionUsuarios" prefWidth="200" text="Gestionar Usuarios" />
+   <Button fx:id="btnConfiguracionesGlobales" onAction="#irConfiguracionesGlobales" prefWidth="200" text="Configuraciones Globales" />
 
     <Label style="-fx-text-fill: gray; -fx-font-style: italic;" text="⚠️ Esta sección está en desarrollo..." />
 </VBox>

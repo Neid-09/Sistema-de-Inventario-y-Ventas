@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1">
+    <!-- Encabezado -->
+    <top>
+        <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Gestión de Plantillas de Permisos para Roles" />
+    </top>
+
+    <!-- Contenido principal -->
+    <center>
+        <VBox alignment="CENTER" spacing="10">
+            <ComboBox fx:id="cbRoles" promptText="Seleccionar Rol" />
+            <TableView fx:id="tblPermisos">
+                <columns>
+                    <TableColumn fx:id="colPermiso" prefWidth="200" text="Permiso" />
+                    <TableColumn fx:id="colDescripcion" prefWidth="300" text="Descripción" />
+                    <TableColumn fx:id="colAsignado" text="Asignado">
+                            <!--Configurar el CheckBox dentro de la celda CON EL CONTROLADOR-->
+                    </TableColumn>
+
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- Botón de Guardar -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="10">
+            <Button fx:id="btnGuardar" style="-fx-background-color: #083671; -fx-text-fill: white;" text="Guardar Cambios" />
+        </HBox>
+    </bottom>
+</BorderPane>

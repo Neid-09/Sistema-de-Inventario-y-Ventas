@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="****">
+
+    <!-- Zona Superior -->
+    <top>
+        <Label text="Gestión de Permisos y Roles" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-padding: 10;"/>
+    </top>
+
+    <!-- Zona Central: Botones de Navegación -->
+    <center>
+        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 20;">
+            <Button fx:id="btnGestionPermisos" text="Gestión de Permisos" styleClass="menu-button" maxWidth="300" />
+            <Button fx:id="btnGestionRoles" text="Gestión de Roles" styleClass="menu-button" maxWidth="300" />
+            <Button fx:id="btnPlantillasRoles" text="Plantillas de Permisos para Roles" styleClass="menu-button" maxWidth="300" />
+            <Button fx:id="btnPermisosUsuarios" text="Permisos Específicos para Usuarios" styleClass="menu-button" maxWidth="300" />
+        </VBox>
+    </center>
+
+</BorderPane>

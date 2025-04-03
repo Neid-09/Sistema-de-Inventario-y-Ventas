@@ -6,7 +6,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoReposit
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.impl.UsuarioServiceImpl;
-import com.novaSup.InventoryGest.InventoryGest_Backend.util.PermisoVerificacionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

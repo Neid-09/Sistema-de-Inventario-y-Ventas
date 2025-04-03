@@ -1,5 +1,6 @@
-package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
+package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
@@ -16,16 +17,15 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.novaSup.InventoryGest.MainApp.springContext;
 
-@Controller
+@Component
 public class UserControllerFX {
 
     @FXML

@@ -5,25 +5,19 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.Permisos
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
-import static com.novaSup.InventoryGest.MainApp.springContext;
-
 @Component
-public class ConfiguracionControllerFX {
-
+public class ConfigurarControllerFX {
     @FXML
     private Button btnGestionarUsuarios;
+
+    @FXML
+    private Button btnConfiguracionesGlobales;
 
     @FXML
     public void irGestionUsuarios(ActionEvent event) {
@@ -47,6 +41,29 @@ public class ConfiguracionControllerFX {
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar la gestión de usuarios: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void irConfiguracionesGlobales(ActionEvent event) {
+        // El permiso correcto es 'gestionar_configuracion' según el backend
+        if (!PermisosUIUtil.verificarPermisoConAlerta("gestionar_configuracion")) {
+            return;
+        }
+
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
+
+            if (menuController != null) {
+                menuController.cargarModuloEnPanel(PathsFXML.CONFIGURACIONES_GLOBALES);
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                        "No se pudo encontrar el controlador del menú principal");
+            }
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                    "No se pudo cargar las configuraciones globales: " + e.getMessage());
         }
     }
 

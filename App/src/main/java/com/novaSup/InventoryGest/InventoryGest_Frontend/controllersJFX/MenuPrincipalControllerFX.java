@@ -110,14 +110,24 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     public void cargarModuloEnPanel(String fxmlPath) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            System.out.println("Intentando cargar: " + fxmlPath);
+            URL recurso = getClass().getResource(fxmlPath);
+
+            if (recurso == null) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                        "Recurso no encontrado: " + fxmlPath);
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(recurso);
             loader.setControllerFactory(springContext::getBean);
             Parent contenido = loader.load();
 
-            // Limpiar y agregar el nuevo contenido
             modulosDinamicos.getChildren().clear();
             modulosDinamicos.getChildren().add(contenido);
         } catch (IOException e) {
+            System.err.println("Error al cargar " + fxmlPath + ": " + e.getMessage());
+            e.printStackTrace();
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el módulo: " + e.getMessage());
         }
