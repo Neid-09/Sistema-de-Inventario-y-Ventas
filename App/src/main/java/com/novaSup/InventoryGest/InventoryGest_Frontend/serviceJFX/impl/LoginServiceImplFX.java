@@ -98,10 +98,10 @@ public class LoginServiceImplFX implements ILoginService {
         }
 
         try {
-            // Usar el token JWT para autenticar la solicitud (se añade automáticamente en HttpClient)
+            // Usar el token JWT para autenticar la solicitud
             String response = HttpClient.get(BASE_URL + "/usuarios/mis-permisos");
 
-            // Procesar permisos
+            // Procesar permisos (incluye permisos del rol y específicos)
             JsonNode permisosNode = mapper.readTree(response);
             permisosUsuario.clear();
 

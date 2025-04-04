@@ -9,7 +9,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.PPermisosRolesCtrlFX">
     <!-- Encabezado -->
     <top>
         <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Gestión de Plantillas de Permisos para Roles" />
