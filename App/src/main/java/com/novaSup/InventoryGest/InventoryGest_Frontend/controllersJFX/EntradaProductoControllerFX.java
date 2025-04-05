@@ -1,3 +1,4 @@
+/*
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProductoFX;
@@ -67,8 +68,10 @@ public class EntradaProductoControllerFX implements Initializable {
     @FXML
     private TableColumn<EntradaProductoFX, Integer> colIdEntrada;
 
+*/
 /*    @FXML
-    private TableColumn<EntradaProductoFX, Integer> colIdProducto;*/
+    private TableColumn<EntradaProductoFX, Integer> colIdProducto;*//*
+
 
     @FXML
     private TableColumn<EntradaProductoFX, String> colNombreP;
@@ -248,3 +251,4 @@ public class EntradaProductoControllerFX implements Initializable {
         alerta.showAndWait();
     }
 }
+*/

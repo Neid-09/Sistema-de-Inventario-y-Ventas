@@ -1,3 +1,4 @@
+/*
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
@@ -117,7 +118,7 @@ public class VenderControllerFX implements Initializable {
 
         // Información de stock y precio
         Label lblStock = new Label("Stock: " + producto.getStock());
-        Label lblPrecio = new Label("Precio: " + formatoMoneda.format(producto.getPrecio()));
+        Label lblPrecio = new Label("Precio: " + formatoMoneda.format(producto.getPrecioVenta()));
 
         // Descripción (si existe)
         Label lblDescripcion = null;
@@ -166,7 +167,7 @@ public class VenderControllerFX implements Initializable {
         spCantidad.setPrefWidth(70);
 
         // Precio por unidad
-        Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecio()));
+        Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecioVenta()));
         lblPrecio.setMinWidth(80);
 
         // Botón para eliminar del carrito
@@ -185,4 +186,4 @@ public class VenderControllerFX implements Initializable {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
-}
+}*/

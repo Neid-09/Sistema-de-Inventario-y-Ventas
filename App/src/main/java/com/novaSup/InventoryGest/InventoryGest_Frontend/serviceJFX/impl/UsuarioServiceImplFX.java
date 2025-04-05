@@ -83,7 +83,7 @@ public class UsuarioServiceImplFX implements IUsuarioService {
             }
 
             String response = HttpClient.post(
-                    BASE_URL + "/registrar",
+                    BASE_URL,
                     mapper.writeValueAsString(usuarioDTO)
             );
 

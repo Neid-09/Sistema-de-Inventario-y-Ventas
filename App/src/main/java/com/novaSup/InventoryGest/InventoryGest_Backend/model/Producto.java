@@ -48,13 +48,24 @@ public class Producto {
     @Transient
     private Integer idCategoria;
 
+    @ManyToOne
+    @JoinColumn(name = "id_proveedor")
+    private Proveedor proveedor;
+
+    @Transient
+    private Integer idProveedor;
+
     @Column(nullable = false)
     private Boolean estado = true;
 
+    // Modificar el método PostLoad existente o crear uno nuevo
     @PostLoad
-    private void setIdFromCategoria() {
+    private void loadIds() {
         if (categoria != null) {
             this.idCategoria = categoria.getIdCategoria();
+        }
+        if (proveedor != null) {
+            this.idProveedor = proveedor.getIdProveedor();
         }
     }
 }

@@ -17,4 +17,10 @@ public interface ProductoService {
     Optional<Producto> actualizarStock(Integer id, Integer cantidad);
     Optional<Producto> desactivarProducto(Integer id);
     Optional<Producto> activarProducto(Integer id);
+
+    // Nuevos métodos
+    List<Producto> buscarPorFiltros(String nombre, String codigo, Integer idCategoria, Boolean estado);
+    boolean existsCodigo(String codigo);
+    List<Producto> obtenerConSobrestock();
+    boolean tieneMovimientosAsociados(Integer idProducto);
 }

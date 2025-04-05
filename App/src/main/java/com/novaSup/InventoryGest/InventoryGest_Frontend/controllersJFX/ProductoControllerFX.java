@@ -1,495 +1,659 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProductoFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
+import javafx.util.StringConverter;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
-import static com.novaSup.InventoryGest.MainApp.springContext;
 
 @Component
 public class ProductoControllerFX implements Initializable {
 
-    @Autowired
-    private IProductoService productoServiceFX; // Servicio frontend en lugar del backend
+    // Componentes FXML - campos de formulario
+    @FXML private TextField txtId;
+    @FXML private TextField txtCodigo;
+    @FXML private TextField txtNombre;
+    @FXML private TextArea txtDescripcion;
+    @FXML private TextField txtPrecioCosto;
+    @FXML private TextField txtPrecioVenta;
+    @FXML private TextField txtStock;
+    @FXML private TextField txtStockMinimo;
+    @FXML private TextField txtStockMaximo;
+    @FXML private ComboBox<CategoriaFX> cmbCategoria;
+    @FXML private ComboBox<ProveedorFX> cmbProveedor;
+    @FXML private CheckBox chkEstado;
 
-    @Autowired
-    private IEntradaProductoService entradaProductoService;
+    // Componentes FXML - filtros
+    @FXML private TextField txtFiltroNombre;
+    @FXML private TextField txtFiltroCodigo;
+    @FXML private ComboBox<CategoriaFX> cmbFiltroCategoria;
+    @FXML private ComboBox<String> cmbFiltroEstado;
 
-    @FXML
-    private Button btnActualizar;
+    // Componentes FXML - tabla
+    @FXML private TableView<ProductoFX> tablaProductos;
+    @FXML private TableColumn<ProductoFX, String> colCodigo;
+    @FXML private TableColumn<ProductoFX, String> colNombre;
+    @FXML private TableColumn<ProductoFX, String> colCategoria;
+    @FXML private TableColumn<ProductoFX, BigDecimal> colPrecioVenta;
+    @FXML private TableColumn<ProductoFX, Integer> colStock;
+    @FXML private TableColumn<ProductoFX, String> colEstado;
 
-    @FXML
-    private Button btnEliminar;
+    // Componentes FXML - otros
+    @FXML private Label lblMensaje;
+    @FXML private TextField txtCantidadMovimiento;
 
-    @FXML
-    private Button btnGuardar;
+    // Servicio
+    private final IProductoService productoService = new ProductoServiceImplFX();
 
-    @FXML
-    private Button btnLimpiar;
-
-    //Botones para control de stock
-    @FXML
-    private Button btnAumentarStock;
-
-    @FXML
-    private Button btnDisminuirStock;
-
-    @FXML
-    private TableColumn<ProductoFX, String> colDescripcion;
-
-    @FXML
-    private TableColumn<ProductoFX, Integer> colId;
-
-    @FXML
-    private TableColumn<ProductoFX, String> colNombre;
-
-    @FXML
-    private TableColumn<ProductoFX, BigDecimal> colPrecio;
-
-    @FXML
-    private TableColumn<ProductoFX, Integer> colStock;
-
-    @FXML
-    private TableView<ProductoFX> tablaProductos;
-
-    //Para añadir un movimiento en stock que + o -
-    @FXML
-    private TextField txtCantidadMovimiento;
-
-    @FXML
-    private TextArea txtDescripcion;
-
-    @FXML
-    private TextField txtId;
-
-    @FXML
-    private TextField txtNombre;
-
-    @FXML
-    private TextField txtPrecio;
-
-    @FXML
-    private TextField txtStock;
-
+    // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
+    private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
+    private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Platform.runLater(() -> {
-            Stage stage = (Stage) tablaProductos.getScene().getWindow();
-            stage.setResizable(true);
+        configurarTabla();
+        configurarCombos();
+        configurarEventos();
+        cargarDatos();
+    }
+
+    private void configurarTabla() {
+        colCodigo.setCellValueFactory(new PropertyValueFactory<>("codigo"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colCategoria.setCellValueFactory(cellData -> {
+            String categoria = cellData.getValue().getCategoria();
+            return new SimpleStringProperty(categoria != null ? categoria : "Sin categoría");
+        });
+        colPrecioVenta.setCellValueFactory(new PropertyValueFactory<>("precioVenta"));
+        colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
+        colEstado.setCellValueFactory(cellData -> {
+            Boolean estado = cellData.getValue().getEstado();
+            return new SimpleStringProperty(estado != null && estado ? "Activo" : "Inactivo");
         });
 
-        configurarColumnas();
-        cargarProductos();
-        configurarSeleccionTabla();
-
-        // Depurar permisos
-        System.out.println("¿Tiene permiso crear_productos? " + LoginServiceImplFX.tienePermiso("crear_productos"));
-
-        // Verificar si hay variación en el nombre del permiso
-        System.out.println("¿Tiene permiso crear_producto? " + LoginServiceImplFX.tienePermiso("crear_producto"));
-
-
-        // Verificar permisos para mostrar/ocultar controles según rol
-        btnGuardar.setVisible(LoginServiceImplFX.tienePermiso("crear_producto"));
-        btnActualizar.setVisible(LoginServiceImplFX.tienePermiso("editar_producto"));
-        btnEliminar.setVisible(LoginServiceImplFX.tienePermiso("eliminar_producto"));
-        btnAumentarStock.setVisible(LoginServiceImplFX.tienePermiso("registrar_entrada"));
-        btnDisminuirStock.setVisible(LoginServiceImplFX.tienePermiso("registrar_salida"));
-
-        // Hacer el campo de stock no editable
-        txtStock.setEditable(true);
-
-        // Deshabilitar botones hasta seleccionar un producto
-        btnActualizar.setDisable(true);
-        btnEliminar.setDisable(true);
-        btnAumentarStock.setDisable(true);
-        btnDisminuirStock.setDisable(true);
-    }
-
-    private void configurarColumnas() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("idProducto"));
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
-        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
-        colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
-    }
-
-    private void configurarSeleccionTabla() {
         tablaProductos.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                txtId.setText(String.valueOf(newSelection.getIdProducto()));
-                txtNombre.setText(newSelection.getNombre());
-                txtDescripcion.setText(newSelection.getDescripcion());
-                txtPrecio.setText(newSelection.getPrecio().toString());
-                txtStock.setText(String.valueOf(newSelection.getStock()));
-
-                // Bloquear edición de stock para productos existentes
-                txtStock.setEditable(false);
-
-                btnActualizar.setDisable(false);
-                btnEliminar.setDisable(false);
-                btnAumentarStock.setDisable(false);
-                btnDisminuirStock.setDisable(false);
-                btnGuardar.setDisable(true);
-            } else {
-                btnActualizar.setDisable(true);
-                btnEliminar.setDisable(true);
-                btnAumentarStock.setDisable(true);
-                btnDisminuirStock.setDisable(true);
-                btnGuardar.setDisable(false);
+                cargarProductoEnFormulario(newSelection);
             }
         });
     }
 
-    private void cargarProductos() {
-        try {
-            listaProductos.clear();
-            List<ProductoFX> productos = productoServiceFX.obtenerTodos();
-            // Filtrar solo productos activos
-            listaProductos.addAll(productos.stream()
-                    .filter(ProductoFX::getEstado)
-                    .collect(Collectors.toList()));
-            tablaProductos.setItems(listaProductos);
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al cargar productos: " + e.getMessage());
-        }
+    private void configurarCombos() {
+        // Configurar filtro de estado
+        cmbFiltroEstado.setItems(FXCollections.observableArrayList("Todos", "Activos", "Inactivos"));
+        cmbFiltroEstado.getSelectionModel().selectFirst();
+
+        // Configurar combo de categoría en formulario y en filtro
+        cmbCategoria.setConverter(new StringConverter<CategoriaFX>() {
+            @Override
+            public String toString(CategoriaFX categoria) {
+                return categoria != null ? categoria.getNombre() : "Sin categoría";
+            }
+
+            @Override
+            public CategoriaFX fromString(String string) {
+                return null; // No necesario para este caso
+            }
+        });
+
+        cmbFiltroCategoria.setConverter(new StringConverter<CategoriaFX>() {
+            @Override
+            public String toString(CategoriaFX categoria) {
+                return categoria != null ? categoria.getNombre() : "Todas las categorías";
+            }
+
+            @Override
+            public CategoriaFX fromString(String string) {
+                return null; // No necesario para este caso
+            }
+        });
+
+        // Configurar combo de proveedor
+        cmbProveedor.setConverter(new StringConverter<ProveedorFX>() {
+            @Override
+            public String toString(ProveedorFX proveedor) {
+                return proveedor != null ? proveedor.getNombre() : "Sin proveedor";
+            }
+
+            @Override
+            public ProveedorFX fromString(String string) {
+                return null; // No necesario para este caso
+            }
+        });
     }
 
     @FXML
-    void guardarProducto(ActionEvent event) {
-        try {
-            // Verificar si el usuario tiene permiso para crear productos
-            if (!LoginServiceImplFX.tienePermiso("crear_producto")) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error de permisos",
-                        "No tienes permiso para crear productos");
-                return;
+    private void configurarEventos() {
+        // Validadores numéricos para campos de precio y stock
+        txtPrecioCosto.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*(\\.\\d*)?")) {
+                txtPrecioCosto.setText(oldText);
             }
+        });
 
-            // Obtener valores de los campos
-            String nombre = txtNombre.getText().trim();
-            String descripcion = txtDescripcion.getText().trim();
-            String precioStr = txtPrecio.getText().trim();
-            String stockStr = txtStock.getText().trim();
-
-            // Validar campos obligatorios
-            if (nombre.isEmpty() || precioStr.isEmpty() || stockStr.isEmpty()) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error", "Todos los campos son obligatorios");
-                return;
+        txtPrecioVenta.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*(\\.\\d*)?")) {
+                txtPrecioVenta.setText(oldText);
             }
+        });
 
-            // Convertir a tipos numéricos
-            BigDecimal precio = new BigDecimal(precioStr);
-            Integer stock = Integer.parseInt(stockStr);
-
-            // Validar valores
-            if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error", "El precio debe ser mayor que cero");
-                return;
+        txtStock.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*")) {
+                txtStock.setText(oldText);
             }
+        });
 
-            if (stock < 0) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error", "El stock no puede ser negativo");
-                return;
+        txtStockMinimo.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*")) {
+                txtStockMinimo.setText(oldText);
             }
+        });
 
-            // Si hay stock inicial, verificar si tiene permiso para registrar entrada
-            if (stock > 0 && !LoginServiceImplFX.tienePermiso("registrar_entrada")) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error de permisos",
-                        "No tienes permiso para registrar entrada de stock");
-                return;
+        txtStockMaximo.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*")) {
+                txtStockMaximo.setText(oldText);
             }
+        });
 
-            // Guardar el producto con stock inicial 0
-            ProductoFX productoGuardado = productoServiceFX.guardar(nombre, descripcion, precio, 0);
-
-            // Si hay stock inicial, registrar un movimiento de entrada
-            if (stock > 0) {
-                entradaProductoService.registrarMovimiento(
-                        productoGuardado.getIdProducto(),
-                        stock,
-                        EntradaProductoFX.TipoMovimiento.ENTRADA,
-                        precio
-                );
+        txtCantidadMovimiento.textProperty().addListener((obs, oldText, newText) -> {
+            if (!newText.matches("\\d*")) {
+                txtCantidadMovimiento.setText(oldText);
             }
-
-            limpiarCampos();
-            cargarProductos();
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Producto guardado correctamente");
-        } catch (NumberFormatException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Formato inválido en campos numéricos");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al guardar: " + e.getMessage());
-            e.printStackTrace(); // Para ver el error completo en la consola
-        }
+        });
     }
 
     @FXML
-    void actualizarProducto(ActionEvent event) {
-        if (txtId.getText().isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Seleccione un producto para actualizar");
-            return;
-        }
+    public void cargarDatos() {
+        lblMensaje.setText("Cargando datos...");
 
-        if (validarCampos()) {
+        // Ejecutar en segundo plano para no bloquear la UI
+        new Thread(() -> {
             try {
-                Integer id = Integer.parseInt(txtId.getText());
-                String nombre = txtNombre.getText();
-                String descripcion = txtDescripcion.getText();
-                BigDecimal precio = new BigDecimal(txtPrecio.getText());
+                // Cargar productos
+                List<ProductoFX> productos = productoService.obtenerTodos();
+                listaProductos.clear();
+                listaProductos.addAll(productos);
 
-                // Obtener el stock actual del producto en la base de datos
-                ProductoFX productoActual = tablaProductos.getSelectionModel().getSelectedItem();
-                Integer stock = productoActual.getStock();
+                // Cargar categorías
+                List<CategoriaFX> categorias = productoService.obtenerCategorias();
 
-                productoServiceFX.actualizar(id, nombre, descripcion, precio, stock);
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Producto actualizado correctamente");
+                // Añadir opción "Sin categoría"
+                CategoriaFX sinCategoria = new CategoriaFX(null, "Sin categoría", "Productos sin categoría asignada", true);
 
-                limpiarCampos(null);
-                cargarProductos();
+                // Cargar proveedores
+                List<ProveedorFX> proveedores = productoService.obtenerProveedores();
+
+                // Añadir opción "Sin proveedor"
+                ProveedorFX sinProveedor = new ProveedorFX(null, "Sin proveedor", null, null, null, null);
+
+                // Actualizar UI en el hilo de JavaFX
+                Platform.runLater(() -> {
+                    tablaProductos.setItems(listaProductos);
+
+                    // Actualizar combos de categoría
+                    listaCategorias.clear();
+                    listaCategorias.add(sinCategoria);
+                    listaCategorias.addAll(categorias);
+
+                    cmbCategoria.setItems(listaCategorias);
+                    cmbCategoria.getSelectionModel().selectFirst();
+
+                    // También para el filtro pero con una opción para "Todas"
+                    ObservableList<CategoriaFX> categoriasConTodas = FXCollections.observableArrayList();
+                    CategoriaFX todasCategorias = new CategoriaFX(null, "Todas las categorías", "", true);
+                    categoriasConTodas.add(todasCategorias);
+                    categoriasConTodas.addAll(categorias);
+
+                    cmbFiltroCategoria.setItems(categoriasConTodas);
+                    cmbFiltroCategoria.getSelectionModel().selectFirst();
+
+                    // Actualizar combo de proveedor
+                    listaProveedores.clear();
+                    listaProveedores.add(sinProveedor);
+                    listaProveedores.addAll(proveedores);
+
+                    cmbProveedor.setItems(listaProveedores);
+                    cmbProveedor.getSelectionModel().selectFirst();
+
+                    lblMensaje.setText("");
+                });
             } catch (Exception e) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al actualizar: " + e.getMessage());
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Error al cargar datos: " + e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudieron cargar los datos", e.getMessage());
+                });
             }
-        }
+        }).start();
     }
 
     @FXML
-    void eliminarProducto(ActionEvent event) {
-        if (txtId.getText().isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Seleccione un producto para desactivar");
-            return;
+    public void buscarProductos() {
+        lblMensaje.setText("Buscando productos...");
+
+        String nombre = txtFiltroNombre.getText().trim();
+        String codigo = txtFiltroCodigo.getText().trim();
+
+        // Obtener categoría seleccionada
+        CategoriaFX categoriaSeleccionada = cmbFiltroCategoria.getSelectionModel().getSelectedItem();
+        Integer idCategoria = (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null) ?
+                categoriaSeleccionada.getIdCategoria() : null;
+
+        // Obtener estado seleccionado
+        String estadoSeleccionado = cmbFiltroEstado.getSelectionModel().getSelectedItem();
+        Boolean estado = null;
+        if ("Activos".equals(estadoSeleccionado)) {
+            estado = true;
+        } else if ("Inactivos".equals(estadoSeleccionado)) {
+            estado = false;
         }
 
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Confirmar desactivación");
-        confirmacion.setHeaderText(null);
-        confirmacion.setContentText("¿Está seguro que desea desactivar este producto?\n\nEl producto no se eliminará permanentemente, solo quedará oculto y se preservará el historial de movimientos.");
+        // Guardar en variables finales para usar en el hilo
+        final Integer idCategoriaFinal = idCategoria;
+        final Boolean estadoFinal = estado;
 
-        if (confirmacion.showAndWait().get() == ButtonType.OK) {
+        // Ejecutar en segundo plano
+        new Thread(() -> {
             try {
-                Integer id = Integer.parseInt(txtId.getText());
-                productoServiceFX.desactivarProducto(id);
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Producto desactivado correctamente");
+                List<ProductoFX> productos = productoService.filtrarProductos(
+                        nombre.isEmpty() ? null : nombre,
+                        codigo.isEmpty() ? null : codigo,
+                        idCategoriaFinal,
+                        estadoFinal);
 
-                limpiarCampos();
-                cargarProductos();
+                Platform.runLater(() -> {
+                    listaProductos.clear();
+                    listaProductos.addAll(productos);
+                    lblMensaje.setText("");
+                });
             } catch (Exception e) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al desactivar: " + e.getMessage());
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Error al buscar: " + e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo realizar la búsqueda", e.getMessage());
+                });
             }
-        }
+        }).start();
     }
 
     @FXML
-    void limpiarCampos(ActionEvent event) {
+    public void limpiarCampos() {
         txtId.clear();
+        txtCodigo.clear();
         txtNombre.clear();
         txtDescripcion.clear();
-        txtPrecio.clear();
+        txtPrecioCosto.clear();
+        txtPrecioVenta.clear();
         txtStock.clear();
+        txtStockMinimo.clear();
+        txtStockMaximo.clear();
+        chkEstado.setSelected(true);
+        cmbCategoria.getSelectionModel().selectFirst(); // "Sin categoría"
+        cmbProveedor.getSelectionModel().selectFirst(); // "Sin proveedor"
         txtCantidadMovimiento.clear();
-
-        // Habilitar edición de stock para productos nuevos
-        txtStock.setEditable(true);
-        btnGuardar.setDisable(false);
-
         tablaProductos.getSelectionModel().clearSelection();
-
-        btnActualizar.setDisable(true);
-        btnEliminar.setDisable(true);
-        btnAumentarStock.setDisable(true);
-        btnDisminuirStock.setDisable(true);
+        lblMensaje.setText("");
     }
 
-    void limpiarCampos() {
-        limpiarCampos(null);
+    private void cargarProductoEnFormulario(ProductoFX producto) {
+        txtId.setText(producto.getIdProducto() != null ? producto.getIdProducto().toString() : "");
+        txtCodigo.setText(producto.getCodigo());
+        txtNombre.setText(producto.getNombre());
+        txtDescripcion.setText(producto.getDescripcion());
+        txtPrecioCosto.setText(producto.getPrecioCosto() != null ? producto.getPrecioCosto().toString() : "");
+        txtPrecioVenta.setText(producto.getPrecioVenta() != null ? producto.getPrecioVenta().toString() : "");
+        txtStock.setText(producto.getStock() != null ? producto.getStock().toString() : "");
+        txtStockMinimo.setText(producto.getStockMinimo() != null ? producto.getStockMinimo().toString() : "");
+        txtStockMaximo.setText(producto.getStockMaximo() != null ? producto.getStockMaximo().toString() : "");
+        chkEstado.setSelected(producto.getEstado() != null && producto.getEstado());
+
+        // Seleccionar categoría correcta
+        Integer idCategoria = producto.getIdCategoria();
+        if (idCategoria != null) {
+            for (CategoriaFX categoria : cmbCategoria.getItems()) {
+                if (categoria.getIdCategoria() != null && categoria.getIdCategoria().equals(idCategoria)) {
+                    cmbCategoria.getSelectionModel().select(categoria);
+                    break;
+                }
+            }
+        } else {
+            cmbCategoria.getSelectionModel().selectFirst(); // Sin categoría
+        }
+
+        // Seleccionar proveedor correcto
+        Integer idProveedor = producto.getIdProveedor();
+        if (idProveedor != null) {
+            for (ProveedorFX proveedor : cmbProveedor.getItems()) {
+                if (proveedor.getIdProveedor() != null && proveedor.getIdProveedor().equals(idProveedor)) {
+                    cmbProveedor.getSelectionModel().select(proveedor);
+                    break;
+                }
+            }
+        } else {
+            cmbProveedor.getSelectionModel().selectFirst(); // Sin proveedor
+        }
+    }
+
+    @FXML
+    public void guardarProducto() {
+        if (!validarCampos()) {
+            return;
+        }
+
+        // Crear objeto de producto
+        ProductoFX producto = obtenerProductoDesdeFormulario();
+
+        // Ejecutar en segundo plano
+        new Thread(() -> {
+            try {
+                // Verificar si el código ya existe
+                if (producto.getIdProducto() == null &&
+                        productoService.existeCodigo(producto.getCodigo(), null)) {
+                    Platform.runLater(() -> {
+                        lblMensaje.setText("El código ya existe. Por favor, use otro.");
+                    });
+                    return;
+                }
+
+                // Guardar producto
+                ProductoFX productoGuardado = productoService.guardar(producto);
+
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Producto guardado correctamente.");
+                    cargarDatos();
+                    limpiarCampos();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Error al guardar: " + e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo guardar el producto", e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    @FXML
+    public void actualizarProducto() {
+        if (txtId.getText().isEmpty()) {
+            lblMensaje.setText("Debe seleccionar un producto para actualizar.");
+            return;
+        }
+
+        if (!validarCampos()) {
+            return;
+        }
+
+        ProductoFX producto = obtenerProductoDesdeFormulario();
+
+        // Ejecutar en segundo plano
+        new Thread(() -> {
+            try {
+                // Verificar si el código ya existe (excluyendo el ID actual)
+                if (productoService.existeCodigo(producto.getCodigo(), producto.getIdProducto())) {
+                    Platform.runLater(() -> {
+                        lblMensaje.setText("El código ya está en uso por otro producto.");
+                    });
+                    return;
+                }
+
+                // Actualizar producto
+                ProductoFX productoActualizado = productoService.actualizar(producto);
+
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Producto actualizado correctamente.");
+                    cargarDatos();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Error al actualizar: " + e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo actualizar el producto", e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    @FXML
+    public void eliminarProducto() {
+        if (txtId.getText().isEmpty()) {
+            lblMensaje.setText("Debe seleccionar un producto para eliminar.");
+            return;
+        }
+
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+        alerta.setTitle("Confirmar eliminación");
+        alerta.setHeaderText("¿Está seguro de eliminar este producto?");
+        alerta.setContentText("Esta acción no se puede deshacer.");
+
+        Optional<ButtonType> resultado = alerta.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            Integer id = Integer.parseInt(txtId.getText());
+
+            // Ejecutar en segundo plano
+            new Thread(() -> {
+                try {
+                    productoService.eliminar(id);
+
+                    Platform.runLater(() -> {
+                        lblMensaje.setText("Producto eliminado correctamente.");
+                        cargarDatos();
+                        limpiarCampos();
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        lblMensaje.setText("Error al eliminar: " + e.getMessage());
+                        mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo eliminar el producto", e.getMessage());
+                    });
+                }
+            }).start();
+        }
+    }
+
+    @FXML
+    public void aumentarStock() {
+        if (txtId.getText().isEmpty()) {
+            lblMensaje.setText("Debe seleccionar un producto para aumentar stock.");
+            return;
+        }
+
+        if (txtCantidadMovimiento.getText().isEmpty()) {
+            lblMensaje.setText("Debe ingresar una cantidad.");
+            return;
+        }
+
+        Integer id = Integer.parseInt(txtId.getText());
+        Integer cantidad = Integer.parseInt(txtCantidadMovimiento.getText());
+
+        // Ejecutar en segundo plano
+        new Thread(() -> {
+            try {
+                ProductoFX productoActualizado = productoService.actualizarStock(id, cantidad);
+
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Stock aumentado correctamente.");
+                    cargarProductoEnFormulario(productoActualizado);
+                    txtCantidadMovimiento.clear();
+                    cargarDatos();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Error al aumentar stock: " + e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo aumentar el stock", e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    @FXML
+    public void disminuirStock() {
+        if (txtId.getText().isEmpty()) {
+            lblMensaje.setText("Debe seleccionar un producto para disminuir stock.");
+            return;
+        }
+
+        if (txtCantidadMovimiento.getText().isEmpty()) {
+            lblMensaje.setText("Debe ingresar una cantidad.");
+            return;
+        }
+
+        Integer id = Integer.parseInt(txtId.getText());
+        Integer cantidad = -Integer.parseInt(txtCantidadMovimiento.getText()); // Negativo para disminuir
+
+        // Ejecutar en segundo plano
+        new Thread(() -> {
+            try {
+                ProductoFX productoActualizado = productoService.actualizarStock(id, cantidad);
+
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Stock disminuido correctamente.");
+                    cargarProductoEnFormulario(productoActualizado);
+                    txtCantidadMovimiento.clear();
+                    cargarDatos();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    lblMensaje.setText("Error al disminuir stock: " + e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo disminuir el stock", e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    @FXML
+    public void mostrarDetalles() {
+        ProductoFX seleccionado = tablaProductos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            lblMensaje.setText("Debe seleccionar un producto para ver detalles.");
+            return;
+        }
+
+        StringBuilder detalles = new StringBuilder();
+        detalles.append("ID: ").append(seleccionado.getIdProducto()).append("\n");
+        detalles.append("Código: ").append(seleccionado.getCodigo()).append("\n");
+        detalles.append("Nombre: ").append(seleccionado.getNombre()).append("\n");
+        detalles.append("Descripción: ").append(seleccionado.getDescripcion()).append("\n");
+        detalles.append("Precio Costo: ").append(seleccionado.getPrecioCosto()).append("\n");
+        detalles.append("Precio Venta: ").append(seleccionado.getPrecioVenta()).append("\n");
+        detalles.append("Stock: ").append(seleccionado.getStock()).append("\n");
+        detalles.append("Stock Mínimo: ").append(seleccionado.getStockMinimo()).append("\n");
+        detalles.append("Stock Máximo: ").append(seleccionado.getStockMaximo()).append("\n");
+        detalles.append("Categoría: ").append(seleccionado.getCategoria() != null ? seleccionado.getCategoria() : "Sin categoría").append("\n");
+        detalles.append("Proveedor: ").append(seleccionado.getProveedor() != null ? seleccionado.getProveedor() : "Sin proveedor").append("\n");
+        detalles.append("Estado: ").append(seleccionado.getEstado() != null && seleccionado.getEstado() ? "Activo" : "Inactivo");
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Detalles del Producto");
+        alert.setHeaderText("Información completa del producto");
+        alert.setContentText(detalles.toString());
+        alert.showAndWait();
     }
 
     private boolean validarCampos() {
         StringBuilder errores = new StringBuilder();
 
-        if (txtNombre.getText().trim().isEmpty()) {
-            errores.append("- El nombre es requerido\n");
+        if (txtCodigo.getText().isEmpty()) {
+            errores.append("El código es obligatorio.\n");
         }
 
-        if (txtPrecio.getText().trim().isEmpty()) {
-            errores.append("- El precio es requerido\n");
-        } else {
-            try {
-                BigDecimal precio = new BigDecimal(txtPrecio.getText());
-                if (precio.compareTo(BigDecimal.ZERO) < 0) {
-                    errores.append("- El precio no puede ser negativo\n");
-                }
-            } catch (NumberFormatException e) {
-                errores.append("- El precio debe ser un número válido\n");
-            }
+        if (txtNombre.getText().isEmpty()) {
+            errores.append("El nombre es obligatorio.\n");
         }
 
-        // Solo validar stock si es un producto nuevo (sin ID)
-        if (txtId.getText().isEmpty()) {
-            if (txtStock.getText().trim().isEmpty()) {
-                errores.append("- El stock inicial es requerido\n");
-            } else {
-                try {
-                    int stock = Integer.parseInt(txtStock.getText());
-                    if (stock < 0) {
-                        errores.append("- El stock no puede ser negativo\n");
-                    }
-                } catch (NumberFormatException e) {
-                    errores.append("- El stock debe ser un número entero\n");
-                }
-            }
+        if (txtPrecioCosto.getText().isEmpty()) {
+            errores.append("El precio de costo es obligatorio.\n");
+        }
+
+        if (txtPrecioVenta.getText().isEmpty()) {
+            errores.append("El precio de venta es obligatorio.\n");
+        }
+
+        if (txtStock.getText().isEmpty()) {
+            errores.append("El stock es obligatorio.\n");
         }
 
         if (errores.length() > 0) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Validación", "Por favor corrija los siguientes errores:\n" + errores.toString());
+            lblMensaje.setText(errores.toString());
             return false;
         }
 
         return true;
     }
 
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
+    private ProductoFX obtenerProductoDesdeFormulario() {
+        ProductoFX producto = new ProductoFX();
+
+        if (!txtId.getText().isEmpty()) {
+            producto.setIdProducto(Integer.parseInt(txtId.getText()));
+        }
+
+        producto.setCodigo(txtCodigo.getText());
+        producto.setNombre(txtNombre.getText());
+        producto.setDescripcion(txtDescripcion.getText());
+
+        if (!txtPrecioCosto.getText().isEmpty()) {
+            producto.setPrecioCosto(new BigDecimal(txtPrecioCosto.getText()));
+        }
+
+        if (!txtPrecioVenta.getText().isEmpty()) {
+            producto.setPrecioVenta(new BigDecimal(txtPrecioVenta.getText()));
+        }
+
+        if (!txtStock.getText().isEmpty()) {
+            producto.setStock(Integer.parseInt(txtStock.getText()));
+        }
+
+        if (!txtStockMinimo.getText().isEmpty()) {
+            producto.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
+        }
+
+        if (!txtStockMaximo.getText().isEmpty()) {
+            producto.setStockMaximo(Integer.parseInt(txtStockMaximo.getText()));
+        }
+
+        producto.setEstado(chkEstado.isSelected());
+
+        // Configurar categoría (puede ser null)
+        CategoriaFX categoriaSeleccionada = cmbCategoria.getSelectionModel().getSelectedItem();
+        if (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null) {
+            producto.setIdCategoria(categoriaSeleccionada.getIdCategoria());
+            producto.setCategoria(categoriaSeleccionada.getNombre());
+        } else {
+            producto.setIdCategoria(null);
+            producto.setCategoria(null);
+        }
+
+        // Configurar proveedor (puede ser null)
+        ProveedorFX proveedorSeleccionado = cmbProveedor.getSelectionModel().getSelectedItem();
+        if (proveedorSeleccionado != null && proveedorSeleccionado.getIdProveedor() != null) {
+            producto.setIdProveedor(proveedorSeleccionado.getIdProveedor());
+            producto.setProveedor(proveedorSeleccionado.getNombre());
+        } else {
+            producto.setIdProveedor(null);
+            producto.setProveedor(null);
+        }
+
+        return producto;
+    }
+
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String header, String mensaje) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
+        alerta.setHeaderText(header);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
-
-    //Para control de stock
-    @FXML
-    void aumentarStock(ActionEvent event) {
-        if (txtId.getText().isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Seleccione un producto primero");
-            return;
-        }
-
-        if (txtCantidadMovimiento.getText().isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Ingrese la cantidad a aumentar");
-            return;
-        }
-
-        try {
-            Integer idProducto = Integer.parseInt(txtId.getText());
-            Integer cantidad = Integer.parseInt(txtCantidadMovimiento.getText());
-
-            // Obtener el precio del producto seleccionado
-            ProductoFX productoSeleccionado = tablaProductos.getSelectionModel().getSelectedItem();
-            BigDecimal precioUnitario = productoSeleccionado.getPrecio();
-
-            if (cantidad <= 0) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "La cantidad debe ser mayor a cero");
-                return;
-            }
-
-            // Registrar el movimiento
-            entradaProductoService.registrarMovimiento(idProducto, cantidad, EntradaProductoFX.TipoMovimiento.ENTRADA, precioUnitario);
-
-            // Actualizar la tabla de productos
-            cargarProductos();
-
-            // Seleccionar el producto actualizado
-            tablaProductos.getItems().stream()
-                    .filter(p -> p.getIdProducto().equals(idProducto))
-                    .findFirst()
-                    .ifPresent(p -> {
-                        tablaProductos.getSelectionModel().select(p);
-                        tablaProductos.scrollTo(p);
-                        txtStock.setText(p.getStock().toString());
-                    });
-
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Stock aumentado correctamente");
-            txtCantidadMovimiento.clear();
-        } catch (NumberFormatException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "La cantidad debe ser un número entero");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al aumentar stock: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void disminuirStock(ActionEvent event) {
-        if (txtId.getText().isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Seleccione un producto primero");
-            return;
-        }
-
-        if (txtCantidadMovimiento.getText().isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "Ingrese la cantidad a disminuir");
-            return;
-        }
-
-        try {
-            Integer idProducto = Integer.parseInt(txtId.getText());
-            Integer cantidad = Integer.parseInt(txtCantidadMovimiento.getText());
-            Integer stockActual = Integer.parseInt(txtStock.getText());
-
-            // Obtener el precio del producto seleccionado
-            ProductoFX productoSeleccionado = tablaProductos.getSelectionModel().getSelectedItem();
-            BigDecimal precioUnitario = productoSeleccionado.getPrecio();
-
-            if (cantidad <= 0) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia", "La cantidad debe ser mayor a cero");
-                return;
-            }
-
-            if (cantidad > stockActual) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Advertencia",
-                        "No hay suficiente stock. Stock actual: " + stockActual);
-                return;
-            }
-
-            // Registrar el movimiento
-            entradaProductoService.registrarMovimiento(idProducto, cantidad, EntradaProductoFX.TipoMovimiento.SALIDA, precioUnitario);
-
-            // Actualizar la tabla de productos
-            cargarProductos();
-
-            // Seleccionar el producto actualizado
-            tablaProductos.getItems().stream()
-                    .filter(p -> p.getIdProducto().equals(idProducto))
-                    .findFirst()
-                    .ifPresent(p -> {
-                        tablaProductos.getSelectionModel().select(p);
-                        tablaProductos.scrollTo(p);
-                        txtStock.setText(p.getStock().toString());
-                    });
-
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Stock disminuido correctamente");
-            txtCantidadMovimiento.clear();
-        } catch (NumberFormatException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "La cantidad debe ser un número entero");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al disminuir stock: " + e.getMessage());
-        }
-    }
-
-
 }
