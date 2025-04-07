@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -20,7 +21,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/entradas")
+@RequestMapping("/api/entradas")
+@CrossOrigin("*")
 public class EntradaProductoController {
 
     @Autowired
@@ -33,23 +35,25 @@ public class EntradaProductoController {
     private ProveedorService proveedorService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_entradas_productos')")
     public ResponseEntity<List<EntradaProducto>> obtenerTodasLasEntradas() {
         return ResponseEntity.ok(entradaProductoService.obtenerTodas());
     }
 
     @GetMapping("/producto/{idProducto}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_entradas_productos')")
     public ResponseEntity<List<EntradaProducto>> obtenerPorProducto(@PathVariable Integer idProducto) {
         return ResponseEntity.ok(entradaProductoService.obtenerPorProducto(idProducto));
     }
 
     @GetMapping("/fecha")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_entradas_productos')")
     public ResponseEntity<List<EntradaProducto>> obtenerPorFecha(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
 
         List<EntradaProducto> entradas = entradaProductoService.obtenerTodas();
 
-        // Filtrar por fechas si se proporcionaron
         if (desde != null) {
             entradas = entradas.stream()
                     .filter(e -> e.getFecha().toLocalDate().isEqual(desde) || e.getFecha().toLocalDate().isAfter(desde))
@@ -66,6 +70,7 @@ public class EntradaProductoController {
     }
 
     @GetMapping("/tipo/{tipo}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_entradas_productos')")
     public ResponseEntity<List<EntradaProducto>> obtenerPorTipo(@PathVariable String tipo) {
         List<EntradaProducto> entradas = entradaProductoService.obtenerTodas().stream()
                 .filter(e -> e.getTipoMovimiento().equalsIgnoreCase(tipo))
@@ -75,6 +80,7 @@ public class EntradaProductoController {
     }
 
     @GetMapping("/filtro")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_entradas_productos')")
     public ResponseEntity<List<EntradaProducto>> obtenerFiltrados(
             @RequestParam(required = false) Integer idProducto,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
@@ -83,7 +89,6 @@ public class EntradaProductoController {
 
         List<EntradaProducto> entradas = entradaProductoService.obtenerTodas();
 
-        // Aplicar filtros según parámetros recibidos
         if (idProducto != null) {
             entradas = entradas.stream()
                     .filter(e -> e.getProducto().getIdProducto().equals(idProducto))
@@ -112,6 +117,7 @@ public class EntradaProductoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('registrar_entrada_producto')")
     public ResponseEntity<EntradaProducto> registrarMovimiento(@RequestBody MovimientoDTO movimientoDTO) {
         Optional<Producto> productoOpt = productoService.obtenerPorId(movimientoDTO.idProducto);
 
@@ -127,14 +133,12 @@ public class EntradaProductoController {
         entrada.setTipoMovimiento(movimientoDTO.tipoMovimiento);
         entrada.setMotivo(movimientoDTO.motivo);
 
-        // Asignar proveedor si es una entrada
         if ("ENTRADA".equalsIgnoreCase(movimientoDTO.tipoMovimiento) && movimientoDTO.idProveedor != null) {
             Proveedor proveedor = proveedorService.obtenerPorId(movimientoDTO.idProveedor)
                     .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
             entrada.setProveedor(proveedor);
         }
 
-        // Usar precio específico según el tipo de movimiento
         if (movimientoDTO.precioUnitario != null) {
             entrada.setPrecioUnitario(movimientoDTO.precioUnitario);
         } else {
@@ -145,31 +149,28 @@ public class EntradaProductoController {
             }
         }
 
-        // Actualizar stock del producto
         if ("ENTRADA".equalsIgnoreCase(movimientoDTO.tipoMovimiento)) {
             producto.setStock(producto.getStock() + movimientoDTO.cantidad);
         } else if ("SALIDA".equalsIgnoreCase(movimientoDTO.tipoMovimiento)) {
             int nuevoStock = producto.getStock() - movimientoDTO.cantidad;
             if (nuevoStock < 0) {
-                return ResponseEntity.badRequest().build(); // No hay suficiente stock
+                return ResponseEntity.badRequest().build();
             }
             producto.setStock(nuevoStock);
         }
 
-        productoService.guardar(producto); // Actualizar producto
+        productoService.guardar(producto);
         EntradaProducto entradaGuardada = entradaProductoService.guardar(entrada);
 
         return new ResponseEntity<>(entradaGuardada, HttpStatus.CREATED);
     }
 
-    // Clase DTO para recibir los datos de movimiento
-// Actualizar MovimientoDTO
     private static class MovimientoDTO {
         public Integer idProducto;
-        public Integer idProveedor; // Nuevo campo
+        public Integer idProveedor;
         public Integer cantidad;
         public String tipoMovimiento;
         public BigDecimal precioUnitario;
-        public String motivo; // Nuevo campo
+        public String motivo;
     }
 }

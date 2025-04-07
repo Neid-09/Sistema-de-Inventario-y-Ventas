@@ -39,18 +39,26 @@ public class CustomUserDetailsService implements UserDetailsService {
             });
         }
 
-        // Añadir permisos personalizados - ASEGURARSE DE QUE ESTA SECCIÓN ESTÉ FUNCIONANDO
+        // Añadir permisos personalizados
         if (usuario.getPermisosPersonalizados() != null) {
             usuario.getPermisosPersonalizados().forEach(permiso -> {
                 authorities.add(new SimpleGrantedAuthority(permiso.getNombre()));
             });
         }
 
-        // Log para verificar qué permisos se están agregando
+        // Log para verificar permisos
         System.out.println("Usuario: " + usuario.getNombre() + " tiene los siguientes permisos:");
         authorities.forEach(auth -> System.out.println(auth.getAuthority()));
 
-        return new User(usuario.getCorreo(), usuario.getContraseña(), authorities);
+        // Retornar CustomUserDetails en lugar de User
+        return new CustomUserDetails(
+                usuario.getCorreo(),
+                usuario.getContraseña(),
+                authorities,
+                usuario.getIdUsuario(),
+                true  // Asumiendo que todos los usuarios están activos por defecto
+                //A FUTURO IMPLEMENTAR USUARIOS ACTIVOS O NO ACTIVOS.
+        );
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Usuario usuario) {

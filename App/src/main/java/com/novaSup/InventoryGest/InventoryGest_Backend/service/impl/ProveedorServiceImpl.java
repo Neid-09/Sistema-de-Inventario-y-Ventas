@@ -35,4 +35,10 @@ public class ProveedorServiceImpl implements ProveedorService {
     public void eliminar(Integer id) {
         proveedorRepository.deleteById(id);
     }
+
+    // ProveedorServiceImpl.java
+    @Override
+    public List<Proveedor> buscarPorNombreOCorreo(String termino) {
+        return proveedorRepository.findByNombreContainingIgnoreCaseOrCorreoContainingIgnoreCase(termino, termino);
+    }
 }

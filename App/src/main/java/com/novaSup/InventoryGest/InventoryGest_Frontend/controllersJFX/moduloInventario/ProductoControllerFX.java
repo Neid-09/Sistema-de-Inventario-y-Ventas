@@ -1,4 +1,4 @@
-package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
+package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
@@ -39,6 +39,10 @@ public class ProductoControllerFX implements Initializable {
     @FXML private ComboBox<ProveedorFX> cmbProveedor;
     @FXML private CheckBox chkEstado;
 
+    //Componentes FXNL - Botones
+    @FXML private Button btnGuardar;
+    @FXML private Button btnActualizar;
+
     // Componentes FXML - filtros
     @FXML private TextField txtFiltroNombre;
     @FXML private TextField txtFiltroCodigo;
@@ -71,6 +75,11 @@ public class ProductoControllerFX implements Initializable {
         configurarTabla();
         configurarCombos();
         configurarEventos();
+
+        // Inicializar estado de botones
+        btnActualizar.setDisable(true);
+        btnGuardar.setDisable(false);
+
         cargarDatos();
     }
 
@@ -195,7 +204,7 @@ public class ProductoControllerFX implements Initializable {
                 List<CategoriaFX> categorias = productoService.obtenerCategorias();
 
                 // Añadir opción "Sin categoría"
-                CategoriaFX sinCategoria = new CategoriaFX(null, "Sin categoría", "Productos sin categoría asignada", true);
+                CategoriaFX sinCategoria = new CategoriaFX(null, "Sin categoría", "Productos sin categoría asignada", true, 0);
 
                 // Cargar proveedores
                 List<ProveedorFX> proveedores = productoService.obtenerProveedores();
@@ -217,7 +226,7 @@ public class ProductoControllerFX implements Initializable {
 
                     // También para el filtro pero con una opción para "Todas"
                     ObservableList<CategoriaFX> categoriasConTodas = FXCollections.observableArrayList();
-                    CategoriaFX todasCategorias = new CategoriaFX(null, "Todas las categorías", "", true);
+                    CategoriaFX todasCategorias = new CategoriaFX(null, "Todas las categorías", "", true, null);
                     categoriasConTodas.add(todasCategorias);
                     categoriasConTodas.addAll(categorias);
 
@@ -308,6 +317,13 @@ public class ProductoControllerFX implements Initializable {
         txtCantidadMovimiento.clear();
         tablaProductos.getSelectionModel().clearSelection();
         lblMensaje.setText("");
+
+        // Habilitar stock para nuevo producto
+        txtStock.setEditable(true);
+
+        // Configurar botones para modo "nuevo producto"
+        btnGuardar.setDisable(false);
+        btnActualizar.setDisable(true);
     }
 
     private void cargarProductoEnFormulario(ProductoFX producto) {
@@ -321,6 +337,13 @@ public class ProductoControllerFX implements Initializable {
         txtStockMinimo.setText(producto.getStockMinimo() != null ? producto.getStockMinimo().toString() : "");
         txtStockMaximo.setText(producto.getStockMaximo() != null ? producto.getStockMaximo().toString() : "");
         chkEstado.setSelected(producto.getEstado() != null && producto.getEstado());
+
+        // Hacer que el stock no sea editable para productos existentes
+        txtStock.setEditable(false);
+
+        // Configurar botones para modo "edición de producto"
+        btnGuardar.setDisable(true);
+        btnActualizar.setDisable(false);
 
         // Seleccionar categoría correcta
         Integer idCategoria = producto.getIdCategoria();
@@ -400,11 +423,27 @@ public class ProductoControllerFX implements Initializable {
 
         ProductoFX producto = obtenerProductoDesdeFormulario();
 
+        // Obtener el producto original de la tabla para comparar
+        ProductoFX productoOriginal = null;
+        for (ProductoFX p : listaProductos) {
+            if (p.getIdProducto().equals(producto.getIdProducto())) {
+                productoOriginal = p;
+                break;
+            }
+        }
+
+        // Guardar referencia al producto para usar en el hilo
+        final ProductoFX productoFinal = producto;
+        final ProductoFX productoOriginalFinal = productoOriginal;
+
         // Ejecutar en segundo plano
         new Thread(() -> {
             try {
-                // Verificar si el código ya existe (excluyendo el ID actual)
-                if (productoService.existeCodigo(producto.getCodigo(), producto.getIdProducto())) {
+                // Solo verificar el código si ha cambiado
+                boolean codigoModificado = productoOriginalFinal != null &&
+                        !productoOriginalFinal.getCodigo().equals(productoFinal.getCodigo());
+
+                if (codigoModificado && productoService.existeCodigo(productoFinal.getCodigo(), productoFinal.getIdProducto())) {
                     Platform.runLater(() -> {
                         lblMensaje.setText("El código ya está en uso por otro producto.");
                     });
@@ -412,7 +451,7 @@ public class ProductoControllerFX implements Initializable {
                 }
 
                 // Actualizar producto
-                ProductoFX productoActualizado = productoService.actualizar(producto);
+                ProductoFX productoActualizado = productoService.actualizar(productoFinal);
 
                 Platform.runLater(() -> {
                     lblMensaje.setText("Producto actualizado correctamente.");

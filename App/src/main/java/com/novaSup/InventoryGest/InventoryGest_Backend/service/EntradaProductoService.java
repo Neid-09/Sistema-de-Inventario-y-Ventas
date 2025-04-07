@@ -8,4 +8,5 @@ public interface EntradaProductoService {
     List<EntradaProducto> obtenerTodas();
     List<EntradaProducto> obtenerPorProducto(Integer idProducto);
     EntradaProducto guardar(EntradaProducto entradaProducto);
+    boolean existsEntradaByProductoId(Integer idProducto);
 }

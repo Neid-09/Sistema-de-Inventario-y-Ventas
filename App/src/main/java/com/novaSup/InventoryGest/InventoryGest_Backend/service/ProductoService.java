@@ -23,4 +23,5 @@ public interface ProductoService {
     boolean existsCodigo(String codigo);
     List<Producto> obtenerConSobrestock();
     boolean tieneMovimientosAsociados(Integer idProducto);
+    List<Producto> obtenerPorProveedor(Integer idProveedor);
 }

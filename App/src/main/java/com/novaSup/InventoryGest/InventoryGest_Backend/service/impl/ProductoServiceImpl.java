@@ -1,21 +1,21 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.EntradaProducto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Proveedor;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.CategoriaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.EntradaProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,6 +33,12 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Autowired
     private EntradaProductoService entradaProductoService;
+
+    @Autowired
+    private NotificacionServiceImpl notificacionService;
+
+    @Autowired
+    private PromocionService promocionService;
 
     @Override
     public List<Producto> obtenerTodos() {
@@ -120,10 +126,10 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public boolean tieneMovimientosAsociados(Integer idProducto) {
-        // Aquí implementarías la lógica para verificar si el producto
-        // tiene ventas, entradas u otros movimientos asociados
-        // Para simplificar, asumimos que existe un método en algún servicio
-        return false; // Por ahora retornamos false
+        // Verificar en ventas, entradas, etc.
+        return entradaProductoService.existsEntradaByProductoId(idProducto) ||
+                // Aquí agregarías más validaciones cuando tengas servicios de ventas, etc.
+                false;
     }
 
     @Override
@@ -141,25 +147,25 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
-    @Transactional
-    public Optional<Producto> actualizarStock(Integer id, Integer cantidad) {
-        return productoRepository.findById(id).map(producto -> {
-            // Actualizar stock
-            int nuevoStock = producto.getStock() + cantidad;
-            producto.setStock(nuevoStock);
-            Producto productoActualizado = productoRepository.save(producto);
+    public Optional<Producto> actualizarStock(Integer idProducto, Integer nuevoStock) {
+        return obtenerPorId(idProducto)
+                .map(producto -> {
+                    producto.setStock(nuevoStock);
+                    Producto productoActualizado = guardar(producto);
 
-            // Registrar entrada/salida
-            EntradaProducto entrada = new EntradaProducto();
-            entrada.setProducto(producto);
-            entrada.setCantidad(cantidad);
-            entrada.setFecha(LocalDateTime.now());
-            entrada.setTipoMovimiento(cantidad > 0 ? "ENTRADA" : "SALIDA");
-            entrada.setPrecioUnitario(cantidad > 0 ? producto.getPrecioCosto() : producto.getPrecioVenta());
-            entradaProductoService.guardar(entrada);
+                    // Verificar stock mínimo y máximo para generar notificaciones automáticas
+                    if (producto.getStockMinimo() != null && nuevoStock <= producto.getStockMinimo()) {
+                        // Pasar el objeto producto completo
+                        notificacionService.notificarStockBajo(productoActualizado);
+                    }
 
-            return productoActualizado;
-        });
+                    if (producto.getStockMaximo() != null && nuevoStock > producto.getStockMaximo()) {
+                        // Pasar el objeto producto completo
+                        notificacionService.notificarSobrestock(productoActualizado);
+                    }
+
+                    return productoActualizado;
+                });
     }
 
     @Override
@@ -176,5 +182,32 @@ public class ProductoServiceImpl implements ProductoService {
             producto.setEstado(true);
             return guardar(producto);
         });
+    }
+
+    @Override
+    public List<Producto> obtenerPorProveedor(Integer idProveedor) {
+        return productoRepository.findByProveedor_IdProveedor(idProveedor);
+    }
+
+
+
+    public Map<String, Object> obtenerDetallesProducto(Integer idProducto) {
+        Map<String, Object> detalles = new HashMap<>();
+
+        // Obtener el producto
+        Optional<Producto> producto = obtenerPorId(idProducto);
+        if (!producto.isPresent()) {
+            return detalles;
+        }
+
+        detalles.put("producto", producto.get());
+
+        // Añadir promociones activas
+        List<Promocion> promociones = promocionService.obtenerPromocionesActivasPorProducto(idProducto);
+        detalles.put("promociones", promociones);
+
+        // Resto de lógica existente...
+
+        return detalles;
     }
 }

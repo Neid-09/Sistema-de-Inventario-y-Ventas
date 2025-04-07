@@ -18,6 +18,9 @@ public class Categoria {
     @Column(nullable = false)
     private String nombre;
 
+    @Column(name = "duracion_garantia")
+    private Integer duracionGarantia;
+
     private String descripcion;
 
     @Column(nullable = false)

@@ -28,4 +28,9 @@ public class EntradaProductoServiceImpl implements EntradaProductoService {
     public EntradaProducto guardar(EntradaProducto entradaProducto) {
         return entradaProductoRepository.save(entradaProducto);
     }
+
+    @Override
+    public boolean existsEntradaByProductoId(Integer idProducto) {
+        return !entradaProductoRepository.findByProductoIdProducto(idProducto).isEmpty();
+    }
 }

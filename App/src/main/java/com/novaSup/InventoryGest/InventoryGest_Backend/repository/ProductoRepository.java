@@ -36,4 +36,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
             @Param("estado") Boolean estado);
 
     boolean existsByCodigo(String codigo);
+    List<Producto> findByProveedor_IdProveedor(Integer idProveedor);
 }

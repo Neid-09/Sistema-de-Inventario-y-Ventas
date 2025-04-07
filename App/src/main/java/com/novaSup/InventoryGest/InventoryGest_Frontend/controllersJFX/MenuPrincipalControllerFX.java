@@ -149,14 +149,14 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     @FXML
-    void irGestionProductos(ActionEvent event) {
+    void irInventario(ActionEvent event) {
         if (!LoginServiceImplFX.tienePermiso("gestionar_productos") &&
                 !LoginServiceImplFX.tienePermiso("ver_productos")) {
             mostrarAlerta(Alert.AlertType.WARNING, "Acceso denegado",
-                    "No tienes permisos para acceder al módulo de productos.");
+                    "No tienes permisos para acceder al módulo de inventario.");
             return;
         }
-        cargarModuloEnPanel(PathsFXML.CRUD_PRDUCTOS);
+        cargarModuloEnPanel(PathsFXML.MOD_INVENTARIO);
     }
 
     @FXML

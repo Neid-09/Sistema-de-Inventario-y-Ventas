@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Tooltip?>
 <BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX">
     <!--TOP-->
     <top>
@@ -33,9 +34,20 @@
                     </HBox.margin>
                 </Label>
 
-
                 <!-- Relleno flexible para empujar el perfil a la derecha -->
                 <Pane HBox.hgrow="ALWAYS" />
+
+
+                <Button fx:id="btnAlerts" styleClass="alert-button">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0">
+                            <Image url="@../images/bell.png" />
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Alertas de inventario" />
+                    </tooltip>
+                </Button>
 
                 <!-- Perfil de usuario (puede ser imagen + nombre + botón cerrar sesión) -->
                 <HBox alignment="CENTER_RIGHT" spacing="10">
@@ -95,7 +107,7 @@
                 </Button>
 
                 <!-- INVENTARIO -->
-                <Button fx:id="btnProductos" onAction="#irGestionProductos" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnProductos" onAction="#irInventario" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>

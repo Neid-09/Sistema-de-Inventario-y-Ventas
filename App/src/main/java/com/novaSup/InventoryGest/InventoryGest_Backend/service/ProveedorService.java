@@ -10,4 +10,5 @@ public interface ProveedorService {
     Optional<Proveedor> obtenerPorId(Integer id);
     Proveedor guardar(Proveedor proveedor);
     void eliminar(Integer id);
+    List<Proveedor> buscarPorNombreOCorreo(String termino);
 }
