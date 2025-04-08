@@ -63,6 +63,16 @@ public class NotificacionServiceImpl implements NotificacionService {
     }
 
     @Override
+    public Notificacion marcarComoNoLeida(Integer idNotificacion) {
+        return notificacionRepository.findById(idNotificacion)
+                .map(notificacion -> {
+                    notificacion.setLeida(false);
+                    return notificacionRepository.save(notificacion);
+                })
+                .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
+    }
+
+    @Override
     public void eliminar(Integer idNotificacion) {
         notificacionRepository.deleteById(idNotificacion);
     }
@@ -106,7 +116,10 @@ public class NotificacionServiceImpl implements NotificacionService {
 
     @Override
     public void notificarUsuariosRelevantes(String titulo, String mensaje, String tipo, Integer idReferencia) {
-        // Notificar a administradores
+        // Lista para almacenar IDs de usuarios ya notificados
+        List<Integer> idsUsuariosNotificados = new ArrayList<>();
+
+        // 1. Notificar a administradores
         usuarioRepository.findByRolNombre("ADMINISTRADOR").forEach(admin -> {
             Notificacion notificacion = new Notificacion();
             notificacion.setIdUsuario(admin.getIdUsuario());
@@ -118,13 +131,13 @@ public class NotificacionServiceImpl implements NotificacionService {
             notificacion.setIdReferencia(idReferencia);
 
             this.crear(notificacion);
+            idsUsuariosNotificados.add(admin.getIdUsuario());
         });
 
-        // Notificar a usuarios con permisos específicos
-        String permisoRequerido = "ver_productos";
-        usuarioRepository.findByPermiso(permisoRequerido).forEach(usuario -> {
-            // Evitar duplicados para administradores
-            if (!usuario.getRol().getNombre().equalsIgnoreCase("ADMINISTRADOR")) {
+        // 2. Notificar a usuarios con el permiso ver_notificaciones (por rol o por asignación directa)
+        usuarioRepository.findByPermisoEffective("ver_notificaciones").forEach(usuario -> {
+            // Verificar que no haya sido notificado antes
+            if (!idsUsuariosNotificados.contains(usuario.getIdUsuario())) {
                 Notificacion notificacion = new Notificacion();
                 notificacion.setIdUsuario(usuario.getIdUsuario());
                 notificacion.setTitulo(titulo);
@@ -135,6 +148,33 @@ public class NotificacionServiceImpl implements NotificacionService {
                 notificacion.setIdReferencia(idReferencia);
 
                 this.crear(notificacion);
+                idsUsuariosNotificados.add(usuario.getIdUsuario());
+            }
+        });
+
+        // 3. Notificar a usuarios con permisos específicos según el tipo de notificación
+        String permisoRequerido = "ver_productos"; // Permiso por defecto para alertas de productos
+
+        if (tipo.equals("ALERTA_VENCIMIENTO")) {
+            permisoRequerido = "ver_lotes";
+        }
+
+        // Usar el nuevo método para obtener usuarios con permisos efectivos
+        final String permiso = permisoRequerido;
+        usuarioRepository.findByPermisoEffective(permiso).forEach(usuario -> {
+            // Verificar que no haya sido notificado antes
+            if (!idsUsuariosNotificados.contains(usuario.getIdUsuario())) {
+                Notificacion notificacion = new Notificacion();
+                notificacion.setIdUsuario(usuario.getIdUsuario());
+                notificacion.setTitulo(titulo);
+                notificacion.setMensaje(mensaje);
+                notificacion.setFecha(LocalDateTime.now());
+                notificacion.setLeida(false);
+                notificacion.setTipo(tipo);
+                notificacion.setIdReferencia(idReferencia);
+
+                this.crear(notificacion);
+                idsUsuariosNotificados.add(usuario.getIdUsuario());
             }
         });
     }

@@ -60,11 +60,17 @@ public class CategoriaControllerFX implements Initializable {
         configurarFormulario();
         cargarCategorias();
 
+        // Deshabilitar el botón guardar inicialmente
+        btnGuardar.setDisable(true);
+
         // Configurar eventos de selección
         tablaCategorias.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
                         mostrarDetalleCategoria(newSelection);
+                        // Deshabilitar el botón guardar cuando solo se selecciona
+                        btnGuardar.setDisable(true);
+                        modoEdicion = false;
                     }
                 });
     }
@@ -144,6 +150,8 @@ public class CategoriaControllerFX implements Initializable {
     @FXML
     void cancelarOperacion(ActionEvent event) {
         limpiarFormulario();
+        modoEdicion = false;
+        btnGuardar.setDisable(true); // Asegurar que el botón esté deshabilitado
         lblEstado.setText("Operación cancelada");
     }
 
@@ -189,6 +197,8 @@ public class CategoriaControllerFX implements Initializable {
                     "Categoría creada correctamente";
             lblEstado.setText(mensaje);
 
+            btnGuardar.setDisable(true);
+
         } catch (Exception e) {
             mostrarError("Error al guardar la categoría", e);
         }
@@ -203,7 +213,8 @@ public class CategoriaControllerFX implements Initializable {
     @FXML
     void nuevaCategoria(ActionEvent event) {
         limpiarFormulario();
-        modoEdicion = false;
+        modoEdicion = true; // Activamos modo edición para nueva categoría
+        btnGuardar.setDisable(false); // Habilitamos el botón
         lblEstado.setText("Creando nueva categoría");
     }
 
@@ -246,6 +257,8 @@ public class CategoriaControllerFX implements Initializable {
     private void cargarCategoriaParaEditar(CategoriaFX categoria) {
         mostrarDetalleCategoria(categoria);
         modoEdicion = true;
+        // Añadir esta línea para habilitar el botón guardar
+        btnGuardar.setDisable(false);
         lblEstado.setText("Editando categoría: " + categoria.getNombre());
     }
 
@@ -288,7 +301,10 @@ public class CategoriaControllerFX implements Initializable {
         txtDuracionGarantia.clear();
         chkEstado.setSelected(true);
         categoriaSeleccionada = null;
-        modoEdicion = false;
+        // Si no estamos en modo edición, deshabilitamos el botón
+        if (!modoEdicion) {
+            btnGuardar.setDisable(true);
+        }
         panelProductosAsociados.setVisible(false);
         panelProductosAsociados.setManaged(false);
     }

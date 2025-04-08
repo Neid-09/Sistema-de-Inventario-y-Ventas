@@ -2,230 +2,167 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoginService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
+import java.util.Base64;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+@Service
 public class LoginServiceImplFX implements ILoginService {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoginServiceImplFX.class);
-    private static final String BASE_URL = "http://localhost:8080";
-    private static UsuarioFX usuarioActual = null;
-    private static Set<String> permisosUsuario = new HashSet<>();
-    private final ObjectMapper mapper = new ObjectMapper();
-    private static String token;
+    private static final String LOGIN_URL = ApiConfig.getBaseUrl() + "/auth/login";
+    private static String jwtToken = null;
+    private static Set<String> permisos = new HashSet<>();
+    private static String nombreUsuario = null;
+    private static Integer idUsuario = null;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public boolean autenticarUsuario(String correo, String contraseña) throws Exception {
         try {
-            ObjectNode credenciales = mapper.createObjectNode();
-            credenciales.put("correo", correo);
-            credenciales.put("contraseña", contraseña);
+            // Crear objeto JSON para la autenticación
+            String jsonCredenciales = String.format("{\"correo\":\"%s\",\"contraseña\":\"%s\"}", correo, contraseña);
 
-            String response = HttpClient.post(
-                    BASE_URL + "/auth/login",
-                    mapper.writeValueAsString(credenciales)
-            );
+            // Realizar petición de autenticación
+            String respuesta = HttpClient.post(LOGIN_URL, jsonCredenciales);
+            JsonNode jsonNode = objectMapper.readTree(respuesta);
 
-            JsonNode jsonResponse = mapper.readTree(response);
+            // Extraer token
+            if (jsonNode.has("token")) {
+                jwtToken = jsonNode.get("token").asText();
+                nombreUsuario = correo;
 
-            // Extraer y guardar el token JWT
-            if (jsonResponse.has("token")) {
-                token = jsonResponse.get("token").asText();
-                logger.info("Token JWT recibido y almacenado");
-            } else {
-                token = null;
-                logger.warn("No se recibió token en la respuesta de autenticación");
-            }
+                // Extraer permisos del token JWT
+                extraerPermisosDeToken(jwtToken);
 
-            // Continuar con el procesamiento del usuario
-            if (jsonResponse.has("usuario")) {
-                JsonNode usuarioNode = jsonResponse.get("usuario");
-
-                // Crear objeto de usuario
-                Integer idUsuario = usuarioNode.has("idUsuario") ? usuarioNode.get("idUsuario").asInt() : null;
-                String nombre = usuarioNode.has("nombre") ? usuarioNode.get("nombre").asText() : "";
-                String correoUsuario = usuarioNode.has("correo") ? usuarioNode.get("correo").asText() : "";
-                String telefono = usuarioNode.has("telefono") ? usuarioNode.get("telefono").asText() : "";
-
-                // Procesar rol del usuario
-                RolFX rol = null;
-                if (usuarioNode.has("rol") && !usuarioNode.get("rol").isNull()) {
-                    JsonNode rolNode = usuarioNode.get("rol");
-                    Integer idRol = rolNode.has("idRol") ? rolNode.get("idRol").asInt() : null;
-                    String nombreRol = rolNode.has("nombre") ? rolNode.get("nombre").asText() : "";
-                    rol = new RolFX(idRol, nombreRol);
+                // Extraer ID del usuario si está disponible
+                if (jsonNode.has("idUsuario")) {
+                    idUsuario = jsonNode.get("idUsuario").asInt();
                 }
-
-                // Crear y almacenar el usuario actual
-                usuarioActual = new UsuarioFX(idUsuario, nombre, correoUsuario, telefono, "", rol);
-
-                // Cargar permisos del usuario
-                cargarPermisosUsuario();
 
                 return true;
             }
 
             return false;
         } catch (Exception e) {
-            token = null;
-            usuarioActual = null;
-            permisosUsuario.clear();
-            logger.error("Error en autenticación: {}", e.getMessage());
-            throw new Exception("Error al autenticar: " + e.getMessage());
+            // Limpiar datos en caso de error
+            limpiarDatosAutenticacion();
+            throw new Exception("Error en la autenticación: " + e.getMessage());
         }
-    }
-
-    public static String getToken() {
-        return token;
     }
 
     /**
-     * Carga los permisos del usuario actual desde el backend
+     * Extrae los permisos del token JWT decodificando su payload
+     * @param token El token JWT
      */
-    private void cargarPermisosUsuario() throws Exception {
-        if (usuarioActual == null || usuarioActual.getIdUsuario() == null) {
-            logger.warn("No hay usuario autenticado para cargar permisos");
-            permisosUsuario.clear();
-            return;
-        }
-
+    private void extraerPermisosDeToken(String token) {
         try {
-            // Usar el token JWT para autenticar la solicitud
-            String response = HttpClient.get(BASE_URL + "/usuarios/mis-permisos");
+            String[] partes = token.split("\\.");
+            if (partes.length >= 2) {
+                String payload = new String(Base64.getUrlDecoder().decode(partes[1]));
+                JsonNode jsonNode = objectMapper.readTree(payload);
 
-            // Procesar permisos (incluye permisos del rol y específicos)
-            JsonNode permisosNode = mapper.readTree(response);
-            permisosUsuario.clear();
+                // Limpiar permisos anteriores
+                permisos.clear();
 
-            for (JsonNode permisoNode : permisosNode) {
-                if (permisoNode.has("nombre")) {
-                    String nombrePermiso = permisoNode.get("nombre").asText();
-                    permisosUsuario.add(nombrePermiso);
+                // Extraer permisos del array "authorities"
+                if (jsonNode.has("authorities") && jsonNode.get("authorities").isArray()) {
+                    for (JsonNode nodo : jsonNode.get("authorities")) {
+                        permisos.add(nodo.asText());
+                    }
                 }
             }
-
-            logger.info("Permisos cargados para {}: {}", usuarioActual.getNombre(), permisosUsuario);
         } catch (Exception e) {
-            logger.error("Error al cargar permisos: {}", e.getMessage());
-            throw new Exception("Error al cargar permisos: " + e.getMessage());
+            System.err.println("Error al extraer permisos del token: " + e.getMessage());
         }
     }
 
     /**
-     * Añade permisos comunes para administradores
-     */
-    private void agregarPermisosAdministrador() {
-        // Permisos de gestión de usuarios
-        permisosUsuario.add("gestionar_usuarios");
-        permisosUsuario.add("ver_usuarios");
-        permisosUsuario.add("crear_usuario");
-        permisosUsuario.add("editar_usuario");
-        permisosUsuario.add("eliminar_usuario");
-
-        // Permisos de gestión de inventario
-        permisosUsuario.add("gestionar_inventario");
-        permisosUsuario.add("ver_productos");
-        permisosUsuario.add("crear_producto");
-        permisosUsuario.add("editar_producto");
-        permisosUsuario.add("eliminar_producto");
-
-        // Permisos de ventas
-        permisosUsuario.add("gestionar_ventas");
-        permisosUsuario.add("crear_venta");
-        permisosUsuario.add("ver_ventas");
-        permisosUsuario.add("anular_venta");
-
-        // Permisos de informes
-        permisosUsuario.add("ver_informes");
-        permisosUsuario.add("generar_informes");
-
-        // Permisos de configuración
-        permisosUsuario.add("gestionar_permisos");
-        permisosUsuario.add("gestionar_roles");
-        permisosUsuario.add("configurar_sistema");
-
-        logger.info("Permisos de administrador cargados para: {}", usuarioActual.getNombre());
-    }
-
-    /**
-     * Verifica si el usuario actual tiene un permiso específico
-     * @param nombrePermiso Nombre del permiso a verificar
-     * @return true si tiene el permiso, false en caso contrario
+     * Verifica si el usuario tiene un permiso específico
+     * @param nombrePermiso El nombre del permiso a verificar
+     * @return true si el usuario tiene el permiso, false en caso contrario
      */
     public static boolean tienePermiso(String nombrePermiso) {
-        // Si no hay usuario autenticado, no tiene permisos
-        if (usuarioActual == null) {
+        // Si no hay permisos o token, no tiene acceso
+        if (jwtToken == null || permisos == null || permisos.isEmpty()) {
             return false;
         }
 
-        // Si el usuario es administrador, tiene todos los permisos
-        if (usuarioActual.getRol() != null &&
-                "Administrador".equalsIgnoreCase(usuarioActual.getRol().getNombre())) {
-            return true;
-        }
-
-        // Verificar si el permiso está en la lista de permisos del usuario
-        return permisosUsuario.contains(nombrePermiso);
+        // Verificar si tiene el permiso específico
+        return permisos.contains(nombrePermiso);
     }
 
     /**
-     * Verifica un permiso específico consultando al backend
-     * Útil para operaciones críticas donde necesitamos verificación en tiempo real
+     * Obtiene el token JWT actual
+     * @return El token JWT o null si no hay sesión activa
      */
-    public static boolean verificarPermisoEnBackend(String nombrePermiso) throws Exception {
-        if (usuarioActual == null || usuarioActual.getIdUsuario() == null) {
-            return false;
-        }
-
-        try {
-            // Consultar al backend para verificar el permiso
-            String response = HttpClient.get(
-                    BASE_URL + "/usuarios/verificar-permiso/" + nombrePermiso,
-                    "usuario-id",
-                    usuarioActual.getIdUsuario().toString()
-            );
-
-            // Si la respuesta no contiene errores, tiene permiso
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonResponse = mapper.readTree(response);
-
-            if (jsonResponse.has("tienePermiso")) {
-                return jsonResponse.get("tienePermiso").asBoolean();
-            }
-
-            return true; // Si no hay respuesta estructurada, asumir que tiene permiso
-        } catch (Exception e) {
-            // Si el error es 403, significa que no tiene permiso
-            if (e.getMessage().contains("code: 403")) {
-                return false;
-            }
-
-            // Para otros errores, propagar la excepción
-            throw e;
-        }
+    public static String getToken() {
+        return jwtToken;
     }
 
     /**
-     * Obtiene el usuario actualmente autenticado
+     * Obtiene el nombre del usuario autenticado
+     * @return El nombre de usuario o null si no hay sesión activa
      */
-    public static UsuarioFX getUsuarioActual() {
-        return usuarioActual;
+    public static String getNombreUsuario() {
+        return nombreUsuario;
     }
 
     /**
-     * Cierra la sesión del usuario actual
+     * Obtiene el ID del usuario autenticado
+     * @return El ID del usuario o null si no está disponible
+     */
+    public static Integer getIdUsuario() {
+        return idUsuario;
+    }
+
+    /**
+     * Cierra la sesión actual limpiando todos los datos de autenticación
      */
     public static void cerrarSesion() {
-        usuarioActual = null;
-        permisosUsuario.clear();
-        logger.info("Sesión cerrada");
+        limpiarDatosAutenticacion();
+    }
+
+    /**
+     * Limpia todos los datos de autenticación
+     */
+    private static void limpiarDatosAutenticacion() {
+        jwtToken = null;
+        nombreUsuario = null;
+        idUsuario = null;
+        permisos = new HashSet<>();
+    }
+
+    /**
+     * Obtiene la lista de permisos del usuario actual
+     * @return Conjunto no modificable de permisos
+     */
+    public static Set<String> getPermisos() {
+        return Collections.unmodifiableSet(permisos);
+    }
+
+    /**
+     * Obtiene la información del usuario actualmente autenticado
+     * @return Objeto UsuarioFX con los datos disponibles del usuario actual o null si no hay sesión
+     */
+    public static UsuarioFX getUsuarioActual() {
+        if (nombreUsuario == null || idUsuario == null) {
+            return null;
+        }
+
+        // Crear instancia con la información disponible
+        UsuarioFX usuario = new UsuarioFX();
+        usuario.setIdUsuario(idUsuario);
+        usuario.setCorreo(nombreUsuario);
+        // Otros campos se dejan vacíos o nulos porque no están disponibles
+
+        return usuario;
     }
 }

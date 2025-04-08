@@ -18,6 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notificaciones")
+@CrossOrigin("*") // Agregar para consistencia con otros controladores
 public class NotificacionController {
 
     @Autowired
@@ -46,49 +47,82 @@ public class NotificacionController {
     }
 
     @GetMapping("/todas")
-    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR')")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_notificaciones')")
     public ResponseEntity<List<Notificacion>> obtenerTodasLasNotificaciones() {
         return ResponseEntity.ok(notificacionService.obtenerTodasLasNotificaciones());
     }
+
 
     @PatchMapping("/{id}/leer")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_notificaciones')")
     public ResponseEntity<?> marcarComoLeida(@PathVariable Integer id) {
         Integer idUsuario = obtenerIdUsuarioActual();
+        if (idUsuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         return notificacionService.obtenerPorId(id)
                 .map(notificacion -> {
                     // Verificar que la notificación pertenece al usuario actual o es admin
-                    if (!notificacion.getIdUsuario().equals(idUsuario) &&
-                            !tieneRolAdmin()) {
+                    if (!notificacion.getIdUsuario().equals(idUsuario) && !tieneRolAdmin()) {
                         Map<String, String> error = new HashMap<>();
                         error.put("mensaje", "No tiene permisos para modificar esta notificación");
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
                     }
 
-                    Notificacion notificacionLeida = notificacionService.marcarComoLeida(id);
-                    return ResponseEntity.ok(notificacionLeida);
+                    try {
+                        Notificacion notificacionLeida = notificacionService.marcarComoLeida(id);
+                        return ResponseEntity.ok(notificacionLeida);
+                    } catch (Exception e) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("mensaje", "Error al marcar notificación como leída: " + e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+
+    @PatchMapping("/{id}/marcar-no-leida")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_notificaciones')")
+    public ResponseEntity<?> marcarComoNoLeida(@PathVariable Integer id) {
+        try {
+            Notificacion notificacion = notificacionService.marcarComoNoLeida(id);
+            return ResponseEntity.ok(notificacion);
+        } catch (Exception e) {
+            Map<String, String> respuesta = new HashMap<>();
+            respuesta.put("mensaje", "Error al marcar notificación como no leída: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(respuesta);
+        }
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_notificaciones')")
     public ResponseEntity<?> eliminarNotificacion(@PathVariable Integer id) {
         Integer idUsuario = obtenerIdUsuarioActual();
+        if (idUsuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         return notificacionService.obtenerPorId(id)
                 .map(notificacion -> {
                     // Verificar que la notificación pertenece al usuario actual o es admin
-                    if (!notificacion.getIdUsuario().equals(idUsuario) &&
-                            !tieneRolAdmin()) {
+                    if (!notificacion.getIdUsuario().equals(idUsuario) && !tieneRolAdmin()) {
                         Map<String, String> error = new HashMap<>();
                         error.put("mensaje", "No tiene permisos para eliminar esta notificación");
                         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
                     }
 
-                    notificacionService.eliminar(id);
-                    return ResponseEntity.ok().build();
+                    try {
+                        notificacionService.eliminar(id);
+                        Map<String, String> respuesta = new HashMap<>();
+                        respuesta.put("mensaje", "Notificación eliminada correctamente");
+                        return ResponseEntity.ok(respuesta);
+                    } catch (Exception e) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("mensaje", "Error al eliminar la notificación: " + e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

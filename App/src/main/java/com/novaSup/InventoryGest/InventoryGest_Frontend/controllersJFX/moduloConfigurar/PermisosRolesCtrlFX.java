@@ -45,20 +45,16 @@ public class PermisosRolesCtrlFX implements Initializable {
 
     private void configurarPermisos() {
         // Botón de Gestión de Permisos solo visible si tiene permiso "gestionar_permisos"
-        PermisosUIUtil.configurarBoton(btnGestionPermisos, "gestionar_permisos");
+        PermisosUIUtil.configurarBoton(btnGestionPermisos, "gestionar_roles_permisos");
 
         // Botón de Gestión de Roles solo visible si tiene permiso "gestionar_roles"
-        PermisosUIUtil.configurarBoton(btnGestionRoles, "gestionar_roles");
+        PermisosUIUtil.configurarBoton(btnGestionRoles, "gestionar_roles_permisos");
 
         // Botón de Plantillas de Roles visible si gestiona roles y permisos
-        boolean puedeGestionarPlantillas = LoginServiceImplFX.tienePermiso("gestionar_roles") &&
-                LoginServiceImplFX.tienePermiso("gestionar_permisos");
-        btnPlantillasRoles.setVisible(puedeGestionarPlantillas);
-        btnPlantillasRoles.setManaged(puedeGestionarPlantillas);
-        btnPlantillasRoles.setDisable(!puedeGestionarPlantillas);
+        PermisosUIUtil.configurarBoton(btnPlantillasRoles, "gestionar_roles_permisos");
 
         // Botón de Permisos Usuarios visible si gestiona usuarios
-        PermisosUIUtil.configurarBoton(btnPermisosUsuarios, "gestionar_usuarios");
+        PermisosUIUtil.configurarBoton(btnPermisosUsuarios, "gestionar_roles_permisos");
     }
 
     private void navegarAModulo(ActionEvent event, String permiso, String path, String errorMsg) {
@@ -85,25 +81,25 @@ public class PermisosRolesCtrlFX implements Initializable {
 
     @FXML
     private void navegarGestionPermisos(ActionEvent event) {
-        navegarAModulo(event, "gestionar_permisos", PathsFXML.GESTION_PERMISOS,
+        navegarAModulo(event, "gestionar_roles_permisos", PathsFXML.GESTION_PERMISOS,
                 "No se pudo cargar el módulo de gestión de permisos");
     }
 
     @FXML
     private void navegarGestionRoles(ActionEvent event) {
-        navegarAModulo(event, "gestionar_roles", PathsFXML.GESTION_ROLES,
+        navegarAModulo(event, "gestionar_roles_permisos", PathsFXML.GESTION_ROLES,
                 "No se pudo cargar el módulo de gestión de roles");
     }
 
     @FXML
     private void navegarPlantillasRoles(ActionEvent event) {
-        navegarAModulo(event, "gestionar_roles", PathsFXML.PLANTILLAS_ROLES,
+        navegarAModulo(event, "gestionar_roles_permisos", PathsFXML.PLANTILLAS_ROLES,
                 "No se pudo cargar el módulo de plantillas de roles");
     }
 
     @FXML
     private void navegarPermisosUsuarios(ActionEvent event) {
-        navegarAModulo(event, "gestionar_usuarios", PathsFXML.PERMISOS_USUARIOS,
+        navegarAModulo(event, "gestionar_roles_permisos", PathsFXML.PERMISOS_USUARIOS,
                 "No se pudo cargar el módulo de permisos de usuarios");
     }
 

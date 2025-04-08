@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
+import java.net.URL;
 
 import static com.novaSup.InventoryGest.MainApp.springContext;
 
@@ -39,6 +40,12 @@ public class LoginControllerFX {
         Platform.runLater(() -> {
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             stage.setResizable(false);
+
+            // Configurar el comportamiento de cierre en el login (sin alerta)
+            stage.setOnCloseRequest(event -> {
+                // Cerrar directamente sin confirmación
+                stage.close();
+            });
         });
     }
 
@@ -81,26 +88,30 @@ public class LoginControllerFX {
         }
     }
 
+    // En LoginControllerFX
     private void cargarMenuPrincipal() {
         try {
-            Stage stage = (Stage) btnLogin.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
+            // Usar el mismo método que en el resto de la aplicación
+            URL fxmlUrl = getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML);
+
+            if (fxmlUrl == null) {
+                throw new IOException("No se encontró el archivo FXML del menú principal");
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             loader.setControllerFactory(springContext::getBean);
             Parent root = loader.load();
 
-            // Obtén el controlador y establece el nombre de usuario
-            MenuPrincipalControllerFX controlador = loader.getController();
-            controlador.establecerUsuario(txtEmail.getText());
-
             Scene scene = new Scene(root);
+            Stage stage = (Stage) btnLogin.getScene().getWindow();
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el menú principal: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);

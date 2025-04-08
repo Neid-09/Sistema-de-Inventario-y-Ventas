@@ -5,6 +5,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -40,8 +41,24 @@ public class ProductoControllerFX implements Initializable {
     @FXML private CheckBox chkEstado;
 
     //Componentes FXNL - Botones
-    @FXML private Button btnGuardar;
-    @FXML private Button btnActualizar;
+    @FXML
+    private Button btnActualizar;
+    @FXML
+    private Button btnAumentarStock;
+    @FXML
+    private Button btnDisminuirStock;
+    @FXML
+    private Button btnEliminar;
+    @FXML
+    private Button btnFiltrar;
+    @FXML
+    private Button btnGuardar;
+    @FXML
+    private Button btnLimpiar;
+    @FXML
+    private Button btnRefrescar;
+    @FXML
+    private Button btnVerDetalles;
 
     // Componentes FXML - filtros
     @FXML private TextField txtFiltroNombre;
@@ -72,6 +89,7 @@ public class ProductoControllerFX implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        configurarPermisos();
         configurarTabla();
         configurarCombos();
         configurarEventos();
@@ -81,6 +99,24 @@ public class ProductoControllerFX implements Initializable {
         btnGuardar.setDisable(false);
 
         cargarDatos();
+    }
+
+    /**
+     * Método para configurar la visibilidad de elementos según los permisos del usuario
+     * Se debe llamar en el método initialize()
+     */
+    private void configurarPermisos() {
+        // Configurar permisos para operaciones CRUD básicas
+        PermisosUIUtil.configurarBoton(btnGuardar, "crear_producto");
+        PermisosUIUtil.configurarBoton(btnActualizar, "editar_producto");
+        PermisosUIUtil.configurarBoton(btnEliminar, "eliminar_producto");
+
+        // Configurar permisos para operaciones de stock
+        PermisosUIUtil.configurarBoton(btnAumentarStock, "ajustar_stock");
+        PermisosUIUtil.configurarBoton(btnDisminuirStock, "ajustar_stock");
+
+        // Configurar permisos para otras acciones
+        PermisosUIUtil.configurarBoton(btnVerDetalles, "ver_productos");
     }
 
     private void configurarTabla() {
@@ -190,6 +226,9 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     public void cargarDatos() {
+
+
+
         lblMensaje.setText("Cargando datos...");
 
         // Ejecutar en segundo plano para no bloquear la UI
@@ -246,7 +285,7 @@ public class ProductoControllerFX implements Initializable {
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     lblMensaje.setText("Error al cargar datos: " + e.getMessage());
-                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudieron cargar los datos", e.getMessage());
+                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudieron cargar los datos1", e.getMessage());
                 });
             }
         }).start();
@@ -256,13 +295,17 @@ public class ProductoControllerFX implements Initializable {
     public void buscarProductos() {
         lblMensaje.setText("Buscando productos...");
 
-        String nombre = txtFiltroNombre.getText().trim();
-        String codigo = txtFiltroCodigo.getText().trim();
+        // Obtener valores de los filtros
+        String nombre = txtFiltroNombre.getText() != null ? txtFiltroNombre.getText().trim() : "";
+        String codigo = txtFiltroCodigo.getText() != null ? txtFiltroCodigo.getText().trim() : "";
 
-        // Obtener categoría seleccionada
+        // Obtener categoría seleccionada - considerar nulo si es la opción "Todas las categorías"
         CategoriaFX categoriaSeleccionada = cmbFiltroCategoria.getSelectionModel().getSelectedItem();
-        Integer idCategoria = (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null) ?
-                categoriaSeleccionada.getIdCategoria() : null;
+        Integer idCategoria = null;
+        if (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null
+                && categoriaSeleccionada.getIdCategoria() > 0) {
+            idCategoria = categoriaSeleccionada.getIdCategoria();
+        }
 
         // Obtener estado seleccionado
         String estadoSeleccionado = cmbFiltroEstado.getSelectionModel().getSelectedItem();
@@ -273,28 +316,40 @@ public class ProductoControllerFX implements Initializable {
             estado = false;
         }
 
-        // Guardar en variables finales para usar en el hilo
+        // Crear copias finales para usar en el lambda
+        final String nombreFinal = nombre;
+        final String codigoFinal = codigo;
         final Integer idCategoriaFinal = idCategoria;
         final Boolean estadoFinal = estado;
+
+        // Logear los valores para depuración
+        System.out.println("Filtros: nombre=[" + nombreFinal + "], codigo=[" + codigoFinal +
+                "], idCategoria=[" + idCategoriaFinal + "], estado=[" + estadoFinal + "]");
+
+        // Deshabilitar botón durante búsqueda
+        btnFiltrar.setDisable(true);
 
         // Ejecutar en segundo plano
         new Thread(() -> {
             try {
                 List<ProductoFX> productos = productoService.filtrarProductos(
-                        nombre.isEmpty() ? null : nombre,
-                        codigo.isEmpty() ? null : codigo,
-                        idCategoriaFinal,
-                        estadoFinal);
+                        nombreFinal, codigoFinal, idCategoriaFinal, estadoFinal);
 
                 Platform.runLater(() -> {
                     listaProductos.clear();
-                    listaProductos.addAll(productos);
-                    lblMensaje.setText("");
+                    if (productos != null && !productos.isEmpty()) {
+                        listaProductos.addAll(productos);
+                        lblMensaje.setText("Se encontraron " + productos.size() + " productos");
+                    } else {
+                        lblMensaje.setText("No se encontraron productos");
+                    }
+                    btnFiltrar.setDisable(false);
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> {
                     lblMensaje.setText("Error al buscar: " + e.getMessage());
                     mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo realizar la búsqueda", e.getMessage());
+                    btnFiltrar.setDisable(false);
                 });
             }
         }).start();
@@ -374,6 +429,12 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     public void guardarProducto() {
+
+        // Verificar permisos antes de proceder
+        if (!PermisosUIUtil.verificarPermisoConAlerta("crear_producto")) {
+            return;
+        }
+
         if (!validarCampos()) {
             return;
         }
@@ -412,6 +473,12 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     public void actualizarProducto() {
+
+        // Verificar permisos antes de proceder
+        if (!PermisosUIUtil.verificarPermisoConAlerta("editar_producto")) {
+            return;
+        }
+
         if (txtId.getText().isEmpty()) {
             lblMensaje.setText("Debe seleccionar un producto para actualizar.");
             return;
@@ -468,6 +535,12 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     public void eliminarProducto() {
+
+        // Verificar permisos antes de proceder
+        if (!PermisosUIUtil.verificarPermisoConAlerta("eliminar_producto")) {
+            return;
+        }
+
         if (txtId.getText().isEmpty()) {
             lblMensaje.setText("Debe seleccionar un producto para eliminar.");
             return;
@@ -504,6 +577,10 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     public void aumentarStock() {
+        // Verificar permisos antes de proceder
+        if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
+            return;
+        }
         if (txtId.getText().isEmpty()) {
             lblMensaje.setText("Debe seleccionar un producto para aumentar stock.");
             return;
@@ -539,6 +616,12 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     public void disminuirStock() {
+
+        // Verificar permisos antes de proceder
+        if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
+            return;
+        }
+
         if (txtId.getText().isEmpty()) {
             lblMensaje.setText("Debe seleccionar un producto para disminuir stock.");
             return;

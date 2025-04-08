@@ -1,15 +1,20 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
 @Component
-public class InventarioControllerFX {
+public class InventarioControllerFX implements Initializable {
 
     @FXML
     private Button btnCategorias;
@@ -32,6 +37,13 @@ public class InventarioControllerFX {
     @FXML
     private Label lblStatus;
 
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        configurarPermisos();
+        // Resto del código de inicialización...
+    }
+
     @FXML
     void irGestionCategorias(ActionEvent event) {
         try {
@@ -43,7 +55,7 @@ public class InventarioControllerFX {
 
             // Cargar el módulo de gestión de categorías
             // Como no existe una constante predefinida, usamos la ruta directamente
-            menuController.cargarModuloEnPanel("/views/ModuloInventario/GestCategorias.fxml");
+            menuController.cargarModuloEnPanel(PathsFXML.GEST_CATEGORIAS);
 
             // Actualizar el estado
             lblStatus.setText("Módulo de gestión de categorías cargado");
@@ -54,6 +66,21 @@ public class InventarioControllerFX {
             // Actualizar mensaje de estado en caso de error
             lblStatus.setText("Error al cargar módulo de categorías");
         }
+    }
+
+    /**
+     * Configura la visibilidad de los elementos según los permisos del usuario
+     */
+    private void configurarPermisos() {
+        // Configurar permisos para acceder a las diferentes secciones
+        PermisosUIUtil.configurarBoton(btnCategorias, "gestionar_categorias");
+        PermisosUIUtil.configurarBoton(btnProductos, "gestionar_productos");
+        PermisosUIUtil.configurarBoton(btnProveedores, "gestionar_proveedores");
+        PermisosUIUtil.configurarBoton(btnMovimientos, "gestionar_movimientos");
+       // PermisosUIUtil.configurarBoton(btnReportes, "ver_reportes_inventario");
+
+        // Si hay más botones o controles que requieran permisos específicos
+        // PermisosUIUtil.configurarBoton(btnOtroControl, "permiso_requerido");
     }
 
     @FXML

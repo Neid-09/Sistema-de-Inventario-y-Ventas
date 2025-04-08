@@ -13,6 +13,7 @@ import javafx.beans.property.IntegerProperty;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -60,28 +61,31 @@ public class ProductoServiceImplFX implements IProductoService {
 
     @Override
     public List<ProductoFX> filtrarProductos(String nombre, String codigo, Integer idCategoria, Boolean estado) throws Exception {
-        StringBuilder url = new StringBuilder(API_URL + "/filtrar");
+        StringBuilder url = new StringBuilder(API_URL + "/filtrar?");
 
-        boolean primerParametro = true;
+        // Preparar los parámetros, sustituyendo null por cadenas vacías
+        nombre = (nombre != null) ? nombre : "";
+        codigo = (codigo != null) ? codigo : "";
 
-        if (nombre != null && !nombre.trim().isEmpty()) {
-            url.append(primerParametro ? "?" : "&").append("nombre=").append(java.net.URLEncoder.encode(nombre, "UTF-8"));
-            primerParametro = false;
+        // Añadir los parámetros de texto
+        url.append("nombre=").append(java.net.URLEncoder.encode(nombre, "UTF-8"));
+        url.append("&codigo=").append(java.net.URLEncoder.encode(codigo, "UTF-8"));
+
+        // Para idCategoria, enviar cadena vacía si es null o cero
+        String idCategoriaStr = "";
+        if (idCategoria != null && idCategoria > 0) {
+            idCategoriaStr = idCategoria.toString();
         }
+        url.append("&idCategoria=").append(idCategoriaStr);
 
-        if (codigo != null && !codigo.trim().isEmpty()) {
-            url.append(primerParametro ? "?" : "&").append("codigo=").append(java.net.URLEncoder.encode(codigo, "UTF-8"));
-            primerParametro = false;
-        }
-
-        if (idCategoria != null) {
-            url.append(primerParametro ? "?" : "&").append("idCategoria=").append(idCategoria);
-            primerParametro = false;
-        }
-
+        // Para estado, siempre incluirlo pero como cadena vacía si es null
+        String estadoStr = "";
         if (estado != null) {
-            url.append(primerParametro ? "?" : "&").append("estado=").append(estado);
+            estadoStr = estado.toString();
         }
+        url.append("&estado=").append(estadoStr);
+
+        System.out.println("URL de filtrado: " + url.toString());
 
         String respuesta = HttpClient.get(url.toString());
         List<ProductoDTO> productos = objectMapper.readValue(respuesta,

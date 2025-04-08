@@ -19,4 +19,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     @Query("SELECT u FROM Usuario u JOIN u.permisosPersonalizados p WHERE p.nombre = :nombrePermiso")
     List<Usuario> findByPermiso(@Param("nombrePermiso") String nombrePermiso);
+
+    @Query("SELECT DISTINCT u FROM Usuario u " +
+            "LEFT JOIN u.permisosPersonalizados p1 " +
+            "LEFT JOIN u.rol r " +
+            "LEFT JOIN r.permisos p2 " +
+            "WHERE p1.nombre = :nombrePermiso OR p2.nombre = :nombrePermiso")
+    List<Usuario> findByPermisoEffective(@Param("nombrePermiso") String nombrePermiso);
 }

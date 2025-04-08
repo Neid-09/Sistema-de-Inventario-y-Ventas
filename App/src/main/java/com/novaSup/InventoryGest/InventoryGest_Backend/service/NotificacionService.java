@@ -13,6 +13,7 @@ public interface NotificacionService {
     Optional<Notificacion> obtenerPorId(Integer id);
     Notificacion crear(Notificacion notificacion);
     Notificacion marcarComoLeida(Integer idNotificacion);
+    Notificacion marcarComoNoLeida(Integer idNotificacion);
     void eliminar(Integer idNotificacion);
 
     // Métodos específicos para notificaciones de inventario

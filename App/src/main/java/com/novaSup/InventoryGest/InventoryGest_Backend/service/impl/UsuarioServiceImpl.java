@@ -102,23 +102,11 @@ public class UsuarioServiceImpl implements UsuarioService {
      * @param nombrePermiso El nombre del permiso a verificar
      * @return true si tiene el permiso, false en caso contrario
      */
-    @Override
     public boolean tienePermiso(Usuario usuario, String nombrePermiso) {
-        // 1. Verificar primero en permisos personalizados (tienen prioridad)
-        boolean tienePermisoPersonalizado = usuario.getPermisosPersonalizados().stream()
-                .anyMatch(p -> p.getNombre().equals(nombrePermiso));
-
-        if (tienePermisoPersonalizado) {
-            return true; // Si está explícitamente asignado, tiene el permiso
-        }
-
-        // 2. Si no tiene un permiso personalizado, verificar permisos del rol
-        if (usuario.getRol() != null) {
-            return usuario.getRol().getPermisos().stream()
-                    .anyMatch(p -> p.getNombre().equals(nombrePermiso));
-        }
-
-        return false;
+        return !usuarioRepository.findByPermisoEffective(nombrePermiso).stream()
+                .filter(u -> u.getIdUsuario().equals(usuario.getIdUsuario()))
+                .collect(Collectors.toList())
+                .isEmpty();
     }
 
     public boolean existenUsuariosConRol(Integer idRol) {

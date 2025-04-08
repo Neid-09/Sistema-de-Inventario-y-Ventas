@@ -27,17 +27,17 @@ public class InventarioScheduler {
     @Autowired
     private NotificacionService notificacionService;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
-
     // Verificar productos con bajo stock diariamente a las 8:00 AM
     @Scheduled(cron = "0 0 8 * * *")
     public void verificarProductosBajoStock() {
         List<Producto> productosBajoStock = productoService.obtenerConStockBajo();
         if (!productosBajoStock.isEmpty()) {
-            notificarUsuariosRelevantes("STOCK_BAJO",
+            notificacionService.notificarUsuariosRelevantes(
                     "Productos con bajo stock",
-                    "Hay " + productosBajoStock.size() + " productos con stock por debajo del mínimo");
+                    "Hay " + productosBajoStock.size() + " productos con stock por debajo del mínimo",
+                    "STOCK_BAJO",
+                    null  // No hay referencia específica
+            );
         }
     }
 
@@ -47,15 +47,11 @@ public class InventarioScheduler {
         List<Producto> productosConSobrestock = productoService.obtenerConSobrestock();
 
         for (Producto producto : productosConSobrestock) {
-            String titulo = "Sobrestock: " + producto.getNombre();
-            String mensaje = "El producto " + producto.getNombre() + " (Código: " +
-                    producto.getCodigo() + ") tiene un stock de " +
-                    producto.getStock() + " unidades, superando el máximo recomendado.";
-
-            // Usar el servicio de notificación en lugar del método privado
             notificacionService.notificarUsuariosRelevantes(
-                    titulo,
-                    mensaje,
+                    "Sobrestock: " + producto.getNombre(),
+                    "El producto " + producto.getNombre() + " (Código: " +
+                            producto.getCodigo() + ") tiene un stock de " +
+                            producto.getStock() + " unidades, superando el máximo recomendado.",
                     "ALERTA_SOBRESTOCK",
                     producto.getIdProducto()
             );
@@ -67,43 +63,13 @@ public class InventarioScheduler {
     public void verificarLotesProximosAVencer() {
         List<Lote> lotesProximosVencer = loteService.obtenerLotesProximosVencer(15); // 15 días de margen
         if (!lotesProximosVencer.isEmpty()) {
-            notificarUsuariosRelevantes("LOTES_VENCER",
+            notificacionService.notificarUsuariosRelevantes(
                     "Lotes próximos a vencer",
-                    "Hay " + lotesProximosVencer.size() + " lotes que vencerán en los próximos 15 días");
+                    "Hay " + lotesProximosVencer.size() + " lotes que vencerán en los próximos 15 días",
+                    "LOTES_VENCER",
+                    null  // No hay referencia específica
+            );
         }
     }
 
-    // Método para enviar notificaciones a usuarios relevantes
-    private void notificarUsuariosRelevantes(String tipo, String titulo, String mensaje) {
-        // Notificar a administradores
-        usuarioRepository.findByRolNombre("ADMINISTRADOR").forEach(admin -> {
-            Notificacion notificacion = new Notificacion();
-            notificacion.setIdUsuario(admin.getIdUsuario());
-            notificacion.setTitulo(titulo);
-            notificacion.setMensaje(mensaje);
-            notificacion.setFecha(LocalDateTime.now());
-            notificacion.setLeida(false);
-            notificacion.setTipo(tipo);
-
-            notificacionService.crear(notificacion);
-        });
-
-        // Notificar a usuarios con permisos específicos
-        if (tipo.equals("STOCK_BAJO")) {
-            usuarioRepository.findByPermiso("ver_productos").forEach(usuario -> {
-                // Evitar duplicados para administradores
-                if (!usuario.getRol().getNombre().equalsIgnoreCase("ADMINISTRADOR")) {
-                    Notificacion notificacion = new Notificacion();
-                    notificacion.setIdUsuario(usuario.getIdUsuario());
-                    notificacion.setTitulo(titulo);
-                    notificacion.setMensaje(mensaje);
-                    notificacion.setFecha(LocalDateTime.now());
-                    notificacion.setLeida(false);
-                    notificacion.setTipo(tipo);
-
-                    notificacionService.crear(notificacion);
-                }
-            });
-        }
-    }
 }
