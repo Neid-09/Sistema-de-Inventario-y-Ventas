@@ -120,10 +120,27 @@ public class InventarioControllerFX implements Initializable {
     void irGestionPromociones(ActionEvent event) {
 
     }
-
     @FXML
     void irGestionProveedores(ActionEvent event) {
+        try {
+            // Obtener el Stage actual
+            Stage stage = (Stage) btnProveedores.getScene().getWindow();
 
+            // Obtener el controlador del MenuPrincipal desde userData
+            MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
+
+            // Cargar el módulo de gestión de proveedores
+            menuController.cargarModuloEnPanel(PathsFXML.GEST_PROVEEDORES);
+
+            // Actualizar el estado
+            lblStatus.setText("Módulo de gestión de proveedores cargado");
+        } catch (Exception e) {
+            System.err.println("Error al cargar el módulo de proveedores: " + e.getMessage());
+            e.printStackTrace();
+
+            // Actualizar mensaje de estado en caso de error
+            lblStatus.setText("Error al cargar módulo de proveedores");
+        }
     }
 
 }
