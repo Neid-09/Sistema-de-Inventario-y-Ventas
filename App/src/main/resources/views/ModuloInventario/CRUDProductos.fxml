@@ -94,17 +94,6 @@
 
                                     <HBox spacing="10.0">
                                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                            <Label text="Stock *" />
-                                            <TextField fx:id="txtStock" />
-                                        </VBox>
-                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                            <Label text="Estado" />
-                                            <CheckBox fx:id="chkEstado" text="Activo" selected="true" />
-                                        </VBox>
-                                    </HBox>
-
-                                    <HBox spacing="10.0">
-                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                             <Label text="Stock Mínimo" />
                                             <TextField fx:id="txtStockMinimo" />
                                         </VBox>
@@ -119,11 +108,18 @@
 
                                     <Label text="Proveedor" />
                                     <ComboBox fx:id="cmbProveedor" maxWidth="Infinity" />
+
+                                    <HBox spacing="10.0">
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Estado" />
+                                            <CheckBox fx:id="chkEstado" text="Activo" selected="true" />
+                                        </VBox>
+                                    </HBox>
                                 </VBox>
                             </content>
                         </TitledPane>
 
-                        <!-- Reemplazar el contenido del TitledPane "Ajuste de Stock" con esto -->
+                        <!-- "Ajuste de Stock"-->
                         <TitledPane text="Ajuste de Stock" expanded="false">
                             <content>
                                 <VBox spacing="10.0">
@@ -140,9 +136,6 @@
                                     <HBox spacing="10.0">
                                         <Button fx:id="btnAumentarStock" onAction="#abrirVentanaAumentarStock" text="+ Aumentar" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
                                         <Button fx:id="btnDisminuirStock" onAction="#disminuirStock" text="− Disminuir" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
-                                    </HBox>
-                                    <HBox spacing="10.0">
-                                        <Button fx:id="btnVerLotes" onAction="#verLotesProducto" text="Ver Lotes" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
                                     </HBox>
                                 </VBox>
                             </content>
