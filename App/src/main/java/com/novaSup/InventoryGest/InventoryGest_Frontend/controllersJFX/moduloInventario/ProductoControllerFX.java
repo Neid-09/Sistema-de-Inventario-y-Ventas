@@ -4,6 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import javafx.application.Platform;
@@ -15,6 +16,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -81,6 +83,8 @@ public class ProductoControllerFX implements Initializable {
 
     // Servicio
     private final IProductoService productoService = new ProductoServiceImplFX();
+    @Autowired
+    private ILoteService loteService;
 
     // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
@@ -576,6 +580,15 @@ public class ProductoControllerFX implements Initializable {
     }
 
     @FXML
+    void abrirVentanaAumentarStock() {
+
+    }
+
+    @FXML
+    void verLotesProducto() {
+
+    }
+/*    @FXML
     public void aumentarStock() {
         // Verificar permisos antes de proceder
         if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
@@ -612,11 +625,10 @@ public class ProductoControllerFX implements Initializable {
                 });
             }
         }).start();
-    }
+    }*/
 
     @FXML
     public void disminuirStock() {
-
         // Verificar permisos antes de proceder
         if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
             return;
@@ -632,27 +644,46 @@ public class ProductoControllerFX implements Initializable {
             return;
         }
 
-        Integer id = Integer.parseInt(txtId.getText());
-        Integer cantidad = -Integer.parseInt(txtCantidadMovimiento.getText()); // Negativo para disminuir
+        Integer idProducto = Integer.parseInt(txtId.getText());
+        Integer cantidadAReducir = Integer.parseInt(txtCantidadMovimiento.getText());
 
-        // Ejecutar en segundo plano
-        new Thread(() -> {
-            try {
-                ProductoFX productoActualizado = productoService.actualizarStock(id, cantidad);
+        if (cantidadAReducir <= 0) {
+            lblMensaje.setText("La cantidad debe ser un número positivo.");
+            return;
+        }
 
-                Platform.runLater(() -> {
-                    lblMensaje.setText("Stock disminuido correctamente.");
-                    cargarProductoEnFormulario(productoActualizado);
-                    txtCantidadMovimiento.clear();
-                    cargarDatos();
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    lblMensaje.setText("Error al disminuir stock: " + e.getMessage());
-                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo disminuir el stock", e.getMessage());
-                });
+        // Mostrar confirmación
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar operación");
+        confirmacion.setHeaderText("¿Está seguro de disminuir " + cantidadAReducir + " unidades del stock?");
+        confirmacion.setContentText("Esta operación reducirá la cantidad de los lotes más próximos a vencer.");
+
+        confirmacion.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                // Ejecutar en segundo plano
+                new Thread(() -> {
+                    try {
+                        // Llamar al método que reduce la cantidad de lotes
+                        loteService.reducirCantidadDeLotes(idProducto, cantidadAReducir);
+
+                        // Obtener el producto actualizado para mostrar en el formulario
+                        ProductoFX productoActualizado = productoService.obtenerPorId(idProducto);
+
+                        Platform.runLater(() -> {
+                            lblMensaje.setText("Stock disminuido correctamente. Se han actualizado los lotes correspondientes.");
+                            cargarProductoEnFormulario(productoActualizado);
+                            txtCantidadMovimiento.clear();
+                            cargarDatos();
+                        });
+                    } catch (Exception e) {
+                        Platform.runLater(() -> {
+                            lblMensaje.setText("Error al disminuir stock: " + e.getMessage());
+                            mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo disminuir el stock", e.getMessage());
+                        });
+                    }
+                }).start();
             }
-        }).start();
+        });
     }
 
     @FXML

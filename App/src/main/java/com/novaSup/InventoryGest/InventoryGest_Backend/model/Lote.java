@@ -29,6 +29,10 @@ public class Lote {
     @Column(name = "numero_lote", length = 50)
     private String numeroLote;
 
+    @Column(name = "fecha_entrada")
+    @Temporal(TemporalType.DATE)
+    private Date fechaEntrada;
+
     @Column(name = "fecha_vencimiento")
     @Temporal(TemporalType.DATE)
     private Date fechaVencimiento;

@@ -86,6 +86,26 @@ public class InventarioControllerFX implements Initializable {
     @FXML
     void irGestionLotes(ActionEvent event) {
 
+        try {
+            // Obtener el Stage actual
+            Stage stage = (Stage) btnLotes.getScene().getWindow();
+
+            // Obtener el controlador del MenuPrincipal desde userData
+            MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
+
+            // Cargar el módulo de gestión de proveedores
+            menuController.cargarModuloEnPanel(PathsFXML.GEST_LOTES);
+
+            // Actualizar el estado
+            lblStatus.setText("Módulo de gestión de lotes cargado");
+        } catch (Exception e) {
+            System.err.println("Error al cargar el módulo de lotes: " + e.getMessage());
+            e.printStackTrace();
+
+            // Actualizar mensaje de estado en caso de error
+            lblStatus.setText("Error al cargar módulo de lotes");
+        }
+
     }
 
     @FXML

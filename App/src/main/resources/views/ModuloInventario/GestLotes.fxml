@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario.LoteControllerFX"
+            prefHeight="600.0" prefWidth="1000.0">
+
+    <top>
+        <VBox spacing="10.0">
+            <padding>
+                <Insets top="15.0" right="15.0" bottom="10.0" left="15.0"/>
+            </padding>
+
+            <!-- Encabezado -->
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <Label text="Gestión de Lotes" styleClass="module-title">
+                    <font>
+                        <Font name="System Bold" size="20.0"/>
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="nuevoLoteButton" text="Nuevo Lote" onAction="#mostrarFormularioNuevoLote"
+                        styleClass="button-success">
+                    <graphic>
+                        <Region styleClass="icon-add" />
+                    </graphic>
+                </Button>
+            </HBox>
+
+            <!-- Panel de filtros colapsable -->
+            <TitledPane text="Filtros de búsqueda" expanded="false" styleClass="filter-panel">
+                <VBox spacing="10.0">
+                    <!-- Filtro por producto y estado -->
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Label text="Producto:" styleClass="filter-label" />
+                        <ComboBox fx:id="productoComboBox" prefWidth="200.0" promptText="Todos los productos" />
+
+                        <Separator orientation="VERTICAL" />
+
+                        <Label text="Estado:" styleClass="filter-label" />
+                        <ComboBox fx:id="estadoComboBox" prefWidth="150.0">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Todos" />
+                                    <String fx:value="Activos" />
+                                    <String fx:value="Inactivos" />
+                                    <String fx:value="Próximos a vencer" />
+                                </FXCollections>
+                            </items>
+                            <value>
+                                <String fx:value="Activos" />
+                            </value>
+                        </ComboBox>
+
+                        <Label text="Días alerta:" styleClass="filter-label" />
+                        <TextField fx:id="diasAlertaField" prefWidth="60.0" text="30" />
+                    </HBox>
+
+                    <!-- Filtro por fechas -->
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Label text="Rango de fechas:" styleClass="filter-label" />
+                        <ComboBox fx:id="tipoFechaComboBox" prefWidth="120.0">
+                            <items>
+                                <FXCollections fx:factory="observableArrayList">
+                                    <String fx:value="Fecha entrada" />
+                                    <String fx:value="Fecha vencimiento" />
+                                </FXCollections>
+                            </items>
+                            <value>
+                                <String fx:value="Fecha entrada" />
+                            </value>
+                        </ComboBox>
+
+                        <DatePicker fx:id="fechaInicioDatePicker" promptText="Fecha inicio" />
+                        <Label text="hasta" />
+                        <DatePicker fx:id="fechaFinDatePicker" promptText="Fecha fin" />
+                    </HBox>
+
+                    <!-- Botones de acción para filtros -->
+                    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                        <Button fx:id="filtrarButton" text="Aplicar filtros" onAction="#filtrarLotes"
+                                styleClass="button-primary">
+                            <graphic>
+                                <Region styleClass="icon-search" />
+                            </graphic>
+                        </Button>
+                        <Button fx:id="limpiarFiltrosButton" text="Limpiar filtros" onAction="#limpiarFiltros"
+                                styleClass="button-secondary">
+                            <graphic>
+                                <Region styleClass="icon-clear" />
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+            </TitledPane>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.7" VBox.vgrow="ALWAYS">
+            <!-- Panel izquierdo con la tabla de lotes -->
+            <VBox spacing="10.0">
+                <padding>
+                    <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                </padding>
+
+                <TableView fx:id="lotesTableView" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="idLoteColumn" text="ID" prefWidth="60.0" />
+                        <TableColumn fx:id="productoColumn" text="Producto" prefWidth="150.0" />
+                        <TableColumn fx:id="numeroLoteColumn" text="Nº Lote" prefWidth="100.0" />
+                        <TableColumn fx:id="fechaEntradaColumn" text="Fecha Entrada" prefWidth="120.0" />
+                        <TableColumn fx:id="fechaVencimientoColumn" text="Fecha Venc." prefWidth="120.0" />
+                        <TableColumn fx:id="diasRestantesColumn" text="Días Rest." prefWidth="90.0" />
+                        <TableColumn fx:id="cantidadColumn" text="Cant." prefWidth="80.0" />
+                        <TableColumn fx:id="estadoColumn" text="Estado" prefWidth="80.0" />
+                        <TableColumn fx:id="accionesColumn" text="Acciones" prefWidth="120.0" />
+                    </columns>
+                    <placeholder>
+                        <Label text="No hay lotes disponibles con los filtros actuales" />
+                    </placeholder>
+                </TableView>
+
+                <!-- Barra de estadísticas -->
+                <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="stats-bar">
+                    <Label text="Total:" styleClass="stats-label" />
+                    <Label fx:id="totalLotesLabel" text="0" styleClass="stats-value" />
+
+                    <Separator orientation="VERTICAL" />
+
+                    <Label text="Próximos a vencer:" styleClass="stats-label" />
+                    <Label fx:id="proximosVencerLabel" text="0" styleClass="stats-warning-value" />
+
+                    <Separator orientation="VERTICAL" />
+
+                    <Label text="Vencidos:" styleClass="stats-label" />
+                    <Label fx:id="vencidosLabel" text="0" styleClass="stats-danger-value" />
+                </HBox>
+            </VBox>
+
+            <!-- Panel derecho con detalles del lote -->
+            <VBox fx:id="detallePane" styleClass="detail-panel">
+                <padding>
+                    <Insets top="15.0" right="15.0" bottom="15.0" left="15.0"/>
+                </padding>
+
+                <Label text="Detalle de Lote" styleClass="panel-title">
+                    <font>
+                        <Font name="System Bold" size="16.0"/>
+                    </font>
+                </Label>
+                <Separator />
+
+                <ScrollPane fitToWidth="true" styleClass="transparent-background" VBox.vgrow="ALWAYS">
+                    <VBox spacing="15.0">
+                        <padding>
+                            <Insets top="10.0" />
+                        </padding>
+
+                        <!-- Información básica del lote -->
+                        <TitledPane text="Información básica" expanded="true">
+                            <GridPane vgap="8.0" hgap="10.0">
+                                <columnConstraints>
+                                    <ColumnConstraints prefWidth="120.0" />
+                                    <ColumnConstraints prefWidth="150.0" />
+                                </columnConstraints>
+
+                                <Label text="ID:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                                       styleClass="detail-label" />
+                                <Label fx:id="detalleIdLabel" text="" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                                       styleClass="detail-value" />
+
+                                <Label text="Número Lote:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                                       styleClass="detail-label" />
+                                <TextField fx:id="txtDetalleNumeroLote" text="" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="1" styleClass="detail-value" />
+
+                                <Label text="Producto:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                                       styleClass="detail-label" />
+                                <ComboBox fx:id="cmbDetalleProducto" GridPane.columnIndex="1"
+                                          GridPane.rowIndex="2" prefWidth="150.0" styleClass="detail-value" />
+
+                                <Label text="Cantidad:" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                                       styleClass="detail-label" />
+                                <TextField fx:id="txtDetalleCantidad" text="" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="3" styleClass="detail-value" />
+
+                                <Label text="Estado:" GridPane.columnIndex="0" GridPane.rowIndex="4"
+                                       styleClass="detail-label" />
+                                <CheckBox fx:id="chkDetalleEstado" text="Activo" selected="true" GridPane.columnIndex="1"
+                                          GridPane.rowIndex="4" styleClass="detail-value" />
+                            </GridPane>
+                        </TitledPane>
+
+                        <!-- Información de fechas -->
+                        <TitledPane text="Fechas" expanded="true">
+                            <GridPane vgap="8.0" hgap="10.0">
+                                <columnConstraints>
+                                    <ColumnConstraints prefWidth="120.0" />
+                                    <ColumnConstraints prefWidth="150.0" />
+                                </columnConstraints>
+
+                                <Label text="Fecha Entrada:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                                       styleClass="detail-label" />
+                                <DatePicker fx:id="dpFechaEntrada" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="0" styleClass="detail-value" />
+
+                                <Label text="Fecha Venc.:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                                       styleClass="detail-label" />
+                                <DatePicker fx:id="dpDetalleFechaVencimiento" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="1" styleClass="detail-value" />
+
+                                <Label text="Días Restantes:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                                       styleClass="detail-label" />
+                                <Label fx:id="detalleDiasRestantesLabel" text="" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="2" styleClass="detail-value" />
+                            </GridPane>
+                        </TitledPane>
+
+                        <!-- Información adicional -->
+                        <TitledPane text="Información relacionada" expanded="false">
+                            <GridPane vgap="8.0" hgap="10.0">
+                                <columnConstraints>
+                                    <ColumnConstraints prefWidth="120.0" />
+                                    <ColumnConstraints prefWidth="150.0" />
+                                </columnConstraints>
+
+                                <Label text="ID Entrada:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                                       styleClass="detail-label" />
+                                <Label fx:id="detalleIdEntradaLabel" text="" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="0" styleClass="detail-value" />
+
+                                <Label text="Fecha Registro:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                                       styleClass="detail-label" />
+                                <Label fx:id="detalleFechaRegistroLabel" text="" GridPane.columnIndex="1"
+                                       GridPane.rowIndex="1" styleClass="detail-value" />
+                            </GridPane>
+                        </TitledPane>
+                    </VBox>
+                </ScrollPane>
+
+                <!-- Botones de acción -->
+                <VBox spacing="10.0" alignment="CENTER">
+                    <padding>
+                        <Insets top="15.0" />
+                    </padding>
+
+                    <HBox spacing="10.0">
+                        <!-- Botón Guardar - visible solo en modo edición -->
+                        <Button fx:id="btnGuardarCambios" text="Guardar Cambios" onAction="#guardarCambios"
+                                styleClass="button-success" maxWidth="Infinity" HBox.hgrow="ALWAYS" visible="false">
+                            <graphic>
+                                <Region styleClass="icon-save" />
+                            </graphic>
+                        </Button>
+
+                        <!-- Botón Cancelar - visible solo en modo edición -->
+                        <Button fx:id="btnCancelarEdicion" text="Cancelar" onAction="#cancelarEdicion"
+                                styleClass="button-secondary" maxWidth="Infinity" HBox.hgrow="ALWAYS" visible="false">
+                            <graphic>
+                                <Region styleClass="icon-cancel" />
+                            </graphic>
+                        </Button>
+                    </HBox>
+
+                    <!-- Botones en modo visualización -->
+                    <HBox spacing="10.0">
+
+                        <!-- Botón Desactivar - visible solo en modo visualización para lotes activos -->
+                        <Button fx:id="btnCambiarEstado" text="Desactivar" onAction="#cambiarEstadoLote"
+                                styleClass="button-warning" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                            <graphic>
+                                <Region styleClass="icon-deactivate" />
+                            </graphic>
+                        </Button>
+                    </HBox>
+
+                    <Button fx:id="verEntradaButton" text="Ver Entrada Asociada(IMPLEMENTAR LUEGO)"
+                            styleClass="button-info" maxWidth="Infinity">
+                        <graphic>
+                            <Region styleClass="icon-view" />
+                        </graphic>
+                    </Button>
+                </VBox>
+            </VBox>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="status-bar">
+            <padding>
+                <Insets top="5.0" right="15.0" bottom="5.0" left="15.0"/>
+            </padding>
+            <Label fx:id="statusLabel" text="Listo" />
+            <Region HBox.hgrow="ALWAYS" />
+            <ProgressIndicator fx:id="progressIndicator" visible="false" prefHeight="20.0" prefWidth="20.0" />
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -5,14 +5,18 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.CategoriaRepos
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.EntradaProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +36,9 @@ public class ProductoServiceImpl implements ProductoService {
     private ProveedorRepository proveedorRepository;
 
     @Autowired
+    private StockServiceImpl stockService;
+
+    @Autowired
     private EntradaProductoService entradaProductoService;
 
     @Autowired
@@ -42,38 +49,55 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public List<Producto> obtenerTodos() {
-        return productoRepository.findAll();
+        List<Producto> productos = productoRepository.findAll();
+        productos.forEach(this::actualizarStockDesdeLoterRepositorio);
+        return productos;
     }
 
     @Override
     public List<Producto> obtenerActivos() {
-        return productoRepository.findByEstadoTrue();
+        List<Producto> productos = productoRepository.findByEstadoTrue();
+        productos.forEach(this::actualizarStockDesdeLoterRepositorio);
+        return productos;
     }
 
     @Override
     public Optional<Producto> obtenerPorId(Integer id) {
-        return productoRepository.findById(id);
+        Optional<Producto> producto = productoRepository.findById(id);
+        producto.ifPresent(this::actualizarStockDesdeLoterRepositorio);
+        return producto;
     }
 
     @Override
     public Optional<Producto> obtenerPorCodigo(String codigo) {
-        return productoRepository.findByCodigo(codigo);
+        Optional<Producto> producto = productoRepository.findByCodigo(codigo);
+        producto.ifPresent(this::actualizarStockDesdeLoterRepositorio);
+        return producto;
     }
 
     @Override
     public List<Producto> obtenerPorCategoria(Integer idCategoria) {
-        return productoRepository.findByCategoria_IdCategoria(idCategoria);
+        List<Producto> productos = productoRepository.findByCategoria_IdCategoria(idCategoria);
+        productos.forEach(this::actualizarStockDesdeLoterRepositorio);
+        return productos;
     }
 
     @Override
     public List<Producto> obtenerConStockBajo() {
-        return productoRepository.findProductosConStockBajo();
+        // Primero actualizamos el stock de todos los productos
+        List<Producto> todosProductos = productoRepository.findAll();
+        todosProductos.forEach(this::actualizarStockDesdeLoterRepositorio);
+
+        // Luego filtramos los que están por debajo del mínimo
+        return todosProductos.stream()
+                .filter(p -> p.getEstado() && p.getStockMinimo() != null && p.getStock() <= p.getStockMinimo())
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public Producto guardar(Producto producto) {
-        // Validaciones
+        // Validaciones básicas
         if (producto.getPrecioCosto().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("El precio de costo debe ser positivo");
         }
@@ -82,9 +106,7 @@ public class ProductoServiceImpl implements ProductoService {
             throw new IllegalArgumentException("El precio de venta debe ser positivo");
         }
 
-        if (producto.getStock() < 0) {
-            throw new IllegalArgumentException("El stock no puede ser negativo");
-        }
+        // No validamos stock negativo ya que ahora se calculará desde los lotes
 
         // Validar código único para productos nuevos
         if (producto.getIdProducto() == null &&
@@ -104,12 +126,19 @@ public class ProductoServiceImpl implements ProductoService {
             proveedor.ifPresent(producto::setProveedor);
         }
 
-        return productoRepository.save(producto);
+        Producto guardado = productoRepository.save(producto);
+
+        // Actualizamos el stock desde los lotes después de guardar
+        actualizarStockDesdeLoterRepositorio(guardado);
+
+        return guardado;
     }
 
     @Override
     public List<Producto> buscarPorFiltros(String nombre, String codigo, Integer idCategoria, Boolean estado) {
-        return productoRepository.buscarPorFiltros(nombre, codigo, idCategoria, estado);
+        List<Producto> productos = productoRepository.buscarPorFiltros(nombre, codigo, idCategoria, estado);
+        productos.forEach(this::actualizarStockDesdeLoterRepositorio);
+        return productos;
     }
 
     @Override
@@ -119,7 +148,10 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public List<Producto> obtenerConSobrestock() {
-        return productoRepository.findAll().stream()
+        List<Producto> todosProductos = productoRepository.findAll();
+        todosProductos.forEach(this::actualizarStockDesdeLoterRepositorio);
+
+        return todosProductos.stream()
                 .filter(p -> p.getStockMaximo() != null && p.getStock() > p.getStockMaximo())
                 .collect(Collectors.toList());
     }
@@ -127,9 +159,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public boolean tieneMovimientosAsociados(Integer idProducto) {
         // Verificar en ventas, entradas, etc.
-        return entradaProductoService.existsEntradaByProductoId(idProducto) ||
-                // Aquí agregarías más validaciones cuando tengas servicios de ventas, etc.
-                false;
+        return entradaProductoService.existsEntradaByProductoId(idProducto);
     }
 
     @Override
@@ -148,23 +178,22 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public Optional<Producto> actualizarStock(Integer idProducto, Integer nuevoStock) {
+        // Este método ya no establece directamente el stock,
+        // ahora lo calcula desde los lotes
         return obtenerPorId(idProducto)
                 .map(producto -> {
-                    producto.setStock(nuevoStock);
-                    Producto productoActualizado = guardar(producto);
+                    actualizarStockDesdeLoterRepositorio(producto);
 
-                    // Verificar stock mínimo y máximo para generar notificaciones automáticas
-                    if (producto.getStockMinimo() != null && nuevoStock <= producto.getStockMinimo()) {
-                        // Pasar el objeto producto completo
-                        notificacionService.notificarStockBajo(productoActualizado);
+                    // Verificar stock mínimo y máximo para generar notificaciones
+                    if (producto.getStockMinimo() != null && producto.getStock() <= producto.getStockMinimo()) {
+                        notificacionService.notificarStockBajo(producto);
                     }
 
-                    if (producto.getStockMaximo() != null && nuevoStock > producto.getStockMaximo()) {
-                        // Pasar el objeto producto completo
-                        notificacionService.notificarSobrestock(productoActualizado);
+                    if (producto.getStockMaximo() != null && producto.getStock() > producto.getStockMaximo()) {
+                        notificacionService.notificarSobrestock(producto);
                     }
 
-                    return productoActualizado;
+                    return producto;
                 });
     }
 
@@ -186,27 +215,38 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public List<Producto> obtenerPorProveedor(Integer idProveedor) {
-        return productoRepository.findByProveedor_IdProveedor(idProveedor);
+        List<Producto> productos = productoRepository.findByProveedor_IdProveedor(idProveedor);
+        productos.forEach(this::actualizarStockDesdeLoterRepositorio);
+        return productos;
     }
 
+    // Método para actualizar el stock desde los lotes
+    private void actualizarStockDesdeLoterRepositorio(Producto producto) {
+        if (producto == null || producto.getIdProducto() == null) return;
 
+        stockService.actualizarStockProducto(producto.getIdProducto());
+    }
 
     public Map<String, Object> obtenerDetallesProducto(Integer idProducto) {
         Map<String, Object> detalles = new HashMap<>();
 
-        // Obtener el producto
-        Optional<Producto> producto = obtenerPorId(idProducto);
-        if (!producto.isPresent()) {
+        Optional<Producto> productoOpt = obtenerPorId(idProducto);
+        if (!productoOpt.isPresent()) {
             return detalles;
         }
 
-        detalles.put("producto", producto.get());
+        Producto producto = productoOpt.get();
+        actualizarStockDesdeLoterRepositorio(producto);
+
+        detalles.put("producto", producto);
 
         // Añadir promociones activas
         List<Promocion> promociones = promocionService.obtenerPromocionesActivasPorProducto(idProducto);
         detalles.put("promociones", promociones);
 
-        // Resto de lógica existente...
+        // Usar stockService para obtener los lotes
+        List<Lote> lotes = stockService.obtenerLotesActivosPorProducto(idProducto);
+        detalles.put("lotes", lotes);
 
         return detalles;
     }

@@ -23,4 +23,6 @@ public class PathsFXML {
     public static final String CRUD_PRDUCTOS = "/views/ModuloInventario/CRUDProductos.fxml";
     public static final String GEST_CATEGORIAS = "/views/ModuloInventario/GestCategorias.fxml";
     public static final String GEST_PROVEEDORES = "/views/ModuloInventario/GestProveedores.fxml";
+    public static final String GEST_LOTES = "/views/ModuloInventario/GestLotes.fxml";
+
 }

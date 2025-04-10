@@ -190,78 +190,32 @@ public class ProductoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Establecer stock directamente (método actual)
-    @PatchMapping("/{id}/stock/establecer")
-    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('editar_producto')")
-    public ResponseEntity<?> establecerStock(@PathVariable Integer id, @RequestParam Integer cantidad) {
-        if (cantidad < 0) {
-            return ResponseEntity.badRequest().body(Map.of("mensaje", "El stock no puede ser negativo"));
-        }
-
-        return productoService.obtenerPorId(id)
-                .map(producto -> {
-                    Integer stockOriginal = producto.getStock();
-                    Producto productoAnterior = new Producto();
-                    productoAnterior.setIdProducto(producto.getIdProducto());
-                    productoAnterior.setStock(stockOriginal);
-
-                    Producto actualizado = productoService.actualizarStock(id, cantidad).orElse(null);
-
-                    if (actualizado != null) {
-                        auditoriaService.registrarAccion(
-                                "ESTABLECER_STOCK",
-                                "productos",
-                                id,
-                                productoAnterior,
-                                actualizado,
-                                null
-                        );
-                        return ResponseEntity.ok(actualizado);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    }
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // Incrementar o decrementar stock
     @PatchMapping("/{id}/stock/ajustar")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('editar_producto')")
     public ResponseEntity<?> ajustarStock(@PathVariable Integer id, @RequestParam Integer cantidad) {
-        return productoService.obtenerPorId(id)
-                .map(producto -> {
-                    Integer stockOriginal = producto.getStock();
-                    Integer nuevoStock = stockOriginal + cantidad;
-
-                    if (nuevoStock < 0) {
-                        return ResponseEntity.badRequest().body(Map.of(
-                                "mensaje", "El stock resultante sería negativo",
-                                "stockActual", stockOriginal,
-                                "ajusteSolicitado", cantidad
-                        ));
-                    }
-
-                    Producto productoAnterior = new Producto();
-                    productoAnterior.setIdProducto(producto.getIdProducto());
-                    productoAnterior.setStock(stockOriginal);
-
-                    Producto actualizado = productoService.actualizarStock(id, nuevoStock).orElse(null);
-
-                    if (actualizado != null) {
-                        auditoriaService.registrarAccion(
-                                cantidad >= 0 ? "INCREMENTAR_STOCK" : "DECREMENTAR_STOCK",
-                                "productos",
-                                id,
-                                productoAnterior,
-                                actualizado,
-                                null
-                        );
-                        return ResponseEntity.ok(actualizado);
-                    } else {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-                    }
-                })
-                .orElse(ResponseEntity.notFound().build());
+        if (cantidad > 0) {
+            // Si es un incremento, redirigir a la creación de un nuevo lote
+            return ResponseEntity.badRequest().body(Map.of(
+                    "mensaje", "Para aumentar el stock, debe crear un nuevo lote a través de /api/lotes"
+            ));
+        } else if (cantidad < 0) {
+            // Si es una reducción, utilizar la funcionalidad de reducir lotes
+            try {
+                loteService.reducirCantidadDeLotes(id, Math.abs(cantidad));
+                return ResponseEntity.ok(Map.of(
+                        "mensaje", "Stock reducido correctamente a través de los lotes"
+                ));
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", e.getMessage()
+                ));
+            }
+        } else {
+            // Si es cero, no hacer nada
+            return ResponseEntity.ok(Map.of(
+                    "mensaje", "No se realizó ningún cambio en el stock"
+            ));
+        }
     }
 
     @PatchMapping("/{id}/desactivar")
