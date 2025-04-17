@@ -8,6 +8,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IE
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -474,19 +475,31 @@ public class ProductoControllerFX implements Initializable {
             // Mostrar mensaje de éxito
             lblMensaje.setText("Producto guardado correctamente");
 
-            // Mostrar alerta preguntando si desea crear un lote
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Crear lote");
-            alert.setHeaderText("¿Deseas crear un lote para este producto?");
-            alert.setContentText("Esto te permitirá agregar stock inicial.");
+            // Verificar si el producto tiene un proveedor asignado
+            if (productoGuardado.getIdProveedor() == null) {
+                // Mostrar alerta informando que no se puede crear un lote sin proveedor
+                mostrarAlerta(Alert.AlertType.WARNING, "Aviso", "No se puede crear lote",
+                        "No se puede crear un lote para este producto porque no tiene un proveedor asignado. " +
+                                "Por favor, asigne un proveedor al producto antes de crear un lote.");
 
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                abrirVentanaCrearLote(productoGuardado);
-            } else {
-                // Si no desea crear lote, solo limpiar campos y actualizar tabla
+                // Limpiar campos y actualizar tabla
                 limpiarCampos();
                 cargarDatos();
+            } else {
+                // Si hay proveedor, preguntar si desea crear un lote
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Crear lote");
+                alert.setHeaderText("¿Deseas crear un lote para este producto?");
+                alert.setContentText("Esto te permitirá agregar stock inicial.");
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    abrirVentanaCrearLote(productoGuardado, "ENTRADA");
+                } else {
+                    // Si no desea crear lote, solo limpiar campos y actualizar tabla
+                    limpiarCampos();
+                    cargarDatos();
+                }
             }
 
         } catch (Exception e) {
@@ -496,10 +509,10 @@ public class ProductoControllerFX implements Initializable {
         }
     }
 
-    private void abrirVentanaCrearLote(ProductoFX producto) {
+    private void abrirVentanaCrearLote(ProductoFX producto, String operacion) {
         try {
             // Cargar el archivo FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloInventario/DialogoAddLote.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.VENTANA_CREATELOTE));
             Parent root = loader.load();
 
             // Obtener el controlador y configurarlo
@@ -512,12 +525,13 @@ public class ProductoControllerFX implements Initializable {
                     applicationContext.getBean(IEntradaProductoService.class)
             );
 
-            controller.inicializar(producto);
+            // Inicializar el controlador con el producto y la operación
+            controller.inicializar(producto, operacion);
 
             // Crear y configurar la escena
             Scene scene = new Scene(root);
             Stage stage = new Stage();
-            stage.setTitle("Agregar Lote - " + producto.getNombre());
+            stage.setTitle(operacion + " - " + producto.getNombre());
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -533,7 +547,7 @@ public class ProductoControllerFX implements Initializable {
 
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al abrir ventana",
-                    "No se pudo abrir la ventana para crear lote: " + e.getMessage());
+                    "No se pudo abrir la ventana para " + operacion.toLowerCase() + ": " + e.getMessage());
         }
     }
 
@@ -646,44 +660,6 @@ public class ProductoControllerFX implements Initializable {
 
     }
 
-/*    @FXML
-    public void aumentarStock() {
-        // Verificar permisos antes de proceder
-        if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
-            return;
-        }
-        if (txtId.getText().isEmpty()) {
-            lblMensaje.setText("Debe seleccionar un producto para aumentar stock.");
-            return;
-        }
-
-        if (txtCantidadMovimiento.getText().isEmpty()) {
-            lblMensaje.setText("Debe ingresar una cantidad.");
-            return;
-        }
-
-        Integer id = Integer.parseInt(txtId.getText());
-        Integer cantidad = Integer.parseInt(txtCantidadMovimiento.getText());
-
-        // Ejecutar en segundo plano
-        new Thread(() -> {
-            try {
-                ProductoFX productoActualizado = productoService.actualizarStock(id, cantidad);
-
-                Platform.runLater(() -> {
-                    lblMensaje.setText("Stock aumentado correctamente.");
-                    cargarProductoEnFormulario(productoActualizado);
-                    txtCantidadMovimiento.clear();
-                    cargarDatos();
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    lblMensaje.setText("Error al aumentar stock: " + e.getMessage());
-                    mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo aumentar el stock", e.getMessage());
-                });
-            }
-        }).start();
-    }*/
 
     @FXML
     public void disminuirStock() {
@@ -791,7 +767,6 @@ public class ProductoControllerFX implements Initializable {
         if (txtPrecioVenta.getText().isEmpty()) {
             errores.append("El precio de venta es obligatorio.\n");
         }
-
 
         if (errores.length() > 0) {
             lblMensaje.setText(errores.toString());

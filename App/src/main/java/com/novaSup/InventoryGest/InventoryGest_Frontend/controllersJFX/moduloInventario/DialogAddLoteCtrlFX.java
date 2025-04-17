@@ -41,10 +41,10 @@ public class DialogAddLoteCtrlFX {
     private ILoteService loteService;
     private IProductoService productoService;
     private ProductoFX productoSeleccionado;
-
-    //Apartir de esto registrar movimiento(Movimiento inicial)
     private IEntradaProductoService registroMovimientoProducto;
 
+    //ALMACENAR OPERACION
+    private String tipoOperacion;
 
 
     public void setServicios(ILoteService loteService, IProductoService productoService,
@@ -54,8 +54,9 @@ public class DialogAddLoteCtrlFX {
         this.registroMovimientoProducto = entradaProductoService;
     }
 
-    public void inicializar(ProductoFX producto) {
+    public void inicializar(ProductoFX producto, String operacion) {
         this.productoSeleccionado = producto;
+        this.tipoOperacion = operacion;
 
         // Configurar la interfaz con los datos del producto
         lblNombreProducto.setText(producto.getNombre());
@@ -120,7 +121,7 @@ public class DialogAddLoteCtrlFX {
             registroMovimientoProducto.registrarMovimiento(
                     productoSeleccionado.getIdProducto(),
                     cantidad,
-                    "ENTRADA_LOTE",
+                    tipoOperacion,
                     productoSeleccionado.getPrecioCosto(),
                     productoSeleccionado.getIdProveedor(),
                     "Creación de lote: " + loteCreado.getNumeroLote()
