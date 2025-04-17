@@ -16,36 +16,43 @@
 <?import javafx.scene.text.Font?>
 
 <BorderPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario.RegisMovimientCtrlFX">
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario.RegisMovimientCtrlFX"
+            style="-fx-background-color: #F5F5F5;">
 
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
     </padding>
 
     <top>
-        <VBox spacing="10">
-            <Label text="Historial de Movimientos de Stock" BorderPane.alignment="CENTER">
+        <VBox spacing="5" style="-fx-background-color: white; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);">
+            <padding>
+                <Insets top="5.0" right="5.0" bottom="5.0" left="5.0" />
+            </padding>
+
+            <Label text="Historial de Movimientos de Stock" BorderPane.alignment="CENTER" style="-fx-text-fill: #2C3E50;">
                 <font>
-                    <Font size="18.0" />
+                    <Font name="System Bold" size="16.0" />
                 </font>
             </Label>
 
             <!-- Filtros -->
-            <HBox spacing="10.0" alignment="CENTER_LEFT">
+            <HBox spacing="8.0" alignment="CENTER_LEFT">
                 <ComboBox fx:id="cmbProducto" prefWidth="150.0" promptText="Filtrar por producto" />
                 <DatePicker fx:id="dpFechaDesde" promptText="Desde" />
                 <DatePicker fx:id="dpFechaHasta" promptText="Hasta" />
                 <ComboBox fx:id="cmbTipoMovimiento" prefWidth="120.0" promptText="Tipo movimiento" />
-                <Button fx:id="btnFiltrar" onAction="#filtrarHistorial" text="Filtrar" />
-                <Button fx:id="btnLimpiarFiltros" onAction="#limpiarFiltros" text="Limpiar" />
+                <Button fx:id="btnFiltrar" onAction="#filtrarHistorial" text="Filtrar" style="-fx-background-color: #3498DB; -fx-text-fill: white;" />
+                <Button fx:id="btnLimpiarFiltros" onAction="#limpiarFiltros" text="Limpiar" style="-fx-background-color: #95A5A6; -fx-text-fill: white;" />
             </HBox>
 
             <Separator />
 
-            <!-- Botones para registrar movimientos -->
-            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                <Button fx:id="btnRegistrarEntrada" onAction="#mostrarFormularioEntrada" text="Registrar Entrada" />
-                <Button fx:id="btnRegistrarSalida" onAction="#mostrarFormularioSalida" text="Registrar Salida" />
+            <!-- Botones para editar/eliminar movimientos -->
+            <HBox spacing="8.0" alignment="CENTER_LEFT">
+                <Button fx:id="btnEditarMovimiento" onAction="#editarMovimientoSeleccionado" text="Editar"
+                        style="-fx-background-color: #F39C12; -fx-text-fill: white;" />
+                <Button fx:id="btnEliminarMovimiento" onAction="#eliminarMovimientoSeleccionado" text="Eliminar"
+                        style="-fx-background-color: #C0392B; -fx-text-fill: white;" />
                 <ProgressIndicator fx:id="progressIndicator" visible="false" prefHeight="20.0" prefWidth="20.0" />
                 <Label fx:id="statusLabel" text="" />
             </HBox>
@@ -53,25 +60,37 @@
     </top>
 
     <center>
-        <VBox spacing="10">
-            <TableView fx:id="tablaHistorial" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colIdEntrada" prefWidth="60.0" text="ID" />
-                    <TableColumn fx:id="colNombreProducto" prefWidth="150.0" text="Producto" />
-                    <TableColumn fx:id="colNombreProveedor" prefWidth="120.0" text="Proveedor" />
-                    <TableColumn fx:id="colCantidad" prefWidth="70.0" text="Cantidad" />
-                    <TableColumn fx:id="colPrecioUnitario" prefWidth="100.0" text="Precio Unit." />
-                    <TableColumn fx:id="colFecha" prefWidth="130.0" text="Fecha" />
-                    <TableColumn fx:id="colTipoMovimiento" prefWidth="100.0" text="Tipo Mov." />
-                    <TableColumn fx:id="colMotivo" prefWidth="150.0" text="Motivo" />
-                </columns>
-            </TableView>
-        </VBox>
+        <TableView fx:id="tablaHistorial" VBox.vgrow="ALWAYS" BorderPane.alignment="CENTER"
+                   style="-fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);">
+            <BorderPane.margin>
+                <Insets top="5.0" />
+            </BorderPane.margin>
+            <columns>
+                <TableColumn fx:id="colIdEntrada" prefWidth="50.0" text="ID" />
+                <TableColumn fx:id="colNombreProducto" prefWidth="140.0" text="Producto" />
+                <TableColumn fx:id="colNombreProveedor" prefWidth="120.0" text="Proveedor" />
+                <TableColumn fx:id="colCantidad" prefWidth="70.0" text="Cantidad" />
+                <TableColumn fx:id="colPrecioUnitario" prefWidth="90.0" text="Precio Unit." />
+                <TableColumn fx:id="colFecha" prefWidth="110.0" text="Fecha" />
+                <TableColumn fx:id="colTipoMovimiento" prefWidth="90.0" text="Tipo Mov." />
+                <TableColumn fx:id="colMotivo" prefWidth="210.0" text="Motivo" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
     </center>
 
     <bottom>
-        <VBox fx:id="formularioMovimiento" visible="false" spacing="10" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
-            <Label fx:id="lblTituloFormulario" text="Registrar Nuevo Movimiento" style="-fx-font-weight: bold;">
+        <VBox fx:id="formularioMovimiento" visible="false" managed="false" spacing="8"
+              style="-fx-background-color: white; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);">
+            <BorderPane.margin>
+                <Insets top="5.0" />
+            </BorderPane.margin>
+            <padding>
+                <Insets top="5.0" right="5.0" bottom="5.0" left="5.0" />
+            </padding>
+            <Label fx:id="lblTituloFormulario" text="Modificar Movimiento" style="-fx-text-fill: #2C3E50; -fx-font-weight: bold;">
                 <font>
                     <Font size="14.0" />
                 </font>
@@ -85,12 +104,12 @@
 
             <HBox spacing="10" alignment="CENTER_LEFT">
                 <ComboBox fx:id="cmbFormProveedor" prefWidth="200.0" promptText="Seleccionar proveedor" />
-                <TextField fx:id="txtMotivo" prefWidth="300.0" promptText="Motivo" />
+                <TextField fx:id="txtMotivo" prefWidth="300.0" promptText="Motivo" HBox.hgrow="ALWAYS" />
             </HBox>
 
             <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button fx:id="btnCancelarRegistro" onAction="#cancelarRegistroMovimiento" text="Cancelar" />
-                <Button fx:id="btnGuardarMovimiento" onAction="#guardarMovimiento" text="Guardar" />
+                <Button fx:id="btnCancelarRegistro" onAction="#cancelarRegistroMovimiento" text="Cancelar" style="-fx-background-color: #95A5A6; -fx-text-fill: white;" />
+                <Button fx:id="btnGuardarMovimiento" onAction="#guardarMovimiento" text="Guardar cambios" style="-fx-background-color: #3498DB; -fx-text-fill: white;" />
             </HBox>
         </VBox>
     </bottom>

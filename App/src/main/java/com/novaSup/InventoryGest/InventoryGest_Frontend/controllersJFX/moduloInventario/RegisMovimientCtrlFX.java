@@ -24,6 +24,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Component
@@ -33,10 +34,6 @@ public class RegisMovimientCtrlFX implements Initializable {
     @FXML private DatePicker dpFechaDesde;
     @FXML private DatePicker dpFechaHasta;
     @FXML private ComboBox<String> cmbTipoMovimiento;
-    @FXML private Button btnFiltrar;
-    @FXML private Button btnLimpiarFiltros;
-    @FXML private Button btnRegistrarEntrada;
-    @FXML private Button btnRegistrarSalida;
     @FXML private ProgressIndicator progressIndicator;
     @FXML private Label statusLabel;
     @FXML private TableView<EntradaProductoFX> tablaHistorial;
@@ -55,13 +52,13 @@ public class RegisMovimientCtrlFX implements Initializable {
     @FXML private TextField txtCantidad;
     @FXML private TextField txtPrecioUnitario;
     @FXML private TextField txtMotivo;
-    @FXML private Button btnCancelarRegistro;
-    @FXML private Button btnGuardarMovimiento;
+    @FXML private Button btnEditarMovimiento;
+    @FXML private Button btnEliminarMovimiento;
 
     private ObservableList<EntradaProductoFX> listaHistorial = FXCollections.observableArrayList();
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
-    private String tipoMovimientoActual = null;
+    private EntradaProductoFX movimientoSeleccionado;
 
     @Autowired
     private IEntradaProductoService entradaProductoService;
@@ -111,8 +108,18 @@ public class RegisMovimientCtrlFX implements Initializable {
 
         tablaHistorial.setItems(listaHistorial);
 
+        // Habilitar selección de fila
+        tablaHistorial.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            btnEditarMovimiento.setDisable(newSelection == null);
+            btnEliminarMovimiento.setDisable(newSelection == null);
+        });
+
         // Configurar combobox de tipos
         cmbTipoMovimiento.getItems().addAll("", EntradaProductoFX.TIPO_ENTRADA, EntradaProductoFX.TIPO_SALIDA);
+
+        // Deshabilitar botones de edición/eliminación inicialmente
+        btnEditarMovimiento.setDisable(true);
+        btnEliminarMovimiento.setDisable(true);
     }
 
     private void cargarDatosIniciales() {
@@ -150,9 +157,9 @@ public class RegisMovimientCtrlFX implements Initializable {
     }
 
     private void verificarPermisos() {
-        // Verificar permisos para registrar movimientos
-        PermisosUIUtil.configurarBoton(btnRegistrarEntrada, "registrar_entrada_producto");
-        PermisosUIUtil.configurarBoton(btnRegistrarSalida, "registrar_entrada_producto");
+        // Verificar permisos para editar y eliminar movimientos
+        PermisosUIUtil.configurarBoton(btnEditarMovimiento, "editar_entrada_producto");
+        PermisosUIUtil.configurarBoton(btnEliminarMovimiento, "eliminar_entrada_producto");
     }
 
     @FXML
@@ -200,82 +207,148 @@ public class RegisMovimientCtrlFX implements Initializable {
     }
 
     @FXML
-    void mostrarFormularioEntrada(ActionEvent event) {
+    void editarMovimientoSeleccionado(ActionEvent event) {
         // Verificar permisos
-        if (!PermisosUIUtil.verificarPermisoConAlerta("registrar_entrada_producto")) {
+        if (!PermisosUIUtil.verificarPermisoConAlerta("editar_entrada_producto")) {
             return;
         }
 
-        lblTituloFormulario.setText("Registrar Entrada de Producto");
-        tipoMovimientoActual = EntradaProductoFX.TIPO_ENTRADA;
+        movimientoSeleccionado = tablaHistorial.getSelectionModel().getSelectedItem();
+        if (movimientoSeleccionado == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección requerida", "Debe seleccionar un movimiento para editar.");
+            return;
+        }
 
-        // Mostrar y configurar proveedor para entradas
-        cmbFormProveedor.setDisable(false);
-        cmbFormProveedor.setValue(null);
-
-        limpiarFormulario();
+        cargarDatosParaEdicion();
         formularioMovimiento.setVisible(true);
+        formularioMovimiento.setManaged(true);
     }
 
     @FXML
-    void mostrarFormularioSalida(ActionEvent event) {
-        // Verificar permisos
-        if (!PermisosUIUtil.verificarPermisoConAlerta("registrar_entrada_producto")) {
+    void eliminarMovimientoSeleccionado(ActionEvent event) {
+/*        // Verificar permisos
+        if (!PermisosUIUtil.verificarPermisoConAlerta("eliminar_entrada_producto")) {
             return;
         }
 
-        lblTituloFormulario.setText("Registrar Salida de Producto");
-        tipoMovimientoActual = EntradaProductoFX.TIPO_SALIDA;
+        EntradaProductoFX movimientoAEliminar = tablaHistorial.getSelectionModel().getSelectedItem();
+        if (movimientoAEliminar == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección requerida", "Debe seleccionar un movimiento para eliminar.");
+            return;
+        }
 
-        // Ocultar proveedor para salidas
-        cmbFormProveedor.setDisable(true);
-        cmbFormProveedor.setValue(null);
+        // Confirmar eliminación
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar eliminación");
+        confirmacion.setHeaderText("¿Está seguro que desea eliminar este movimiento?");
+        confirmacion.setContentText("Esta acción no se puede deshacer.");
 
-        limpiarFormulario();
-        formularioMovimiento.setVisible(true);
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            try {
+                progressIndicator.setVisible(true);
+                statusLabel.setText("Eliminando movimiento...");
+
+                // Llamar al servicio para eliminar
+                entradaProductoService.eliminar(movimientoAEliminar.getIdEntrada());
+
+                // Actualizar lista
+                listaHistorial.remove(movimientoAEliminar);
+
+                progressIndicator.setVisible(false);
+                statusLabel.setText("Movimiento eliminado correctamente.");
+            } catch (Exception e) {
+                progressIndicator.setVisible(false);
+                mostrarError("Error al eliminar el movimiento", e);
+            }
+        }*/
+    }
+
+    private void cargarDatosParaEdicion() {
+        lblTituloFormulario.setText("Modificar Movimiento");
+
+        // Cargar producto
+        for (ProductoFX p : cmbFormProducto.getItems()) {
+            if (p.getNombre().equals(movimientoSeleccionado.getNombreProducto())) {
+                cmbFormProducto.setValue(p);
+                break;
+            }
+        }
+
+        // Cargar proveedor si existe
+        if (movimientoSeleccionado.getIdProveedor() != null) {
+            cmbFormProveedor.setDisable(false);
+            for (ProveedorFX p : cmbFormProveedor.getItems()) {
+                if (p.getIdProveedor().equals(movimientoSeleccionado.getIdProveedor())) {
+                    cmbFormProveedor.setValue(p);
+                    break;
+                }
+            }
+        } else {
+            cmbFormProveedor.setDisable(true);
+            cmbFormProveedor.setValue(null);
+        }
+
+        // Cargar resto de datos
+        txtCantidad.setText(String.valueOf(movimientoSeleccionado.getCantidad()));
+        txtPrecioUnitario.setText(movimientoSeleccionado.getPrecioUnitario().toString());
+        txtMotivo.setText(movimientoSeleccionado.getMotivo());
     }
 
     @FXML
     void guardarMovimiento(ActionEvent event) {
-        if (!validarFormulario()) {
+/*        if (!validarFormulario()) {
             return;
         }
 
         try {
             progressIndicator.setVisible(true);
-            statusLabel.setText("Registrando movimiento...");
+            statusLabel.setText("Guardando cambios...");
 
             ProductoFX producto = cmbFormProducto.getValue();
             Integer cantidad = Integer.parseInt(txtCantidad.getText().trim());
             BigDecimal precioUnitario = new BigDecimal(txtPrecioUnitario.getText().trim());
             String motivo = txtMotivo.getText().trim();
 
-            // Obtener id de proveedor si es una entrada
+            // Obtener id de proveedor si está disponible
             Integer idProveedor = null;
-            if (EntradaProductoFX.TIPO_ENTRADA.equals(tipoMovimientoActual) && cmbFormProveedor.getValue() != null) {
+            if (cmbFormProveedor.getValue() != null && !cmbFormProveedor.isDisable()) {
                 idProveedor = cmbFormProveedor.getValue().getIdProveedor();
             }
 
-            // Registrar el movimiento
-            EntradaProductoFX nuevaEntrada = entradaProductoService.registrarMovimiento(
-                    producto.getIdProducto(), cantidad, tipoMovimientoActual,
-                    precioUnitario, idProveedor, motivo);
+            // Actualizar el movimiento
+            EntradaProductoFX movimientoActualizado = entradaProductoService.actualizar(
+                    movimientoSeleccionado.getIdEntrada(),
+                    producto.getIdProducto(),
+                    cantidad,
+                    movimientoSeleccionado.getTipoMovimiento(),
+                    precioUnitario,
+                    idProveedor,
+                    motivo);
 
             // Actualizar la tabla
-            listaHistorial.add(0, nuevaEntrada);
+            int indice = listaHistorial.indexOf(movimientoSeleccionado);
+            if (indice >= 0) {
+                listaHistorial.set(indice, movimientoActualizado);
+            }
+
             formularioMovimiento.setVisible(false);
+            formularioMovimiento.setManaged(false);
+            movimientoSeleccionado = null;
 
             progressIndicator.setVisible(false);
-            statusLabel.setText("Movimiento registrado correctamente.");
+            statusLabel.setText("Movimiento actualizado correctamente.");
         } catch (Exception e) {
             progressIndicator.setVisible(false);
-            mostrarError("Error al registrar movimiento", e);
-        }
+            mostrarError("Error al actualizar movimiento", e);
+        }*/
     }
 
     @FXML
     void cancelarRegistroMovimiento(ActionEvent event) {
         formularioMovimiento.setVisible(false);
+        formularioMovimiento.setManaged(false);
+        movimientoSeleccionado = null;
         statusLabel.setText("Operación cancelada.");
     }
 
@@ -312,27 +385,24 @@ public class RegisMovimientCtrlFX implements Initializable {
             }
         }
 
-        if (EntradaProductoFX.TIPO_ENTRADA.equals(tipoMovimientoActual) && cmbFormProveedor.getValue() == null) {
+        if (!cmbFormProveedor.isDisable() && cmbFormProveedor.getValue() == null) {
             errores.append("- Debe seleccionar un proveedor para las entradas.\n");
         }
 
         if (errores.length() > 0) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Validación");
-            alert.setHeaderText("Por favor corrija los siguientes errores:");
-            alert.setContentText(errores.toString());
-            alert.showAndWait();
+            mostrarAlerta(Alert.AlertType.WARNING, "Validación", "Por favor corrija los siguientes errores:\n" + errores.toString());
             return false;
         }
 
         return true;
     }
 
-    private void limpiarFormulario() {
-        cmbFormProducto.setValue(null);
-        txtCantidad.clear();
-        txtPrecioUnitario.clear();
-        txtMotivo.clear();
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
     private void mostrarError(String mensaje, Exception e) {
