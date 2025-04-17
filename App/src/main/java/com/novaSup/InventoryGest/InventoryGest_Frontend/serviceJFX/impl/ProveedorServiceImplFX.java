@@ -78,6 +78,12 @@ public class ProveedorServiceImplFX implements IProveedorService {
     public ProveedorFX guardar(ProveedorFX proveedor) throws Exception {
         try {
             ProveedorDTO dto = convertirAProveedorDTO(proveedor);
+
+            // Si el ID es 0, establecerlo explícitamente como null para que el backend lo trate como una nueva entidad
+            if (proveedor.getIdProveedor() != null && proveedor.getIdProveedor() == 0) {
+                dto.idProveedor = null;
+            }
+
             String jsonProveedor = mapper.writeValueAsString(dto);
             String response;
 
