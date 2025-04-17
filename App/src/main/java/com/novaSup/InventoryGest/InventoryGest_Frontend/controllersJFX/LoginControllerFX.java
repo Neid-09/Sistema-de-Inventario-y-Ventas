@@ -88,7 +88,6 @@ public class LoginControllerFX {
         }
     }
 
-    // En LoginControllerFX
     private void cargarMenuPrincipal() {
         try {
             // Usar el mismo método que en el resto de la aplicación

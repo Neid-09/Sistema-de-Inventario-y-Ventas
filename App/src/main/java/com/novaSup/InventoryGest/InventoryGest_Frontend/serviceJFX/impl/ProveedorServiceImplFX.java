@@ -3,19 +3,20 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Proveedor;
-
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProveedorService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+@Service  // Asegúrate de que tenga esta anotación
 public class ProveedorServiceImplFX implements IProveedorService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProveedorServiceImplFX.class);
@@ -23,10 +24,13 @@ public class ProveedorServiceImplFX implements IProveedorService {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
-    public List<Proveedor> obtenerTodos() throws Exception {
+    public List<ProveedorFX> obtenerTodos() throws Exception {
         try {
             String response = HttpClient.get(API_URL);
-            return mapper.readValue(response, new TypeReference<List<Proveedor>>() {});
+            List<ProveedorDTO> proveedores = mapper.readValue(response, new TypeReference<List<ProveedorDTO>>() {});
+            return proveedores.stream()
+                    .map(this::convertirAProveedorFX)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Error al obtener todos los proveedores", e);
             throw new Exception("Error al obtener proveedores: " + e.getMessage());
@@ -34,11 +38,14 @@ public class ProveedorServiceImplFX implements IProveedorService {
     }
 
     @Override
-    public List<Proveedor> buscarPorNombreOCorreo(String termino) throws Exception {
+    public List<ProveedorFX> buscarPorNombreOCorreo(String termino) throws Exception {
         try {
             String url = API_URL + "/buscar?termino=" + termino;
             String response = HttpClient.get(url);
-            return mapper.readValue(response, new TypeReference<List<Proveedor>>() {});
+            List<ProveedorDTO> proveedores = mapper.readValue(response, new TypeReference<List<ProveedorDTO>>() {});
+            return proveedores.stream()
+                    .map(this::convertirAProveedorFX)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Error al buscar proveedores con término: {}", termino, e);
             throw new Exception("Error al buscar proveedores: " + e.getMessage());
@@ -46,7 +53,7 @@ public class ProveedorServiceImplFX implements IProveedorService {
     }
 
     @Override
-    public Optional<Proveedor> obtenerPorId(Integer id) throws Exception {
+    public Optional<ProveedorFX> obtenerPorId(Integer id) throws Exception {
         try {
             String url = API_URL + "/" + id;
             String response = HttpClient.get(url);
@@ -54,8 +61,8 @@ public class ProveedorServiceImplFX implements IProveedorService {
             JsonNode proveedorNode = root.get("proveedor");
 
             if (proveedorNode != null) {
-                Proveedor proveedor = mapper.treeToValue(proveedorNode, Proveedor.class);
-                return Optional.of(proveedor);
+                ProveedorDTO proveedor = mapper.treeToValue(proveedorNode, ProveedorDTO.class);
+                return Optional.of(convertirAProveedorFX(proveedor));
             }
             return Optional.empty();
         } catch (Exception e) {
@@ -68,12 +75,13 @@ public class ProveedorServiceImplFX implements IProveedorService {
     }
 
     @Override
-    public Proveedor guardar(Proveedor proveedor) throws Exception {
+    public ProveedorFX guardar(ProveedorFX proveedor) throws Exception {
         try {
-            String jsonProveedor = mapper.writeValueAsString(proveedor);
+            ProveedorDTO dto = convertirAProveedorDTO(proveedor);
+            String jsonProveedor = mapper.writeValueAsString(dto);
             String response;
 
-            if (proveedor.getIdProveedor() == null) {
+            if (proveedor.getIdProveedor() == null || proveedor.getIdProveedor() == 0) {
                 // Es un nuevo proveedor
                 response = HttpClient.post(API_URL, jsonProveedor);
             } else {
@@ -81,20 +89,32 @@ public class ProveedorServiceImplFX implements IProveedorService {
                 response = HttpClient.put(API_URL + "/" + proveedor.getIdProveedor(), jsonProveedor);
             }
 
-            return mapper.readValue(response, Proveedor.class);
+            ProveedorDTO proveedorGuardado = mapper.readValue(response, ProveedorDTO.class);
+            return convertirAProveedorFX(proveedorGuardado);
         } catch (Exception e) {
-            logger.error("Error al guardar proveedor: {}", proveedor, e);
+            logger.error("Error al guardar proveedor", e);
             throw new Exception("Error al guardar proveedor: " + e.getMessage());
         }
     }
 
     @Override
-    public Proveedor actualizar(Integer id, Proveedor proveedor) throws Exception {
+    public ProveedorFX actualizar(Integer id, ProveedorFX proveedor) throws Exception {
         try {
-            proveedor.setIdProveedor(id);
-            String jsonProveedor = mapper.writeValueAsString(proveedor);
+            // Crear un nuevo objeto ProveedorFX con el ID actualizado
+            ProveedorFX proveedorConId = new ProveedorFX(
+                    id,
+                    proveedor.getNombre(),
+                    proveedor.getContacto(),
+                    proveedor.getTelefono(),
+                    proveedor.getCorreo(),
+                    proveedor.getDireccion()
+            );
+
+            ProveedorDTO dto = convertirAProveedorDTO(proveedorConId);
+            String jsonProveedor = mapper.writeValueAsString(dto);
             String response = HttpClient.put(API_URL + "/" + id, jsonProveedor);
-            return mapper.readValue(response, Proveedor.class);
+            ProveedorDTO proveedorActualizado = mapper.readValue(response, ProveedorDTO.class);
+            return convertirAProveedorFX(proveedorActualizado);
         } catch (Exception e) {
             logger.error("Error al actualizar proveedor con ID: {}", id, e);
             throw new Exception("Error al actualizar proveedor: " + e.getMessage());
@@ -108,12 +128,9 @@ public class ProveedorServiceImplFX implements IProveedorService {
             return true;
         } catch (Exception e) {
             logger.error("Error al eliminar proveedor con ID: {}", id, e);
-
-            // Si contiene mensaje de productos asociados, lanzar excepción específica
             if (e.getMessage().contains("productos asociados")) {
                 throw new Exception("No se puede eliminar el proveedor porque tiene productos asociados");
             }
-
             throw new Exception("Error al eliminar proveedor: " + e.getMessage());
         }
     }
@@ -134,5 +151,37 @@ public class ProveedorServiceImplFX implements IProveedorService {
             logger.error("Error al obtener cantidad de productos para proveedor ID: {}", id, e);
             return 0; // Devolver 0 en caso de error
         }
+    }
+
+    private ProveedorFX convertirAProveedorFX(ProveedorDTO dto) {
+        return new ProveedorFX(
+                dto.idProveedor,
+                dto.nombre,
+                dto.contacto,   // Ahora incluimos el campo contacto
+                dto.telefono,
+                dto.correo,
+                dto.direccion
+        );
+    }
+
+    private ProveedorDTO convertirAProveedorDTO(ProveedorFX fx) {
+        ProveedorDTO dto = new ProveedorDTO();
+        dto.idProveedor = fx.getIdProveedor();
+        dto.nombre = fx.getNombre();
+        dto.contacto = fx.getContacto(); // Añadimos el campo contacto
+        dto.correo = fx.getCorreo();
+        dto.telefono = fx.getTelefono();
+        dto.direccion = fx.getDireccion();
+        return dto;
+    }
+
+    // Clase interna para mapeo a/desde API
+    private static class ProveedorDTO {
+        public Integer idProveedor;
+        public String nombre;
+        public String contacto; // Añadimos el campo contacto
+        public String correo;
+        public String telefono;
+        public String direccion;
     }
 }

@@ -4,6 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -507,7 +508,8 @@ public class ProductoControllerFX implements Initializable {
             // Inyectar manualmente los servicios (obtenidos del contexto de Spring)
             controller.setServicios(
                     applicationContext.getBean(ILoteService.class),
-                    applicationContext.getBean(IProductoService.class)
+                    applicationContext.getBean(IProductoService.class),
+                    applicationContext.getBean(IEntradaProductoService.class)
             );
 
             controller.inicializar(producto);

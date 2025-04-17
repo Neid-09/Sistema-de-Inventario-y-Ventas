@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario.RegisMovimientCtrlFX">
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <top>
+        <VBox spacing="10">
+            <Label text="Historial de Movimientos de Stock" BorderPane.alignment="CENTER">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
+
+            <!-- Filtros -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <ComboBox fx:id="cmbProducto" prefWidth="150.0" promptText="Filtrar por producto" />
+                <DatePicker fx:id="dpFechaDesde" promptText="Desde" />
+                <DatePicker fx:id="dpFechaHasta" promptText="Hasta" />
+                <ComboBox fx:id="cmbTipoMovimiento" prefWidth="120.0" promptText="Tipo movimiento" />
+                <Button fx:id="btnFiltrar" onAction="#filtrarHistorial" text="Filtrar" />
+                <Button fx:id="btnLimpiarFiltros" onAction="#limpiarFiltros" text="Limpiar" />
+            </HBox>
+
+            <Separator />
+
+            <!-- Botones para registrar movimientos -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Button fx:id="btnRegistrarEntrada" onAction="#mostrarFormularioEntrada" text="Registrar Entrada" />
+                <Button fx:id="btnRegistrarSalida" onAction="#mostrarFormularioSalida" text="Registrar Salida" />
+                <ProgressIndicator fx:id="progressIndicator" visible="false" prefHeight="20.0" prefWidth="20.0" />
+                <Label fx:id="statusLabel" text="" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <TableView fx:id="tablaHistorial" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colIdEntrada" prefWidth="60.0" text="ID" />
+                    <TableColumn fx:id="colNombreProducto" prefWidth="150.0" text="Producto" />
+                    <TableColumn fx:id="colNombreProveedor" prefWidth="120.0" text="Proveedor" />
+                    <TableColumn fx:id="colCantidad" prefWidth="70.0" text="Cantidad" />
+                    <TableColumn fx:id="colPrecioUnitario" prefWidth="100.0" text="Precio Unit." />
+                    <TableColumn fx:id="colFecha" prefWidth="130.0" text="Fecha" />
+                    <TableColumn fx:id="colTipoMovimiento" prefWidth="100.0" text="Tipo Mov." />
+                    <TableColumn fx:id="colMotivo" prefWidth="150.0" text="Motivo" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <bottom>
+        <VBox fx:id="formularioMovimiento" visible="false" spacing="10" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 10;">
+            <Label fx:id="lblTituloFormulario" text="Registrar Nuevo Movimiento" style="-fx-font-weight: bold;">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ComboBox fx:id="cmbFormProducto" prefWidth="200.0" promptText="Seleccionar producto" />
+                <TextField fx:id="txtCantidad" prefWidth="80.0" promptText="Cantidad" />
+                <TextField fx:id="txtPrecioUnitario" prefWidth="120.0" promptText="Precio unitario" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <ComboBox fx:id="cmbFormProveedor" prefWidth="200.0" promptText="Seleccionar proveedor" />
+                <TextField fx:id="txtMotivo" prefWidth="300.0" promptText="Motivo" />
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button fx:id="btnCancelarRegistro" onAction="#cancelarRegistroMovimiento" text="Cancelar" />
+                <Button fx:id="btnGuardarMovimiento" onAction="#guardarMovimiento" text="Guardar" />
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>

@@ -1,6 +1,5 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario;
 
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Proveedor;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProveedorServiceImplFX;
@@ -222,26 +221,16 @@ public class ProveedorControllerFX implements Initializable {
 
         CompletableFuture.runAsync(() -> {
             try {
-                List<Proveedor> proveedores;
+                List<ProveedorFX> proveedores;
                 if (termino.isEmpty() || "Todos".equals(criterio)) {
                     proveedores = proveedorService.obtenerTodos();
                 } else {
                     proveedores = proveedorService.buscarPorNombreOCorreo(termino);
                 }
 
-                final List<ProveedorFX> proveedoresFX = proveedores.stream()
-                        .map(p -> new ProveedorFX(
-                                p.getIdProveedor(),
-                                p.getNombre(),
-                                p.getContacto(),
-                                p.getTelefono(),
-                                p.getCorreo(),
-                                p.getDireccion()))
-                        .collect(Collectors.toList());
-
                 Platform.runLater(() -> {
                     listaProveedores.clear();
-                    listaProveedores.addAll(proveedoresFX);
+                    listaProveedores.addAll(proveedores);
                     actualizarTotalProveedores();
                     setEstadoOperacion("Búsqueda completada");
                     mostrarProgreso(false);
@@ -249,9 +238,12 @@ public class ProveedorControllerFX implements Initializable {
             } catch (Exception e) {
                 logger.error("Error al buscar proveedores", e);
                 Platform.runLater(() -> {
-                    setEstadoOperacion("Error: " + e.getMessage());
-                    mostrarAlerta("Error", "Error al buscar proveedores", e.getMessage(), Alert.AlertType.ERROR);
-                    mostrarProgreso(false);
+                    logger.error("Error al buscar proveedores", e);
+                    Platform.runLater(() -> {
+                        setEstadoOperacion("Error: " + e.getMessage());
+                        mostrarAlerta("Error", "Error al buscar proveedores", e.getMessage(), Alert.AlertType.ERROR);
+                        mostrarProgreso(false);
+                    });
                 });
             }
         });
@@ -269,13 +261,13 @@ public class ProveedorControllerFX implements Initializable {
             return;
         }
 
-        Proveedor proveedor = obtenerProveedorDesdeFormulario();
+        ProveedorFX proveedor = obtenerProveedorDesdeFormulario();
         mostrarProgreso(true);
         setEstadoOperacion("Guardando proveedor...");
 
         CompletableFuture.runAsync(() -> {
             try {
-                Proveedor proveedorGuardado = proveedorService.guardar(proveedor);
+                ProveedorFX proveedorGuardado = proveedorService.guardar(proveedor);
 
                 Platform.runLater(() -> {
                     ProveedorFX proveedorFX = new ProveedorFX(
@@ -337,26 +329,17 @@ public class ProveedorControllerFX implements Initializable {
 
         CompletableFuture.runAsync(() -> {
             try {
-                List<Proveedor> proveedores = proveedorService.obtenerTodos();
-
-                final List<ProveedorFX> proveedoresFX = proveedores.stream()
-                        .map(p -> new ProveedorFX(
-                                p.getIdProveedor(),
-                                p.getNombre(),
-                                p.getContacto(),
-                                p.getTelefono(),
-                                p.getCorreo(),
-                                p.getDireccion()))
-                        .collect(Collectors.toList());
+                List<ProveedorFX> proveedores = proveedorService.obtenerTodos();
 
                 Platform.runLater(() -> {
                     listaProveedores.clear();
-                    listaProveedores.addAll(proveedoresFX);
+                    listaProveedores.addAll(proveedores);
                     actualizarTotalProveedores();
-                    setEstadoOperacion("Proveedores cargados correctamente");
+                    setEstadoOperacion("Proveedores cargados");
                     mostrarProgreso(false);
                 });
             } catch (Exception e) {
+
                 logger.error("Error al cargar proveedores", e);
                 Platform.runLater(() -> {
                     setEstadoOperacion("Error: " + e.getMessage());
@@ -490,24 +473,20 @@ public class ProveedorControllerFX implements Initializable {
         return correo.matches(regex);
     }
 
-    private Proveedor obtenerProveedorDesdeFormulario() {
-        Proveedor proveedor = new Proveedor();
-
+    private ProveedorFX obtenerProveedorDesdeFormulario() {
+        Integer id = null;
         if (!txtId.getText().isEmpty()) {
-            try {
-                proveedor.setIdProveedor(Integer.parseInt(txtId.getText()));
-            } catch (NumberFormatException e) {
-                // Ignorar, será un nuevo proveedor
-            }
+            id = Integer.parseInt(txtId.getText());
         }
 
-        proveedor.setNombre(txtNombre.getText().trim());
-        proveedor.setContacto(txtContacto.getText().trim());
-        proveedor.setTelefono(txtTelefono.getText().trim());
-        proveedor.setCorreo(txtCorreo.getText().trim());
-        proveedor.setDireccion(txtDireccion.getText().trim());
-
-        return proveedor;
+        return new ProveedorFX(
+                id,
+                txtNombre.getText(),
+                txtContacto.getText(),
+                txtTelefono.getText(),
+                txtCorreo.getText(),
+                txtDireccion.getText()
+        );
     }
 
     private void limpiarFormulario() {

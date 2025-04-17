@@ -166,24 +166,28 @@ public class CategoriaControllerFX implements Initializable {
 
             // Crear o actualizar objeto
             CategoriaFX categoria;
-            if (modoEdicion) {
+            if (modoEdicion && categoriaSeleccionada != null) {
+                // Usar la categoría seleccionada existente
                 categoria = categoriaSeleccionada;
-                // Aseguramos que tenga el ID correcto
-                if (txtId.getText() != null && !txtId.getText().isEmpty()) {
-                    // Esto es crítico para la actualización
-                    categoria.setIdCategoria(Integer.parseInt(txtId.getText()));
-                }
             } else {
+                // Crear una nueva instancia
                 categoria = new CategoriaFX();
                 categoria.setIdCategoria(0); // Asegurar que sea una nueva categoría
             }
 
+            // Actualizar los campos con los valores del formulario
             categoria.setNombre(txtNombre.getText().trim());
             categoria.setDescripcion(txtDescripcion.getText().trim());
             categoria.setEstado(chkEstado.isSelected());
-            categoria.setDuracionGarantia(
-                    txtDuracionGarantia.getText().isEmpty() ? 0 : Integer.parseInt(txtDuracionGarantia.getText())
-            );
+
+            // Asegurar que no haya problemas con la duración de garantía
+            try {
+                int duracionGarantia = txtDuracionGarantia.getText().isEmpty() ?
+                        0 : Integer.parseInt(txtDuracionGarantia.getText().trim());
+                categoria.setDuracionGarantia(duracionGarantia);
+            } catch (NumberFormatException e) {
+                categoria.setDuracionGarantia(0);
+            }
 
             // Guardar en la BD
             CategoriaFX guardada = categoriaService.guardar(categoria);
@@ -197,7 +201,10 @@ public class CategoriaControllerFX implements Initializable {
                     "Categoría creada correctamente";
             lblEstado.setText(mensaje);
 
+            // Reiniciar estado
+            modoEdicion = false;
             btnGuardar.setDisable(true);
+            categoriaSeleccionada = null;
 
         } catch (Exception e) {
             mostrarError("Error al guardar la categoría", e);

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProductoFX.TipoMovimiento;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class EntradaProductoServiceImplFX implements IEntradaProductoService {
 
-    private final String API_URL = "http://localhost:8080/entradas";
+    private final String API_URL = ApiConfig.getBaseUrl() + "/api/entradas";
     private final ObjectMapper objectMapper;
 
     public EntradaProductoServiceImplFX() {
@@ -71,8 +71,8 @@ public class EntradaProductoServiceImplFX implements IEntradaProductoService {
     }
 
     @Override
-    public List<EntradaProductoFX> obtenerPorTipoMovimiento(TipoMovimiento tipo) throws Exception {
-        String respuesta = HttpClient.get(API_URL + "/tipo/" + tipo.name());
+    public List<EntradaProductoFX> obtenerPorTipoMovimiento(String tipo) throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/tipo/" + tipo);
         List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
                 new TypeReference<List<EntradaDTO>>() {});
 
@@ -83,7 +83,7 @@ public class EntradaProductoServiceImplFX implements IEntradaProductoService {
 
     @Override
     public List<EntradaProductoFX> obtenerFiltrados(Integer idProducto, LocalDate desde,
-                                                    LocalDate hasta, TipoMovimiento tipo) throws Exception {
+                                                    LocalDate hasta, String tipo) throws Exception {
         StringBuilder url = new StringBuilder(API_URL + "/filtro?");
         boolean hayParametro = false;
 
@@ -106,7 +106,7 @@ public class EntradaProductoServiceImplFX implements IEntradaProductoService {
 
         if (tipo != null) {
             if (hayParametro) url.append("&");
-            url.append("tipo=").append(tipo.name());
+            url.append("tipo=").append(tipo);
         }
 
         String respuesta = HttpClient.get(url.toString());
@@ -119,8 +119,11 @@ public class EntradaProductoServiceImplFX implements IEntradaProductoService {
     }
 
     @Override
-    public EntradaProductoFX registrarMovimiento(Integer idProducto, Integer cantidad, TipoMovimiento tipo, BigDecimal precioUnitario) throws Exception {
-        MovimientoDTO movimientoDTO = new MovimientoDTO(idProducto, cantidad, tipo.name(), precioUnitario);
+    public EntradaProductoFX registrarMovimiento(Integer idProducto, Integer cantidad,
+                                                 String tipoMovimiento, BigDecimal precioUnitario,
+                                                 Integer idProveedor, String motivo) throws Exception {
+        MovimientoDTO movimientoDTO = new MovimientoDTO(idProducto, idProveedor, cantidad,
+                tipoMovimiento, precioUnitario, motivo);
         String json = objectMapper.writeValueAsString(movimientoDTO);
         String respuesta = HttpClient.post(API_URL, json);
         EntradaDTO entradaDTO = objectMapper.readValue(respuesta, EntradaDTO.class);
@@ -132,47 +135,60 @@ public class EntradaProductoServiceImplFX implements IEntradaProductoService {
                 dto.idEntrada,
                 dto.producto.idProducto,
                 dto.producto.nombre,
+                dto.proveedor != null ? dto.proveedor.idProveedor : null,
+                dto.proveedor != null ? dto.proveedor.nombre : null,
                 dto.cantidad,
                 dto.fecha,
-                TipoMovimiento.valueOf(dto.tipoMovimiento),
-                dto.precioUnitario
+                dto.tipoMovimiento,
+                dto.precioUnitario,
+                dto.motivo
         );
     }
 
     // Clases internas para el mapeo de JSON
     private static class EntradaDTO {
         public Integer idEntrada;
-        public ProductoDTO producto;  // En lugar de idProducto y nombreProducto directos
+        public ProductoDTO producto;
+        public ProveedorDTO proveedor;
         public Integer cantidad;
         public LocalDateTime fecha;
         public String tipoMovimiento;
         public BigDecimal precioUnitario;
+        public String motivo;
 
         // Clase interna para el objeto producto
-// Clase interna para el objeto producto
         public static class ProductoDTO {
             public Integer idProducto;
             public String nombre;
-            public String descripcion;    // Añadir este campo
-            public BigDecimal precio;     // Añadir este campo
-            public Integer stock;         // Añadir este campo
+            public String descripcion;
+            public BigDecimal precio;
+            public Integer stock;
         }
 
-        public EntradaDTO() {}
+        // Clase interna para el objeto proveedor
+        public static class ProveedorDTO {
+            public Integer idProveedor;
+            public String nombre;
+        }
     }
 
     private static class MovimientoDTO {
         public Integer idProducto;
+        public Integer idProveedor;
         public Integer cantidad;
         public String tipoMovimiento;
         public BigDecimal precioUnitario;
+        public String motivo;
 
-        // Constructor actualizado
-        public MovimientoDTO(Integer idProducto, Integer cantidad, String tipoMovimiento, BigDecimal precioUnitario) {
+        // Constructor completo
+        public MovimientoDTO(Integer idProducto, Integer idProveedor, Integer cantidad,
+                             String tipoMovimiento, BigDecimal precioUnitario, String motivo) {
             this.idProducto = idProducto;
+            this.idProveedor = idProveedor;
             this.cantidad = cantidad;
             this.tipoMovimiento = tipoMovimiento;
             this.precioUnitario = precioUnitario;
+            this.motivo = motivo;
         }
     }
 }
