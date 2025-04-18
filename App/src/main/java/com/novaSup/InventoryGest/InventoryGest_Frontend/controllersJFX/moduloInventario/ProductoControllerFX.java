@@ -57,6 +57,8 @@ public class ProductoControllerFX implements Initializable {
     @FXML
     private Button btnAumentarStock;
     @FXML
+    private Button btnAjusteStock;
+    @FXML
     private Button btnDisminuirStock;
     @FXML
     private Button btnEliminar;
@@ -657,10 +659,47 @@ public class ProductoControllerFX implements Initializable {
 
     @FXML
     void abrirVentanaAumentarStock() {
+        // Verificar permisos antes de proceder
+        if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
+            return;
+        }
 
+        // Verificar que haya un producto seleccionado
+        if (txtId.getText().isEmpty()) {
+            lblMensaje.setText("Debe seleccionar un producto para aumentar stock");
+            mostrarAlerta(Alert.AlertType.WARNING, "Aviso", "Selección requerida",
+                    "Debe seleccionar un producto para aumentar el stock");
+            return;
+        }
+
+        // Obtener el producto seleccionado
+        Integer idProducto = Integer.parseInt(txtId.getText());
+        ProductoFX productoSeleccionado;
+
+        try {
+            productoSeleccionado = productoService.obtenerPorId(idProducto);
+
+            // Verificar si el producto tiene un proveedor asignado
+            if (productoSeleccionado.getIdProveedor() == null) {
+                // Mostrar alerta informando que no se puede crear un lote sin proveedor
+                mostrarAlerta(Alert.AlertType.WARNING, "Aviso", "No se puede crear lote",
+                        "No se puede aumentar el stock porque este producto no tiene un proveedor asignado. " +
+                                "Por favor, asigne un proveedor al producto antes de aumentar el stock.");
+                return;
+            }
+
+            // Abrir la ventana para crear un nuevo lote
+            abrirVentanaCrearLote(productoSeleccionado, "ENTRADA");
+
+        } catch (Exception e) {
+            lblMensaje.setText("Error al cargar el producto: " + e.getMessage());
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Ha ocurrido un error",
+                    "No se pudo cargar el producto para aumentar el stock: " + e.getMessage());
+        }
     }
 
 
+    //ESTE ESTA SOLO PARA TESTEAR QUE SE REDUZCA LOS PRODUCTOS, EL DISMINUIR SE VINCULARA YA CON EL MODULO DE VENDER
     @FXML
     public void disminuirStock() {
         // Verificar permisos antes de proceder
@@ -719,6 +758,86 @@ public class ProductoControllerFX implements Initializable {
             }
         });
     }
+
+    @FXML
+    public void ajustarStock() {
+        // Verificar permisos
+        if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
+            return;
+        }
+
+        // Verificar que haya un producto seleccionado
+        if (txtId.getText().isEmpty()) {
+            lblMensaje.setText("Debe seleccionar un producto para ajustar stock");
+            mostrarAlerta(Alert.AlertType.WARNING, "Aviso", "Selección requerida",
+                    "Debe seleccionar un producto para ajustar el stock");
+            return;
+        }
+
+        // Mostrar confirmación
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar operación");
+        confirmacion.setHeaderText("¿Está seguro de ajustar el stock?");
+        confirmacion.setContentText("Esta acción modificará el stock del producto seleccionado.");
+
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            try {
+                // Obtener el producto seleccionado
+                Integer idProducto = Integer.parseInt(txtId.getText());
+                ProductoFX productoSeleccionado = productoService.obtenerPorId(idProducto);
+
+                // Abrir la ventana de ajuste de stock
+                abrirVentanaAjustarStock(productoSeleccionado);
+            } catch (Exception e) {
+                lblMensaje.setText("Error al cargar el producto: " + e.getMessage());
+                mostrarAlerta(Alert.AlertType.ERROR, "Error", "Ha ocurrido un error",
+                        "No se pudo cargar el producto para ajustar el stock: " + e.getMessage());
+            }
+        }
+    }
+
+    private void abrirVentanaAjustarStock(ProductoFX producto) {
+        try {
+            // Cargar el archivo FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.VENTANA_AJUSTE_STOCK));
+            Parent root = loader.load();
+
+            // Obtener el controlador y configurarlo
+            VAjusteStockCtrlFX controller = loader.getController();
+
+            // Inyectar manualmente los servicios
+            controller.setServicios(
+                    applicationContext.getBean(ILoteService.class),
+                    applicationContext.getBean(IProductoService.class)
+            );
+
+            // Inicializar el controlador con el producto
+            controller.inicializar(producto);
+
+            // Crear y configurar la escena
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setTitle("Ajuste de Stock - " + producto.getNombre());
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            // Manejar el cierre de la ventana
+            stage.setOnHidden(event -> {
+                // Refrescar datos después de cerrar la ventana
+                cargarDatos();
+            });
+
+            // Mostrar la ventana
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al abrir ventana",
+                    "No se pudo abrir la ventana para ajustar stock: " + e.getMessage());
+        }
+    }
+
+
 
     @FXML
     public void mostrarDetalles() {
