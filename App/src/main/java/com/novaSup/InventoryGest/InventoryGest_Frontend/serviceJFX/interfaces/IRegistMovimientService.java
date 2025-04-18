@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface IEntradaProductoService {
+public interface IRegistMovimientService {
     List<EntradaProductoFX> obtenerTodos() throws Exception;
     List<EntradaProductoFX> obtenerPorIdProducto(Integer idProducto) throws Exception;
     List<EntradaProductoFX> obtenerPorFecha(LocalDate desde, LocalDate hasta) throws Exception;

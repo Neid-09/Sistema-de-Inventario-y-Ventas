@@ -3,8 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -23,7 +22,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -92,18 +90,23 @@ public class ProductoControllerFX implements Initializable {
     @FXML private Label lblMensaje;
     @FXML private TextField txtCantidadMovimiento;
 
-    // Servicio
-    private final IProductoService productoService = new ProductoServiceImplFX();
-    @Autowired
-    private ILoteService loteService;
-
-    //Para abrir la ventana adicional
-    @Autowired
-    private ApplicationContext applicationContext;
+    // Servicios - inyectados por constructor
+    private final IProductoService productoService;
+    private final ILoteService loteService;
+    private final ApplicationContext applicationContext;
+    
     // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
+
+    public ProductoControllerFX(IProductoService productoService, 
+                              ILoteService loteService, 
+                              ApplicationContext applicationContext) {
+        this.productoService = productoService;
+        this.loteService = loteService;
+        this.applicationContext = applicationContext;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -524,7 +527,7 @@ public class ProductoControllerFX implements Initializable {
             controller.setServicios(
                     applicationContext.getBean(ILoteService.class),
                     applicationContext.getBean(IProductoService.class),
-                    applicationContext.getBean(IEntradaProductoService.class)
+                    applicationContext.getBean(IRegistMovimientService.class)
             );
 
             // Inicializar el controlador con el producto y la operación

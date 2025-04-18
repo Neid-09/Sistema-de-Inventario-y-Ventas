@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.LoteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IEntradaProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import javafx.application.Platform;
@@ -41,14 +41,14 @@ public class DialogAddLoteCtrlFX {
     private ILoteService loteService;
     private IProductoService productoService;
     private ProductoFX productoSeleccionado;
-    private IEntradaProductoService registroMovimientoProducto;
+    private IRegistMovimientService registroMovimientoProducto;
 
     //ALMACENAR OPERACION
     private String tipoOperacion;
 
 
     public void setServicios(ILoteService loteService, IProductoService productoService,
-                             IEntradaProductoService entradaProductoService) {
+                             IRegistMovimientService entradaProductoService) {
         this.loteService = loteService;
         this.productoService = productoService;
         this.registroMovimientoProducto = entradaProductoService;

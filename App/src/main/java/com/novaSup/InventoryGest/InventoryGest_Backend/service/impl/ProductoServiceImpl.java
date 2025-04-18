@@ -161,7 +161,13 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public void eliminar(Integer id) {
-        // Verificar si tiene movimientos asociados
+        // Primero verificar si tiene lotes asociados
+        if (tieneLotesAsociados(id)) {
+            // Si tiene lotes activos, no permitir eliminación
+            throw new IllegalStateException("No se puede eliminar el producto porque tiene lotes asociados.");
+        }
+        
+        // Si no tiene lotes, verificar si tiene movimientos asociados
         if (tieneMovimientosAsociados(id)) {
             // En lugar de eliminar, cambiar estado a inactivo
             obtenerPorId(id).ifPresent(p -> {
@@ -169,6 +175,7 @@ public class ProductoServiceImpl implements ProductoService {
                 productoRepository.save(p);
             });
         } else {
+            // Si no tiene lotes ni movimientos, eliminarlo físicamente
             productoRepository.deleteById(id);
         }
     }
@@ -215,6 +222,12 @@ public class ProductoServiceImpl implements ProductoService {
         List<Producto> productos = productoRepository.findByProveedor_IdProveedor(idProveedor);
         productos.forEach(this::actualizarStockDesdeLoterRepositorio);
         return productos;
+    }
+
+    @Override
+    public boolean tieneLotesAsociados(Integer idProducto) {
+        List<Lote> lotes = stockService.obtenerLotesActivosPorProducto(idProducto);
+        return !lotes.isEmpty();
     }
 
     // Método para actualizar el stock desde los lotes

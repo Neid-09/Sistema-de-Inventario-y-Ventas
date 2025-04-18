@@ -35,7 +35,6 @@ public class LoteServiceImpl implements LoteService {
     private final NotificacionService notificacionService;
     private final RegistMovimientService registMovimientService;
 
-    @Autowired
     public LoteServiceImpl(
             LoteRepository loteRepository,
             StockServiceImpl stockService,

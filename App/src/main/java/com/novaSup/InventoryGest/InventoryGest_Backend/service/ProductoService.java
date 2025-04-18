@@ -24,4 +24,5 @@ public interface ProductoService {
     List<Producto> obtenerConSobrestock();
     boolean tieneMovimientosAsociados(Integer idProducto);
     List<Producto> obtenerPorProveedor(Integer idProveedor);
+    boolean tieneLotesAsociados(Integer idProducto);
 }

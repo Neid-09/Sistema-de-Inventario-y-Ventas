@@ -142,55 +142,77 @@ public class ProductoController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('eliminar_producto')")
     public ResponseEntity<?> eliminarProducto(@PathVariable Integer id) {
-        return productoService.obtenerPorId(id)
-                .map(producto -> {
-                    // Verificar si tiene movimientos asociados
-                    if (productoService.tieneMovimientosAsociados(id)) {
-                        // En vez de eliminar, cambiar estado a inactivo
-                        Producto productoAnterior = new Producto();
-                        productoAnterior.setIdProducto(producto.getIdProducto());
-                        productoAnterior.setEstado(producto.getEstado());
+        try {
+            return productoService.obtenerPorId(id)
+                    .map(producto -> {
+                        try {
+                            // Verificar si el producto tiene lotes asociados
+                            if (productoService.tieneLotesAsociados(id)) {
+                                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                                        "mensaje", "No se puede eliminar el producto porque tiene lotes asociados. Elimine primero los lotes.",
+                                        "tieneLotes", true
+                                ));
+                            }
 
-                        producto.setEstado(false);
-                        Producto productoDesactivado = productoService.guardar(producto);
+                            // Verificar si tiene movimientos asociados
+                            if (productoService.tieneMovimientosAsociados(id)) {
+                                // En vez de eliminar, cambiar estado a inactivo
+                                Producto productoAnterior = new Producto();
+                                productoAnterior.setIdProducto(producto.getIdProducto());
+                                productoAnterior.setEstado(producto.getEstado());
 
-                        // Auditar cambio de estado
-                        auditoriaService.registrarAccion(
-                                "DESACTIVAR",
-                                "productos",
-                                id,
-                                productoAnterior,
-                                productoDesactivado,
-                                null
-                        );
+                                producto.setEstado(false);
+                                Producto productoDesactivado = productoService.guardar(producto);
 
-                        return ResponseEntity.ok().body(Map.of(
-                                "mensaje", "El producto tiene movimientos asociados. Se ha desactivado en lugar de eliminar.",
-                                "desactivado", true
-                        ));
-                    } else {
-                        // Guardar datos para auditoría antes de eliminar
-                        Producto productoEliminado = new Producto();
-                        productoEliminado.setIdProducto(producto.getIdProducto());
-                        productoEliminado.setCodigo(producto.getCodigo());
-                        productoEliminado.setNombre(producto.getNombre());
+                                // Auditar cambio de estado
+                                auditoriaService.registrarAccion(
+                                        "DESACTIVAR",
+                                        "productos",
+                                        id,
+                                        productoAnterior,
+                                        productoDesactivado,
+                                        null
+                                );
 
-                        productoService.eliminar(id);
+                                return ResponseEntity.ok().body(Map.of(
+                                        "mensaje", "El producto tiene movimientos asociados. Se ha desactivado en lugar de eliminar.",
+                                        "desactivado", true
+                                ));
+                            } else {
+                                // Guardar datos para auditoría antes de eliminar
+                                Producto productoEliminado = new Producto();
+                                productoEliminado.setIdProducto(producto.getIdProducto());
+                                productoEliminado.setCodigo(producto.getCodigo());
+                                productoEliminado.setNombre(producto.getNombre());
 
-                        // Auditar eliminación
-                        auditoriaService.registrarAccion(
-                                "ELIMINAR",
-                                "productos",
-                                id,
-                                productoEliminado,
-                                null,
-                                null
-                        );
+                                productoService.eliminar(id);
 
-                        return ResponseEntity.ok().build();
-                    }
-                })
-                .orElse(ResponseEntity.notFound().build());
+                                // Auditar eliminación
+                                auditoriaService.registrarAccion(
+                                        "ELIMINAR",
+                                        "productos",
+                                        id,
+                                        productoEliminado,
+                                        null,
+                                        null
+                                );
+
+                                return ResponseEntity.ok().build();
+                            }
+                        } catch (IllegalStateException e) {
+                            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                                    "mensaje", e.getMessage(),
+                                    "tieneLotes", true
+                            ));
+                        }
+                    })
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "mensaje", e.getMessage(),
+                    "tieneLotes", true
+            ));
+        }
     }
 
     @PatchMapping("/{id}/stock/ajustar")

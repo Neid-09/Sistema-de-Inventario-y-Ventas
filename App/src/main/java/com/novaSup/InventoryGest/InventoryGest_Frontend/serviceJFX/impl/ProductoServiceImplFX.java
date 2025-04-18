@@ -8,25 +8,27 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import javafx.beans.property.IntegerProperty;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class ProductoServiceImplFX implements IProductoService {
 
-    private final String API_URL = "http://localhost:8080/productos";
-    private final String API_CATEGORIAS = "http://localhost:8080/api/categorias";
-    private final String API_PROVEEDORES = "http://localhost:8080/api/proveedores";
+    private final String API_URL;
+    private final String API_CATEGORIAS;
+    private final String API_PROVEEDORES;
     private final ObjectMapper objectMapper;
 
     public ProductoServiceImplFX() {
+        API_URL = ApiConfig.getBaseUrl() + "/productos";
+        API_CATEGORIAS = ApiConfig.getBaseUrl() + "/api/categorias";
+        API_PROVEEDORES = ApiConfig.getBaseUrl() + "/api/proveedores";
+        
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -115,7 +117,17 @@ public class ProductoServiceImplFX implements IProductoService {
 
     @Override
     public void eliminar(Integer id) throws Exception {
-        HttpClient.delete(API_URL + "/" + id);
+        try {
+            String respuesta = HttpClient.delete(API_URL + "/" + id);
+            // Si llegamos aquí, es que el producto se eliminó con éxito
+        } catch (Exception e) {
+            // Extraer el mensaje de error
+            String mensajeError = e.getMessage();
+            if (mensajeError.contains("lotes asociados")) {
+                throw new Exception("No se puede eliminar el producto porque tiene lotes asociados. Elimine primero los lotes.");
+            }
+            throw e; // Re-lanzar la excepción original si no es el caso específico
+        }
     }
 
     @Override
@@ -251,7 +263,7 @@ public class ProductoServiceImplFX implements IProductoService {
         public String nombre;
         public String descripcion;
         public Boolean estado;
-        public Integer duracionGarantia; // Cambiado de IntegerProperty a Integer
+        public Integer duracionGarantia;
     }
 
     private static class ProveedorDTO {
