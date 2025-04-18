@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.EntradaProducto;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
@@ -34,7 +34,7 @@ public class ReporteController {
     private LoteService loteService;
 
     @Autowired
-    private EntradaProductoService entradaProductoService;
+    private RegistMovimientService registMovimientService;
 
     @GetMapping("/inventario/resumen")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_productos')")
@@ -133,7 +133,7 @@ public class ReporteController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
             @RequestParam(required = false) String tipoMovimiento) {
 
-        List<EntradaProducto> entradas = entradaProductoService.obtenerTodas();
+        List<RegistMovimient> entradas = registMovimientService.obtenerTodas();
 
         // Filtrar por fechas
         entradas = entradas.stream()
@@ -148,7 +148,7 @@ public class ReporteController {
         }
 
         // Agrupar por fecha
-        Map<LocalDate, List<EntradaProducto>> movimientosPorFecha = entradas.stream()
+        Map<LocalDate, List<RegistMovimient>> movimientosPorFecha = entradas.stream()
                 .collect(Collectors.groupingBy(e -> e.getFecha().toLocalDate()));
 
         // Construir resultado

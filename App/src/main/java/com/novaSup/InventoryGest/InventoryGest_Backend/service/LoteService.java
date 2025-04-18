@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.service;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
-import org.springframework.transaction.annotation.Transactional;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 
 import java.util.Date;
 import java.util.List;
@@ -22,4 +22,29 @@ public interface LoteService {
     void reducirCantidadDeLotes(Integer idProducto, Integer cantidadTotal) throws Exception;
     Lote procesarDevolucion(Integer idLote, Integer cantidad) throws Exception;
     List<Lote> obtenerLotesActivos();
+
+    /**
+     * Crea un lote de ajuste para un producto
+     * Este método se utiliza en el CASO 3 cuando se detecta una diferencia en el inventario físico
+     * 
+     * @param producto Producto al que se le creará el lote de ajuste
+     * @param cantidad Cantidad a ajustar (positiva para aumentar, negativa para disminuir)
+     * @param motivo Motivo del ajuste
+     * @return El lote creado
+     * @throws Exception Si ocurre un error al crear el lote
+     */
+    Lote crearLoteAjuste(Producto producto, Integer cantidad, String motivo) throws Exception;
+
+    /**
+     * Crea un nuevo lote para un producto
+     * Este método se utiliza en el CASO 1 cuando se compra un producto
+     * 
+     * @param producto Producto al que se le creará el lote
+     * @param cantidad Cantidad inicial del lote
+     * @param numeroLote Número de lote
+     * @param fechaVencimiento Fecha de vencimiento del lote
+     * @param idEntrada ID del registro de movimiento de entrada
+     * @return El lote creado
+     */
+    Lote crearNuevoLote(Producto producto, Integer cantidad, String numeroLote, Date fechaVencimiento, Integer idEntrada);
 }

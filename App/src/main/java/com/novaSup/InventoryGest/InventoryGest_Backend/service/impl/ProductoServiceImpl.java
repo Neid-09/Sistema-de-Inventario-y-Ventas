@@ -4,19 +4,13 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.CategoriaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.EntradaProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,26 +20,29 @@ import java.util.stream.Collectors;
 @Service
 public class ProductoServiceImpl implements ProductoService {
 
-    @Autowired
-    private ProductoRepository productoRepository;
+    private final ProductoRepository productoRepository;
 
-    @Autowired
-    private CategoriaRepository categoriaRepository;
+    private final CategoriaRepository categoriaRepository;
 
-    @Autowired
-    private ProveedorRepository proveedorRepository;
+    private final ProveedorRepository proveedorRepository;
 
-    @Autowired
-    private StockServiceImpl stockService;
+    private final StockServiceImpl stockService;
 
-    @Autowired
-    private EntradaProductoService entradaProductoService;
+    private final RegistMovimientService registMovimientService;
 
-    @Autowired
-    private NotificacionServiceImpl notificacionService;
+    private final NotificacionServiceImpl notificacionService;
 
-    @Autowired
-    private PromocionService promocionService;
+    private final PromocionService promocionService;
+
+    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository, ProveedorRepository proveedorRepository, StockServiceImpl stockService, RegistMovimientService registMovimientService, NotificacionServiceImpl notificacionService, PromocionService promocionService) {
+        this.productoRepository = productoRepository;
+        this.categoriaRepository = categoriaRepository;
+        this.proveedorRepository = proveedorRepository;
+        this.stockService = stockService;
+        this.registMovimientService = registMovimientService;
+        this.notificacionService = notificacionService;
+        this.promocionService = promocionService;
+    }
 
     @Override
     public List<Producto> obtenerTodos() {
@@ -159,7 +156,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public boolean tieneMovimientosAsociados(Integer idProducto) {
         // Verificar en ventas, entradas, etc.
-        return entradaProductoService.existsEntradaByProductoId(idProducto);
+        return registMovimientService.existsEntradaByProductoId(idProducto);
     }
 
     @Override

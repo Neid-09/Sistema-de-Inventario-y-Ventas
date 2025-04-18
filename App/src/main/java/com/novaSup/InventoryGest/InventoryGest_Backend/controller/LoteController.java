@@ -1,9 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +12,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+/**
+ * Controlador para operaciones básicas relacionadas con lotes.
+ * Las operaciones complejas que involucran movimientos y lotes se manejan en InventarioController.
+ */
 @RestController
 @RequestMapping("/api/lotes")
 public class LoteController {
 
-    @Autowired
-    private LoteService loteService;
+    private final LoteService loteService;
+    private final ProductoService productoService;
 
-    @Autowired
-    private ProductoService productoService;
+    public LoteController(LoteService loteService, ProductoService productoService) {
+        this.loteService = loteService;
+        this.productoService = productoService;
+    }
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_productos')")
@@ -61,27 +67,22 @@ public class LoteController {
     public ResponseEntity<?> crearLote(@RequestBody Lote lote) {
         try {
             // Verificar si el producto existe
-            if (!productoService.obtenerPorId(lote.getIdProducto()).isPresent()) {
+            Optional<Producto> productoOpt = productoService.obtenerPorId(lote.getIdProducto());
+            if (!productoOpt.isPresent()) {
                 Map<String, String> error = Map.of("mensaje", "El producto especificado no existe");
                 return ResponseEntity.badRequest().body(error);
             }
 
-            // El producto existe, continuar con la creación del lote
-            productoService.obtenerPorId(lote.getIdProducto()).ifPresent(lote::setProducto);
-
-            // Si no se proporciona fecha de entrada, usar la fecha actual
-            if (lote.getFechaEntrada() == null) {
-                lote.setFechaEntrada(new Date());
-            }
-
-            // Asegurarse que el lote esté activo por defecto
-            if (lote.getActivo() == null) {
-                lote.setActivo(true);
-            }
-
-            Lote nuevoLote = loteService.guardar(lote);
-
-            // Ya no actualizamos manualmente el stock aquí, se calcula automáticamente desde los lotes
+            Producto producto = productoOpt.get();
+            
+            // Usar el método que crea el registro de movimiento automáticamente
+            Lote nuevoLote = loteService.crearNuevoLote(
+                producto,
+                lote.getCantidad(),
+                lote.getNumeroLote(),
+                lote.getFechaVencimiento(),
+                lote.getIdEntrada() // Pasamos el idEntrada si viene en la petición, o null si no viene
+            );
 
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoLote);
         } catch (Exception e) {
@@ -112,10 +113,6 @@ public class LoteController {
                     }
 
                     Lote loteActualizado = loteService.guardar(lote);
-
-                    // Ya no necesitamos actualizar manualmente el stock aquí
-                    // El stock se calculará automáticamente al consultar el producto
-
                     return ResponseEntity.ok(loteActualizado);
                 })
                 .orElse(ResponseEntity.notFound().build());

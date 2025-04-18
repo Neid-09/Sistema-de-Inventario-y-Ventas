@@ -16,11 +16,14 @@ import java.util.List;
 @Service
 public class StockServiceImpl {
 
-    @Autowired
-    private LoteRepository loteRepository;
+    private final LoteRepository loteRepository;
 
-    @Autowired
-    private ProductoRepository productoRepository;
+    private final ProductoRepository productoRepository;
+
+    public StockServiceImpl(LoteRepository loteRepository, ProductoRepository productoRepository) {
+        this.loteRepository = loteRepository;
+        this.productoRepository = productoRepository;
+    }
 
     /**
      * Calcula el stock total de un producto basado en sus lotes activos

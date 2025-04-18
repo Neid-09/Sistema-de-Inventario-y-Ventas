@@ -19,14 +19,17 @@ import java.util.Map;
 @RequestMapping("/productos")
 public class ProductoController {
 
-    @Autowired
-    private ProductoService productoService;
+    private final ProductoService productoService;
 
-    @Autowired
-    private LoteService loteService;
+    private final LoteService loteService;
 
-    @Autowired
-    private AuditoriaService auditoriaService;
+    private final AuditoriaService auditoriaService;
+
+    public ProductoController(ProductoService productoService, LoteService loteService, AuditoriaService auditoriaService) {
+        this.productoService = productoService;
+        this.loteService = loteService;
+        this.auditoriaService = auditoriaService;
+    }
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_productos')")
