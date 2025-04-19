@@ -406,6 +406,7 @@ public class LoteServiceImpl implements LoteService {
                 
             RegistMovimient registroMovimiento = new RegistMovimient();
             registroMovimiento.setProducto(producto);
+            registroMovimiento.setProveedor(producto.getProveedor());
             registroMovimiento.setCantidad(cantidad);
             registroMovimiento.setPrecioUnitario(precioUnitario);
             registroMovimiento.setTipoMovimiento("ENTRADA");

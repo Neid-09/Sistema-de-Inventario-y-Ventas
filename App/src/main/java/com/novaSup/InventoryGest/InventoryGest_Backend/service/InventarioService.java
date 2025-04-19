@@ -25,7 +25,6 @@ public interface InventarioService {
      * @param precioUnitario Precio unitario de compra
      * @param numeroLote Número de lote
      * @param fechaVencimiento Fecha de vencimiento del lote
-     * @param idProveedor ID del proveedor
      * @param motivo Motivo de la entrada (opcional)
      * @return El registro de movimiento creado
      */
@@ -35,7 +34,6 @@ public interface InventarioService {
         BigDecimal precioUnitario,
         String numeroLote,
         Date fechaVencimiento,
-        Integer idProveedor,
         String motivo
     );
 

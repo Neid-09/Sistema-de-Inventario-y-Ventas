@@ -30,6 +30,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.ResourceBundle.Control;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Component
@@ -326,6 +328,10 @@ public class LoteControllerFX implements Initializable {
         FilteredList<ProductoFX> productosFiltrados = new FilteredList<>(listaProductos, p -> true);
         comboBox.setItems(productosFiltrados);
 
+        // Bandera para evitar ciclos infinitos entre listeners
+        final AtomicBoolean updatingFromValueChange = new AtomicBoolean(false);
+        final AtomicBoolean updatingFromTextChange = new AtomicBoolean(false);
+
         // Agregar manejador para teclas especiales
         comboBox.getEditor().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
@@ -337,7 +343,9 @@ public class LoteControllerFX implements Initializable {
                     // Buscar primera coincidencia
                     for (ProductoFX producto : productosFiltrados) {
                         if (converter.toString(producto).toLowerCase().contains(texto.toLowerCase())) {
+                            updatingFromTextChange.set(true);
                             comboBox.setValue(producto);
+                            updatingFromTextChange.set(false);
                             break;
                         }
                     }
@@ -347,6 +355,9 @@ public class LoteControllerFX implements Initializable {
 
         // Filtro automático al escribir
         comboBox.getEditor().textProperty().addListener((obs, oldValue, newValue) -> {
+            // Evitar procesamiento si el cambio viene del listener de valor
+            if (updatingFromValueChange.get()) return;
+            
             String texto = newValue.toLowerCase();
 
             productosFiltrados.setPredicate(producto -> {
@@ -359,8 +370,13 @@ public class LoteControllerFX implements Initializable {
 
         // Manejar selección: sincronizar editor con el objeto
         comboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            // Evitar procesamiento si el cambio viene del listener de texto
+            if (updatingFromTextChange.get()) return;
+            
             if (newVal != null) {
+                updatingFromValueChange.set(true);
                 comboBox.getEditor().setText(converter.toString(newVal));
+                updatingFromValueChange.set(false);
             }
         });
     }

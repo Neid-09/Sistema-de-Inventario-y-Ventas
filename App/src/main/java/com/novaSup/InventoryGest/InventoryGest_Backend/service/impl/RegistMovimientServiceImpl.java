@@ -35,7 +35,7 @@ public class RegistMovimientServiceImpl implements RegistMovimientService {
      * @param proveedorRepository Repositorio para acceder a los proveedores
      * @param productoRepository Repositorio para acceder a los productos
      */
-    @Autowired
+    
     public RegistMovimientServiceImpl(
             RegistMovimientRepository registMovimientRepository,
             ProveedorRepository proveedorRepository,

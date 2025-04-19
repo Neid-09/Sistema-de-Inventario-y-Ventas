@@ -51,6 +51,11 @@ public class InventarioController {
             // Validar que el producto exista
             Producto producto = productoService.obtenerPorId(compraDTO.idProducto)
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
+            
+            // Asignar el idProveedor al producto si se proporciona en el DTO
+            if (compraDTO.idProveedor != null) {
+                producto.setIdProveedor(compraDTO.idProveedor);
+            }
 
             // Registrar la compra
             RegistMovimient movimiento = inventarioService.registrarCompraProducto(
@@ -59,7 +64,6 @@ public class InventarioController {
                     compraDTO.precioUnitario != null ? compraDTO.precioUnitario : producto.getPrecioCosto(),
                     compraDTO.numeroLote,
                     compraDTO.fechaVencimiento,
-                    compraDTO.idProveedor,
                     compraDTO.motivo
             );
 

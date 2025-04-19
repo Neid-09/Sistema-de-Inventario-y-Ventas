@@ -50,11 +50,16 @@ public class InventarioServiceImpl implements InventarioService {
             BigDecimal precioUnitario,
             String numeroLote,
             Date fechaVencimiento,
-            Integer idProveedor,
             String motivo) {
 
         // Validar datos de entrada
         validarDatosCompra(producto, cantidad, precioUnitario, numeroLote, fechaVencimiento);
+
+        // Obtener el idProveedor del producto
+        Integer idProveedor = producto.getIdProveedor();
+        if (idProveedor == null && producto.getProveedor() != null) {
+            idProveedor = producto.getProveedor().getIdProveedor();
+        }
 
         // 1. Registrar el movimiento de entrada
         RegistMovimient movimiento = registMovimientService.registrarCompraProducto(
