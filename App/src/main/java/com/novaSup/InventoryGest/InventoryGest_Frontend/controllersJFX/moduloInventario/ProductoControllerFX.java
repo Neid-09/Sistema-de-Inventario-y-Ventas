@@ -499,7 +499,7 @@ public class ProductoControllerFX implements Initializable {
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    abrirVentanaCrearLote(productoGuardado, "ENTRADA");
+                    abrirVentanaCrearLote(productoGuardado);
                 } else {
                     // Si no desea crear lote, solo limpiar campos y actualizar tabla
                     limpiarCampos();
@@ -514,7 +514,7 @@ public class ProductoControllerFX implements Initializable {
         }
     }
 
-    private void abrirVentanaCrearLote(ProductoFX producto, String operacion) {
+    private void abrirVentanaCrearLote(ProductoFX producto) {
         try {
             // Cargar el archivo FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.VENTANA_CREATELOTE));
@@ -526,17 +526,16 @@ public class ProductoControllerFX implements Initializable {
             // Inyectar manualmente los servicios (obtenidos del contexto de Spring)
             controller.setServicios(
                     applicationContext.getBean(ILoteService.class),
-                    applicationContext.getBean(IProductoService.class),
-                    applicationContext.getBean(IRegistMovimientService.class)
+                    applicationContext.getBean(IProductoService.class)
             );
 
             // Inicializar el controlador con el producto y la operación
-            controller.inicializar(producto, operacion);
+            controller.inicializar(producto);
 
             // Crear y configurar la escena
             Scene scene = new Scene(root);
             Stage stage = new Stage();
-            stage.setTitle(operacion + " - " + producto.getNombre());
+            stage.setTitle("Crear lote - " + producto.getNombre());
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
 
@@ -552,7 +551,7 @@ public class ProductoControllerFX implements Initializable {
 
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al abrir ventana",
-                    "No se pudo abrir la ventana para " + operacion.toLowerCase() + ": " + e.getMessage());
+                    "No se pudo abrir la ventana para crear lote: " + e.getMessage());
         }
     }
 
@@ -692,7 +691,7 @@ public class ProductoControllerFX implements Initializable {
             }
 
             // Abrir la ventana para crear un nuevo lote
-            abrirVentanaCrearLote(productoSeleccionado, "ENTRADA");
+            abrirVentanaCrearLote(productoSeleccionado);
 
         } catch (Exception e) {
             lblMensaje.setText("Error al cargar el producto: " + e.getMessage());

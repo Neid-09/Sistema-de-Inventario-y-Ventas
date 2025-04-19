@@ -2,16 +2,13 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.LoteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Component
@@ -41,22 +38,14 @@ public class DialogAddLoteCtrlFX {
     private ILoteService loteService;
     private IProductoService productoService;
     private ProductoFX productoSeleccionado;
-    private IRegistMovimientService registroMovimientoProducto;
 
-    //ALMACENAR OPERACION
-    private String tipoOperacion;
-
-
-    public void setServicios(ILoteService loteService, IProductoService productoService,
-                             IRegistMovimientService entradaProductoService) {
+    public void setServicios(ILoteService loteService, IProductoService productoService) {
         this.loteService = loteService;
         this.productoService = productoService;
-        this.registroMovimientoProducto = entradaProductoService;
     }
 
-    public void inicializar(ProductoFX producto, String operacion) {
+    public void inicializar(ProductoFX producto) {
         this.productoSeleccionado = producto;
-        this.tipoOperacion = operacion;
 
         // Configurar la interfaz con los datos del producto
         lblNombreProducto.setText(producto.getNombre());
@@ -108,24 +97,11 @@ public class DialogAddLoteCtrlFX {
             nuevoLote.setActivo(true);
 
             // Guardar en la base de datos
-            LoteFX loteCreado = loteService.crear(nuevoLote);
+            loteService.crear(nuevoLote);
 
-            // Actualizar stock del producto (esto se hace automáticamente en el backend)
-            // Refrescar para ver el stock actualizado
-            ProductoFX productoActualizado = productoService.obtenerPorId(productoSeleccionado.getIdProducto());
+            productoService.obtenerPorId(productoSeleccionado.getIdProducto());
 
-            // Registrar el movimiento de entrada
-            int cantidad = Integer.parseInt(txtCantidad.getText().trim());
-            BigDecimal precioUnitario = productoSeleccionado.getPrecioCosto();
 
-            registroMovimientoProducto.registrarMovimiento(
-                    productoSeleccionado.getIdProducto(),
-                    cantidad,
-                    tipoOperacion,
-                    productoSeleccionado.getPrecioCosto(),
-                    productoSeleccionado.getIdProveedor(),
-                    "Creación de lote: " + loteCreado.getNumeroLote()
-            );
 
             // Mostrar mensaje de éxito
             mostrarAlerta("Lote creado y stock actualizado correctamente.", Alert.AlertType.INFORMATION);
