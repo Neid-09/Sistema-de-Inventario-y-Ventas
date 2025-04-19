@@ -481,7 +481,7 @@ public class ProductoControllerFX implements Initializable {
             lblMensaje.setText("Producto guardado correctamente");
 
             // Verificar si el producto tiene un proveedor asignado
-            if (productoGuardado.getIdProveedor() == null) {
+            if (productoGuardado.getIdProveedor() == null || producto.getIdProveedor() == 0) {
                 // Mostrar alerta informando que no se puede crear un lote sin proveedor
                 mostrarAlerta(Alert.AlertType.WARNING, "Aviso", "No se puede crear lote",
                         "No se puede crear un lote para este producto porque no tiene un proveedor asignado. " +

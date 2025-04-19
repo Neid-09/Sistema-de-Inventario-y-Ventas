@@ -382,6 +382,11 @@ public class LoteServiceImpl implements LoteService {
         if (cantidad <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
         }
+        
+        // Verificar que el producto tenga un proveedor asignado
+        if (producto.getProveedor() == null) {
+            throw new IllegalArgumentException("No se puede crear un lote para un producto sin proveedor asignado. Por favor, asigne un proveedor al producto antes de crear un lote.");
+        }
 
         // Crear nuevo lote
         Lote lote = new Lote();
