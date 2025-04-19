@@ -3,9 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.LoteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
@@ -147,20 +145,14 @@ public class LoteServiceImplFX implements ILoteService {
     @Override
     public LoteFX activar(Integer id) throws Exception {
         try {
-            String url = ApiConfig.getBaseUrl() + "/api/lotes/" + id + "/activar";
+            String url = BASE_URL + "/" + id + "/activar";
             String respuesta = HttpClient.put(url, "");
 
-            // Convertir respuesta JSON a objeto LoteFX
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-            return objectMapper.readValue(respuesta, LoteFX.class);
+            JsonNode jsonResponse = objectMapper.readTree(respuesta);
+            return convertirJsonALoteFX(jsonResponse);
         } catch (Exception e) {
-            // Capturar mensajes específicos del backend (como lote vencido)
             String mensajeError = e.getMessage();
 
-            // Si es un error de lote vencido, propagar el mensaje específico
             if (mensajeError.contains("vencido")) {
                 throw new Exception("No se puede activar un lote vencido: " + mensajeError);
             }
@@ -248,19 +240,7 @@ public class LoteServiceImplFX implements ILoteService {
                 throw new IllegalArgumentException("La cantidad a devolver debe ser mayor que cero");
             }
 
-            String url = String.format("%s/%d/devolucion?cantidad=%d", BASE_URL, idLote, cantidad);
-            String response = HttpClient.patch(url, "");
-            JsonNode jsonResponse = objectMapper.readTree(response);
-
-            if (jsonResponse.has("error")) {
-                throw new Exception(jsonResponse.get("error").asText());
-            }
-
-            if (jsonResponse.has("lote")) {
-                return convertirJsonALoteFX(jsonResponse.get("lote"));
-            } else {
-                throw new Exception("Respuesta del servidor no contiene información del lote");
-            }
+            throw new Exception("La funcionalidad de devolución no está implementada en el backend actualmente");
         } catch (Exception e) {
             logger.error("Error al procesar devolución para lote ID {}: {}", idLote, e.getMessage());
             throw new Exception("Error al procesar la devolución: " + e.getMessage());
