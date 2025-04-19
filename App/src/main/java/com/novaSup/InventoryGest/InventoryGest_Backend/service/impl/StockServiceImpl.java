@@ -36,10 +36,18 @@ public class StockServiceImpl {
 
     /**
      * Actualiza el stock de un producto en la base de datos
+     * Si el producto estu00e1 inactivo, no se actualizaru00e1 el stock
      */
     @Transactional
     public void actualizarStockProducto(Integer idProducto) {
         productoRepository.findById(idProducto).ifPresent(producto -> {
+            // Verificar si el producto estu00e1 activo
+            if (!producto.getEstado()) {
+                // Si el producto estu00e1 inactivo, no actualizamos el stock
+                // pero tampoco lanzamos excepciu00f3n para permitir listar productos
+                return;
+            }
+            
             int stockCalculado = calcularStockProducto(idProducto);
             if (producto.getStock() != stockCalculado) {
                 producto.setStock(stockCalculado);

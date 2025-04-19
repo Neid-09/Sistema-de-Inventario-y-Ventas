@@ -7,7 +7,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.LoteRepository
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -135,17 +134,7 @@ public class LoteServiceImpl implements LoteService {
                 throw new IllegalStateException("No se puede activar un lote vencido");
             }
             
-            // Registrar movimiento de activación (ajuste positivo)
-            try {
-                registrarMovimientoAjuste(
-                    lote.getProducto(),
-                    lote.getCantidad(),
-                    "Activación de lote: " + lote.getNumeroLote()
-                );
-            } catch (Exception e) {
-                throw new RuntimeException("Error al registrar movimiento de activación: " + e.getMessage());
-            }
-
+            // Ya no registramos movimiento, solo actualizamos el estado del lote
             lote.setActivo(true);
             Lote loteActualizado = loteRepository.save(lote);
 
@@ -168,15 +157,21 @@ public class LoteServiceImpl implements LoteService {
         if (loteOpt.isPresent()) {
             Lote lote = loteOpt.get();
             
-            // Registrar movimiento de desactivación (ajuste negativo)
-            try {
-                registrarMovimientoAjuste(
-                    lote.getProducto(),
-                    -lote.getCantidad(),
-                    "Desactivación de lote: " + lote.getNumeroLote()
-                );
-            } catch (Exception e) {
-                throw new RuntimeException("Error al registrar movimiento de desactivación: " + e.getMessage());
+            // Verificar si el lote está vencido
+            Date fechaActual = new Date();
+            boolean loteVencido = lote.getFechaVencimiento() != null && lote.getFechaVencimiento().before(fechaActual);
+            
+            // Solo registrar movimiento si el lote está vencido
+            if (loteVencido) {
+                try {
+                    registrarMovimientoAjuste(
+                        lote.getProducto(),
+                        -lote.getCantidad(),
+                        "Desactivación de lote vencido: " + lote.getNumeroLote()
+                    );
+                } catch (Exception e) {
+                    throw new RuntimeException("Error al registrar movimiento de desactivación: " + e.getMessage());
+                }
             }
             
             lote.setActivo(false);
