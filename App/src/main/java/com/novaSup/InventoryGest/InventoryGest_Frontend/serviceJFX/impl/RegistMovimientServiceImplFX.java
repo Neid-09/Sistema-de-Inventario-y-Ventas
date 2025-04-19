@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class RegistMovimientServiceImplFX implements IRegistMovimientService {
 
-    private final String API_URL = ApiConfig.getBaseUrl() + "/api/entradas";
+    private final String API_URL = ApiConfig.getBaseUrl() + "/api/movimientos";
     private final ObjectMapper objectMapper;
 
     public RegistMovimientServiceImplFX() {
@@ -42,6 +42,17 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
     @Override
     public List<EntradaProductoFX> obtenerPorIdProducto(Integer idProducto) throws Exception {
         String respuesta = HttpClient.get(API_URL + "/producto/" + idProducto);
+        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
+                new TypeReference<List<EntradaDTO>>() {});
+
+        return entradas.stream()
+                .map(this::convertirAEntradaFX)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EntradaProductoFX> obtenerPorProveedor(Integer idProveedor) throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/proveedor/" + idProveedor);
         List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
                 new TypeReference<List<EntradaDTO>>() {});
 
@@ -84,11 +95,23 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
     @Override
     public List<EntradaProductoFX> obtenerFiltrados(Integer idProducto, LocalDate desde,
                                                     LocalDate hasta, String tipo) throws Exception {
+        return obtenerFiltradosCompleto(idProducto, null, desde, hasta, tipo);
+    }
+
+    @Override
+    public List<EntradaProductoFX> obtenerFiltradosCompleto(Integer idProducto, Integer idProveedor, LocalDate desde,
+                                                    LocalDate hasta, String tipo) throws Exception {
         StringBuilder url = new StringBuilder(API_URL + "/filtro?");
         boolean hayParametro = false;
 
         if (idProducto != null) {
             url.append("idProducto=").append(idProducto);
+            hayParametro = true;
+        }
+
+        if (idProveedor != null) {
+            if (hayParametro) url.append("&");
+            url.append("idProveedor=").append(idProveedor);
             hayParametro = true;
         }
 
@@ -122,10 +145,15 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
     public EntradaProductoFX registrarMovimiento(Integer idProducto, Integer cantidad,
                                                  String tipoMovimiento, BigDecimal precioUnitario,
                                                  Integer idProveedor, String motivo) throws Exception {
+        // Nota: Este método se mantiene pero debería ser implementado en InventarioController
+        // ya que RegistMovimientController solo maneja consultas, no modificaciones
         MovimientoDTO movimientoDTO = new MovimientoDTO(idProducto, idProveedor, cantidad,
                 tipoMovimiento, precioUnitario, motivo);
         String json = objectMapper.writeValueAsString(movimientoDTO);
-        String respuesta = HttpClient.post(API_URL, json);
+
+        // Aquí deberíamos usar la URL del InventarioController para registrar movimientos
+        String inventarioApiUrl = ApiConfig.getBaseUrl() + "/api/inventario/movimiento";
+        String respuesta = HttpClient.post(inventarioApiUrl, json);
         EntradaDTO entradaDTO = objectMapper.readValue(respuesta, EntradaDTO.class);
         return convertirAEntradaFX(entradaDTO);
     }

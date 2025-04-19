@@ -47,12 +47,8 @@
 
             <Separator />
 
-            <!-- Botones para editar/eliminar movimientos -->
+            <!-- Indicadores de estado -->
             <HBox spacing="8.0" alignment="CENTER_LEFT">
-                <Button fx:id="btnEditarMovimiento" onAction="#editarMovimientoSeleccionado" text="Editar"
-                        style="-fx-background-color: #F39C12; -fx-text-fill: white;" />
-                <Button fx:id="btnEliminarMovimiento" onAction="#eliminarMovimientoSeleccionado" text="Eliminar"
-                        style="-fx-background-color: #C0392B; -fx-text-fill: white;" />
                 <ProgressIndicator fx:id="progressIndicator" visible="false" prefHeight="20.0" prefWidth="20.0" />
                 <Label fx:id="statusLabel" text="" />
             </HBox>
@@ -81,37 +77,8 @@
         </TableView>
     </center>
 
-    <bottom>
-        <VBox fx:id="formularioMovimiento" visible="false" managed="false" spacing="8"
-              style="-fx-background-color: white; -fx-border-color: #E0E0E0; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);">
-            <BorderPane.margin>
-                <Insets top="5.0" />
-            </BorderPane.margin>
-            <padding>
-                <Insets top="5.0" right="5.0" bottom="5.0" left="5.0" />
-            </padding>
-            <Label fx:id="lblTituloFormulario" text="Modificar Movimiento" style="-fx-text-fill: #2C3E50; -fx-font-weight: bold;">
-                <font>
-                    <Font size="14.0" />
-                </font>
-            </Label>
-
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <ComboBox fx:id="cmbFormProducto" prefWidth="200.0" promptText="Seleccionar producto" />
-                <TextField fx:id="txtCantidad" prefWidth="80.0" promptText="Cantidad" />
-                <TextField fx:id="txtPrecioUnitario" prefWidth="120.0" promptText="Precio unitario" />
-            </HBox>
-
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <ComboBox fx:id="cmbFormProveedor" prefWidth="200.0" promptText="Seleccionar proveedor" />
-                <TextField fx:id="txtMotivo" prefWidth="300.0" promptText="Motivo" HBox.hgrow="ALWAYS" />
-            </HBox>
-
-            <HBox spacing="10" alignment="CENTER_RIGHT">
-                <Button fx:id="btnCancelarRegistro" onAction="#cancelarRegistroMovimiento" text="Cancelar" style="-fx-background-color: #95A5A6; -fx-text-fill: white;" />
-                <Button fx:id="btnGuardarMovimiento" onAction="#guardarMovimiento" text="Guardar cambios" style="-fx-background-color: #3498DB; -fx-text-fill: white;" />
-            </HBox>
-        </VBox>
-    </bottom>
+    <!-- Se ha eliminado la sección del formulario para crear/editar movimientos,
+         ya que el controlador RegistMovimientController es solo para consultas.
+         Las operaciones de creación/edición deben realizarse desde el módulo de inventario. -->
 
 </BorderPane>
