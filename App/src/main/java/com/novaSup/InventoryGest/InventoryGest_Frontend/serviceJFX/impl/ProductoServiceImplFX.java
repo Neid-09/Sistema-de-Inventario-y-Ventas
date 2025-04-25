@@ -28,7 +28,7 @@ public class ProductoServiceImplFX implements IProductoService {
         API_URL = ApiConfig.getBaseUrl() + "/productos";
         API_CATEGORIAS = ApiConfig.getBaseUrl() + "/api/categorias";
         API_PROVEEDORES = ApiConfig.getBaseUrl() + "/api/proveedores";
-        
+
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

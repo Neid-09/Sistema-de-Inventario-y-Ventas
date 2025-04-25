@@ -166,7 +166,7 @@ public class ProductoServiceImpl implements ProductoService {
             // Si tiene lotes activos, no permitir eliminación
             throw new IllegalStateException("No se puede eliminar el producto porque tiene lotes asociados.");
         }
-        
+
         // Si no tiene lotes, verificar si tiene movimientos asociados
         if (tieneMovimientosAsociados(id)) {
             // En lugar de eliminar, cambiar estado a inactivo
