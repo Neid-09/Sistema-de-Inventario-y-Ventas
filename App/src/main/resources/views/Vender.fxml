@@ -91,7 +91,7 @@
             </Button>
          </VBox>
          <VBox alignment="CENTER">
-            <Button contentDisplay="BOTTOM" prefHeight="100" prefWidth="240" text="PROCESAR VENTA">
+            <Button fx:id="btnProcesarVenta" onAction="#procesarVenta" contentDisplay="BOTTOM" prefHeight="100" prefWidth="240" text="PROCESAR VENTA">
                <graphic>
                   <ImageView fitHeight="60" fitWidth="60" preserveRatio="true">
                      <image>
@@ -107,7 +107,7 @@
                   <Font name="System Bold" size="21.0" />
                </font>
             </Label>
-            <TextField editable="false" text="19,900">
+            <TextField fx:id="txtTotal" editable="false" text="">
                <font>
                   <Font name="System Bold" size="40.0" />
                </font>

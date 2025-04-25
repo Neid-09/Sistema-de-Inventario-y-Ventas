@@ -36,4 +36,9 @@ public class ProductoFX {
     public BigDecimal getPrecio() { return precio.get(); }
     public Integer getStock() { return stock.get(); }
     public Boolean getEstado() { return estado.get(); }
+
+    // Setter para stock
+    public void setStock(Integer stock) {
+        this.stock.set(stock);
+    }
 }

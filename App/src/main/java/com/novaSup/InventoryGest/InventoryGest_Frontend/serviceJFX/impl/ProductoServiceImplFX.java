@@ -14,61 +14,126 @@ import java.util.stream.Collectors;
 @Service
 public class ProductoServiceImplFX implements IProductoService {
 
-    private final String API_URL = "http://localhost:8080/productos";
+    private static final String API_URL = "http://localhost:8080/productos";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public List<ProductoFX> obtenerTodos() throws Exception {
-        String respuesta = HttpClient.get(API_URL);
-        List<ProductoDTO> productos = objectMapper.readValue(respuesta,
-                new TypeReference<List<ProductoDTO>>() {});
-
-        return productos.stream()
-                .map(this::convertirAProductoFX)
-                .collect(Collectors.toList());
+        try {
+            String respuesta = HttpClient.get(API_URL);
+            List<ProductoDTO> productos = objectMapper.readValue(respuesta,
+                    new TypeReference<List<ProductoDTO>>() {});
+            return productos.stream()
+                    .map(this::convertirAProductoFX)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new Exception("Error al obtener todos los productos: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ProductoFX obtenerPorId(Integer id) throws Exception {
-        String respuesta = HttpClient.get(API_URL + "/" + id);
-        ProductoDTO producto = objectMapper.readValue(respuesta, ProductoDTO.class);
-        return convertirAProductoFX(producto);
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID del producto no es válido.");
+        }
+        try {
+            String respuesta = HttpClient.get(API_URL + "/" + id);
+            ProductoDTO producto = objectMapper.readValue(respuesta, ProductoDTO.class);
+            return convertirAProductoFX(producto);
+        } catch (Exception e) {
+            throw new Exception("Error al obtener el producto con ID " + id + ": " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ProductoFX guardar(String nombre, String descripcion, BigDecimal precio, Integer stock) throws Exception {
-        ProductoDTO productoDTO = new ProductoDTO(null, nombre, descripcion, precio, stock, true);
-        String json = objectMapper.writeValueAsString(productoDTO);
-        String respuesta = HttpClient.post(API_URL, json);
-        ProductoDTO productoGuardado = objectMapper.readValue(respuesta, ProductoDTO.class);
-        return convertirAProductoFX(productoGuardado);
+        if (nombre == null || nombre.isEmpty() || precio == null || stock == null || stock < 0) {
+            throw new IllegalArgumentException("Datos del producto no válidos.");
+        }
+        try {
+            ProductoDTO productoDTO = new ProductoDTO(null, nombre, descripcion, precio, stock, true);
+            String json = objectMapper.writeValueAsString(productoDTO);
+            String respuesta = HttpClient.post(API_URL, json);
+            ProductoDTO productoGuardado = objectMapper.readValue(respuesta, ProductoDTO.class);
+            return convertirAProductoFX(productoGuardado);
+        } catch (Exception e) {
+            throw new Exception("Error al guardar el producto: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ProductoFX actualizar(Integer id, String nombre, String descripcion, BigDecimal precio, Integer stock) throws Exception {
-        ProductoDTO productoDTO = new ProductoDTO(id, nombre, descripcion, precio, stock, true);
-        String json = objectMapper.writeValueAsString(productoDTO);
-        String respuesta = HttpClient.put(API_URL + "/" + id, json);
-        ProductoDTO productoActualizado = objectMapper.readValue(respuesta, ProductoDTO.class);
-        return convertirAProductoFX(productoActualizado);
+        if (id == null || id <= 0 || nombre == null || nombre.isEmpty() || precio == null || stock == null || stock < 0) {
+            throw new IllegalArgumentException("Datos del producto no válidos.");
+        }
+        try {
+            ProductoDTO productoDTO = new ProductoDTO(id, nombre, descripcion, precio, stock, true);
+            String json = objectMapper.writeValueAsString(productoDTO);
+            String respuesta = HttpClient.put(API_URL + "/" + id, json);
+            ProductoDTO productoActualizado = objectMapper.readValue(respuesta, ProductoDTO.class);
+            return convertirAProductoFX(productoActualizado);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar el producto con ID " + id + ": " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void eliminar(Integer id) throws Exception {
-        HttpClient.delete(API_URL + "/" + id);
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID del producto no es válido.");
+        }
+        try {
+            HttpClient.delete(API_URL + "/" + id);
+        } catch (Exception e) {
+            throw new Exception("Error al eliminar el producto con ID " + id + ": " + e.getMessage(), e);
+        }
     }
 
     @Override
     public void desactivarProducto(Integer id) throws Exception {
-        // Llamar al endpoint para desactivar el producto
-        HttpClient.patch(API_URL + "/" + id + "/desactivar");
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID del producto no es válido.");
+        }
+        try {
+            HttpClient.patch(API_URL + "/" + id + "/desactivar");
+        } catch (Exception e) {
+            throw new Exception("Error al desactivar el producto con ID " + id + ": " + e.getMessage(), e);
+        }
     }
 
     @Override
     public ProductoFX actualizarStock(Integer id, Integer cantidad) throws Exception {
-        String respuesta = HttpClient.patch(API_URL + "/" + id + "/stock?cantidad=" + cantidad);
-        ProductoDTO productoActualizado = objectMapper.readValue(respuesta, ProductoDTO.class);
-        return convertirAProductoFX(productoActualizado);
+        if (id == null || id <= 0 || cantidad == null) {
+            throw new IllegalArgumentException("Datos para actualizar el stock no válidos.");
+        }
+        try {
+            String respuesta = HttpClient.patch(API_URL + "/" + id + "/stock?cantidad=" + cantidad);
+            ProductoDTO productoActualizado = objectMapper.readValue(respuesta, ProductoDTO.class);
+            return convertirAProductoFX(productoActualizado);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar el stock del producto con ID " + id + ": " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void actualizarProducto(ProductoFX producto) throws Exception {
+        if (producto == null || producto.getIdProducto() == null || producto.getIdProducto() <= 0) {
+            throw new IllegalArgumentException("El producto no es válido.");
+        }
+        try {
+            ProductoDTO productoDTO = new ProductoDTO(
+                    producto.getIdProducto(),
+                    producto.getNombre(),
+                    producto.getDescripcion(),
+                    producto.getPrecio(),
+                    producto.getStock(),
+                    producto.getEstado()
+            );
+            String json = objectMapper.writeValueAsString(productoDTO);
+            HttpClient.put(API_URL + "/" + producto.getIdProducto(), json);
+        } catch (Exception e) {
+            throw new Exception("Error al actualizar el producto: " + e.getMessage(), e);
+        }
     }
 
     private ProductoFX convertirAProductoFX(ProductoDTO dto) {

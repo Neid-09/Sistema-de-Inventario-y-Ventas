@@ -38,6 +38,9 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public void eliminar(Integer id) {
+        if (!productoRepository.existsById(id)) {
+            throw new RuntimeException("El producto con ID " + id + " no existe.");
+        }
         productoRepository.deleteById(id);
     }
 
@@ -45,26 +48,31 @@ public class ProductoServiceImpl implements ProductoService {
     @Transactional
     public Optional<Producto> actualizarStock(Integer id, Integer cantidad) {
         return productoRepository.findById(id).map(producto -> {
-            // Actualizar stock
             int nuevoStock = producto.getStock() + cantidad;
+            if (nuevoStock < 0) {
+                throw new RuntimeException("El stock no puede ser negativo.");
+            }
             producto.setStock(nuevoStock);
             Producto productoActualizado = productoRepository.save(producto);
 
-            // Registrar entrada/salida
             EntradaProducto entrada = new EntradaProducto();
             entrada.setProducto(producto);
             entrada.setCantidad(cantidad);
             entradaProductoService.guardar(entrada);
 
             return productoActualizado;
+        }).or(() -> {
+            throw new RuntimeException("Producto con ID " + id + " no encontrado.");
         });
     }
 
     @Override
     public Optional<Producto> desactivarProducto(Integer id) {
-        return obtenerPorId(id).map(producto -> {
+        return productoRepository.findById(id).map(producto -> {
             producto.setEstado(false);
-            return guardar(producto);
+            return productoRepository.save(producto);
+        }).or(() -> {
+            throw new RuntimeException("Producto con ID " + id + " no encontrado.");
         });
     }
 }
