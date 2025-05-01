@@ -1,14 +1,12 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.impl.UsuarioServiceImpl;
+import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/permisos")
@@ -19,47 +17,62 @@ public class PermisoController {
     private PermisoRepository permisoRepository;
 
     @Autowired
-    private UsuarioServiceImpl usuarioService;
+    private SecurityUtil securityUtil;
 
     @GetMapping
-    public ResponseEntity<?> listarPermisos(@RequestHeader("usuario-id") Integer idUsuario) {
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_permisos')")
+    public ResponseEntity<?> listarPermisos() {
         try {
-            Usuario admin = usuarioService.obtenerUsuarioPorId(idUsuario);
-            if (!usuarioService.tienePermiso(admin, "gestionar_permisos")) {
-                return ResponseEntity.status(403).body("No tienes permisos para gestionar permisos");
-            }
-
             return ResponseEntity.ok(permisoRepository.findAll());
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_permisos')")
+    public ResponseEntity<?> obtenerPermiso(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(permisoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Permiso no encontrado")));
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> crearPermiso(@RequestBody Permiso permiso, @RequestHeader("usuario-id") Integer idUsuario) {
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_permisos')")
+    public ResponseEntity<?> crearPermiso(@RequestBody Permiso permiso) {
         try {
-            Usuario admin = usuarioService.obtenerUsuarioPorId(idUsuario);
-            if (!usuarioService.tienePermiso(admin, "gestionar_permisos")) {
-                return ResponseEntity.status(403).body("No tienes permisos para gestionar permisos");
-            }
-
             return ResponseEntity.ok(permisoRepository.save(permiso));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_permisos')")
+    public ResponseEntity<?> actualizarPermiso(@PathVariable Integer id, @RequestBody Permiso permiso) {
+        try {
+            Permiso permisoExistente = permisoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Permiso no encontrado"));
+
+            permisoExistente.setNombre(permiso.getNombre());
+            permisoExistente.setDescripcion(permiso.getDescripcion());
+
+            return ResponseEntity.ok(permisoRepository.save(permisoExistente));
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarPermiso(@PathVariable Integer id, @RequestHeader("usuario-id") Integer idUsuario) {
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_permisos')")
+    public ResponseEntity<?> eliminarPermiso(@PathVariable Integer id) {
         try {
-            Usuario admin = usuarioService.obtenerUsuarioPorId(idUsuario);
-            if (!usuarioService.tienePermiso(admin, "gestionar_permisos")) {
-                return ResponseEntity.status(403).body("No tienes permisos para gestionar permisos");
-            }
-
             permisoRepository.deleteById(id);
             return ResponseEntity.ok("Permiso eliminado correctamente");
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

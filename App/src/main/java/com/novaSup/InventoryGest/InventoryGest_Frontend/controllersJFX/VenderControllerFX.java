@@ -108,7 +108,7 @@ public class VenderControllerFX implements Initializable {
         lblNombre.setFont(Font.font("System", FontWeight.BOLD, 14));
 
         Label lblStock = new Label("Stock: " + producto.getStock());
-        Label lblPrecio = new Label("Precio: " + formatoMoneda.format(producto.getPrecio()));
+        Label lblPrecio = new Label("Precio: " + formatoMoneda.format(producto.getPrecioVenta()));
 
         Button btnAgregar = new Button("Agregar");
         btnAgregar.setOnAction(e -> agregarAlCarrito(producto));
@@ -128,20 +128,20 @@ public class VenderControllerFX implements Initializable {
         Spinner<Integer> spCantidad = new Spinner<>(1, producto.getStock(), 1);
         spCantidad.setPrefWidth(70);
 
-        Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecio()));
+        Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecioVenta()));
         lblPrecio.setMinWidth(80);
 
         Button btnEliminar = new Button("X");
         btnEliminar.setStyle("-fx-text-fill: red;");
         btnEliminar.setOnAction(e -> {
             carritoBox.getChildren().remove(itemCarrito);
-            BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(spCantidad.getValue()));
+            BigDecimal subtotal = producto.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue()));
             totalVenta = totalVenta.subtract(subtotal);
             actualizarTotal();
         });
 
         spCantidad.valueProperty().addListener((obs, oldValue, newValue) -> {
-            BigDecimal diferencia = producto.getPrecio().multiply(BigDecimal.valueOf(newValue - oldValue));
+            BigDecimal diferencia = producto.getPrecioVenta().multiply(BigDecimal.valueOf(newValue - oldValue));
             totalVenta = totalVenta.add(diferencia);
             actualizarTotal();
         });
@@ -149,7 +149,7 @@ public class VenderControllerFX implements Initializable {
         itemCarrito.getChildren().addAll(lblNombre, spCantidad, lblPrecio, btnEliminar);
         carritoBox.getChildren().add(0, itemCarrito);
 
-        totalVenta = totalVenta.add(producto.getPrecio());
+        totalVenta = totalVenta.add(producto.getPrecioVenta());
         actualizarTotal();
     }
 
@@ -173,24 +173,47 @@ public class VenderControllerFX implements Initializable {
                 return;
             }
 
+            // Opcional: Usar setUserData/getUserData como se sugirió antes para más robustez
             for (Node item : carritoBox.getChildren()) {
                 if (item instanceof HBox) {
                     HBox itemCarrito = (HBox) item;
-                    Label lblNombre = (Label) itemCarrito.getChildren().get(0);
-                    Spinner<Integer> spCantidad = (Spinner<Integer>) itemCarrito.getChildren().get(1);
+                    // Asumiendo que recuperas el producto de alguna forma (getUserData o búsqueda por nombre)
+                    ProductoFX producto = null; // = obtenerProductoDelItem(itemCarrito);
 
-                    ProductoFX producto = todosLosProductos.stream()
+                    // --- Inicio: Lógica para obtener el producto (ejemplo con búsqueda por nombre) ---
+                    Label lblNombre = (Label) itemCarrito.getChildren().get(0);
+                    producto = todosLosProductos.stream()
                             .filter(p -> p.getNombre().equals(lblNombre.getText()))
                             .findFirst()
                             .orElse(null);
+                    // --- Fin: Lógica para obtener el producto ---
+
+
+                    Spinner<Integer> spCantidad = (Spinner<Integer>) itemCarrito.getChildren().get(1);
 
                     if (producto != null) {
                         int cantidadVendida = spCantidad.getValue();
-                        producto.setStock(producto.getStock() - cantidadVendida);
-                        productoService.actualizarProducto(producto);
+
+                        // *** Cambio Principal: Llamar a actualizarStock ***
+                        // No necesitas hacer producto.setStock(...) aquí
+                        // Pasa el ID del producto y la cantidad vendida como negativa
+                        productoService.actualizarStock(producto.getIdProducto(), -cantidadVendida);
+
+                    } else {
+                         mostrarError("Error Interno", "No se pudo encontrar el producto en el carrito.");
+                         return; // Detener si un producto no se encuentra
                     }
                 }
             }
+
+            // --- Recargar productos después de la venta para reflejar stock actualizado ---
+            try {
+                cargarProductos(); // Vuelve a cargar la lista 'todosLosProductos' desde la API
+            } catch (Exception loadEx) {
+                 mostrarError("Error post-venta", "No se pudo recargar la lista de productos: " + loadEx.getMessage());
+            }
+            // --- Fin recarga ---
+
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Venta Procesada");
@@ -201,8 +224,13 @@ public class VenderControllerFX implements Initializable {
             carritoBox.getChildren().clear();
             totalVenta = BigDecimal.ZERO;
             actualizarTotal();
+            // Limpiar también los resultados de búsqueda si es necesario
+            productosBox.getChildren().clear();
+            txtBusqueda.clear();
+
         } catch (Exception e) {
             mostrarError("Error al procesar la venta", e.getMessage());
+            e.printStackTrace(); // Mantener para depuración
         }
     }
 }

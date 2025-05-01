@@ -3,6 +3,9 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "usuarios")
 @Getter
@@ -31,11 +34,18 @@ public class Usuario {
     @Transient
     private Integer idRol;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "permisos_usuario",
+            joinColumns = @JoinColumn(name = "id_usuario"),
+            inverseJoinColumns = @JoinColumn(name = "id_permiso")
+    )
+    private Set<Permiso> permisosPersonalizados = new HashSet<>();
+
     @PostLoad
     private void setIdFromRol() {
         if (rol != null) {
             this.idRol = rol.getIdRol();
         }
     }
-
 }

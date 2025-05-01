@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.PermisosUserCtrlFX">
+    <children>
+        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <!-- Título -->
+                <Label text="Administración de Permisos de Usuario" textFill="#2c3e50">
+                    <font>
+                        <Font name="System Bold" size="18.0" />
+                    </font>
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </padding>
+                </Label>
+
+                <!-- Selección de Usuario -->
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <padding>
+                        <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                    </padding>
+                    <children>
+                        <Label text="Seleccionar Usuario:" />
+                        <ComboBox fx:id="comboUsuarios" prefWidth="300.0" promptText="Seleccione un usuario" />
+                        <Button fx:id="btnCargarPermisos" mnemonicParsing="false" onAction="#cargarPermisosUsuario" text="Cargar Permisos" />
+                    </children>
+                </HBox>
+
+                <!-- Información del Usuario -->
+                <GridPane hgap="10.0" vgap="5.0">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
+                    </padding>
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="120.0" minWidth="100.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" prefWidth="300.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <Label text="Rol del Usuario:" GridPane.rowIndex="0" />
+                        <Label fx:id="lblRolUsuario" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Label text="Nombre:" GridPane.rowIndex="1" />
+                        <Label fx:id="lblNombreUsuario" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    </children>
+                </GridPane>
+
+                <!-- Gestión de Permisos -->
+                <TitledPane animated="true" collapsible="false" text="Gestión de Permisos">
+                    <content>
+                        <VBox spacing="10.0">
+                            <children>
+                                <!-- Permisos del Rol -->
+                                <TitledPane animated="true" text="Permisos del Rol">
+                                    <content>
+                                        <VBox spacing="5.0">
+                                            <Label text="Estos permisos son heredados del rol y no pueden modificarse directamente:" />
+                                            <TableView fx:id="tablaPermisosRol" prefHeight="150.0">
+                                                <columns>
+                                                    <TableColumn fx:id="colIdPermisoRol" prefWidth="75.0" text="ID" />
+                                                    <TableColumn fx:id="colNombrePermisoRol" prefWidth="200.0" text="Nombre" />
+                                                    <TableColumn fx:id="colDescripcionPermisoRol" prefWidth="300.0" text="Descripción" />
+                                                </columns>
+                                            </TableView>
+                                        </VBox>
+                                    </content>
+                                </TitledPane>
+
+                                <!-- Permisos Específicos del Usuario -->
+                                <TitledPane animated="true" text="Permisos Específicos del Usuario">
+                                    <content>
+                                        <VBox spacing="5.0">
+                                            <Label text="Estos permisos son asignados directamente al usuario:" />
+                                            <HBox spacing="10.0">
+                                                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                                    <Label text="Permisos Disponibles" />
+                                                    <TableView fx:id="tablaPermisosDisponibles" prefHeight="200.0">
+                                                        <columns>
+                                                            <TableColumn fx:id="colIdPermisoDisponible" prefWidth="50.0" text="ID" />
+                                                            <TableColumn fx:id="colNombrePermisoDisponible" prefWidth="150.0" text="Nombre" />
+                                                            <TableColumn fx:id="colDescripcionPermisoDisponible" prefWidth="250.0" text="Descripción" />
+                                                        </columns>
+                                                    </TableView>
+                                                </VBox>
+
+                                                <VBox alignment="CENTER" spacing="10.0">
+                                                    <Button fx:id="btnAsignarPermiso" mnemonicParsing="false" onAction="#asignarPermiso" text="&gt;" />
+                                                    <Button fx:id="btnQuitarPermiso" mnemonicParsing="false" onAction="#quitarPermiso" text="&lt;" />
+                                                </VBox>
+
+                                                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                                    <Label text="Permisos Asignados" />
+                                                    <TableView fx:id="tablaPermisosAsignados" prefHeight="200.0">
+                                                        <columns>
+                                                            <TableColumn fx:id="colIdPermisoAsignado" prefWidth="50.0" text="ID" />
+                                                            <TableColumn fx:id="colNombrePermisoAsignado" prefWidth="150.0" text="Nombre" />
+                                                            <TableColumn fx:id="colDescripcionPermisoAsignado" prefWidth="250.0" text="Descripción" />
+                                                        </columns>
+                                                    </TableView>
+                                                </VBox>
+                                            </HBox>
+                                        </VBox>
+                                    </content>
+                                </TitledPane>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+                <!-- Botones de acción -->
+                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    </padding>
+                    <children>
+                        <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#cancelar" text="Cancelar" />
+                        <Button fx:id="btnGuardar" defaultButton="true" mnemonicParsing="false" onAction="#guardarPermisos" text="Guardar Cambios" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

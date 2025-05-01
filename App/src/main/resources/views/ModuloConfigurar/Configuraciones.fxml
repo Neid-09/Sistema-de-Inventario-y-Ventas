@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.ConfigsControllerFX">
+
+    <!-- Zona Superior (Top) -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10; -fx-background-color: #ADD8E6;">
+            <Label text="Gestión de Configuraciones Globales" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <!-- Zona Central (Tabla de Configuraciones) -->
+    <center>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <HBox spacing="5">
+                <TextField fx:id="buscarConfiguracion" promptText="Buscar configuración..." prefWidth="250"/>
+                <Button text="Buscar" onAction="#buscarConfiguracion"/>
+                <Button text="Agregar Nueva" onAction="#mostrarFormulario"/>
+            </HBox>
+            <TableView fx:id="tablaConfiguraciones" prefHeight="300">
+                <columns>
+                    <TableColumn text="Clave" fx:id="colClave" prefWidth="150"/>
+                    <TableColumn text="Valor" fx:id="colValor" prefWidth="200"/>
+                    <TableColumn text="Descripción" fx:id="colDescripcion" prefWidth="300"/>
+                    <TableColumn text="Acciones" fx:id="colAcciones" prefWidth="150"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- Zona Inferior (Formulario para Agregar/Editar) -->
+    <bottom>
+        <VBox fx:id="formulario" spacing="10" style="-fx-padding: 10; -fx-background-color: #F0F0F0;" visible="false">
+            <Label text="Formulario de Configuración" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <GridPane hgap="10" vgap="10">
+                <Label text="Clave:"/>
+                <TextField fx:id="txtClave" GridPane.columnIndex="1"/>
+                <Label text="Valor:" GridPane.rowIndex="1"/>
+                <TextField fx:id="txtValor" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Descripción:" GridPane.rowIndex="2"/>
+                <TextField fx:id="txtDescripcion" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            </GridPane>
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="Guardar" onAction="#guardarConfiguracion"/>
+                <Button text="Cancelar" onAction="#ocultarFormulario"/>
+            </HBox>
+        </VBox>
+    </bottom>
+</BorderPane>

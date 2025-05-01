@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.layout.StackPane?>
 <BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX">
     <!--TOP-->
     <top>
@@ -33,9 +34,23 @@
                     </HBox.margin>
                 </Label>
 
-
                 <!-- Relleno flexible para empujar el perfil a la derecha -->
                 <Pane HBox.hgrow="ALWAYS" />
+
+
+                <Button fx:id="btnNotificaciones" onAction="#irNotificaciones" style="-fx-background-color: transparent;" styleClass="alert-button" textFill="TRANSPARENT">
+                    <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0">
+                            <Image url="@../img/menuPrincipal/notificaciones.png" />
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Alertas de inventario" />
+                    </tooltip>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+                </Button>
 
                 <!-- Perfil de usuario (puede ser imagen + nombre + botón cerrar sesión) -->
                 <HBox alignment="CENTER_RIGHT" spacing="10">
@@ -58,12 +73,11 @@
         <VBox alignment="CENTER" prefWidth="250.0" spacing="10" style="-fx-background-color: #083671;" xmlns:fx="http://javafx.com/fxml">
             <children>
 
-                <Button text="🏠 Inicio" onAction="#volverAlInicio"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;" />
+                <Button onAction="#volverAlInicio" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;" text="🏠 Inicio" />
                 <!-- Más botones de módulos debajo -->
 
                 <!-- VENDER -->
-                <Button fx:id="btnVender" onAction="#irVender" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnVender" maxWidth="200" onAction="#irVender" style="-fx-alignment: CENTER_LEFT;">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
@@ -95,7 +109,7 @@
                 </Button>
 
                 <!-- INVENTARIO -->
-                <Button fx:id="btnProductos" onAction="#irGestionProductos" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnInventario" maxWidth="200" onAction="#irModuloInventario" style="-fx-alignment: CENTER_LEFT;">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
@@ -159,7 +173,7 @@
                 </Button>
 
                 <!-- ENTRADAS/SALIDAS -->
-                <Button fx:id="btnVerHistorial" onAction="#verHistorialStock" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnEntradasSalidas" maxWidth="200" onAction="#irModuloEntradasSalidas" style="-fx-alignment: CENTER_LEFT;">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
@@ -191,7 +205,7 @@
                 </Button>
 
                 <!-- CONFIGURAR -->
-                <Button fx:id="btnConfiguracion" onAction="#irConfiguracion" maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnConfiguracion" maxWidth="200" onAction="#irModuloConfiguracion" style="-fx-alignment: CENTER_LEFT;">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
@@ -223,7 +237,7 @@
         <HBox alignment="CENTER" prefHeight="50.0" spacing="20" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
             <children>
 
-                <Label text="ROL: []" />
+                <Label fx:id="lblRol" text="ROL: []" />
 
             </children>
         </HBox>
