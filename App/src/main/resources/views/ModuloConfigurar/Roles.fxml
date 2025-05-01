@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.RolesControllerFX">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <Label text="Gestión de Roles" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10" VBox.vgrow="ALWAYS">
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <TableView fx:id="tablaRoles" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                    <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+        <VBox spacing="10" prefWidth="300">
+            <GridPane vgap="10" hgap="10">
+                <Label text="Nombre:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtNombre" GridPane.rowIndex="0" GridPane.columnIndex="1" maxWidth="Infinity"/>
+
+                <HBox spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                    <Button fx:id="btnNuevo" text="Nuevo" onAction="#nuevoRol" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnGuardar" text="Guardar" onAction="#guardarRol" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnEliminar" text="Eliminar" onAction="#confirmarEliminarRol" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <Separator GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" prefHeight="20"/>
+
+                <Button fx:id="btnAsignarPermisos" text="Asignar Permisos"
+                        onAction="#navegarAsignarPermisos"
+                        GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"
+                        maxWidth="Infinity"/>
+            </GridPane>
+        </VBox>
+    </HBox>
+</VBox>

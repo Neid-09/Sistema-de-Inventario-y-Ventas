@@ -1,6 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX;
 
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class PermisoFX {
     private final IntegerProperty idPermiso;
@@ -28,8 +31,8 @@ public class PermisoFX {
         return idPermiso;
     }
 
-    public void setIdPermiso(Integer id) {
-        this.idPermiso.set(id);
+    public void setIdPermiso(Integer idPermiso) {
+        this.idPermiso.set(idPermiso);
     }
 
     public String getNombre() {
@@ -57,7 +60,15 @@ public class PermisoFX {
     }
 
     @Override
-    public String toString() {
-        return nombre.get();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PermisoFX permisoFX = (PermisoFX) o;
+        return idPermiso.get() == permisoFX.idPermiso.get();
+    }
+
+    @Override
+    public int hashCode() {
+        return idPermiso.get();
     }
 }

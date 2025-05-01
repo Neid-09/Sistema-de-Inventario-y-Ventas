@@ -8,39 +8,25 @@ public class EntradaProductoFX {
     private Integer idEntrada;
     private Integer idProducto;
     private String nombreProducto;
+    private Integer idProveedor;
+    private String nombreProveedor;
     private Integer cantidad;
     private LocalDateTime fecha;
-    private TipoMovimiento tipoMovimiento;
+    private String tipoMovimiento; // String en lugar de enum
     private BigDecimal precioUnitario;
+    private String motivo;
 
-    // Enumeración para el tipo de movimiento
-    public enum TipoMovimiento {
-        ENTRADA("Entrada"),
-        SALIDA("Salida");
-
-        private final String descripcion;
-
-        TipoMovimiento(String descripcion) {
-            this.descripcion = descripcion;
-        }
-
-        public String getDescripcion() {
-            return descripcion;
-        }
-
-        @Override
-        public String toString() {
-            return descripcion;
-        }
-    }
+    // Constantes para los tipos de movimiento
+    public static final String TIPO_ENTRADA = "ENTRADA";
+    public static final String TIPO_SALIDA = "SALIDA";
 
     // Constructores
     public EntradaProductoFX() {
     }
 
-    // Actualizar constructor
+    // Constructor básico
     public EntradaProductoFX(Integer idEntrada, Integer idProducto, String nombreProducto,
-                             Integer cantidad, LocalDateTime fecha, TipoMovimiento tipoMovimiento,
+                             Integer cantidad, LocalDateTime fecha, String tipoMovimiento,
                              BigDecimal precioUnitario) {
         this.idEntrada = idEntrada;
         this.idProducto = idProducto;
@@ -49,6 +35,23 @@ public class EntradaProductoFX {
         this.fecha = fecha;
         this.tipoMovimiento = tipoMovimiento;
         this.precioUnitario = precioUnitario;
+    }
+
+    // Constructor completo
+    public EntradaProductoFX(Integer idEntrada, Integer idProducto, String nombreProducto,
+                             Integer idProveedor, String nombreProveedor, Integer cantidad,
+                             LocalDateTime fecha, String tipoMovimiento,
+                             BigDecimal precioUnitario, String motivo) {
+        this.idEntrada = idEntrada;
+        this.idProducto = idProducto;
+        this.nombreProducto = nombreProducto;
+        this.idProveedor = idProveedor;
+        this.nombreProveedor = nombreProveedor;
+        this.cantidad = cantidad;
+        this.fecha = fecha;
+        this.tipoMovimiento = tipoMovimiento;
+        this.precioUnitario = precioUnitario;
+        this.motivo = motivo;
     }
 
     // Getters y setters
@@ -76,6 +79,22 @@ public class EntradaProductoFX {
         this.nombreProducto = nombreProducto;
     }
 
+    public Integer getIdProveedor() {
+        return idProveedor;
+    }
+
+    public void setIdProveedor(Integer idProveedor) {
+        this.idProveedor = idProveedor;
+    }
+
+    public String getNombreProveedor() {
+        return nombreProveedor;
+    }
+
+    public void setNombreProveedor(String nombreProveedor) {
+        this.nombreProveedor = nombreProveedor;
+    }
+
     public Integer getCantidad() {
         return cantidad;
     }
@@ -92,15 +111,14 @@ public class EntradaProductoFX {
         this.fecha = fecha;
     }
 
-    public TipoMovimiento getTipoMovimiento() {
+    public String getTipoMovimiento() {
         return tipoMovimiento;
     }
 
-    public void setTipoMovimiento(TipoMovimiento tipoMovimiento) {
+    public void setTipoMovimiento(String tipoMovimiento) {
         this.tipoMovimiento = tipoMovimiento;
     }
 
-    // Agregar getter y setter
     public BigDecimal getPrecioUnitario() {
         return precioUnitario;
     }
@@ -109,4 +127,22 @@ public class EntradaProductoFX {
         this.precioUnitario = precioUnitario;
     }
 
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
+    @Override
+    public String toString() {
+        return "EntradaProductoFX{" +
+                "idEntrada=" + idEntrada +
+                ", producto=" + nombreProducto +
+                ", cantidad=" + cantidad +
+                ", fecha=" + fecha +
+                ", tipoMovimiento='" + tipoMovimiento + '\'' +
+                '}';
+    }
 }
