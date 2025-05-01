@@ -355,23 +355,6 @@ public class LoteServiceImpl implements LoteService {
         return loteActualizado;
     }
 
-    // Verificar lotes por vencer y notificar
-    @Scheduled(cron = "0 0 0 * * ?") // Ejecutar diariamente a medianoche
-    public void verificarLotesPorVencer() {
-        // Días de alerta (se podría obtener de configuración)
-        int diasAlerta = 30;
-
-        List<Lote> lotesPorVencer = obtenerLotesProximosVencer(diasAlerta);
-
-        for (Lote lote : lotesPorVencer) {
-            notificacionService.notificarLoteProximoAVencer(
-                    lote.getIdLote(),
-                    lote.getProducto().getNombre(),
-                    lote.getFechaVencimiento()
-            );
-        }
-    }
-
     @Override
     @Transactional
     public Lote crearNuevoLote(Producto producto, Integer cantidad, String numeroLote, Date fechaVencimiento, Integer idEntrada) {

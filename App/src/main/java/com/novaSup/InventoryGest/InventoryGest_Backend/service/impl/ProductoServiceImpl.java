@@ -186,15 +186,31 @@ public class ProductoServiceImpl implements ProductoService {
         // ahora lo calcula desde los lotes
         return obtenerPorId(idProducto)
                 .map(producto -> {
-                    actualizarStockDesdeLoterRepositorio(producto);
+                    actualizarStockDesdeLoterRepositorio(producto); // Esto recalcula y guarda el stock si cambió
 
-                    // Verificar stock mínimo y máximo para generar notificaciones
-                    if (producto.getStockMinimo() != null && producto.getStock() <= producto.getStockMinimo()) {
-                        notificacionService.notificarStockBajo(producto);
+                    // Verificar stock mínimo y máximo para generar notificaciones usando el método general
+                    if (producto.getEstado() && producto.getStockMinimo() != null && producto.getStock() <= producto.getStockMinimo()) {
+                        // Usar notificarUsuariosRelevantes en lugar de notificarStockBajo
+                        notificacionService.notificarUsuariosRelevantes(
+                                "Stock Bajo: " + producto.getNombre(),
+                                "El producto '" + producto.getNombre() + "' (Código: " + producto.getCodigo() +
+                                        ") tiene un stock actual de " + producto.getStock() +
+                                        ", que está por debajo del mínimo de " + producto.getStockMinimo() + ".",
+                                "STOCK_BAJO",
+                                producto.getIdProducto()
+                        );
                     }
 
-                    if (producto.getStockMaximo() != null && producto.getStock() > producto.getStockMaximo()) {
-                        notificacionService.notificarSobrestock(producto);
+                    if (producto.getEstado() && producto.getStockMaximo() != null && producto.getStock() > producto.getStockMaximo()) {
+                        // Usar notificarUsuariosRelevantes en lugar de notificarSobrestock
+                        notificacionService.notificarUsuariosRelevantes(
+                                "Sobrestock: " + producto.getNombre(),
+                                "El producto '" + producto.getNombre() + "' (Código: " + producto.getCodigo() +
+                                        ") tiene un stock actual de " + producto.getStock() +
+                                        ", superando el máximo recomendado de " + producto.getStockMaximo() + ".",
+                                "ALERTA_SOBRESTOCK",
+                                producto.getIdProducto()
+                        );
                     }
 
                     return producto;

@@ -3,6 +3,8 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.LoteRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService; // Importar NotificacionService
+import org.springframework.beans.factory.annotation.Autowired; // Importar Autowired
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +18,14 @@ import java.util.List;
 public class StockServiceImpl {
 
     private final LoteRepository loteRepository;
-
     private final ProductoRepository productoRepository;
+    private final NotificacionService notificacionService; // Inyectar NotificacionService
 
-    public StockServiceImpl(LoteRepository loteRepository, ProductoRepository productoRepository) {
+    // Inyectar NotificacionService en el constructor
+    public StockServiceImpl(LoteRepository loteRepository, ProductoRepository productoRepository, NotificacionService notificacionService) {
         this.loteRepository = loteRepository;
         this.productoRepository = productoRepository;
+        this.notificacionService = notificacionService;
     }
 
     /**
@@ -36,18 +40,18 @@ public class StockServiceImpl {
 
     /**
      * Actualiza el stock de un producto en la base de datos
-     * Si el producto estu00e1 inactivo, no se actualizaru00e1 el stock
+     * Si el producto está inactivo, no se actualizará el stock
      */
     @Transactional
     public void actualizarStockProducto(Integer idProducto) {
         productoRepository.findById(idProducto).ifPresent(producto -> {
-            // Verificar si el producto estu00e1 activo
+            // Verificar si el producto está activo
             if (!producto.getEstado()) {
-                // Si el producto estu00e1 inactivo, no actualizamos el stock
-                // pero tampoco lanzamos excepciu00f3n para permitir listar productos
+                // Si el producto está inactivo, no actualizamos el stock
+                // pero tampoco lanzamos excepción para permitir listar productos
                 return;
             }
-            
+
             int stockCalculado = calcularStockProducto(idProducto);
             if (producto.getStock() != stockCalculado) {
                 producto.setStock(stockCalculado);
@@ -64,21 +68,35 @@ public class StockServiceImpl {
     }
 
     /**
-     * Verifica y desactiva lotes vencidos
+     * Verifica y desactiva lotes vencidos, y notifica sobre la desactivación.
      */
     @Scheduled(cron = "0 0 0 * * ?") // Ejecutar a medianoche
+    @Transactional // Asegurar transacción para guardar lote y actualizar stock
     public void verificarYDesactivarLotesVencidos() {
         Date hoy = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        List<Lote> todosLotes = loteRepository.findAll();
+        // Buscar solo lotes activos para optimizar
+        List<Lote> lotesActivos = loteRepository.findByActivoTrue();
 
-        for (Lote lote : todosLotes) {
-            if (lote.getActivo() && lote.getFechaVencimiento() != null &&
-                    lote.getFechaVencimiento().before(hoy)) {
+        for (Lote lote : lotesActivos) {
+            if (lote.getFechaVencimiento() != null && lote.getFechaVencimiento().before(hoy)) {
                 // El lote está vencido, desactivarlo
                 lote.setActivo(false);
                 loteRepository.save(lote);
 
-                // Actualizar el stock del producto
+                // Notificar sobre la desactivación del lote vencido
+                String nombreProducto = lote.getProducto() != null ? lote.getProducto().getNombre() : "Desconocido";
+                String numeroLote = lote.getNumeroLote() != null ? lote.getNumeroLote() : "N/A";
+                String fechaVencimientoStr = lote.getFechaVencimiento().toString(); // Sabemos que no es null aquí
+
+                notificacionService.notificarUsuariosRelevantes(
+                        "Lote Vencido Desactivado: " + nombreProducto,
+                        "El lote '" + numeroLote + "' del producto '" + nombreProducto +
+                                "' (vencido el " + fechaVencimientoStr + ") ha sido desactivado automáticamente.",
+                        "LOTE_VENCIDO", // Tipo de notificación
+                        lote.getIdLote() // Referencia al lote
+                );
+
+                // Actualizar el stock del producto asociado
                 if (lote.getProducto() != null) {
                     actualizarStockProducto(lote.getProducto().getIdProducto());
                 }

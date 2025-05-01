@@ -9,8 +9,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling; // Importar EnableScheduling
 
 @SpringBootApplication
+@EnableScheduling // Habilitar la ejecución de tareas programadas
 public class MainApp extends Application {
 
     public static ConfigurableApplicationContext springContext;
