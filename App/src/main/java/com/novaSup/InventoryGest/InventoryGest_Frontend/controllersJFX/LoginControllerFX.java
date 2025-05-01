@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.springframework.stereotype.Component;
 import java.io.IOException;
+import java.net.URL;
 
 import static com.novaSup.InventoryGest.MainApp.springContext;
 
@@ -39,6 +40,12 @@ public class LoginControllerFX {
         Platform.runLater(() -> {
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             stage.setResizable(false);
+
+            // Configurar el comportamiento de cierre en el login (sin alerta)
+            stage.setOnCloseRequest(event -> {
+                // Cerrar directamente sin confirmación
+                stage.close();
+            });
         });
     }
 
@@ -62,40 +69,48 @@ public class LoginControllerFX {
                         "Usuario o contraseña incorrectos");
             }
         } catch (Exception e) {
-            // Captura específicamente errores HTTP 401 para mostrar mensaje amigable
-            if (e.getMessage() != null && e.getMessage().contains("code: 401")) {
+            // Mostrar mensaje amigable para credenciales inválidas
+            if (e.getMessage() != null &&
+                    (e.getMessage().contains("Credenciales inválidas") ||
+                            e.getMessage().contains("code: 400") ||
+                            e.getMessage().contains("code: 401"))) {
+
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de autenticación",
                         "Usuario o contraseña incorrectos");
             } else {
-                // Para otros errores, muestra un mensaje más genérico
+                // Para otros errores de conexión
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de conexión",
                         "No se pudo conectar con el servidor. Intente nuevamente más tarde.");
-                // Log del error real para depuración
-                System.err.println("Error de autenticación: " + e.getMessage());
+
+                // Log del error para depuración
+                System.err.println("Error de conexión: " + e.getMessage());
             }
         }
     }
 
     private void cargarMenuPrincipal() {
         try {
-            Stage stage = (Stage) btnLogin.getScene().getWindow();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
+            // Usar el mismo método que en el resto de la aplicación
+            URL fxmlUrl = getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML);
+
+            if (fxmlUrl == null) {
+                throw new IOException("No se encontró el archivo FXML del menú principal");
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             loader.setControllerFactory(springContext::getBean);
             Parent root = loader.load();
 
-            // Obtén el controlador y establece el nombre de usuario
-            MenuPrincipalControllerFX controlador = loader.getController();
-            controlador.establecerUsuario(txtEmail.getText());
-
             Scene scene = new Scene(root);
+            Stage stage = (Stage) btnLogin.getScene().getWindow();
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el menú principal: " + e.getMessage());
+            e.printStackTrace();
         }
     }
-
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);

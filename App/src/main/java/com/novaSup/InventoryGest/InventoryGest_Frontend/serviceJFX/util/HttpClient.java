@@ -1,152 +1,217 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util;
 
-import java.io.BufferedReader;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import okhttp3.*;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 public class HttpClient {
 
+    private static final int CONNECT_TIMEOUT = 5000; // 5 segundos
+    private static final int READ_TIMEOUT = 5000; // 5 segundos
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+    // Cliente OkHttp como variable estática
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
+            .build();
+
     // Método GET sin encabezados
-    public static String get(String urlStr) throws IOException {
+    public static String get(String urlStr) throws Exception {
         return get(urlStr, null, null);
     }
 
     // Método GET con encabezados
-    public static String get(String urlStr, String headerName, String headerValue) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("Content-Type", "application/json");
+    public static String get(String urlStr, String headerName, String headerValue) throws Exception {
+        try {
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .get()
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json");
 
-        // Añadir encabezado si se proporciona
-        if (headerName != null && headerValue != null) {
-            connection.setRequestProperty(headerName, headerValue);
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
+
+            // Añadir encabezado adicional si se proporciona
+            if (headerName != null && headerValue != null) {
+                requestBuilder.header(headerName, headerValue);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().string() : "";
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
         }
-
-        return leerRespuesta(connection);
     }
 
     // Método POST sin encabezados
-    public static String post(String urlStr, String jsonBody) throws IOException {
+    public static String post(String urlStr, String jsonBody) throws Exception {
         return post(urlStr, jsonBody, null, null);
     }
 
     // Método POST con encabezados
-    public static String post(String urlStr, String jsonBody, String headerName, String headerValue) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
+    public static String post(String urlStr, String jsonBody, String headerName, String headerValue) throws Exception {
+        try {
+            RequestBody requestBody = jsonBody != null ?
+                    RequestBody.create(jsonBody, JSON) :
+                    RequestBody.create("", JSON);
 
-        // Añadir encabezado si se proporciona
-        if (headerName != null && headerValue != null) {
-            connection.setRequestProperty(headerName, headerValue);
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .post(requestBody)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json");
+
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
+
+            // Añadir encabezado adicional si se proporciona
+            if (headerName != null && headerValue != null) {
+                requestBuilder.header(headerName, headerValue);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().string() : "";
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
         }
-
-        connection.setDoOutput(true);
-
-        // Escribir el cuerpo JSON
-        try (OutputStream os = connection.getOutputStream()) {
-            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        }
-
-        return leerRespuesta(connection);
     }
 
     // Método PUT sin encabezados
-    public static String put(String urlStr, String jsonBody) throws IOException {
+    public static String put(String urlStr, String jsonBody) throws Exception {
         return put(urlStr, jsonBody, null, null);
     }
 
     // Método PUT con encabezados
-    public static String put(String urlStr, String jsonBody, String headerName, String headerValue) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
-        connection.setRequestMethod("PUT");
-        connection.setRequestProperty("Content-Type", "application/json");
+    public static String put(String urlStr, String jsonBody, String headerName, String headerValue) throws Exception {
+        try {
+            RequestBody requestBody = jsonBody != null ?
+                    RequestBody.create(jsonBody, JSON) :
+                    RequestBody.create("", JSON);
 
-        // Añadir encabezado si se proporciona
-        if (headerName != null && headerValue != null) {
-            connection.setRequestProperty(headerName, headerValue);
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .put(requestBody)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json");
+
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
+
+            // Añadir encabezado adicional si se proporciona
+            if (headerName != null && headerValue != null) {
+                requestBuilder.header(headerName, headerValue);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().string() : "";
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
         }
-
-        connection.setDoOutput(true);
-
-        // Escribir el cuerpo JSON
-        try (OutputStream os = connection.getOutputStream()) {
-            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        }
-
-        return leerRespuesta(connection);
     }
 
     // Método DELETE sin encabezados
-    public static String delete(String urlStr) throws IOException {
+    public static String delete(String urlStr) throws Exception {
         return delete(urlStr, null, null);
     }
 
     // Método DELETE con encabezados
-    public static String delete(String urlStr, String headerName, String headerValue) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
-        connection.setRequestMethod("DELETE");
-        connection.setRequestProperty("Content-Type", "application/json");
+    public static String delete(String urlStr, String headerName, String headerValue) throws Exception {
+        try {
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .delete()
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json");
 
-        // Añadir encabezado si se proporciona
-        if (headerName != null && headerValue != null) {
-            connection.setRequestProperty(headerName, headerValue);
-        }
-
-        return leerRespuesta(connection);
-    }
-
-    // Método PATCH sin cuerpo (para operaciones que no requieren datos)
-    public static String patch(String urlStr) throws IOException {
-        return patch(urlStr, "{}", null, null);
-    }
-
-    // Método PATCH sin encabezados
-    public static String patch(String urlStr, String jsonBody) throws IOException {
-        return patch(urlStr, jsonBody, null, null);
-    }
-
-    // Método PATCH con encabezados
-    public static String patch(String urlStr, String jsonBody, String headerName, String headerValue) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
-
-        // Configurar para usar PATCH - Requiere esta configuración especial
-        connection.setRequestProperty("X-HTTP-Method-Override", "PATCH");
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
-
-        // Añadir encabezado si se proporciona
-        if (headerName != null && headerValue != null) {
-            connection.setRequestProperty(headerName, headerValue);
-        }
-
-        connection.setDoOutput(true);
-
-        // Escribir el cuerpo JSON
-        try (OutputStream os = connection.getOutputStream()) {
-            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        }
-
-        return leerRespuesta(connection);
-    }
-
-    // Método auxiliar para leer la respuesta
-    private static String leerRespuesta(HttpURLConnection connection) throws IOException {
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-            StringBuilder response = new StringBuilder();
-            String responseLine;
-            while ((responseLine = br.readLine()) != null) {
-                response.append(responseLine.trim());
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
             }
-            return response.toString();
+
+            // Añadir encabezado adicional si se proporciona
+            if (headerName != null && headerValue != null) {
+                requestBuilder.header(headerName, headerValue);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().string() : "";
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
+        }
+    }
+
+    // Método PATCH
+    public static String patch(String urlStr, String jsonBody) throws Exception {
+        try {
+            RequestBody requestBody = jsonBody != null && !jsonBody.isEmpty() ?
+                    RequestBody.create(jsonBody, JSON) :
+                    RequestBody.create("", JSON);
+
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .patch(requestBody)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json");
+
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().string() : "";
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
         }
     }
 }

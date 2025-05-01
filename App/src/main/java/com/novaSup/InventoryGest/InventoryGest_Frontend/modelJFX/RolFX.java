@@ -1,32 +1,30 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX;
 
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class RolFX {
     private final IntegerProperty idRol;
-    private final StringProperty rol;
-    private final ObservableSet<PermisoFX> permisos;
+    private final StringProperty nombre;
+    private ObservableSet<PermisoFX> permisos;
 
     public RolFX() {
         this.idRol = new SimpleIntegerProperty();
-        this.rol = new SimpleStringProperty();
-        this.permisos = FXCollections.observableSet();
+        this.nombre = new SimpleStringProperty();
+        this.permisos = FXCollections.observableSet(new HashSet<>());
     }
 
-    public RolFX(Integer idRol, String rol) {
+    public RolFX(Integer idRol, String nombre) {
         this.idRol = new SimpleIntegerProperty(idRol);
-        this.rol = new SimpleStringProperty(rol);
-        this.permisos = FXCollections.observableSet();
-    }
-
-    public RolFX(Integer idRol, String rol, Set<PermisoFX> permisos) {
-        this.idRol = new SimpleIntegerProperty(idRol);
-        this.rol = new SimpleStringProperty(rol);
-        this.permisos = FXCollections.observableSet(permisos);
+        this.nombre = new SimpleStringProperty(nombre);
+        this.permisos = FXCollections.observableSet(new HashSet<>());
     }
 
     // Getters y setters
@@ -42,19 +40,19 @@ public class RolFX {
         this.idRol.set(idRol);
     }
 
-    public String getRol() {
-        return rol.get();
+    public String getNombre() {
+        return nombre.get();
     }
 
-    public StringProperty rolProperty() {
-        return rol;
+    public StringProperty nombreProperty() {
+        return nombre;
     }
 
-    public void setRol(String rol) {
-        this.rol.set(rol);
+    public void setNombre(String nombre) {
+        this.nombre.set(nombre);
     }
 
-    public ObservableSet<PermisoFX> getPermisos() {
+    public Set<PermisoFX> getPermisos() {
         return permisos;
     }
 
@@ -67,6 +65,6 @@ public class RolFX {
 
     @Override
     public String toString() {
-        return rol.get();
+        return nombre.get();
     }
 }

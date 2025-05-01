@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario.ProductoControllerFX">
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <!-- Título -->
+    <top>
+        <VBox spacing="10.0">
+            <Label text="Gestión de Productos" BorderPane.alignment="CENTER">
+                <font>
+                    <Font size="24.0" />
+                </font>
+            </Label>
+
+            <!-- Sección de Filtros -->
+            <TitledPane text="Filtros de búsqueda" collapsible="true" expanded="false">
+                <VBox spacing="10.0">
+                    <HBox spacing="10.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Nombre" />
+                            <TextField fx:id="txtFiltroNombre" promptText="Buscar por nombre..." />
+                        </VBox>
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Código" />
+                            <TextField fx:id="txtFiltroCodigo" promptText="Buscar por código..." />
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="10.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Categoría" />
+                            <ComboBox fx:id="cmbFiltroCategoria" promptText="Seleccione categoría" maxWidth="Infinity" />
+                        </VBox>
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Estado" />
+                            <ComboBox fx:id="cmbFiltroEstado" promptText="Seleccione estado" maxWidth="Infinity" />
+                        </VBox>
+                    </HBox>
+
+                    <Button fx:id="btnFiltrar" text="Buscar" onAction="#buscarProductos" maxWidth="Infinity" />
+                </VBox>
+            </TitledPane>
+        </VBox>
+    </top>
+
+    <!-- Centro: Formulario + Tabla -->
+    <center>
+        <SplitPane dividerPositions="0.4" orientation="HORIZONTAL">
+            <!-- Formulario -->
+            <ScrollPane fitToWidth="true" prefWidth="350.0">
+                <content>
+                    <VBox spacing="10.0">
+                        <padding>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                        </padding>
+                        <TitledPane text="Datos del Producto" expanded="false">
+                            <content>
+                                <VBox spacing="10.0">
+                                    <HBox spacing="10.0">
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="ID" />
+                                            <TextField fx:id="txtId" editable="false" />
+                                        </VBox>
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Código *" />
+                                            <TextField fx:id="txtCodigo" />
+                                        </VBox>
+                                    </HBox>
+
+                                    <Label text="Nombre *" />
+                                    <TextField fx:id="txtNombre" />
+
+                                    <Label text="Descripción" />
+                                    <TextArea fx:id="txtDescripcion" prefRowCount="3" wrapText="true" />
+
+                                    <HBox spacing="10.0">
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Precio Costo *" />
+                                            <TextField fx:id="txtPrecioCosto" />
+                                        </VBox>
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Precio Venta *" />
+                                            <TextField fx:id="txtPrecioVenta" />
+                                        </VBox>
+                                    </HBox>
+
+                                    <HBox spacing="10.0">
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Stock Mínimo" />
+                                            <TextField fx:id="txtStockMinimo" />
+                                        </VBox>
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Stock Máximo" />
+                                            <TextField fx:id="txtStockMaximo" />
+                                        </VBox>
+                                    </HBox>
+
+                                    <Label text="Categoría *" />
+                                    <ComboBox fx:id="cmbCategoria" maxWidth="Infinity" />
+
+                                    <Label text="Proveedor" />
+                                    <ComboBox fx:id="cmbProveedor" maxWidth="Infinity" />
+
+                                    <HBox spacing="10.0">
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Estado" />
+                                            <CheckBox fx:id="chkEstado" text="Activo" selected="true" />
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </TitledPane>
+
+                        <!-- "Ajuste de Stock"-->
+                        <TitledPane text="Ajuste de Stock" expanded="false">
+                            <content>
+                                <VBox spacing="10.0">
+                                    <HBox spacing="10.0">
+                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                            <Label text="Cantidad" />
+                                            <TextField fx:id="txtCantidadMovimiento" promptText="Cantidad(Solo para testear disminuir)" />
+                                        </VBox>
+                                    </HBox>
+                                    <HBox spacing="10.0">
+                                        <Button fx:id="btnAumentarStock" onAction="#abrirVentanaAumentarStock" text="Agregar stock" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                        <Button fx:id="btnDisminuirStock" onAction="#disminuirStock" text="− Disminuir" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                        <Button fx:id="btnAjusteStock" onAction="#ajustarStock" text="🛠Ajustar stock" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+
+                                    </HBox>
+                                </VBox>
+                            </content>
+                        </TitledPane>
+
+                        <HBox spacing="10.0">
+                            <Button fx:id="btnGuardar" onAction="#guardarProducto" text="Guardar" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                            <Button fx:id="btnActualizar" onAction="#actualizarProducto" text="Actualizar" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                        </HBox>
+
+                        <HBox spacing="10.0">
+                            <Button fx:id="btnEliminar" onAction="#eliminarProducto" text="Eliminar" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                            <Button fx:id="btnLimpiar" onAction="#limpiarCampos" text="Limpiar" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                        </HBox>
+
+                        <Label fx:id="lblMensaje" wrapText="true" textFill="red" />
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- Tabla y Detalles -->
+            <VBox spacing="10.0">
+                <TableView fx:id="tablaProductos" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colCodigo" prefWidth="80.0" text="Código" />
+                        <TableColumn fx:id="colNombre" prefWidth="150.0" text="Nombre" />
+                        <TableColumn fx:id="colCategoria" prefWidth="100.0" text="Categoría" />
+                        <TableColumn fx:id="colPrecioVenta" prefWidth="90.0" text="Precio Venta" />
+                        <TableColumn fx:id="colStock" prefWidth="70.0" text="Stock" />
+                        <TableColumn fx:id="colEstado" prefWidth="70.0" text="Estado" />
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
+                </TableView>
+
+                <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                    <Button fx:id="btnVerDetalles" text="Ver Detalles" onAction="#mostrarDetalles" />
+                    <Button fx:id="btnRefrescar" text="Refrescar" onAction="#cargarDatos" />
+                </HBox>
+            </VBox>
+        </SplitPane>
+    </center>
+
+</BorderPane>

@@ -2,12 +2,13 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Rol;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RolRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.impl.UsuarioServiceImpl;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
@@ -26,31 +27,91 @@ public class RolController {
     private PermisoRepository permisoRepository;
 
     @Autowired
-    private UsuarioServiceImpl usuarioService;
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private SecurityUtil securityUtil;
 
     @GetMapping
-    public List<Rol> getRoles() {
-        return rolRepository.findAll();
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> listarRoles() {
+        try {
+            return ResponseEntity.ok(rolRepository.findAll());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> obtenerRol(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(rolRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado")));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Rol> crearRol(@RequestBody Rol rol) {
-        return ResponseEntity.ok(rolRepository.save(rol));
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> crearRol(@RequestBody Rol rol) {
+        try {
+            return ResponseEntity.ok(rolRepository.save(rol));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    @PutMapping("/{rolId}/permisos")
-    public ResponseEntity<?> asignarPermisos(
-            @PathVariable Integer rolId,
-            @RequestBody List<Integer> permisosIds,
-            @RequestHeader("usuario-id") Integer idUsuario) {
-
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> actualizarRol(@PathVariable Integer id, @RequestBody Rol rol) {
         try {
-            Usuario admin = usuarioService.obtenerUsuarioPorId(idUsuario);
-            if (!usuarioService.tienePermiso(admin, "gestionar_roles")) {
-                return ResponseEntity.status(403).body("No tienes permisos para gestionar roles");
+            Rol rolExistente = rolRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+            rolExistente.setNombre(rol.getNombre());
+
+            return ResponseEntity.ok(rolRepository.save(rolExistente));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> eliminarRol(@PathVariable Integer id) {
+        try {
+            // Verificar que no haya usuarios con este rol
+            if (usuarioService.existenUsuariosConRol(id)) {
+                return ResponseEntity.badRequest().body("No se puede eliminar un rol asignado a usuarios");
             }
 
-            Rol rol = rolRepository.findById(rolId)
+            rolRepository.deleteById(id);
+            return ResponseEntity.ok("Rol eliminado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/permisos")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> obtenerPermisosRol(@PathVariable Integer id) {
+        try {
+            Rol rol = rolRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+            return ResponseEntity.ok(rol.getPermisos());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/permisos")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")
+    public ResponseEntity<?> asignarPermisos(@PathVariable Integer id, @RequestBody List<Integer> permisosIds) {
+        try {
+            Rol rol = rolRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 
             Set<Permiso> permisos = new HashSet<>();
@@ -62,7 +123,7 @@ public class RolController {
 
             rol.setPermisos(permisos);
             return ResponseEntity.ok(rolRepository.save(rol));
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
