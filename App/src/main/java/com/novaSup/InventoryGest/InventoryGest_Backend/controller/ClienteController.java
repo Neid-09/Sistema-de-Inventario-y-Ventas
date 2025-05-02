@@ -15,6 +15,12 @@ import java.util.List;
 @RequestMapping("/api/clientes") // Ruta base para las operaciones de clientes
 public class ClienteController {
 
+    /* 
+     * ALTER TABLE clientes
+     * ADD limite_credito DECIMAL(10,2) DEFAULT 1000.00;
+     * FIJAR ESO PARA CAMBIOS
+     */
+
     @Autowired
     private ClienteService clienteService;
 

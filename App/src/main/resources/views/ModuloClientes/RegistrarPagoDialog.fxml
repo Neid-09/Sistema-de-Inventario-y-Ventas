@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="450.0" spacing="15.0" style="-fx-background-color: #E3F2FD; -fx-border-color: #90CAF9; -fx-border-width: 1;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   <children>
+      <Label text="Registrar Pago de Crédito" textFill="#0D47A1">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <GridPane hgap="10.0" vgap="10.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="130.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="270.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Crédito (ID):" textFill="#1E88E5" GridPane.rowIndex="0" />
+            <Label fx:id="creditoIdLabel" text="-" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            
+            <Label text="Monto Pendiente (€):" textFill="#1E88E5" GridPane.rowIndex="1" />
+            <Label fx:id="montoPendienteLabel" text="0.00" style="-fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            
+            <Label text="Monto a Pagar (€):" textFill="#1E88E5" GridPane.rowIndex="2" />
+            <TextField fx:id="montoPagarField" promptText="Ingrese el monto" style="-fx-border-color: #BBDEFB;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            
+            <Label text="Fecha de Pago:" textFill="#1E88E5" GridPane.rowIndex="3" />
+            <DatePicker fx:id="fechaPagoPicker" style="-fx-border-color: #BBDEFB;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            
+            <Label text="Método de Pago:" textFill="#1E88E5" GridPane.rowIndex="4" />
+            <ComboBox fx:id="metodoPagoCombo" prefWidth="270.0" promptText="Seleccione método" style="-fx-background-color: #FFFFFF; -fx-border-color: #BBDEFB; -fx-border-radius: 3;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            
+            <Label text="Notas:" textFill="#1E88E5" GridPane.rowIndex="5" />
+            <TextArea fx:id="notasArea" prefHeight="200.0" prefWidth="200.0" promptText="Notas adicionales (opcional)" style="-fx-border-color: #BBDEFB;" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+         </children>
+      </GridPane>
+      <HBox alignment="CENTER_RIGHT" spacing="10.0">
+         <children>
+            <Button fx:id="guardarPagoButton" mnemonicParsing="false" style="-fx-background-color: #1976D2; -fx-text-fill: white; -fx-font-weight: bold;" text="Guardar Pago" />
+            <Button fx:id="cancelarButton" mnemonicParsing="false" style="-fx-background-color: #9E9E9E; -fx-text-fill: white;" text="Cancelar" />
+         </children>
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+</VBox>

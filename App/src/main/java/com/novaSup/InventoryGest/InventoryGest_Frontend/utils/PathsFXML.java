@@ -27,4 +27,15 @@ public class PathsFXML {
     public static final String VENTANA_CREATELOTE = "/views/ModuloInventario/DialogoAddLote.fxml";
     public static final String VENTANA_AJUSTE_STOCK = "/views/ModuloInventario/AjusteStock.fxml";
 
+    /* MODULO GESTION CLIENTES */
+    public static final String MOD_CLIENTES_MENU = "/views/ModuloClientes/MenuCliente.fxml";
+    public static final String GESTION_CLIENTES = "/views/ModuloClientes/GestionClientes.fxml";
+    public static final String GESTION_CREDITOS = "/views/ModuloClientes/GestionCreditosView.fxml";
+    public static final String REPORTES_DEUDAS = "/views/ModuloClientes/ReportesDeudasView.fxml";
+    public static final String DIALOG_ADD_EDIT_CLIENTE = "/views/ModuloClientes/AddEditClienteDialog.fxml";
+    public static final String DIALOG_CANJEAR_RECOMPENSA = "/views/ModuloClientes/CanjearRecompensaDialog.fxml";
+    public static final String VIEW_CLIENTE_DETALLES = "/views/ModuloClientes/ClienteDetallesView.fxml";
+    public static final String DIALOG_CREDITO_DETALLES = "/views/ModuloClientes/CreditoDetallesDialog.fxml";
+    public static final String DIALOG_REGISTRAR_PAGO = "/views/ModuloClientes/RegistrarPagoDialog.fxml";
+
 }

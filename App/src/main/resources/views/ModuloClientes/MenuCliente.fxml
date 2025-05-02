@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+            style="-fx-background-color: #f4f4f4;"> <!-- Cambiado fondo a gris claro -->
+   <top>
+      <VBox alignment="CENTER_LEFT" style="-fx-background-color: #083671;" BorderPane.alignment="CENTER"> <!-- Usando azul oscuro del menú principal -->
+         <padding>
+            <Insets bottom="10.0" left="20.0" right="10.0" top="10.0" />
+         </padding>
+         <children>
+            <Label text="Módulo de Clientes y Crédito" textFill="white"> <!-- Texto blanco sobre fondo oscuro -->
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" 
+               style="-fx-open-tab-animation: FADE; -fx-close-tab-animation: FADE;">
+        <tabs>
+          <Tab text="Gestión de Clientes">
+               <content>
+                  <!-- Incluye la vista de Gestión de Clientes -->
+                  <fx:include source="GestionClientes.fxml" />
+               </content>
+          </Tab>
+          <Tab text="Gestión de Créditos">
+               <content>
+                   <!-- Incluye la vista de Gestión de Créditos -->
+                  <fx:include source="GestionCreditosView.fxml" />
+               </content>
+          </Tab>
+          <Tab text="Reportes de Deudas">
+               <content>
+                   <!-- Incluye la vista de Reportes de Deudas -->
+                  <fx:include source="ReportesDeudasView.fxml" />
+               </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+</BorderPane>
