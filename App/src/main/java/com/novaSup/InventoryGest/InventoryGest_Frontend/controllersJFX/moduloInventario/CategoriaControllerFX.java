@@ -2,7 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICategoriaService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.CategoriaServiceImplFX;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -51,8 +50,9 @@ public class CategoriaControllerFX implements Initializable {
     @FXML private TextField txtId;
     @FXML private TextField txtNombre;
 
-    public CategoriaControllerFX() {
-        this.categoriaService = new CategoriaServiceImplFX(); // Instanciación directa
+    // Constructor para inyección de dependencias
+    public CategoriaControllerFX(ICategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
     }
 
     @Override

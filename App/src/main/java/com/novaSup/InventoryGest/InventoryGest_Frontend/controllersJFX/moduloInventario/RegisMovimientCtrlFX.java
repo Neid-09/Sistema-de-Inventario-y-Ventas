@@ -48,11 +48,10 @@ public class RegisMovimientCtrlFX implements Initializable {
     private final IRegistMovimientService registMovimientService;
     private final IProductoService productoService;
 
-    // Añadir constructor para inicializar servicios
-    public RegisMovimientCtrlFX() {
-        // Asumiendo nombres de implementación estándar
-        this.registMovimientService = new RegistMovimientServiceImplFX(); 
-        this.productoService = new ProductoServiceImplFX();
+    // Añadir constructor para inicializar servicios mediante inyección
+    public RegisMovimientCtrlFX(IRegistMovimientService registMovimientService, IProductoService productoService) {
+        this.registMovimientService = registMovimientService;
+        this.productoService = productoService;
     }
 
     // Servicio de proveedores eliminado ya que ya no se utiliza en este controlador

@@ -4,22 +4,17 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.LoteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoteServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
@@ -42,7 +37,6 @@ public class LoteControllerFX implements Initializable {
     private ObservableList<LoteFX> listaLotes = FXCollections.observableArrayList();
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private LoteFX loteSeleccionado;
-    private boolean modoEdicion = false;
 
     // Elementos de la tabla
     @FXML
@@ -170,9 +164,10 @@ public class LoteControllerFX implements Initializable {
     @FXML
     private ProgressIndicator progressIndicator;
 
-    public LoteControllerFX() {
-        this.loteService = new LoteServiceImplFX();
-        this.productoService = new ProductoServiceImplFX();
+    // Constructor para inyección de dependencias
+    public LoteControllerFX(ILoteService loteService, IProductoService productoService) {
+        this.loteService = loteService;
+        this.productoService = productoService;
     }
 
     @Override
@@ -518,7 +513,7 @@ public class LoteControllerFX implements Initializable {
     private void mostrarDetalleLote(LoteFX lote) {
         if (lote != null) {
 
-            // Asignar el lote seleccionado - LÍNEA FALTANTE
+            // Asignar el lote seleccionado
             this.loteSeleccionado = lote;
             detalleIdLabel.setText(lote.getIdLote().toString());
             txtDetalleNumeroLote.setText(lote.getNumeroLote());
@@ -592,7 +587,6 @@ public class LoteControllerFX implements Initializable {
         btnCambiarEstado.setVisible(!editable && loteSeleccionado != null);
         verEntradaButton.setVisible(!editable && loteSeleccionado != null && loteSeleccionado.getIdEntrada() > 0);
 
-        modoEdicion = editable;
     }
 
     @FXML
@@ -659,32 +653,27 @@ public class LoteControllerFX implements Initializable {
                 return;
             }
 
-            // Obtener producto seleccionado con validación mejorada
+            // Obtener producto seleccionado del ComboBox
             ProductoFX productoSeleccionado = cmbDetalleProducto.getValue();
             if (productoSeleccionado == null) {
-                // Intentar buscar el producto por el texto ingresado
-                String textoProducto = cmbDetalleProducto.getEditor().getText().trim();
-                if (!textoProducto.isEmpty()) {
-                    // Buscar en la lista de productos
-                    for (ProductoFX producto : listaProductos) {
-                        String productoStr = "[" + producto.getCodigo() + "] " + producto.getNombre();
-                        if (productoStr.equalsIgnoreCase(textoProducto)) {
-                            productoSeleccionado = producto;
-                            break;
-                        }
-                    }
-                }
-
-                if (productoSeleccionado == null) {
-                    mostrarAlerta("Debe seleccionar un producto válido", Alert.AlertType.WARNING);
-                    return;
-                }
+                mostrarAlerta("Debe seleccionar un producto válido", Alert.AlertType.WARNING);
+                return;
             }
 
-            if (txtDetalleCantidad.getText().trim().isEmpty() ||
-                    Integer.parseInt(txtDetalleCantidad.getText().trim()) <= 0) {
-                mostrarAlerta("La cantidad debe ser un número positivo", Alert.AlertType.WARNING);
-                return;
+            if (txtDetalleCantidad.getText().trim().isEmpty()) {
+                 mostrarAlerta("La cantidad es obligatoria", Alert.AlertType.WARNING);
+                 return;
+            }
+            int nuevaCantidad = 0;
+            try {
+                nuevaCantidad = Integer.parseInt(txtDetalleCantidad.getText().trim());
+                if (nuevaCantidad <= 0) {
+                    mostrarAlerta("La cantidad debe ser un número positivo", Alert.AlertType.WARNING);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                 mostrarAlerta("La cantidad debe ser un número válido", Alert.AlertType.WARNING);
+                 return;
             }
 
             if (dpFechaEntrada.getValue() == null) {
@@ -694,7 +683,6 @@ public class LoteControllerFX implements Initializable {
 
             // Guardar cantidad original para verificar cambios (para depuración)
             int cantidadOriginal = loteSeleccionado.getCantidad();
-            int nuevaCantidad = Integer.parseInt(txtDetalleCantidad.getText().trim());
             Integer idProductoOriginal = loteSeleccionado.getIdProducto();
 
             // Actualizar objeto lote con los datos del formulario
@@ -717,11 +705,14 @@ public class LoteControllerFX implements Initializable {
             if (index >= 0) {
                 listaLotes.set(index, loteActualizado);
             } else {
+                // Si no estaba en la lista (raro en actualización), añadirlo
                 listaLotes.add(loteActualizado);
             }
 
             // Actualizar selección y UI
             lotesTableView.getSelectionModel().select(loteActualizado);
+            // Forzar refresco visual de la fila seleccionada
+            lotesTableView.refresh();
 
             // Mostrar información sobre el cambio de stock (opcional, para verificar)
             if (cantidadOriginal != nuevaCantidad || !idProductoOriginal.equals(productoSeleccionado.getIdProducto())) {
@@ -740,6 +731,7 @@ public class LoteControllerFX implements Initializable {
         } catch (Exception e) {
             progressIndicator.setVisible(false);
             mostrarAlerta("Error al guardar cambios: " + e.getMessage(), Alert.AlertType.ERROR);
+            e.printStackTrace(); // Imprimir stack trace para depuración
         }
     }
 
@@ -949,10 +941,22 @@ public class LoteControllerFX implements Initializable {
         confirmacion.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
+                    progressIndicator.setVisible(true);
+                    statusLabel.setText("Eliminando lote...");
                     loteService.eliminar(lote.getIdLote());
-                    cargarLotesActivos();
+                    // Eliminar de la lista observable directamente
+                    listaLotes.remove(lote);
+                    // Limpiar selección y detalle si el lote eliminado era el seleccionado
+                    if (lote.equals(loteSeleccionado)) {
+                        lotesTableView.getSelectionModel().clearSelection();
+                        limpiarFormularioDetalle();
+                        loteSeleccionado = null;
+                    }
+                    actualizarEstadisticas();
                     statusLabel.setText("Lote eliminado correctamente");
+                    progressIndicator.setVisible(false);
                 } catch (Exception e) {
+                    progressIndicator.setVisible(false);
                     mostrarError("Error al eliminar lote", e);
                 }
             }

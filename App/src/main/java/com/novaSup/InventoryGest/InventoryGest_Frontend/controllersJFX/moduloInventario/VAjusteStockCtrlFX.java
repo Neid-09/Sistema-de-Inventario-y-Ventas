@@ -3,8 +3,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoteServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -34,10 +32,10 @@ public class VAjusteStockCtrlFX {
             "Robo", "Daño", "Producto vencido", "Otro"
     );
 
-    // Añadir constructor para inicializar servicios
-    public VAjusteStockCtrlFX() {
-        this.loteService = new LoteServiceImplFX(); // Instanciación directa
-        this.productoService = new ProductoServiceImplFX(); // Instanciación directa
+    // Constructor para inyección de dependencias
+    public VAjusteStockCtrlFX(ILoteService loteService, IProductoService productoService) {
+        this.loteService = loteService;
+        this.productoService = productoService;
     }
 
     public void inicializar(ProductoFX producto) {

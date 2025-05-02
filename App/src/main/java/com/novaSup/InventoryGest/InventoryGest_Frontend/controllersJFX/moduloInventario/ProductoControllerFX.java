@@ -3,7 +3,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -511,18 +510,18 @@ public class ProductoControllerFX implements Initializable {
         try {
             // Cargar el archivo FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.VENTANA_CREATELOTE));
+
+            // Crear el controlador manualmente e inyectar dependencias
+            DialogAddLoteCtrlFX controller = new DialogAddLoteCtrlFX(this.loteService, this.productoService);
+
+            // Establecer el controlador en el FXMLLoader ANTES de cargar
+            loader.setController(controller);
+
+            // Cargar el FXML. Ahora FXMLLoader usará la instancia del controlador proporcionada.
             Parent root = loader.load();
 
-            // Obtener el controlador y configurarlo
-            DialogAddLoteCtrlFX controller = loader.getController();
-
-            // Inyectar manualmente los servicios (obtenidos del contexto de Spring)
-            controller.setServicios(
-                    this.loteService,      // Pasar la instancia existente
-                    this.productoService   // Pasar la instancia existente
-            );
-
-            // Inicializar el controlador con el producto y la operación
+            // Inicializar el controlador con el producto DESPUÉS de cargar el FXML
+            // (para que los componentes @FXML ya estén inyectados en el controlador)
             controller.inicializar(producto);
 
             // Crear y configurar la escena
@@ -545,6 +544,12 @@ public class ProductoControllerFX implements Initializable {
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al abrir ventana",
                     "No se pudo abrir la ventana para crear lote: " + e.getMessage());
+            // Imprimir stack trace para más detalles en la consola
+            e.printStackTrace();
+        } catch (Exception e) { // Capturar otras posibles excepciones
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error inesperado",
+                    "Ocurrió un error inesperado al abrir la ventana: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

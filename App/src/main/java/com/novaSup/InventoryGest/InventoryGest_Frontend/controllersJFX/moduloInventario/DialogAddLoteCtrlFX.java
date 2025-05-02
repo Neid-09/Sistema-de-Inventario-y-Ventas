@@ -33,12 +33,12 @@ public class DialogAddLoteCtrlFX {
     @FXML
     private Button btnCancelar;
 
-    private ILoteService loteService;
-    private IProductoService productoService;
+    private final ILoteService loteService;
+    private final IProductoService productoService;
     private ProductoFX productoSeleccionado;
 
-    // Añadir método para recibir los servicios inyectados
-    public void setServicios(ILoteService loteService, IProductoService productoService) {
+    // Constructor para inyección de dependencias
+    public DialogAddLoteCtrlFX(ILoteService loteService, IProductoService productoService) {
         this.loteService = loteService;
         this.productoService = productoService;
     }
