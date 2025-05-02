@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig; // Importar ApiConfig
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,8 @@ import java.util.List;
 public class PermisoServiceImplFX implements IPermisoService {
 
     private static final Logger logger = LoggerFactory.getLogger(PermisoServiceImplFX.class);
-    private static final String BASE_URL = "http://localhost:8080/permisos";
+    // Usar ApiConfig para la URL base
+    private static final String BASE_URL = ApiConfig.getBaseUrl() + "/permisos";
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override

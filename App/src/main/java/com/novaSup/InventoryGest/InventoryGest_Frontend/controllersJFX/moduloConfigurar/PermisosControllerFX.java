@@ -10,13 +10,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class PermisosControllerFX implements Initializable {
 
     @FXML private TableView<PermisoFX> tablaPermisos;
@@ -30,13 +28,13 @@ public class PermisosControllerFX implements Initializable {
     @FXML private Button btnNuevo;
     @FXML private Button btnEliminar;
 
-    private IPermisoService permisoService;
+    private final IPermisoService permisoService;
     private ObservableList<PermisoFX> listaPermisos;
     private PermisoFX permisoSeleccionado;
     private boolean modoEdicion = false;
 
     public PermisosControllerFX() {
-        permisoService = new PermisoServiceImplFX();
+        this.permisoService = new PermisoServiceImplFX(); // Instanciación directa
         listaPermisos = FXCollections.observableArrayList();
     }
 

@@ -8,12 +8,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class InventarioControllerFX implements Initializable {
 
     @FXML

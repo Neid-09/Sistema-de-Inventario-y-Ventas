@@ -11,7 +11,6 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfi
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Service
 public class LoteServiceImplFX implements ILoteService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoteServiceImplFX.class);

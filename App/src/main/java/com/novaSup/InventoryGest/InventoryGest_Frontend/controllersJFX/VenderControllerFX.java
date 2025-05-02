@@ -1,8 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -12,8 +13,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -23,11 +22,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-@Component
 public class VenderControllerFX implements Initializable {
 
-    @Autowired
-    private IProductoService productoService;
+    private final IProductoService productoService;
 
     @FXML
     private TextField txtBusqueda;
@@ -44,6 +41,11 @@ public class VenderControllerFX implements Initializable {
     private List<ProductoFX> todosLosProductos;
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
     private BigDecimal totalVenta = BigDecimal.ZERO;
+
+    // Añadir constructor para inicializar el servicio
+    public VenderControllerFX() {
+        this.productoService = new ProductoServiceImplFX(); // Instanciación directa
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

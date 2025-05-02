@@ -8,6 +8,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig; // Importar ApiConfig
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,9 @@ import java.util.Set;
 public class UsuarioServiceImplFX implements IUsuarioService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioServiceImplFX.class);
-    private static final String BASE_URL = "http://localhost:8080/usuarios";
-    private static final String ROLES_URL = "http://localhost:8080/roles";
+    // Usar ApiConfig para la URL base
+    private static final String BASE_URL = ApiConfig.getBaseUrl() + "/usuarios";
+    private static final String ROLES_URL = ApiConfig.getBaseUrl() + "/roles";
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override

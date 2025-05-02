@@ -1,7 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoginService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -14,13 +13,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
+import javafx.util.Callback;
 import java.io.IOException;
 import java.net.URL;
 
-import static com.novaSup.InventoryGest.MainApp.springContext;
-
-@Component
 public class LoginControllerFX {
 
     @FXML
@@ -32,8 +28,13 @@ public class LoginControllerFX {
     @FXML
     private PasswordField txtPassword;
 
-    // Usamos la interfaz en lugar de la implementación directa
-    private final ILoginService loginService = new LoginServiceImplFX();
+    private final ILoginService loginService;
+    private final Callback<Class<?>, Object> controllerFactory;
+
+    public LoginControllerFX(ILoginService loginService, Callback<Class<?>, Object> controllerFactory) {
+        this.loginService = loginService;
+        this.controllerFactory = controllerFactory;
+    }
 
     @FXML
     public void initialize() {
@@ -41,9 +42,7 @@ public class LoginControllerFX {
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             stage.setResizable(false);
 
-            // Configurar el comportamiento de cierre en el login (sin alerta)
             stage.setOnCloseRequest(event -> {
-                // Cerrar directamente sin confirmación
                 stage.close();
             });
         });
@@ -51,7 +50,6 @@ public class LoginControllerFX {
 
     @FXML
     void iniciarSesion(ActionEvent event) {
-        // Validar campos
         if (txtEmail.getText().isEmpty() || txtPassword.getText().isEmpty()) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error de inicio de sesión",
                     "Por favor completa todos los campos");
@@ -69,7 +67,6 @@ public class LoginControllerFX {
                         "Usuario o contraseña incorrectos");
             }
         } catch (Exception e) {
-            // Mostrar mensaje amigable para credenciales inválidas
             if (e.getMessage() != null &&
                     (e.getMessage().contains("Credenciales inválidas") ||
                             e.getMessage().contains("code: 400") ||
@@ -78,11 +75,9 @@ public class LoginControllerFX {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de autenticación",
                         "Usuario o contraseña incorrectos");
             } else {
-                // Para otros errores de conexión
                 mostrarAlerta(Alert.AlertType.ERROR, "Error de conexión",
                         "No se pudo conectar con el servidor. Intente nuevamente más tarde.");
 
-                // Log del error para depuración
                 System.err.println("Error de conexión: " + e.getMessage());
             }
         }
@@ -90,7 +85,6 @@ public class LoginControllerFX {
 
     private void cargarMenuPrincipal() {
         try {
-            // Usar el mismo método que en el resto de la aplicación
             URL fxmlUrl = getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML);
 
             if (fxmlUrl == null) {
@@ -98,7 +92,7 @@ public class LoginControllerFX {
             }
 
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
-            loader.setControllerFactory(springContext::getBean);
+            loader.setControllerFactory(this.controllerFactory);
             Parent root = loader.load();
 
             Scene scene = new Scene(root);
@@ -111,6 +105,7 @@ public class LoginControllerFX {
             e.printStackTrace();
         }
     }
+
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);

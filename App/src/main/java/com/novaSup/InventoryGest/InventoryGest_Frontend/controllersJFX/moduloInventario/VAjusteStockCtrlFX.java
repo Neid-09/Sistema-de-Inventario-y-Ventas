@@ -3,14 +3,14 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoteServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
 
-@Component
 public class VAjusteStockCtrlFX {
 
     @FXML private Label lblProducto;
@@ -22,8 +22,8 @@ public class VAjusteStockCtrlFX {
     @FXML private Button btnCancelar;
 
     private ProductoFX producto;
-    private ILoteService loteService;
-    private IProductoService productoService;
+    private final ILoteService loteService;
+    private final IProductoService productoService;
 
     // Listas de motivos según el tipo de ajuste
     private final ObservableList<String> motivosAumentar = FXCollections.observableArrayList(
@@ -34,9 +34,10 @@ public class VAjusteStockCtrlFX {
             "Robo", "Daño", "Producto vencido", "Otro"
     );
 
-    public void setServicios(ILoteService loteService, IProductoService productoService) {
-        this.loteService = loteService;
-        this.productoService = productoService;
+    // Añadir constructor para inicializar servicios
+    public VAjusteStockCtrlFX() {
+        this.loteService = new LoteServiceImplFX(); // Instanciación directa
+        this.productoService = new ProductoServiceImplFX(); // Instanciación directa
     }
 
     public void inicializar(ProductoFX producto) {

@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICategoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.CategoriaServiceImplFX;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,18 +13,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class CategoriaControllerFX implements Initializable {
 
-    @Autowired
-    private ICategoriaService categoriaService;
+    private final ICategoriaService categoriaService;
 
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private CategoriaFX categoriaSeleccionada;
@@ -53,6 +50,10 @@ public class CategoriaControllerFX implements Initializable {
     @FXML private TextArea txtDescripcion;
     @FXML private TextField txtId;
     @FXML private TextField txtNombre;
+
+    public CategoriaControllerFX() {
+        this.categoriaService = new CategoriaServiceImplFX(); // Instanciación directa
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {

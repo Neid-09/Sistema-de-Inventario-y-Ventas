@@ -17,7 +17,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.List;
@@ -25,14 +24,17 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-@Component
 public class ProveedorControllerFX implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(ProveedorControllerFX.class);
-    private final IProveedorService proveedorService = new ProveedorServiceImplFX();
+    private final IProveedorService proveedorService;
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
     private ProveedorFX proveedorSeleccionado;
     private boolean modoEdicion = false;
+
+    public ProveedorControllerFX() {
+        this.proveedorService = new ProveedorServiceImplFX();
+    }
 
     @FXML
     private Button btnBuscar;

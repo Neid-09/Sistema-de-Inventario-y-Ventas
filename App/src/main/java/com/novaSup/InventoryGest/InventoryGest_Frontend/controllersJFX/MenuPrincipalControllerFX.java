@@ -21,16 +21,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-import static com.novaSup.InventoryGest.MainApp.springContext;
-
-@Component
 public class MenuPrincipalControllerFX implements Initializable {
 
     @FXML
@@ -66,16 +62,25 @@ public class MenuPrincipalControllerFX implements Initializable {
     private Popup notificacionesPopup;
     private Label contadorNotificaciones;
 
-    @Autowired
-    private INotificacionService notificacionService;
+    // Declare services as final fields, injected via constructor
+    private final INotificacionService notificacionService;
+    private final Callback<Class<?>, Object> controllerFactory; // To load nested FXMLs
 
     private Timer timerNotificaciones;
     private ObservableList<NotificacionFX> listaNotificaciones = FXCollections.observableArrayList();
 
+    // Constructor for dependency injection
+    public MenuPrincipalControllerFX(INotificacionService notificacionService, Callback<Class<?>, Object> controllerFactory) {
+        this.notificacionService = notificacionService;
+        this.controllerFactory = controllerFactory;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("Iniciando MenuPrincipalControllerFX.initialize()");
+
+        // Remove direct instantiation: notificacionService = new NotificacionServiceImplFX();
+        // DependencyManager and CustomControllerFactory handle this now.
 
         // Diagnóstico de permisos
         PermisosUIUtil.imprimirTodosLosPermisos();
@@ -118,6 +123,12 @@ public class MenuPrincipalControllerFX implements Initializable {
                         });
             }
 
+            // Ensure service is available before using it
+            if (this.notificacionService == null) {
+                System.err.println("Error crítico: INotificacionService no fue inyectado.");
+                // Consider showing an error to the user or disabling notification features
+                return; // Prevent further execution that depends on the service
+            }
 
             // Inicializar el badge contador de notificaciones
             inicializarContadorNotificaciones();
@@ -143,7 +154,6 @@ public class MenuPrincipalControllerFX implements Initializable {
             e.printStackTrace();
         }
     }
-
 
     @FXML
     void irNotificaciones(ActionEvent event) {
@@ -245,6 +255,10 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     private void marcarNotificacion(NotificacionFX notificacion) {
+        if (this.notificacionService == null) { // Check injected service
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de notificaciones no inicializado.");
+            return;
+        }
         try {
             if (notificacion.getLeida()) {
                 // Si está leída, marcarla como no leída
@@ -264,6 +278,10 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     private void eliminarNotificacion(NotificacionFX notificacion) {
+        if (this.notificacionService == null) { // Check injected service
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de notificaciones no inicializado.");
+            return;
+        }
         try {
             notificacionService.eliminarNotificacion(notificacion.getIdNotificacion());
 
@@ -280,6 +298,7 @@ public class MenuPrincipalControllerFX implements Initializable {
      * Método común para actualizar después de una acción (eliminar o marcar)
      */
     private void actualizarDespuesDeAccion() {
+        if (this.notificacionService == null) return; // Check injected service
         // Actualizar el contador de notificaciones
         actualizarNotificaciones();
 
@@ -316,6 +335,7 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     private void programarActualizacionNotificaciones() {
+        if (this.notificacionService == null) return; // Check injected service
         // Actualizar cada 60 segundos (ajustable según necesidades)
         timerNotificaciones = new Timer(true);
         timerNotificaciones.scheduleAtFixedRate(new TimerTask() {
@@ -327,6 +347,10 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     private void actualizarNotificaciones() {
+        if (this.notificacionService == null) { // Check injected service
+            System.err.println("Servicio de notificaciones no disponible para actualizar contador.");
+            return;
+        }
         try {
             int cantidad = notificacionService.contarNotificacionesNoLeidas();
             Platform.runLater(() -> {
@@ -344,6 +368,11 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     private void cargarNotificaciones() {
+        if (this.notificacionService == null) { // Check injected service
+            System.err.println("Servicio de notificaciones no disponible para cargar lista.");
+            listaNotificaciones.clear();
+            return;
+        }
         try {
             List<NotificacionFX> notificaciones = notificacionService.obtenerNotificaciones();
             listaNotificaciones.setAll(notificaciones);
@@ -406,13 +435,16 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     /**
-     * Carga un módulo específico en el panel central
+     * Carga un módulo específico en el panel central usando la controller factory
      * @param rutaFXML Ruta del archivo FXML a cargar
      * @throws IOException Si hay un error al cargar el módulo
      */
     public void cargarModuloEnPanel(String rutaFXML) throws IOException {
+        if (this.controllerFactory == null) {
+            throw new IllegalStateException("ControllerFactory no fue inyectada en MenuPrincipalControllerFX");
+        }
         FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
-        loader.setControllerFactory(springContext::getBean);
+        loader.setControllerFactory(this.controllerFactory); // <<< USE THE FACTORY
         Parent root = loader.load();
 
         // Limpiar el panel y agregar el nuevo módulo
@@ -441,9 +473,13 @@ public class MenuPrincipalControllerFX implements Initializable {
             // Centrar en pantalla
             stage.centerOnScreen();
 
-            // Cargar el login
+            // Cargar el login USANDO LA FACTORY
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.LOGIN_FXML));
-            loader.setControllerFactory(springContext::getBean);
+            if (this.controllerFactory != null) { // Asegurarse que la factory existe
+                loader.setControllerFactory(this.controllerFactory);
+            } else {
+                System.err.println("Advertencia: No se pudo obtener la ControllerFactory al cerrar sesión. El login podría no tener dependencias inyectadas.");
+            }
             Parent root = loader.load();
 
             Scene scene = new Scene(root);
@@ -452,6 +488,7 @@ public class MenuPrincipalControllerFX implements Initializable {
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cerrar la sesión: " + e.getMessage());
+            e.printStackTrace(); // Print stack trace for debugging
         }
     }
 
@@ -462,7 +499,7 @@ public class MenuPrincipalControllerFX implements Initializable {
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.INICIO_FXML));
-            loader.setControllerFactory(springContext::getBean);
+            loader.setControllerFactory(this.controllerFactory); // <<< USE THE FACTORY
             Parent root = loader.load();
             modulosDinamicos.getChildren().add(root);
         } catch (IOException e) {
@@ -492,18 +529,6 @@ public class MenuPrincipalControllerFX implements Initializable {
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el módulo de inventario: " + e.getMessage());
-        }
-    }
-
-    @FXML
-    void irModuloEntradasSalidas() {
-        try {
-            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_EntradasSalidas")) {
-                cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el historial de stock: " + e.getMessage());
         }
     }
 

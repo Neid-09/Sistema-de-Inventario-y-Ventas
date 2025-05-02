@@ -10,13 +10,11 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 public class ProductoServiceImplFX implements IProductoService {
 
     private final String API_URL;

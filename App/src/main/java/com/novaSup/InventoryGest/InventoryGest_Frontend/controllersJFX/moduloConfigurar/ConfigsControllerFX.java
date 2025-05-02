@@ -12,12 +12,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class ConfigsControllerFX implements Initializable {
 
     @FXML
@@ -50,13 +48,16 @@ public class ConfigsControllerFX implements Initializable {
     @FXML
     private TextField txtValor;
 
-    private ConfiguracionServiceFX configuracionService;
+    private final ConfiguracionServiceFX configuracionService;
     private ObservableList<ConfiguracionFX> listaConfiguraciones;
     private ConfiguracionFX configuracionActual;
 
+    public ConfigsControllerFX() {
+        this.configuracionService = new ConfiguracionServiceFX(); // Instanciación directa
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        configuracionService = new ConfiguracionServiceFX();
         listaConfiguraciones = FXCollections.observableArrayList();
 
         // Configurar columnas de la tabla

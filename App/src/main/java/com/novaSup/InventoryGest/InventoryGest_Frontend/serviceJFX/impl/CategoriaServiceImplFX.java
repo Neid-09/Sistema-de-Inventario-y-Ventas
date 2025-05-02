@@ -1,20 +1,19 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // Necesario para ignorar propiedades desconocidas
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
+// Eliminar la importación del modelo backend: import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICategoriaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
-import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 public class CategoriaServiceImplFX implements ICategoriaService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -23,8 +22,9 @@ public class CategoriaServiceImplFX implements ICategoriaService {
     @Override
     public List<CategoriaFX> obtenerTodas() throws Exception {
         String response = HttpClient.get(baseUrl);
-        List<Categoria> categorias = objectMapper.readValue(response, new TypeReference<List<Categoria>>() {});
-        return categorias.stream()
+        // Deserializar en la lista de DTOs
+        List<CategoriaDTO> categoriasDTO = objectMapper.readValue(response, new TypeReference<List<CategoriaDTO>>() {});
+        return categoriasDTO.stream()
                 .map(this::convertirAModeloFX)
                 .collect(Collectors.toList());
     }
@@ -33,8 +33,9 @@ public class CategoriaServiceImplFX implements ICategoriaService {
     public List<CategoriaFX> buscarPorNombre(String nombre) throws Exception {
         String url = baseUrl + "/buscar?nombre=" + nombre;
         String response = HttpClient.get(url);
-        List<Categoria> categorias = objectMapper.readValue(response, new TypeReference<List<Categoria>>() {});
-        return categorias.stream()
+        // Deserializar en la lista de DTOs
+        List<CategoriaDTO> categoriasDTO = objectMapper.readValue(response, new TypeReference<List<CategoriaDTO>>() {});
+        return categoriasDTO.stream()
                 .map(this::convertirAModeloFX)
                 .collect(Collectors.toList());
     }
@@ -45,12 +46,11 @@ public class CategoriaServiceImplFX implements ICategoriaService {
             String url = baseUrl + "/" + id;
             String response = HttpClient.get(url);
 
-            // El API devuelve un objeto con la categoría y cantidad de productos
             JsonNode jsonNode = objectMapper.readTree(response);
-            Categoria categoria = objectMapper.treeToValue(jsonNode.get("categoria"), Categoria.class);
-            CategoriaFX categoriaFX = convertirAModeloFX(categoria);
+            // Deserializar la parte 'categoria' del JSON en el DTO
+            CategoriaDTO categoriaDTO = objectMapper.treeToValue(jsonNode.get("categoria"), CategoriaDTO.class);
+            CategoriaFX categoriaFX = convertirAModeloFX(categoriaDTO);
 
-            // Añadimos la información de productos asociados que el API proporciona
             return Optional.of(categoriaFX);
         } catch (Exception e) {
             return Optional.empty();
@@ -59,21 +59,22 @@ public class CategoriaServiceImplFX implements ICategoriaService {
 
     @Override
     public CategoriaFX guardar(CategoriaFX categoriaFX) throws Exception {
-        Categoria categoria = convertirAModeloBackend(categoriaFX);
-        String json = objectMapper.writeValueAsString(categoria);
+        // Convertir el modelo FX a DTO para enviar al backend
+        CategoriaDTO categoriaDTO = convertirADTO(categoriaFX);
+        String json = objectMapper.writeValueAsString(categoriaDTO);
 
         String response;
         if (categoriaFX.getIdCategoria() == 0) {
-            // Crear nueva categoría
             response = HttpClient.post(baseUrl, json);
         } else {
-            // Actualizar categoría existente
             String url = baseUrl + "/" + categoriaFX.getIdCategoria();
             response = HttpClient.put(url, json);
         }
 
-        Categoria categoriaGuardada = objectMapper.readValue(response, Categoria.class);
-        return convertirAModeloFX(categoriaGuardada);
+        // Deserializar la respuesta del backend (que es un DTO)
+        CategoriaDTO categoriaGuardadaDTO = objectMapper.readValue(response, CategoriaDTO.class);
+        // Convertir el DTO de respuesta al modelo FX
+        return convertirAModeloFX(categoriaGuardadaDTO);
     }
 
     @Override
@@ -100,25 +101,38 @@ public class CategoriaServiceImplFX implements ICategoriaService {
         }
     }
 
-    // Método auxiliar para convertir de modelo Backend a modelo FX
-    private CategoriaFX convertirAModeloFX(Categoria categoria) {
+    // Método auxiliar para convertir de DTO a modelo FX
+    private CategoriaFX convertirAModeloFX(CategoriaDTO categoriaDTO) {
         return new CategoriaFX(
-                categoria.getIdCategoria(),
-                categoria.getNombre(),
-                categoria.getDescripcion(),
-                categoria.getEstado(),
-                categoria.getDuracionGarantia()
+                categoriaDTO.idCategoria,
+                categoriaDTO.nombre,
+                categoriaDTO.descripcion,
+                categoriaDTO.estado,
+                categoriaDTO.duracionGarantia
         );
     }
 
-    // Método auxiliar para convertir de modelo FX a modelo Backend
-    private Categoria convertirAModeloBackend(CategoriaFX categoriaFX) {
-        Categoria categoria = new Categoria();
-        categoria.setIdCategoria(categoriaFX.getIdCategoria() == 0 ? null : categoriaFX.getIdCategoria());
-        categoria.setNombre(categoriaFX.getNombre());
-        categoria.setDescripcion(categoriaFX.getDescripcion());
-        categoria.setEstado(categoriaFX.getEstado());
-        categoria.setDuracionGarantia(categoriaFX.getDuracionGarantia());
-        return categoria;
+    // Método auxiliar para convertir de modelo FX a DTO
+    private CategoriaDTO convertirADTO(CategoriaFX categoriaFX) {
+        CategoriaDTO dto = new CategoriaDTO();
+        // Si es una nueva categoría, el ID debe ser null para el backend
+        dto.idCategoria = (categoriaFX.getIdCategoria() == 0) ? null : categoriaFX.getIdCategoria();
+        dto.nombre = categoriaFX.getNombre();
+        dto.descripcion = categoriaFX.getDescripcion();
+        dto.estado = categoriaFX.getEstado();
+        dto.duracionGarantia = categoriaFX.getDuracionGarantia();
+        return dto;
+    }
+
+    // Clase DTO interna para representar la estructura JSON de la API
+    @JsonIgnoreProperties(ignoreUnknown = true) // Ignora campos extra en el JSON
+    private static class CategoriaDTO {
+        public Integer idCategoria;
+        public String nombre;
+        public String descripcion;
+        public Boolean estado;
+        public Integer duracionGarantia;
+        // No se necesitan constructores, getters o setters si los campos son públicos
+        // y solo se usa para la deserialización/serialización con Jackson.
     }
 }

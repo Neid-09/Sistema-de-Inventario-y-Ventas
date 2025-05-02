@@ -14,14 +14,11 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class RolesControllerFX implements Initializable {
 
     @FXML
@@ -48,13 +45,13 @@ public class RolesControllerFX implements Initializable {
     @FXML
     private Button btnAsignarPermisos;
 
-    private IRolService rolService;
+    private final IRolService rolService;
     private ObservableList<RolFX> listaRoles;
     private RolFX rolSeleccionado;
     private boolean modoEdicion = false;
 
     public RolesControllerFX() {
-        rolService = new RolServiceImplFX();
+        this.rolService = new RolServiceImplFX(); // Instanciación directa
         listaRoles = FXCollections.observableArrayList();
     }
 

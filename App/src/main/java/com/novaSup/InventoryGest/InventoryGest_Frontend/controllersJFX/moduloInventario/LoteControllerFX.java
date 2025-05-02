@@ -4,6 +4,8 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.LoteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoteServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,8 +22,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -30,18 +30,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.ResourceBundle.Control;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-@Component
 public class LoteControllerFX implements Initializable {
 
-    @Autowired
-    private ILoteService loteService;
-
-    @Autowired
-    private IProductoService productoService;
+    private final ILoteService loteService;
+    private final IProductoService productoService;
 
     // Variables de datos
     private ObservableList<LoteFX> listaLotes = FXCollections.observableArrayList();
@@ -174,6 +169,11 @@ public class LoteControllerFX implements Initializable {
 
     @FXML
     private ProgressIndicator progressIndicator;
+
+    public LoteControllerFX() {
+        this.loteService = new LoteServiceImplFX();
+        this.productoService = new ProductoServiceImplFX();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

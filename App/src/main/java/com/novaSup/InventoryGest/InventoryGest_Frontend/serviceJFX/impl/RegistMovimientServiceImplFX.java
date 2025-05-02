@@ -8,7 +8,6 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProducto
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 public class RegistMovimientServiceImplFX implements IRegistMovimientService {
 
     private final String API_URL = ApiConfig.getBaseUrl() + "/api/movimientos";

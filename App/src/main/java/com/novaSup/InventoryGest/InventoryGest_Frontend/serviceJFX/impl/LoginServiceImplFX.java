@@ -6,14 +6,13 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoginService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@Service
+// @Service // Anotación eliminada
 public class LoginServiceImplFX implements ILoginService {
 
     private static final String LOGIN_URL = ApiConfig.getBaseUrl() + "/auth/login";

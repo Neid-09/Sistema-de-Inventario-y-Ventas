@@ -4,6 +4,8 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProducto
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RegistMovimientServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -12,8 +14,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -22,7 +22,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
-@Component
 public class RegisMovimientCtrlFX implements Initializable {
 
     @FXML private ComboBox<ProductoFX> cmbProducto;
@@ -46,11 +45,15 @@ public class RegisMovimientCtrlFX implements Initializable {
     private ObservableList<EntradaProductoFX> listaHistorial = FXCollections.observableArrayList();
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
 
-    @Autowired
-    private IRegistMovimientService entradaProductoService;
+    private final IRegistMovimientService registMovimientService;
+    private final IProductoService productoService;
 
-    @Autowired
-    private IProductoService productoService;
+    // Añadir constructor para inicializar servicios
+    public RegisMovimientCtrlFX() {
+        // Asumiendo nombres de implementación estándar
+        this.registMovimientService = new RegistMovimientServiceImplFX(); 
+        this.productoService = new ProductoServiceImplFX();
+    }
 
     // Servicio de proveedores eliminado ya que ya no se utiliza en este controlador
 
@@ -109,7 +112,7 @@ public class RegisMovimientCtrlFX implements Initializable {
 
             // Cargar historial usando el nuevo servicio que apunta a /api/movimientos
             listaHistorial.clear();
-            listaHistorial.addAll(entradaProductoService.obtenerTodos());
+            listaHistorial.addAll(registMovimientService.obtenerTodos());
 
             // Cargar productos para filtros
             listaProductos.clear();
@@ -154,7 +157,7 @@ public class RegisMovimientCtrlFX implements Initializable {
             listaHistorial.clear();
             // Usamos el nuevo método obtenerFiltradosCompleto que permite filtrar también por proveedor
             // Por ahora no estamos filtrando por proveedor desde la UI, pero podría añadirse en el futuro
-            listaHistorial.addAll(entradaProductoService.obtenerFiltradosCompleto(
+            listaHistorial.addAll(registMovimientService.obtenerFiltradosCompleto(
                     idProducto, null, desde, hasta, tipo));
 
             progressIndicator.setVisible(false);
@@ -174,7 +177,7 @@ public class RegisMovimientCtrlFX implements Initializable {
 
         try {
             listaHistorial.clear();
-            listaHistorial.addAll(entradaProductoService.obtenerTodos());
+            listaHistorial.addAll(registMovimientService.obtenerTodos());
             statusLabel.setText(listaHistorial.size() + " registros cargados.");
         } catch (Exception e) {
             mostrarError("Error al cargar datos", e);

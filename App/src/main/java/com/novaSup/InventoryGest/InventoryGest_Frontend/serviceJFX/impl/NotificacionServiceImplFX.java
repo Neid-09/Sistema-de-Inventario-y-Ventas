@@ -7,13 +7,11 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.NotificacionFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.INotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 public class NotificacionServiceImplFX implements INotificacionService {
 
     private static final String API_URL = ApiConfig.getBaseUrl() + "/api/notificaciones";

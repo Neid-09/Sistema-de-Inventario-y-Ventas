@@ -22,8 +22,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class ProductoControllerFX implements Initializable {
 
     // Componentes FXML - campos de formulario
@@ -93,19 +90,15 @@ public class ProductoControllerFX implements Initializable {
     // Servicios - inyectados por constructor
     private final IProductoService productoService;
     private final ILoteService loteService;
-    private final ApplicationContext applicationContext;
     
     // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
 
-    public ProductoControllerFX(IProductoService productoService, 
-                              ILoteService loteService, 
-                              ApplicationContext applicationContext) {
+    public ProductoControllerFX(IProductoService productoService, ILoteService loteService) {
         this.productoService = productoService;
         this.loteService = loteService;
-        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -525,8 +518,8 @@ public class ProductoControllerFX implements Initializable {
 
             // Inyectar manualmente los servicios (obtenidos del contexto de Spring)
             controller.setServicios(
-                    applicationContext.getBean(ILoteService.class),
-                    applicationContext.getBean(IProductoService.class)
+                    this.loteService,      // Pasar la instancia existente
+                    this.productoService   // Pasar la instancia existente
             );
 
             // Inicializar el controlador con el producto y la operación
@@ -807,12 +800,6 @@ public class ProductoControllerFX implements Initializable {
 
             // Obtener el controlador y configurarlo
             VAjusteStockCtrlFX controller = loader.getController();
-
-            // Inyectar manualmente los servicios
-            controller.setServicios(
-                    applicationContext.getBean(ILoteService.class),
-                    applicationContext.getBean(IProductoService.class)
-            );
 
             // Inicializar el controlador con el producto
             controller.inicializar(producto);

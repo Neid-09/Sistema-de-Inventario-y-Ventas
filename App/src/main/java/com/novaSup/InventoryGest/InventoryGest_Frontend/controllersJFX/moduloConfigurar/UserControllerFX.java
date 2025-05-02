@@ -4,9 +4,12 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrinc
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -18,14 +21,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
-import static com.novaSup.InventoryGest.MainApp.springContext;
-
-@Component
 public class UserControllerFX {
 
     @FXML
@@ -70,8 +68,13 @@ public class UserControllerFX {
     @FXML
     private Button btnEliminar;
 
-    // Usamos la interfaz en lugar de la implementación directa
-    private final IUsuarioService usuarioService = new UsuarioServiceImplFX();
+    private final IUsuarioService usuarioService;
+    private final IRolService rolService;
+
+    public UserControllerFX() {
+        this.usuarioService = new UsuarioServiceImplFX();
+        this.rolService = new RolServiceImplFX();
+    }
 
     private UsuarioFX usuarioSeleccionado;
 
@@ -125,9 +128,6 @@ public class UserControllerFX {
         btnEliminar.setManaged(btnEliminar.isVisible());
     }
 
-    /**
-     * Verifica si el usuario tiene alguno de los permisos necesarios para gestionar usuarios
-     */
     /**
      * Verifica si el usuario tiene alguno de los permisos necesarios para gestionar usuarios
      */
@@ -379,11 +379,6 @@ public class UserControllerFX {
         btnEliminar.setDisable(true);
     }
 
-
-    /**
-     * Vuelve a la pantalla de configuración de forma segura
-     * @param event Evento que disparó la acción (opcional)
-     */
     private void volverAConfiguracion(ActionEvent event) {
         try {
             Stage stage;
@@ -411,7 +406,6 @@ public class UserControllerFX {
                         "No se encontró el controlador principal. Usando método alternativo.");
 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.MENUPRINCIPAL_FXML));
-                loader.setControllerFactory(springContext::getBean);
                 Parent root = loader.load();
                 Scene scene = new Scene(root);
                 stage.setScene(scene);

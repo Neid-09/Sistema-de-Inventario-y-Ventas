@@ -13,13 +13,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class PPermisosRolesCtrlFX implements Initializable {
 
     @FXML
@@ -40,8 +38,8 @@ public class PPermisosRolesCtrlFX implements Initializable {
     @FXML
     private Button btnGuardar;
 
-    private IPermisoService permisoService;
-    private IRolService rolService;
+    private final IPermisoService permisoService;
+    private final IRolService rolService;
 
     private ObservableList<RolFX> listaRoles;
     private ObservableList<PermisoConEstado> listaPermisos;

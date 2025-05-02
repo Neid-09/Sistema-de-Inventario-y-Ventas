@@ -16,13 +16,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class PermisosUserCtrlFX implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(PermisosUserCtrlFX.class);
@@ -55,8 +53,8 @@ public class PermisosUserCtrlFX implements Initializable {
     @FXML private Button btnCancelar;
     @FXML private Button btnCargarPermisos;
 
-    private IUsuarioService usuarioService;
-    private IPermisoService permisoService;
+    private final IUsuarioService usuarioService;
+    private final IPermisoService permisoService;
 
     private ObservableList<UsuarioFX> listaUsuarios;
     private ObservableList<PermisoFX> permisosRol;

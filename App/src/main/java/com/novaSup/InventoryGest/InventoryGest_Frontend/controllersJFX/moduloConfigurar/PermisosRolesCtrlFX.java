@@ -1,9 +1,13 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,13 +15,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class PermisosRolesCtrlFX implements Initializable {
+
+    private final IRolService rolService;
+    private final IPermisoService permisoService;
 
     @FXML
     private Button btnGestionPermisos;
@@ -30,6 +35,11 @@ public class PermisosRolesCtrlFX implements Initializable {
 
     @FXML
     private Button btnPermisosUsuarios;
+
+    public PermisosRolesCtrlFX() {
+        this.rolService = new RolServiceImplFX();
+        this.permisoService = new PermisoServiceImplFX();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
