@@ -2,7 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCo
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
@@ -10,7 +9,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -50,8 +48,9 @@ public class RolesControllerFX implements Initializable {
     private RolFX rolSeleccionado;
     private boolean modoEdicion = false;
 
-    public RolesControllerFX() {
-        this.rolService = new RolServiceImplFX(); // Instanciación directa
+    // Constructor para inyección de dependencias
+    public RolesControllerFX(IRolService rolService) {
+        this.rolService = rolService;
         listaRoles = FXCollections.observableArrayList();
     }
 

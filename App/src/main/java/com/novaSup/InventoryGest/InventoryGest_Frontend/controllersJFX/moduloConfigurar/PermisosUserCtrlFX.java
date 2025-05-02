@@ -2,8 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCo
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -64,9 +62,10 @@ public class PermisosUserCtrlFX implements Initializable {
     private Set<PermisoFX> permisosOriginales;
     private UsuarioFX usuarioSeleccionado;
 
-    public PermisosUserCtrlFX() {
-        this.usuarioService = new UsuarioServiceImplFX();
-        this.permisoService = new PermisoServiceImplFX();
+    // Constructor para inyección de dependencias
+    public PermisosUserCtrlFX(IUsuarioService usuarioService, IPermisoService permisoService) {
+        this.usuarioService = usuarioService;
+        this.permisoService = permisoService;
         this.listaUsuarios = FXCollections.observableArrayList();
         this.permisosRol = FXCollections.observableArrayList();
         this.permisosDisponibles = FXCollections.observableArrayList();

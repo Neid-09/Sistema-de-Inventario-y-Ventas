@@ -1,7 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import javafx.collections.FXCollections;
@@ -33,8 +32,9 @@ public class PermisosControllerFX implements Initializable {
     private PermisoFX permisoSeleccionado;
     private boolean modoEdicion = false;
 
-    public PermisosControllerFX() {
-        this.permisoService = new PermisoServiceImplFX(); // Instanciación directa
+    // Constructor para inyección de dependencias
+    public PermisosControllerFX(IPermisoService permisoService) {
+        this.permisoService = permisoService;
         listaPermisos = FXCollections.observableArrayList();
     }
 

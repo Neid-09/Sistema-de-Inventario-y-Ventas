@@ -2,7 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProveedorServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProveedorService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import javafx.application.Platform;
@@ -13,7 +12,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,18 +20,19 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class ProveedorControllerFX implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(ProveedorControllerFX.class);
-    private final IProveedorService proveedorService;
+    private final IProveedorService proveedorService; // Mantener como final
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
     private ProveedorFX proveedorSeleccionado;
     private boolean modoEdicion = false;
 
-    public ProveedorControllerFX() {
-        this.proveedorService = new ProveedorServiceImplFX();
+    // Constructor para inyección de dependencias
+    public ProveedorControllerFX(IProveedorService proveedorService) {
+        this.proveedorService = proveedorService;
+        // Quitar: this.proveedorService = new ProveedorServiceImplFX();
     }
 
     @FXML

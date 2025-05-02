@@ -1,10 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 
@@ -21,9 +17,6 @@ import java.util.ResourceBundle;
 
 public class PermisosRolesCtrlFX implements Initializable {
 
-    private final IRolService rolService;
-    private final IPermisoService permisoService;
-
     @FXML
     private Button btnGestionPermisos;
 
@@ -36,9 +29,8 @@ public class PermisosRolesCtrlFX implements Initializable {
     @FXML
     private Button btnPermisosUsuarios;
 
+    // Constructor para inyección de dependencias (remove unused services)
     public PermisosRolesCtrlFX() {
-        this.rolService = new RolServiceImplFX();
-        this.permisoService = new PermisoServiceImplFX();
     }
 
     @Override

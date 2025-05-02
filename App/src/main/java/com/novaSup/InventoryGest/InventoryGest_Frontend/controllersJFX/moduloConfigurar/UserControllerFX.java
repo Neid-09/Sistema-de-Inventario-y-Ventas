@@ -4,10 +4,8 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrinc
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 
 import javafx.application.Platform;
@@ -71,9 +69,10 @@ public class UserControllerFX {
     private final IUsuarioService usuarioService;
     private final IRolService rolService;
 
-    public UserControllerFX() {
-        this.usuarioService = new UsuarioServiceImplFX();
-        this.rolService = new RolServiceImplFX();
+    // Constructor para inyección de dependencias
+    public UserControllerFX(IUsuarioService usuarioService, IRolService rolService) {
+        this.usuarioService = usuarioService;
+        this.rolService = rolService;
     }
 
     private UsuarioFX usuarioSeleccionado;
@@ -230,7 +229,7 @@ public class UserControllerFX {
 
     private void cargarRoles() {
         try {
-            List<RolFX> roles = usuarioService.obtenerRoles();
+            List<RolFX> roles = rolService.obtenerRoles();
             cmbRol.setItems(FXCollections.observableArrayList(roles));
         } catch (Exception e) {
             e.printStackTrace();
