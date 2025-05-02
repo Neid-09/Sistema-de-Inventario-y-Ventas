@@ -29,6 +29,7 @@ public class DependencyManager {
         services.put(IUsuarioService.class, new UsuarioServiceImplFX()); // Asumiendo que existe
         services.put(IRolService.class, new RolServiceImplFX()); // Asumiendo que existe
         services.put(IPermisoService.class, new PermisoServiceImplFX()); // Asumiendo que existe
+        services.put(IConfiguracionServiceFX.class, new ConfiguracionServiceImplFX()); // Registrar el nuevo servicio
         // ... Agrega aquí todas las interfaces y sus implementaciones FX correspondientes
     }
 

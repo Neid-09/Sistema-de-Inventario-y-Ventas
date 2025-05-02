@@ -1,18 +1,19 @@
-package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX;
+package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ConfiguracionFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IConfiguracionServiceFX;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfiguracionServiceFX {
+public class ConfiguracionServiceImplFX implements IConfiguracionServiceFX {
     private static final String BASE_URL = "http://localhost:8080/api/configuraciones";
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    @Override
     public List<ConfiguracionFX> listarConfiguraciones() throws Exception {
         String response = HttpClient.get(BASE_URL);
         List<ConfiguracionFX> configuraciones = new ArrayList<>();
@@ -30,6 +31,7 @@ public class ConfiguracionServiceFX {
         return configuraciones;
     }
 
+    @Override
     public List<ConfiguracionFX> buscarConfiguracionesPorClave(String clave) throws Exception {
         String response = HttpClient.get(BASE_URL + "/buscar?clave=" + clave);
         List<ConfiguracionFX> configuraciones = new ArrayList<>();
@@ -47,6 +49,7 @@ public class ConfiguracionServiceFX {
         return configuraciones;
     }
 
+    @Override
     public ConfiguracionFX obtenerConfiguracionPorId(Integer id) throws Exception {
         String response = HttpClient.get(BASE_URL + "/" + id);
         JsonNode node = mapper.readTree(response);
@@ -59,6 +62,7 @@ public class ConfiguracionServiceFX {
         return new ConfiguracionFX(idConfig, clave, valor, descripcion);
     }
 
+    @Override
     public ConfiguracionFX guardarConfiguracion(ConfiguracionFX configuracion) throws Exception {
         String json = mapper.writeValueAsString(configuracionToMap(configuracion));
         String url;
@@ -95,6 +99,7 @@ public class ConfiguracionServiceFX {
         }
     }
 
+    @Override
     public void eliminarConfiguracion(Integer id) throws Exception {
         HttpClient.delete(BASE_URL + "/" + id);
     }
