@@ -8,8 +8,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
-            style="-fx-background-color: #f4f4f4;"> <!-- Cambiado fondo a gris claro -->
+<BorderPane xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" 
+            style="-fx-background-color: #f4f4f4;" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.MenuControllerFX"> <!-- Cambiado fondo a gris claro -->
    <top>
       <VBox alignment="CENTER_LEFT" style="-fx-background-color: #083671;" BorderPane.alignment="CENTER"> <!-- Usando azul oscuro del menú principal -->
          <padding>

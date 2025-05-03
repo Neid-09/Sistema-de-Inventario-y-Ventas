@@ -533,6 +533,21 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     @FXML
+    void irModuloClientes(){
+        try {
+            // Añadir verificación de permisos
+            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_clientes")) { // Asumiendo permiso 'acces_mod_clientes'
+                cargarModuloEnPanel(PathsFXML.MOD_CLIENTES_MENU);
+            }
+        } catch (IOException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                    "No se pudo cargar el módulo de clientes: " + e.getMessage());
+            // Imprimir stack trace para más detalles en la consola
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     void irModuloEntradasSalidas() {
         try {
             if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_EntradasSalidas")) {

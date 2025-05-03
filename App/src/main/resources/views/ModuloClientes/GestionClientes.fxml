@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.presentation.controller.ModuloClientes.GestionClientesController">
+<BorderPane style="-fx-background-color: #f4f4f4;" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.GestionClientesControllerFX">
    <top>
       <VBox spacing="10.0" BorderPane.alignment="CENTER" style="-fx-background-color: #f4f4f4;">
          <padding>
@@ -27,9 +27,9 @@
             </Label>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
-                  <TextField fx:id="searchField" promptText="Buscar por nombre, correo o cédula..." HBox.hgrow="ALWAYS" style="-fx-border-color: #cccccc; -fx-background-color: white;" />
+                  <TextField fx:id="txtSearch" promptText="Buscar por nombre, correo o cédula..." HBox.hgrow="ALWAYS" style="-fx-border-color: #cccccc; -fx-background-color: white;" />
                   <Label text="Filtrar por Estado:" textFill="#333333" />
-                  <ComboBox fx:id="statusFilterCombo" prefWidth="150.0" promptText="Todos" style="-fx-border-color: #cccccc; -fx-background-color: white;" />
+                  <ComboBox fx:id="cmbStatusFilter" prefWidth="150.0" promptText="Todos" style="-fx-border-color: #cccccc; -fx-background-color: white;" />
                </children>
             </HBox>
          </children>
@@ -38,16 +38,16 @@
    <center>
       <TableView fx:id="clientesTable" style="-fx-selection-bar: #BDD7F0; -fx-selection-bar-non-focused: #E0E0E0;" BorderPane.alignment="CENTER">
         <columns>
-          <TableColumn fx:id="nombreCol" prefWidth="150.0" text="Nombre" />
-          <TableColumn fx:id="correoCol" prefWidth="180.0" text="Correo" />
-            <TableColumn fx:id="cedulaCol" prefWidth="100.0" text="Cédula" />
-          <TableColumn fx:id="telefonoCol" prefWidth="100.0" text="Teléfono" />
-          <TableColumn fx:id="direccionCol" prefWidth="200.0" text="Dirección" />
-          <TableColumn fx:id="totalComprasCol" prefWidth="100.0" text="Total Compras (€)" />
-          <TableColumn fx:id="ultimaCompraCol" prefWidth="120.0" text="Última Compra" />
-          <TableColumn fx:id="saldoPendienteCol" prefWidth="110.0" text="Saldo Pendiente (€)" />
-          <TableColumn fx:id="puntosFidelidadCol" prefWidth="100.0" text="Puntos" />
-          <TableColumn fx:id="estadoCol" prefWidth="80.0" text="Estado" />
+          <TableColumn fx:id="colNombre" prefWidth="150.0" text="Nombre" />
+          <TableColumn fx:id="colCorreo" prefWidth="180.0" text="Correo" />
+            <TableColumn fx:id="colCedula" prefWidth="100.0" text="Cédula" />
+          <TableColumn fx:id="colTelefono" prefWidth="100.0" text="Teléfono" />
+          <TableColumn fx:id="colDireccion" prefWidth="200.0" text="Dirección" />
+          <TableColumn fx:id="colTotalCompras" prefWidth="100.0" text="Total Compras (€)" />
+          <TableColumn fx:id="colUltimaCompra" prefWidth="120.0" text="Última Compra" />
+          <TableColumn fx:id="colSaldoPendiente" prefWidth="110.0" text="Saldo Pendiente (€)" />
+          <TableColumn fx:id="colPuntosFidelidad" prefWidth="100.0" text="Puntos" />
+          <TableColumn fx:id="colEstado" prefWidth="80.0" text="Estado" />
         </columns>
          <BorderPane.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
@@ -64,10 +64,10 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="20.0" />
          </padding>
          <children>
-            <Button fx:id="addClienteButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Agregar Cliente" />
-            <Button fx:id="editClienteButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Editar Cliente" />
-            <Button fx:id="deleteClienteButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-base: #d9534f;" text="Eliminar" />
-            <Button fx:id="viewDetailsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Ver Detalles" />
+            <Button fx:id="btnAddCliente" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Agregar Cliente" />
+            <Button fx:id="btnEditCliente" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Editar Cliente" />
+            <Button fx:id="btnDeleteCliente" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-base: #d9534f;" text="Eliminar" />
+            <Button fx:id="btnViewDetails" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Ver Detalles" />
          </children>
       </VBox>
    </right>
