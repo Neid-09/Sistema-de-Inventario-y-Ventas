@@ -7,7 +7,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.LoteRepository
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import org.springframework.scheduling.annotation.Scheduled;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService; // Import ProductoService
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,18 +31,19 @@ public class LoteServiceImpl implements LoteService {
 
     private final LoteRepository loteRepository;
     private final StockServiceImpl stockService;
-    private final NotificacionService notificacionService;
     private final RegistMovimientService registMovimientService;
+    private final ProductoService productoService; // Inject ProductoService
 
     public LoteServiceImpl(
             LoteRepository loteRepository,
             StockServiceImpl stockService,
             NotificacionService notificacionService,
-            RegistMovimientService registMovimientService) {
+            RegistMovimientService registMovimientService,
+            ProductoService productoService) { // Add ProductoService to constructor
         this.loteRepository = loteRepository;
         this.stockService = stockService;
-        this.notificacionService = notificacionService;
         this.registMovimientService = registMovimientService;
+        this.productoService = productoService; // Initialize ProductoService
     }
 
     @Override
@@ -217,6 +218,11 @@ public class LoteServiceImpl implements LoteService {
             throw new Exception("No se puede reducir cantidad de un lote inactivo");
         }
 
+        // Verificar si el producto asociado está activo
+        if (lote.getProducto() == null || !lote.getProducto().getEstado()) { // Use getEstado()
+            throw new Exception("No se puede reducir cantidad de un lote asociado a un producto inactivo");
+        }
+
         if (lote.getCantidad() < cantidad) {
             throw new Exception("Cantidad a reducir excede el stock disponible en el lote");
         }
@@ -260,6 +266,13 @@ public class LoteServiceImpl implements LoteService {
     public void reducirCantidadDeLotes(Integer idProducto, Integer cantidadTotal) throws Exception {
         if (cantidadTotal <= 0) {
             throw new IllegalArgumentException("La cantidad total a reducir debe ser mayor que cero");
+        }
+
+        // Verificar si el producto está activo antes de buscar lotes
+        Producto producto = productoService.obtenerPorId(idProducto) // Use productoService
+                .orElseThrow(() -> new Exception("Producto no encontrado con ID: " + idProducto));
+        if (!producto.getEstado()) { // Use getEstado()
+            throw new Exception("No se puede reducir cantidad de lotes para un producto inactivo");
         }
 
         // Obtener lotes activos ordenados por fecha de vencimiento (FEFO)
@@ -362,6 +375,11 @@ public class LoteServiceImpl implements LoteService {
             throw new IllegalArgumentException("El producto es requerido");
         }
 
+        // Verificar si el producto está activo
+        if (!producto.getEstado()) { // Use getEstado()
+            throw new IllegalArgumentException("No se puede crear un lote para un producto inactivo.");
+        }
+
         if (cantidad <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
         }
@@ -413,6 +431,11 @@ public class LoteServiceImpl implements LoteService {
     public Lote crearLoteAjuste(Producto producto, Integer cantidad, String motivo) throws Exception {
         if (producto == null || producto.getIdProducto() == null) {
             throw new IllegalArgumentException("El producto es requerido");
+        }
+
+        // Verificar si el producto está activo
+        if (!producto.getEstado()) { // Use getEstado()
+            throw new IllegalArgumentException("No se puede crear un lote de ajuste para un producto inactivo.");
         }
 
         if (cantidad == 0) {

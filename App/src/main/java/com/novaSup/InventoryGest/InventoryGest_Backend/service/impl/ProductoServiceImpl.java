@@ -186,6 +186,11 @@ public class ProductoServiceImpl implements ProductoService {
         // ahora lo calcula desde los lotes
         return obtenerPorId(idProducto)
                 .map(producto -> {
+                    // Validar si el producto está activo
+                    if (!producto.getEstado()) {
+                        throw new IllegalStateException("No se puede actualizar el stock de un producto inactivo: " + producto.getNombre());
+                    }
+
                     actualizarStockDesdeLoterRepositorio(producto); // Esto recalcula y guarda el stock si cambió
 
                     // Verificar stock mínimo y máximo para generar notificaciones usando el método general
