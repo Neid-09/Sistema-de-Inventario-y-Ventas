@@ -533,6 +533,18 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     @FXML
+    void irModuloEntradasSalidas() {
+        try {
+            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_EntradasSalidas")) {
+                cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
+            }
+        } catch (IOException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                    "No se pudo cargar el historial de stock: " + e.getMessage());
+        }
+    }
+
+    @FXML
     void irModuloConfiguracion() {
         try {
             if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_configurar")) {

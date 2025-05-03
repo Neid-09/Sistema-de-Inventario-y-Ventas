@@ -4,8 +4,6 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProducto
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RegistMovimientServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -23,6 +21,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 public class RegisMovimientCtrlFX implements Initializable {
+    @FXML
+    private Button btnFiltrar;
+
+    @FXML
+    private Button btnLimpiarFiltros;
+
 
     @FXML private ComboBox<ProductoFX> cmbProducto;
     @FXML private DatePicker dpFechaDesde;
