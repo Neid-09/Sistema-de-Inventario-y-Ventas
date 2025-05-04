@@ -40,12 +40,6 @@
                   <fx:include source="GestionCreditosView.fxml" />
                </content>
           </Tab>
-          <Tab text="Reportes de Deudas">
-               <content>
-                   <!-- Incluye la vista de Reportes de Deudas -->
-                  <fx:include source="ReportesDeudasView.fxml" />
-               </content>
-          </Tab>
         </tabs>
       </TabPane>
    </center>
