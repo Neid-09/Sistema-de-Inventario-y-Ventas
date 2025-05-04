@@ -1,9 +1,10 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Para manejar LocalDate
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
@@ -12,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -182,14 +183,14 @@ public class ClienteServiceImplFX implements IClienteService {
                 dto.idCliente,
                 dto.cedula,
                 dto.nombre,
-                dto.apellido,
                 dto.correo,
-                dto.telefono,
+                dto.celular,
                 dto.direccion,
                 dto.puntosFidelidad,
                 dto.limiteCredito,
                 dto.totalComprado,
-                dto.ultimaCompra
+                dto.ultimaCompra, // Pasa OffsetDateTime
+                dto.tieneCreditos // Pasa el nuevo boolean
         );
     }
 
@@ -203,16 +204,16 @@ public class ClienteServiceImplFX implements IClienteService {
         dto.idCliente = (fx.getIdCliente() != null && fx.getIdCliente() > 0) ? fx.getIdCliente() : null;
         dto.cedula = fx.getCedula();
         dto.nombre = fx.getNombre();
-        dto.apellido = fx.getApellido();
         dto.correo = fx.getCorreo();
-        dto.telefono = fx.getTelefono();
+        dto.celular = fx.getCelular();
         dto.direccion = fx.getDireccion();
         dto.puntosFidelidad = fx.getPuntosFidelidad();
         dto.limiteCredito = fx.getLimiteCredito();
         // Estos campos usualmente no se envían desde el frontend para crear/actualizar,
         // son calculados por el backend, pero los incluimos por completitud del DTO.
         dto.totalComprado = fx.getTotalComprado();
-        dto.ultimaCompra = fx.getUltimaCompra();
+        dto.ultimaCompra = fx.getUltimaCompra(); // Obtiene OffsetDateTime
+        dto.tieneCreditos = fx.isTieneCreditos(); // Obtiene el boolean
         return dto;
     }
 
@@ -223,20 +224,18 @@ public class ClienteServiceImplFX implements IClienteService {
      * esperada/devuelta por la API de Clientes.
      * Mantiene el frontend desacoplado del modelo exacto del backend.
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static class ClienteDTO {
         public Integer idCliente;
         public String cedula;
         public String nombre;
-        public String apellido;
         public String correo;
-        public String telefono;
+        public String celular;
         public String direccion;
         public Integer puntosFidelidad;
         public BigDecimal limiteCredito;
         public BigDecimal totalComprado;
-        public LocalDate ultimaCompra; // Asegúrate que Jackson maneje bien LocalDate
-
-        // Constructor, getters/setters opcionales si Jackson los necesita,
-        // pero con campos públicos suele ser suficiente.
+        public OffsetDateTime ultimaCompra; // CORREGIDO: Cambiado a OffsetDateTime
+        public Boolean tieneCreditos; // Nuevo campo
     }
 }
