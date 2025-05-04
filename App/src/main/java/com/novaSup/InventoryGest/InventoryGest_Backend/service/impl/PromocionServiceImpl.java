@@ -3,7 +3,6 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Promocion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PromocionRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -13,8 +12,11 @@ import java.util.Optional;
 @Service
 public class PromocionServiceImpl implements PromocionService {
 
-    @Autowired
-    private PromocionRepository promocionRepository;
+    private final PromocionRepository promocionRepository;
+
+    public PromocionServiceImpl(PromocionRepository promocionRepository) {
+        this.promocionRepository = promocionRepository;
+    }
 
     @Override
     public List<Promocion> obtenerTodas() {

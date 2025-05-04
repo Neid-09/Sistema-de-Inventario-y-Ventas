@@ -6,7 +6,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ClienteReposit
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RecompensaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.RecompensaService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +17,15 @@ import java.util.Optional;
 @Service
 public class RecompensaServiceImpl implements RecompensaService {
 
-    @Autowired
-    private RecompensaRepository recompensaRepository;
+    private final RecompensaRepository recompensaRepository;
 
     // Nota: Asegúrate que el nombre aquí coincida con tu clase repositorio de Cliente.
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+
+    public RecompensaServiceImpl(RecompensaRepository recompensaRepository, ClienteRepository clienteRepository) {
+        this.recompensaRepository = recompensaRepository;
+        this.clienteRepository = clienteRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)

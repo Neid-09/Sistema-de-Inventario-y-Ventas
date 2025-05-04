@@ -5,7 +5,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.AuditoriaStockRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaStockService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ public class AuditoriaStockServiceImpl implements AuditoriaStockService {
     private final LoteService loteService;
     private final StockServiceImpl stockService;
 
-    @Autowired
     public AuditoriaStockServiceImpl(
             AuditoriaStockRepository auditoriaStockRepository,
             LoteService loteService,

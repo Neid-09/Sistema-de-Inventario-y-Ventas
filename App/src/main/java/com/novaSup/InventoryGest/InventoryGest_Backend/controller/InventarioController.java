@@ -8,7 +8,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.service.InventarioService
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,16 +28,13 @@ public class InventarioController {
 
     private final InventarioService inventarioService;
     private final ProductoService productoService;
-    private final ProveedorService proveedorService;
 
-    @Autowired
     public InventarioController(
             InventarioService inventarioService,
             ProductoService productoService,
             ProveedorService proveedorService) {
         this.inventarioService = inventarioService;
         this.productoService = productoService;
-        this.proveedorService = proveedorService;
     }
 
     /**

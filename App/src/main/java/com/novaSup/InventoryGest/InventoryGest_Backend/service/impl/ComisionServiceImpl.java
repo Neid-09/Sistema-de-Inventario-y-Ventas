@@ -7,7 +7,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ComisionReposi
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ComisionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.VendedorService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,23 +22,26 @@ import java.util.List;
 @Service
 public class ComisionServiceImpl implements ComisionService {
 
-    @Autowired
-    private ComisionRepository comisionRepository;
+    private final ComisionRepository comisionRepository;
 
-    @Autowired
-    private VendedorService vendedorService; // Para obtener datos del vendedor
+    private final VendedorService vendedorService; // Para obtener datos del vendedor
 
     // Constante para el estado inicial de la comisión
     private static final String ESTADO_PENDIENTE = "PENDIENTE";
     private static final String ESTADO_PAGADO = "PAGADO";
 
-    // TODO: Definir cómo se obtiene el porcentaje de comisión.
+    // Definir cómo se obtiene el porcentaje de comisión.
     // Opciones:
     // 1. Añadir un campo 'porcentajeComision' a la entidad Vendedor (requiere cambio en DB y modelo).
     // 2. Obtenerlo de una configuración global (application.properties o tabla de configuración).
     // 3. Obtenerlo basado en el Rol del Usuario asociado al Vendedor.
     // Por ahora, usaremos un valor fijo como placeholder.
     private static final BigDecimal DEFAULT_PORCENTAJE_COMISION = new BigDecimal("5.00"); // Ejemplo: 5%
+
+    public ComisionServiceImpl(ComisionRepository comisionRepository, VendedorService vendedorService) {
+        this.comisionRepository = comisionRepository;
+        this.vendedorService = vendedorService;
+    }
 
     @Override
     @Transactional

@@ -27,8 +27,6 @@ public class ReporteController {
     @Autowired
     private CategoriaService categoriaService;
 
-    @Autowired
-    private ProveedorService proveedorService;
 
     @Autowired
     private LoteService loteService;

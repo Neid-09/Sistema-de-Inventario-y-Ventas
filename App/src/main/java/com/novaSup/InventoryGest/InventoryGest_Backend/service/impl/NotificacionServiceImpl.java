@@ -2,26 +2,26 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Notificacion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.NotificacionRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificacionServiceImpl implements NotificacionService {
 
-    @Autowired
-    private NotificacionRepository notificacionRepository;
+    private final NotificacionRepository notificacionRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+
+    public NotificacionServiceImpl(NotificacionRepository notificacionRepository, UsuarioRepository usuarioRepository) {
+        this.notificacionRepository = notificacionRepository;
+        this.usuarioRepository = usuarioRepository;
+    }
 
     @Override
     public List<Notificacion> obtenerTodasLasNotificaciones() {
@@ -185,11 +185,11 @@ public class NotificacionServiceImpl implements NotificacionService {
         notificarUsuariosRelevantes(titulo, mensaje, tipo, idReferencia);
     }
 
-    // Método auxiliar para obtener IDs de administradores
+/*     // Método auxiliar para obtener IDs de administradores
     private List<Integer> obtenerIdsAdministradores() {
         return usuarioRepository.findByRolNombre("ROLE_ADMINISTRADOR")
                 .stream()
                 .map(Usuario::getIdUsuario)
                 .collect(Collectors.toList());
-    }
+    } */
 }

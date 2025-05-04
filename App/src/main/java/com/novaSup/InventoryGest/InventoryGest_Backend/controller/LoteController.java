@@ -96,10 +96,6 @@ public class LoteController {
     public ResponseEntity<?> actualizarLote(@PathVariable Integer id, @RequestBody Lote lote) {
         return loteService.obtenerPorId(id)
                 .map(loteExistente -> {
-                    // Guardar el estado original para comparar después
-                    boolean estadoOriginal = loteExistente.getActivo();
-                    int cantidadOriginal = loteExistente.getCantidad();
-
                     lote.setIdLote(id);
                     // Conservar la fecha de entrada original si no se proporciona una nueva
                     if (lote.getFechaEntrada() == null) {

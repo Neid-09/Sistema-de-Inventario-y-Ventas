@@ -4,7 +4,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Cliente;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ClienteRepository; // Asegúrate que el nombre del repositorio coincida
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +19,11 @@ public class ClienteServiceImpl implements ClienteService {
     // Nota: Asegúrate que el nombre aquí coincida con tu clase repositorio.
     // Si renombraste ClienteRespository a ClienteRepository, usa ClienteRepository aquí.
     // Si no, usa ClienteRespository. Asumiré ClienteRepository por convención.
-    @Autowired
-    private ClienteRepository clienteRepository;
+    private final ClienteRepository clienteRepository;
+
+    public ClienteServiceImpl(ClienteRepository clienteRepository) {
+        this.clienteRepository = clienteRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)

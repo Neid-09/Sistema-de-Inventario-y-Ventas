@@ -5,7 +5,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Rol;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RolRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,9 +27,6 @@ public class RolController {
 
     @Autowired
     private UsuarioService usuarioService;
-
-    @Autowired
-    private SecurityUtil securityUtil;
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_roles')")

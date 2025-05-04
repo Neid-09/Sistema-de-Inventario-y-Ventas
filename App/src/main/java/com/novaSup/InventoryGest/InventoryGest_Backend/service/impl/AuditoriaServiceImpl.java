@@ -5,7 +5,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Auditoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.AuditoriaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -15,14 +14,17 @@ import java.time.LocalDateTime;
 @Service
 public class AuditoriaServiceImpl implements AuditoriaService {
 
-    @Autowired
-    private AuditoriaRepository auditoriaRepository;
+    private final AuditoriaRepository auditoriaRepository;
 
-    @Autowired
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
+    public AuditoriaServiceImpl(AuditoriaRepository auditoriaRepository, HttpServletRequest request, ObjectMapper objectMapper) {
+        this.auditoriaRepository = auditoriaRepository;
+        this.request = request;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public Auditoria registrarAccion(String accion, String tablaAfectada, Integer idRegistro,

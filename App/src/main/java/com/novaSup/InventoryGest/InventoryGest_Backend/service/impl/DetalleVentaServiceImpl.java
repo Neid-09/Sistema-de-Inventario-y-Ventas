@@ -3,7 +3,6 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVenta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.DetalleVentaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.DetalleVentaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +14,11 @@ import java.util.List;
 @Service
 public class DetalleVentaServiceImpl implements DetalleVentaService {
 
-    @Autowired
-    private DetalleVentaRepository detalleVentaRepository;
+    private final DetalleVentaRepository detalleVentaRepository;
+
+    public DetalleVentaServiceImpl(DetalleVentaRepository detalleVentaRepository) {
+        this.detalleVentaRepository = detalleVentaRepository;
+    }
 
     @Override
     @Transactional // Asegura que todos los detalles se guarden en una transacción

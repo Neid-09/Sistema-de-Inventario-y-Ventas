@@ -2,11 +2,9 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
-import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RolRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,17 +15,17 @@ import java.util.stream.Collectors;
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private PermisoRepository permisoRepository;
+    private final RolRepository rolRepository;
 
-    @Autowired
-    private RolRepository rolRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public Usuario guardarUsuario(Usuario usuario) {

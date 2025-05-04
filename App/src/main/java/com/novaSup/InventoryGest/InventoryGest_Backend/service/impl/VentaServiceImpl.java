@@ -5,7 +5,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.VentaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,33 +22,37 @@ import java.util.Optional;
 @Service
 public class VentaServiceImpl implements VentaService {
 
-    @Autowired
-    private VentaRepository ventaRepository;
+    private final VentaRepository ventaRepository;
 
-    @Autowired
-    private DetalleVentaService detalleVentaService;
+    private final DetalleVentaService detalleVentaService;
 
-    @Autowired
-    private ProductoService productoService;
+    private final ProductoService productoService;
 
-    @Autowired
-    private ClienteService clienteService;
+    private final ClienteService clienteService;
 
-    @Autowired
-    private ComisionService comisionService;
+    private final ComisionService comisionService;
 
-    @Autowired
-    private VendedorService vendedorService;
+    private final VendedorService vendedorService;
 
-    @Autowired
-    private LoteService loteService; // Necesario para obtener el lote para el detalle
+    private final LoteService loteService; // Necesario para obtener el lote para el detalle
 
     // Eliminar si no se usa en otro lugar
     // @Autowired
     // private RegistMovimientService registMovimientService;
 
-    @Autowired // <--- Inyectar InventarioService
-    private InventarioService inventarioService;
+    // <--- Inyectar InventarioService
+    private final InventarioService inventarioService;
+
+    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService) {
+        this.ventaRepository = ventaRepository;
+        this.detalleVentaService = detalleVentaService;
+        this.productoService = productoService;
+        this.clienteService = clienteService;
+        this.comisionService = comisionService;
+        this.vendedorService = vendedorService;
+        this.loteService = loteService;
+        this.inventarioService = inventarioService;
+    }
 
     @Override
     @Transactional // Toda la operación es una única transacción
