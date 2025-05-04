@@ -51,6 +51,10 @@ public class Cliente {
     @Temporal(TemporalType.TIMESTAMP)
     private Timestamp ultimaCompra;
 
+    @Column(name = "limite_credito", precision = 10, scale = 2)
+    @ColumnDefault("1000.00") // Opcional: si quieres reflejar el default de DB en Hibernate
+    private BigDecimal limiteCredito; // Nuevo campo para limite_credito
+
     // Getters y Setters generados por Lombok (@Data)
 
     // Relaciones inversas (opcional, si necesitas navegar desde Cliente a otras entidades)

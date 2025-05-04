@@ -83,6 +83,10 @@ public class ClienteServiceImpl implements ClienteService {
         cliente.setCelular(clienteDetalles.getCelular());
         cliente.setCorreo(clienteDetalles.getCorreo());
         cliente.setDireccion(clienteDetalles.getDireccion());
+        // Actualizar el nuevo campo
+        if (clienteDetalles.getLimiteCredito() != null) { // Solo actualizar si se proporciona un valor
+             cliente.setLimiteCredito(clienteDetalles.getLimiteCredito());
+        }
         // No actualizamos total_comprado, puntos_fidelidad ni ultima_compra directamente aquí
 
         return clienteRepository.save(cliente);
