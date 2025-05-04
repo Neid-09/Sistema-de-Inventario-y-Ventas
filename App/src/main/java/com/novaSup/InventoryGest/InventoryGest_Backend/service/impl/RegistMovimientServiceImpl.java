@@ -7,7 +7,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoReposi
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RegistMovimientRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -161,7 +160,8 @@ public class RegistMovimientServiceImpl implements RegistMovimientService {
             Producto producto,
             Integer cantidad,
             BigDecimal precioUnitario,
-            String motivo) throws Exception {
+            String motivo,
+            Integer idProveedor) {
 
         // Validaciones básicas
         validarProducto(producto);
@@ -171,11 +171,24 @@ public class RegistMovimientServiceImpl implements RegistMovimientService {
         // Crear el registro de movimiento de tipo SALIDA
         RegistMovimient registroMovimiento = new RegistMovimient();
         registroMovimiento.setProducto(producto);
-        registroMovimiento.setCantidad(cantidad);
+        // Para ventas, la cantidad se registra como negativa para indicar salida
+        // CORRECCIÓN: La cantidad debe ser positiva aquí, el tipo de movimiento indica la salida.
+        // Si se quiere registrar negativo, ajustar la lógica de validación y stock.
+        // Por ahora, mantenemos la cantidad positiva como en la compra.
+        // Ajuste: Se registrará la cantidad en positivo, el tipo "SALIDA" indica la disminución.
+        registroMovimiento.setCantidad(cantidad); // Registrar cantidad positiva
         registroMovimiento.setPrecioUnitario(precioUnitario);
         registroMovimiento.setTipoMovimiento("SALIDA");
         registroMovimiento.setFecha(LocalDateTime.now());
         registroMovimiento.setMotivo(motivo != null ? motivo : "Venta de producto");
+
+        // Asignar proveedor si se proporciona el ID
+        if (idProveedor != null) {
+            // Usar orElseThrow para manejar el caso de proveedor no encontrado si es obligatorio
+            Proveedor proveedor = proveedorRepository.findById(idProveedor)
+                    .orElseThrow(() -> new IllegalArgumentException("No se encontró al proveedor con ID: " + idProveedor));
+            registroMovimiento.setProveedor(proveedor);
+        }
 
         // Guardar el registro de movimiento
         return registMovimientRepository.save(registroMovimiento);

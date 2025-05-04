@@ -42,25 +42,17 @@ public interface RegistMovimientService {
     );
 
     /**
-     * CASO 2: Registra la venta de un producto (salida)
-     * - Busca lotes disponibles con stock (por orden FIFO)
-     * - Crea un registro de movimiento de tipo SALIDA
-     * - Descuenta la cantidad en los lotes correspondientes
+     * Registra un movimiento de SALIDA debido a una venta.
      *
-     * @param producto Producto que se vende
-     * @param cantidad Cantidad vendida
-     * @param precioUnitario Precio unitario de venta
-     * @param motivo Motivo de la salida (opcional)
-     * @return El registro de movimiento creado
-     * @throws Exception Si no hay suficiente stock disponible
+     * @param producto       Producto vendido.
+     * @param cantidad       Cantidad vendida.
+     * @param precioUnitario Precio de venta unitario.
+     * @param motivo         Motivo del movimiento (ej. "Venta [NumeroVenta]").
+     * @param idProveedor    ID del proveedor asociado al producto (opcional, para trazabilidad).
+     * @return El registro de movimiento creado.
      */
-    RegistMovimient registrarVentaProducto(
-        Producto producto,
-        Integer cantidad,
-        BigDecimal precioUnitario,
-        String motivo
-    ) throws Exception;
-    
+    RegistMovimient registrarVentaProducto(Producto producto, Integer cantidad, BigDecimal precioUnitario, String motivo, Integer idProveedor);
+
     /**
      * CASO 3: Registra un ajuste de inventario (puede ser positivo o negativo)
      * - Crea un lote de ajuste con la cantidad especificada

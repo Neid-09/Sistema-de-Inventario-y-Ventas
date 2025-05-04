@@ -101,12 +101,22 @@ public class InventarioServiceImpl implements InventarioService {
         // Validar que haya suficiente stock
         validarStockSuficiente(producto, cantidad);
 
-        // 1. Registrar el movimiento de salida
+        // --- Obtener idProveedor del producto ---
+        Integer idProveedor = null;
+        if (producto.getProveedor() != null) {
+            idProveedor = producto.getProveedor().getIdProveedor();
+        } else if (producto.getIdProveedor() != null) { // Fallback si solo se guarda el ID directamente
+             idProveedor = producto.getIdProveedor();
+        }
+        // Considerar si se debe lanzar una excepción si el proveedor es nulo y es requerido
+
+        // 1. Registrar el movimiento de salida, incluyendo idProveedor
         RegistMovimient movimiento = registMovimientService.registrarVentaProducto(
                 producto,
                 cantidad,
                 precioUnitario,
-                motivo
+                motivo,
+                idProveedor // <--- Pasar el idProveedor obtenido
         );
 
         // 2. Reducir la cantidad en los lotes (FIFO/FEFO)

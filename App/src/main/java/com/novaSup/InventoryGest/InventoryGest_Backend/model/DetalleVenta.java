@@ -1,78 +1,47 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "detalle_venta")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DetalleVenta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_detalle")
+    private Integer idDetalle;
 
-    @ManyToOne
-    @JoinColumn(name = "venta_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_venta", nullable = false)
     private Venta venta;
 
-    private Long idProducto;
-    private String nombreProducto;
-    private int cantidad;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_producto", nullable = false)
+    private Producto producto;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_lote") // Puede ser nulo si no se maneja inventario por lotes estrictamente en todas las ventas
+    private Lote lote;
+
+    @Column(nullable = false)
+    private Integer cantidad;
+
+    @Column(name = "precio_unitario", precision = 10, scale = 2, nullable = false)
     private BigDecimal precioUnitario;
+
+    @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal subtotal;
 
-    // Getters y setters
-    public Long getId() {
-        return id;
-    }
+    @Column(precision = 10, scale = 2) // La ganancia podría calcularse o ser nula
+    private BigDecimal ganancia;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Venta getVenta() {
-        return venta;
-    }
-
-    public void setVenta(Venta venta) {
-        this.venta = venta;
-    }
-
-    public Long getIdProducto() {
-        return idProducto;
-    }
-
-    public void setIdProducto(Long idProducto) {
-        this.idProducto = idProducto;
-    }
-
-    public String getNombreProducto() {
-        return nombreProducto;
-    }
-
-    public void setNombreProducto(String nombreProducto) {
-        this.nombreProducto = nombreProducto;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public BigDecimal getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
+    // Lombok genera getters, setters, etc.
 }

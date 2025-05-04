@@ -27,9 +27,6 @@ public class Vendedor {
     @JoinColumn(name = "id_usuario", referencedColumnName = "idUsuario", insertable = false, updatable = false) // Mapea la FK
     private Usuario usuario;
 
-    @Column(name = "comision", precision = 5, scale = 2)
-    private BigDecimal comision;
-
     @Column(name = "objetivo_ventas", precision = 10, scale = 2)
     private BigDecimal objetivoVentas;
 
