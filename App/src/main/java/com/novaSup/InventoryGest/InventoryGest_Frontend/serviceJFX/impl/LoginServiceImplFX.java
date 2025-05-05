@@ -33,27 +33,67 @@ public class LoginServiceImplFX implements ILoginService {
             String respuesta = HttpClient.post(LOGIN_URL, jsonCredenciales);
             JsonNode jsonNode = objectMapper.readTree(respuesta);
 
-            // Extraer token
-            if (jsonNode.has("token")) {
+            // Extraer token y datos del usuario
+            if (jsonNode.has("token") && jsonNode.has("usuario")) {
                 jwtToken = jsonNode.get("token").asText();
-                nombreUsuario = correo;
+                JsonNode usuarioNode = jsonNode.get("usuario");
+
+                // Extraer nombre del usuario del objeto anidado
+                if (usuarioNode.has("nombre")) {
+                    nombreUsuario = usuarioNode.get("nombre").asText();
+                } else {
+                    nombreUsuario = correo; // Fallback al correo si no hay nombre
+                }
+
+                // Extraer ID del usuario del objeto anidado
+                if (usuarioNode.has("idUsuario")) {
+                    idUsuario = usuarioNode.get("idUsuario").asInt();
+                } else {
+                    idUsuario = null; // Asegurarse de que sea null si no se encuentra
+                }
 
                 // Extraer permisos del token JWT
                 extraerPermisosDeToken(jwtToken);
 
-                // Extraer ID del usuario si está disponible
-                if (jsonNode.has("idUsuario")) {
-                    idUsuario = jsonNode.get("idUsuario").asInt();
-                }
-
                 return true;
+            } else if (jsonNode.has("message") && "La cuenta de usuario está inactiva.".equals(jsonNode.get("message").asText())) {
+                // Manejo específico si la respuesta indica cuenta inactiva (aunque el backend ya devuelve 400)
+                limpiarDatosAutenticacion();
+                throw new Exception("La cuenta de usuario está inactiva.");
+            } else {
+                // Si no hay token o usuario, la autenticación falló
+                limpiarDatosAutenticacion();
+                // Intentar obtener un mensaje de error más específico si existe
+                String errorMessage = "Credenciales inválidas o respuesta inesperada del servidor.";
+                if (jsonNode.has("message")) {
+                    errorMessage = jsonNode.get("message").asText();
+                } else if (jsonNode.has("error")) {
+                    errorMessage = jsonNode.get("error").asText();
+                }
+                throw new Exception(errorMessage);
             }
 
-            return false;
         } catch (Exception e) {
             // Limpiar datos en caso de error
             limpiarDatosAutenticacion();
-            throw new Exception("Error en la autenticación: " + e.getMessage());
+            // Re-lanzar la excepción (puede ser la específica de cuenta inactiva o la genérica)
+            // Verificar si el mensaje ya indica cuenta inactiva para no duplicar
+            if (e.getMessage() != null && e.getMessage().contains("La cuenta de usuario está inactiva.")) {
+                throw e; // Ya es la excepción correcta
+            } else if (e.getMessage() != null && e.getMessage().contains("Credenciales inválidas")) {
+                 throw new Exception("Credenciales inválidas."); // Mensaje más limpio
+            }
+            // Analizar el mensaje de la excepción original por si viene del HttpClient (ej. 400 Bad Request)
+            // El HttpClient podría lanzar una excepción con el cuerpo de la respuesta en el mensaje
+            String originalMessage = e.getMessage();
+            if (originalMessage != null && originalMessage.contains("La cuenta de usuario está inactiva.")) {
+                 throw new Exception("La cuenta de usuario está inactiva.");
+            } else if (originalMessage != null && originalMessage.contains("Credenciales inválidas.")) {
+                 throw new Exception("Credenciales inválidas.");
+            }
+
+            // Si no se pudo determinar la causa específica, lanzar error genérico
+            throw new Exception("Error en la autenticación: " + (e.getMessage() != null ? e.getMessage() : "Error desconocido"));
         }
     }
 
@@ -156,11 +196,13 @@ public class LoginServiceImplFX implements ILoginService {
             return null;
         }
 
-        // Crear instancia con la información disponible
+        // Crear instancia con la información disponible (ID y Nombre real)
         UsuarioFX usuario = new UsuarioFX();
         usuario.setIdUsuario(idUsuario);
-        usuario.setCorreo(nombreUsuario);
-        // Otros campos se dejan vacíos o nulos porque no están disponibles
+        usuario.setNombre(nombreUsuario); // Usar el nombre real obtenido
+        // El correo no se almacena directamente ahora, pero podría añadirse si fuera necesario
+        // Otros campos como rol, estado, etc., no se obtienen en el login y requerirían otra llamada API
+        // o ser incluidos en la respuesta del login.
 
         return usuario;
     }

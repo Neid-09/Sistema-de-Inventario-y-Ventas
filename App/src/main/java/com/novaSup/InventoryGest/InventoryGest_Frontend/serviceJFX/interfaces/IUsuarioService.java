@@ -12,7 +12,9 @@ public interface IUsuarioService {
     List<UsuarioFX> obtenerUsuarios() throws Exception;
     UsuarioFX registrarUsuario(UsuarioFX usuario) throws Exception;
     UsuarioFX actualizarUsuario(Integer id, UsuarioFX usuario) throws Exception;
-    void eliminarUsuario(Integer id) throws Exception;
+    void desactivarUsuario(Integer id) throws Exception;
+    void activarUsuario(Integer id) throws Exception;
+
     /**
      * Obtiene los permisos específicos asignados a un usuario
      */

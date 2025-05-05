@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class RolFX {
@@ -61,6 +62,19 @@ public class RolFX {
         if (permisos != null) {
             this.permisos.addAll(permisos);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RolFX otroRol = (RolFX) o;
+        return Objects.equals(this.getIdRol(), otroRol.getIdRol());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getIdRol());
     }
 
     @Override
