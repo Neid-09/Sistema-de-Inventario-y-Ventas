@@ -1,0 +1,117 @@
+/* src/main/resources/styles/menu-styles.css */
+
+/* Estilo base para los botones de módulo */
+.module-button {
+    -fx-background-color: transparent; /* Fondo transparente por defecto */
+    -fx-text-fill: white; /* Texto blanco */
+    -fx-font-size: 13px; /* Tamaño de fuente */
+    -fx-alignment: CENTER_LEFT; /* Alinear contenido a la izquierda */
+    -fx-padding: 8px 12px; /* Padding interno (arriba/abajo, izquierda/derecha) */
+    -fx-background-radius: 5px; /* Bordes redondeados */
+    -fx-border-radius: 5px;
+    -fx-cursor: hand; /* Cursor de mano al pasar por encima */
+    -fx-pref-height: 40px; /* Altura fija */
+    -fx-pref-width: 100%; /* Ocupar todo el ancho disponible */
+    -fx-graphic-text-gap: 10px; /* Espacio entre icono y texto */
+}
+
+/* Estilo para el texto (Label) dentro de los botones de módulo */
+.module-button .label {
+    -fx-text-fill: white; /* Asegurar que el texto sea blanco */
+    -fx-font-weight: normal; /* Fuente normal */
+}
+
+/* Efecto al pasar el mouse por encima (hover) */
+.module-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1); /* Fondo blanco semitransparente */
+}
+
+/* Efecto al presionar el botón */
+.module-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Fondo un poco más opaco */
+}
+
+/* --- Estilo para el botón activo --- */
+.module-button-active,
+.inicio-button-active /* Aplicar a ambos tipos si usan clases distintas */ {
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Fondo más destacado */
+    /* Puedes añadir más estilos, como un borde izquierdo */
+    /* -fx-border-color: white transparent transparent transparent; */
+    /* -fx-border-width: 0 0 0 3; */
+}
+
+/* Ajustar hover para el botón activo para que no sea menos visible */
+.module-button-active:hover,
+.inicio-button-active:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* --- Estilo para el botón de Inicio --- */
+/* Aplicar los mismos estilos base que module-button */
+.inicio-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 13px; /* Mismo tamaño de fuente que otros módulos */
+    -fx-alignment: CENTER_LEFT; /* Alinear igual que otros módulos */
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+    -fx-pref-height: 40px;
+    -fx-pref-width: 100%;
+    -fx-graphic-text-gap: 10px; /* Mismo espacio icono-texto */
+}
+
+/* Estilo para el texto (Label) dentro del botón de Inicio */
+.inicio-button .label {
+    -fx-text-fill: white; /* Asegurar texto blanco */
+    -fx-font-weight: normal;
+}
+
+/* Mismos efectos hover/pressed que module-button */
+.inicio-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.inicio-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Estilo para el botón de Toggle Sidebar --- */
+.toggle-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+    -fx-background-radius: 50%; /* Hacerlo circular */
+    -fx-pref-width: 30px; /* Tamaño fijo */
+    -fx-pref-height: 30px;
+    -fx-alignment: CENTER;
+}
+
+.toggle-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Estilo para los Separadores --- */
+.sidebar-separator {
+    -fx-padding: 8px 0; /* Espacio vertical alrededor del separador */
+    -fx-max-width: 80%; /* Hacer la línea un poco más corta que el ancho */
+}
+
+.sidebar-separator .line {
+    -fx-border-color: rgba(255, 255, 255, 0.3); /* Color de la línea */
+    -fx-border-width: 1 0 0 0; /* Grosor y posición (línea superior) */
+}
+
+/* Estilo para el Tooltip (opcional, para mejorar apariencia) */
+.tooltip {
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+    -fx-font-size: 11px;
+}

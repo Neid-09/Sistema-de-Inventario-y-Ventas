@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -13,7 +15,15 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX">
+<!-- Añadir import para Separator -->
+<!-- Import URL -->
+
+<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX">
+    <!-- Añadir la hoja de estilos -->
+    <stylesheets>
+        <URL value="@../styles/menu-styles.css" />
+    </stylesheets>
+
     <!--TOP-->
     <top>
         <HBox fx:id="topBar" alignment="CENTER_LEFT" prefHeight="60.0" spacing="20" style="-fx-background-color: #f4f4f4; -fx-padding: 10 20;">
@@ -70,154 +80,229 @@
 
     <!-- PANEL LATERAL IZQUIERDO AZUL -->
     <left>
-        <VBox alignment="CENTER" prefWidth="250.0" spacing="10" style="-fx-background-color: #083671;" xmlns:fx="http://javafx.com/fxml">
+        <VBox fx:id="sidePanelVBox" alignment="CENTER" onMouseEntered="#handleSidePanelMouseEnter" onMouseExited="#handleSidePanelMouseExit" prefWidth="60.0" spacing="5" style="-fx-background-color: #083671;">
+            <padding>
+                <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+            </padding>
             <children>
+                <!-- Botón para expandir/colapsar -->
+                <Button fx:id="btnToggleSidebar" onAction="#handleToggleSidebar" styleClass="toggle-button">
+                    <graphic>
+                        <!-- Puedes usar un icono aquí, por ejemplo, de FontAwesomeFX o una imagen -->
+                        <ImageView fx:id="toggleIcon" fitHeight="16" fitWidth="16" preserveRatio="true">
+                             <image>
+                                <!-- Cambia esto por iconos de flecha izquierda/derecha según el estado -->
+                                <Image url="@../img/menuPrincipal/flecha-derecha.png" /> 
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Expandir/Colapsar Menú" />
+                    </tooltip>
+                </Button>
 
-                <Button onAction="#volverAlInicio" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT;" text="🏠 Inicio" />
-                <!-- Más botones de módulos debajo -->
+                <!-- Separador -->
+                <Separator styleClass="sidebar-separator" />
 
-                <!-- VENDER -->
-                <Button fx:id="btnVender" maxWidth="200" onAction="#irVender" style="-fx-alignment: CENTER_LEFT;">
+                <!-- Botón Inicio -->
+                <Button fx:id="btnInicio" maxWidth="Infinity" onAction="#volverAlInicio" styleClass="inicio-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
+                                    <image>
+                                        <!-- Asegúrate que esta ruta sea correcta -->
+                                        <Image url="@../img/menuPrincipal/pagina-de-inicio.png" />
+                                    </image>
+                                </ImageView>
+                                <Label fx:id="lblInicio" managed="false" text="Inicio" visible="false" /> <!-- Añadir Label para el texto -->
+                            </children>
+                        </HBox>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Inicio" />
+                    </tooltip>
+                </Button>
+
+                <!-- Separador (Agrupación: Operaciones Principales) -->
+                <Separator styleClass="sidebar-separator" />
+
+                <!-- VENDER -->
+                <Button fx:id="btnVender" maxWidth="Infinity" onAction="#irVender" styleClass="module-button">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <children>
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true"> <!-- Ajustar tamaño icono -->
                                     <image>
                                         <Image url="@../img/menuPrincipal/vender.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="VENDER" />
+                                <!-- Quitar style de Label, se hereda de .module-button .label -->
+                                <Label fx:id="lblVender" managed="false" text="VENDER" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Vender" />
+                    </tooltip>
                 </Button>
 
                 <!-- REPORTE VENTAS -->
-                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnReporteVentas" maxWidth="Infinity" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/reporteVentas.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="REPORTE VENTAS" />
+                                <Label fx:id="lblReporteVentas" managed="false" text="REPORTE VENTAS" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Reporte Ventas" />
+                    </tooltip>
                 </Button>
 
                 <!-- INVENTARIO -->
-                <Button fx:id="btnInventario" maxWidth="200" onAction="#irModuloInventario" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnInventario" maxWidth="Infinity" onAction="#irModuloInventario" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/inventario.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="INVENTARIO" />
+                                <Label fx:id="lblInventario" managed="false" text="INVENTARIO" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Inventario" />
+                    </tooltip>
                 </Button>
 
                 <!-- CONSULTA -->
-                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnConsulta" maxWidth="Infinity" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/consulta.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="CONSULTA" />
+                                <Label fx:id="lblConsulta" managed="false" text="CONSULTA" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Consulta" />
+                    </tooltip>
                 </Button>
 
                 <!-- CREDITO/CLIENTES -->
-                <Button maxWidth="200" onAction="#irModuloClientes" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnCreditoClientes" maxWidth="Infinity" onAction="#irModuloClientes" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/clienteCreditos.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="CREDITO/CLIENTES" />
+                                <Label fx:id="lblCreditoClientes" managed="false" text="CREDITO/CLIENTES" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Crédito / Clientes" />
+                    </tooltip>
                 </Button>
 
+                <!-- Separador (Agrupación: Análisis y Control) -->
+                <Separator styleClass="sidebar-separator" />
+
                 <!-- MAS VENDIDO -->
-                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnMasVendido" maxWidth="Infinity" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/masVendido.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="MAS VENDIDO" />
+                                <Label fx:id="lblMasVendido" managed="false" text="MAS VENDIDO" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Más Vendido" />
+                    </tooltip>
                 </Button>
 
                 <!-- ENTRADAS/SALIDAS -->
-                <Button fx:id="btnEntradasSalidas" maxWidth="200" onAction="#irModuloEntradasSalidas" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnEntradasSalidas" maxWidth="Infinity" onAction="#irModuloEntradasSalidas" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/entradaSalidas.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="ENTRADAS/SALIDAS" />
+                                <Label fx:id="lblEntradasSalidas" managed="false" text="ENTRADAS/SALIDAS" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Entradas / Salidas" />
+                    </tooltip>
                 </Button>
 
                 <!-- GARANTIAS/SERVICIOS -->
-                <Button maxWidth="200" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnGarantiasServicios" maxWidth="Infinity" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/garantiasServicios.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="GARANTIAS/SERVICIOS" />
+                                <Label fx:id="lblGarantiasServicios" managed="false" text="GARANTIAS/SERVICIOS" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Garantías / Servicios" />
+                    </tooltip>
                 </Button>
 
+                 <!-- Separador (Agrupación: Sistema) -->
+                <Separator styleClass="sidebar-separator" />
+
                 <!-- CONFIGURAR -->
-                <Button fx:id="btnConfiguracion" maxWidth="200" onAction="#irModuloConfiguracion" style="-fx-alignment: CENTER_LEFT;">
+                <Button fx:id="btnConfiguracion" maxWidth="Infinity" onAction="#irModuloConfiguracion" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>
-                                <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                                     <image>
                                         <Image url="@../img/menuPrincipal/configuraciones.png" />
                                     </image>
                                 </ImageView>
-                                <Label style="-fx-text-fill: black; -fx-font-size: 14px;" text="CONFIGURAR" />
+                                <Label fx:id="lblConfigurar" managed="false" text="CONFIGURAR" visible="false" />
                             </children>
                         </HBox>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Configurar" />
+                    </tooltip>
                 </Button>
 
             </children>

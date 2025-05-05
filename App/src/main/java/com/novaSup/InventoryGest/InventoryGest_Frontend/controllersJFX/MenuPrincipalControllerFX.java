@@ -5,6 +5,10 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginSer
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.INotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,12 +20,16 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent; // Import MouseEvent
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration; // Import Duration
 
 import java.io.IOException;
 import java.net.URL;
@@ -68,6 +76,49 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     private Timer timerNotificaciones;
     private ObservableList<NotificacionFX> listaNotificaciones = FXCollections.observableArrayList();
+
+    @FXML
+    private VBox sidePanelVBox; // Added for the side panel
+
+    // Added FXML fields for the labels inside buttons
+    @FXML private Label lblVender;
+    @FXML private Label lblReporteVentas;
+    @FXML private Label lblInventario;
+    @FXML private Label lblConsulta;
+    @FXML private Label lblCreditoClientes;
+    @FXML private Label lblMasVendido;
+    @FXML private Label lblEntradasSalidas;
+    @FXML private Label lblGarantiasServicios;
+    @FXML private Label lblConfigurar;
+
+    // Added FXML field for the Inicio button
+    @FXML private Button btnInicio;
+
+    // Added FXML field for the Inicio button's label
+    @FXML private Label lblInicio;
+
+    @FXML private Button btnToggleSidebar; // Added toggle button
+    @FXML private ImageView toggleIcon; // Added icon for toggle button
+    @FXML private Button btnReporteVentas;
+    @FXML private Button btnConsulta;
+    @FXML private Button btnCreditoClientes;
+    @FXML private Button btnMasVendido;
+    @FXML private Button btnGarantiasServicios;
+
+    private Timeline expandTimeline;
+    private Timeline collapseTimeline;
+    private final double collapsedWidth = 60.0;
+    private final double expandedWidth = 200.0;
+    private boolean isSidebarExpanded = false; // Track sidebar state
+    private Button currentActiveButton = null; // Track active button
+
+    // --- Icons for Toggle Button ---
+    // Make sure these paths are correct relative to the resources folder
+    private final Image iconCollapse = new Image(getClass().getResourceAsStream("/img/menuPrincipal/flecha-izquierda.png"));
+    private final Image iconExpand = new Image(getClass().getResourceAsStream("/img/menuPrincipal/flecha-derecha.png"));
+    // --- Active Button Style Classes ---
+    private final String styleClassModuleActive = "module-button-active";
+    private final String styleClassInicioActive = "inicio-button-active";
 
     // Constructor for dependency injection
     public MenuPrincipalControllerFX(INotificacionService notificacionService, Callback<Class<?>, Object> controllerFactory) {
@@ -153,6 +204,140 @@ public class MenuPrincipalControllerFX implements Initializable {
             System.err.println("Error general en initialize: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // Initialize animations
+        setupAnimations();
+
+        // Set initial state (collapsed)
+        setSidebarState(false, false); // Initial state is collapsed, no animation
+
+        // Set initial active button (Inicio)
+        setActiveButton(btnInicio);
+
+    }
+
+    private void setupAnimations() {
+        // Animation for expanding the side panel
+        expandTimeline = new Timeline(
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(sidePanelVBox.prefWidthProperty(), expandedWidth, Interpolator.EASE_BOTH)
+                )
+        );
+        expandTimeline.setOnFinished(event -> {
+            setLabelVisibility(true);
+            isSidebarExpanded = true;
+            updateToggleIcon();
+        });
+
+        // Animation for collapsing the side panel
+        collapseTimeline = new Timeline(
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(sidePanelVBox.prefWidthProperty(), collapsedWidth, Interpolator.EASE_BOTH)
+                )
+        );
+        collapseTimeline.getKeyFrames().add(0, new KeyFrame(Duration.ZERO, event -> {
+            if (!isSidebarExpanded) { // Only hide labels if collapsing
+                setLabelVisibility(false);
+            }
+        }));
+        collapseTimeline.setOnFinished(event -> {
+            if (!isSidebarExpanded) { // Ensure labels are hidden if state is collapsed
+                setLabelVisibility(false);
+            }
+            updateToggleIcon();
+        });
+    }
+
+    /**
+     * Sets the state of the sidebar (expanded or collapsed).
+     * @param expand True to expand, false to collapse.
+     * @param animate True to animate the transition, false for immediate change.
+     */
+    private void setSidebarState(boolean expand, boolean animate) {
+        isSidebarExpanded = expand; // Update state first
+        updateToggleIcon(); // Update icon based on new state
+
+        if (animate) {
+            if (expand) {
+                collapseTimeline.stop();
+                expandTimeline.playFromStart();
+            } else {
+                expandTimeline.stop();
+                collapseTimeline.playFromStart();
+            }
+        } else {
+            // Set immediately without animation
+            sidePanelVBox.setPrefWidth(expand ? expandedWidth : collapsedWidth);
+            setLabelVisibility(expand);
+        }
+    }
+
+    private void setLabelVisibility(boolean visible) {
+        // Only change visibility if the state requires it
+        if (visible == isSidebarExpanded) {
+            // Show/hide all module labels based on the 'visible' parameter
+            if (lblInicio != null) { lblInicio.setVisible(visible); lblInicio.setManaged(visible); }
+            if (lblVender != null) { lblVender.setVisible(visible); lblVender.setManaged(visible); }
+            if (lblReporteVentas != null) { lblReporteVentas.setVisible(visible); lblReporteVentas.setManaged(visible); }
+            if (lblInventario != null) { lblInventario.setVisible(visible); lblInventario.setManaged(visible); }
+            if (lblConsulta != null) { lblConsulta.setVisible(visible); lblConsulta.setManaged(visible); }
+            if (lblCreditoClientes != null) { lblCreditoClientes.setVisible(visible); lblCreditoClientes.setManaged(visible); }
+            if (lblMasVendido != null) { lblMasVendido.setVisible(visible); lblMasVendido.setManaged(visible); }
+            if (lblEntradasSalidas != null) { lblEntradasSalidas.setVisible(visible); lblEntradasSalidas.setManaged(visible); }
+            if (lblGarantiasServicios != null) { lblGarantiasServicios.setVisible(visible); lblGarantiasServicios.setManaged(visible); }
+            if (lblConfigurar != null) { lblConfigurar.setVisible(visible); lblConfigurar.setManaged(visible); }
+        }
+    }
+
+    private void updateToggleIcon() {
+        if (toggleIcon != null) {
+            toggleIcon.setImage(isSidebarExpanded ? iconCollapse : iconExpand);
+        }
+    }
+
+    /**
+     * Sets the visual style for the active button and removes it from the previous one.
+     * @param button The button to mark as active.
+     */
+    private void setActiveButton(Button button) {
+        if (currentActiveButton != null) {
+            // Remove active class from the previous button
+            currentActiveButton.getStyleClass().remove(styleClassModuleActive);
+            currentActiveButton.getStyleClass().remove(styleClassInicioActive);
+        }
+
+        currentActiveButton = button;
+
+        if (currentActiveButton != null) {
+            // Add the appropriate active class to the new button
+            if (currentActiveButton == btnInicio) {
+                currentActiveButton.getStyleClass().add(styleClassInicioActive);
+            } else {
+                currentActiveButton.getStyleClass().add(styleClassModuleActive);
+            }
+        }
+    }
+
+    @FXML
+    void handleToggleSidebar(ActionEvent event) {
+        setSidebarState(!isSidebarExpanded, true); // Toggle state with animation
+    }
+
+    @FXML
+    void handleSidePanelMouseEnter(MouseEvent event) {
+        // Expand only if not already expanded by the toggle button
+        if (!isSidebarExpanded) {
+            setSidebarState(true, true); // Expand with animation
+        }
+    }
+
+    @FXML
+    void handleSidePanelMouseExit(MouseEvent event) {
+        // Collapse only if it was expanded by hover (not manually by toggle)
+        // This logic might need refinement depending on desired interaction.
+        // For now, let's keep it simple: if mouse leaves, collapse.
+        // A more robust approach might involve checking if the toggle button forced expansion.
+        setSidebarState(false, true); // Collapse with animation
     }
 
     @FXML
@@ -447,15 +632,47 @@ public class MenuPrincipalControllerFX implements Initializable {
         loader.setControllerFactory(this.controllerFactory); // <<< USE THE FACTORY
         Parent root = loader.load();
 
+        // Determine which button corresponds to the loaded FXML and set it active
+        Button targetButton = findButtonForFXML(rutaFXML);
+        setActiveButton(targetButton); // Set active *after* successful load
+
         // Limpiar el panel y agregar el nuevo módulo
         modulosDinamicos.getChildren().clear();
         modulosDinamicos.getChildren().add(root);
+    }
+
+    /**
+     * Helper method to find the button associated with a given FXML path.
+     * This needs to be maintained if FXML paths or button IDs change.
+     * @param rutaFXML The path to the FXML file.
+     * @return The corresponding Button, or null if not found.
+     */
+    private Button findButtonForFXML(String rutaFXML) {
+        if (rutaFXML == null) return null;
+
+        switch (rutaFXML) {
+            case PathsFXML.INICIO_FXML: return btnInicio;
+            case PathsFXML.VENDER_FXML: return btnVender;
+            case PathsFXML.MOD_INVENTARIO: return btnInventario;
+            case PathsFXML.MOD_CLIENTES_MENU: return btnCreditoClientes; // Assuming this is the correct FXML for the button
+            case PathsFXML.CONTROLSTOCK_FXML: return btnEntradasSalidas; // Assuming this is the correct FXML for the button
+            case PathsFXML.CONFIGURACION_FXML: return btnConfiguracion;
+            // Add cases for other buttons/FXMLs:
+            // case PathsFXML.REPORTE_VENTAS_FXML: return btnReporteVentas;
+            // case PathsFXML.CONSULTA_FXML: return btnConsulta;
+            // case PathsFXML.MAS_VENDIDO_FXML: return btnMasVendido;
+            // case PathsFXML.GARANTIAS_SERVICIOS_FXML: return btnGarantiasServicios;
+            default: return null; // Or return btnInicio as a fallback?
+        }
     }
 
     @FXML
     void cerrarSesion() {
         try {
             detenerTimers();
+            // Stop animations if running
+            if (expandTimeline != null) expandTimeline.stop();
+            if (collapseTimeline != null) collapseTimeline.stop();
 
             // Limpiar datos de sesión
             LoginServiceImplFX.cerrarSesion();
@@ -501,6 +718,7 @@ public class MenuPrincipalControllerFX implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.INICIO_FXML));
             loader.setControllerFactory(this.controllerFactory); // <<< USE THE FACTORY
             Parent root = loader.load();
+            setActiveButton(btnInicio); // Set Inicio as active
             modulosDinamicos.getChildren().add(root);
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
