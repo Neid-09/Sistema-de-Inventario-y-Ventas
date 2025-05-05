@@ -5,14 +5,12 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioReposit
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -56,32 +54,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 usuario.getContraseña(),
                 authorities,
                 usuario.getIdUsuario(),
-                true  // Asumiendo que todos los usuarios están activos por defecto
-                //A FUTURO IMPLEMENTAR USUARIOS ACTIVOS O NO ACTIVOS.
+                usuario.getEstado() != null && usuario.getEstado() // Usar el estado del usuario
         );
-    }
-
-    private Collection<? extends GrantedAuthority> getAuthorities(Usuario usuario) {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
-        // Añadir rol
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre().toUpperCase()));
-
-        // Añadir permisos del rol
-        if (usuario.getRol() != null && usuario.getRol().getPermisos() != null) {
-            authorities.addAll(usuario.getRol().getPermisos().stream()
-                    .map(p -> new SimpleGrantedAuthority(p.getNombre()))
-                    .collect(Collectors.toList()));
-        }
-
-        // Añadir permisos personalizados
-        if (usuario.getPermisosPersonalizados() != null) {
-            authorities.addAll(usuario.getPermisosPersonalizados().stream()
-                    .map(p -> new SimpleGrantedAuthority(p.getNombre()))
-                    .collect(Collectors.toList()));
-        }
-
-        return authorities;
     }
 
     public Usuario getUserByEmail(String correo) {

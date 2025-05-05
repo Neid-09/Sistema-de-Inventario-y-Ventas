@@ -7,6 +7,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioReposit
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Importar Transactional
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,16 +29,37 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional // Añadir Transactional para asegurar atomicidad
     public Usuario guardarUsuario(Usuario usuario) {
         if (usuario.getIdRol() != null) {
             usuario.setRol(rolRepository.findById(usuario.getIdRol())
                     .orElseThrow(() -> new RuntimeException("Rol no encontrado")));
         }
 
-        // Encriptar contraseña si se está creando un nuevo usuario
+        // Si es un nuevo usuario (sin ID)
         if (usuario.getIdUsuario() == null) {
+            // Encriptar contraseña
             usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
+            // Establecer estado como activo por defecto
+            if (usuario.getEstado() == null) { // Solo si no se proporciona explícitamente
+                usuario.setEstado(true);
+            }
+        } else {
+            // Si es una actualización, asegurarse de que el estado no sea null si no se proporciona
+            // (Esto previene que una actualización sin el campo estado lo ponga a null)
+            Usuario usuarioExistente = obtenerUsuarioPorId(usuario.getIdUsuario());
+            if (usuario.getEstado() == null) {
+                usuario.setEstado(usuarioExistente.getEstado()); // Mantener estado existente si no se especifica
+            }
+            // Asegurarse de no sobrescribir la contraseña si no se proporciona una nueva
+             if (usuario.getContraseña() == null || usuario.getContraseña().isEmpty()) {
+                 usuario.setContraseña(usuarioExistente.getContraseña());
+             } else if (!passwordEncoder.matches(usuario.getContraseña(), usuarioExistente.getContraseña())) {
+                 // Solo encriptar si la contraseña es nueva y diferente
+                 usuario.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
+             }
         }
+
 
         return usuarioRepository.save(usuario);
     }
@@ -47,45 +69,73 @@ public class UsuarioServiceImpl implements UsuarioService {
         return usuarioRepository.findAll();
     }
 
+    // Nuevo método para listar solo usuarios activos
     @Override
+    public List<Usuario> listarUsuariosActivos() {
+        return usuarioRepository.findByEstadoTrue();
+    }
+
+    // Nuevo método para listar solo usuarios inactivos
+    @Override
+    public List<Usuario> listarUsuariosInactivos() {
+        return usuarioRepository.findByEstadoFalse();
+    }
+
+
+    @Override
+    @Transactional // Añadir Transactional
     public Usuario actualizarUsuario(int id, Usuario usuario) {
         Usuario usuarioExistente = obtenerUsuarioPorId(id);
         usuarioExistente.setNombre(usuario.getNombre());
         usuarioExistente.setCorreo(usuario.getCorreo());
         usuarioExistente.setTelefono(usuario.getTelefono());
 
-        // Solo actualizar contraseña si viene en la petición
-        if (usuario.getContraseña() != null && !usuario.getContraseña().isEmpty()) {
+        // Actualizar estado si se proporciona
+        if (usuario.getEstado() != null) {
+            usuarioExistente.setEstado(usuario.getEstado());
+        }
+
+        // Solo actualizar contraseña si viene en la petición y es diferente
+        if (usuario.getContraseña() != null && !usuario.getContraseña().isEmpty() &&
+            !passwordEncoder.matches(usuario.getContraseña(), usuarioExistente.getContraseña())) {
+             // Considerar si realmente se debe permitir cambiar la contraseña aquí o en un endpoint dedicado
             usuarioExistente.setContraseña(passwordEncoder.encode(usuario.getContraseña()));
         }
 
         // Actualizar rol si se proporciona
-        if (usuario.getIdRol() != null) {
+        if (usuario.getIdRol() != null && !usuario.getIdRol().equals(usuarioExistente.getRol().getIdRol())) {
             usuarioExistente.setRol(rolRepository.findById(usuario.getIdRol())
                     .orElseThrow(() -> new RuntimeException("Rol no encontrado")));
         }
 
+        // Actualizar permisos personalizados si se proporcionan (asumiendo que vienen en el objeto usuario)
+        // Nota: La asignación de permisos se maneja en un endpoint separado en UsuarioController,
+        // quizás no sea necesario actualizar aquí directamente. Si se necesita, descomentar y ajustar.
+        /*
+        if (usuario.getPermisosPersonalizados() != null) {
+            usuarioExistente.setPermisosPersonalizados(usuario.getPermisosPersonalizados());
+        }
+        */
+
         return usuarioRepository.save(usuarioExistente);
     }
 
+    // Implementación de desactivarUsuario (soft delete)
     @Override
-    public void eliminarUsuario(int id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new NoSuchElementException("Usuario no encontrado con ID: " + id);
-        }
-        usuarioRepository.deleteById(id);
+    @Transactional // Añadir Transactional
+    public void desactivarUsuario(int id) {
+        Usuario usuario = obtenerUsuarioPorId(id);
+        usuario.setEstado(false);
+        usuarioRepository.save(usuario);
     }
 
+    // Implementación de activarUsuario
     @Override
-    public Usuario autenticarUsuario(String correo, String contraseña) {
-        Usuario usuario = usuarioRepository.findByCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
-
-        if (!passwordEncoder.matches(contraseña, usuario.getContraseña())) {
-            throw new RuntimeException("Credenciales inválidas");
-        }
-
-        return usuario;
+    @Transactional // Añadir Transactional
+    public void activarUsuario(int id) {
+        Usuario usuario = obtenerUsuarioPorId(id);
+        usuario.setEstado(true);
+        usuarioRepository.save(usuario);
     }
 
     @Override
