@@ -1,0 +1,282 @@
+/* Estilos generales para la vista de Vender */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif; /* Fuente más moderna */
+    -fx-background-color: #F4F6F8; /* Un fondo global ligeramente gris */
+}
+
+/* Barra superior de búsqueda y acciones */
+.top-bar {
+    -fx-padding: 15px;
+    -fx-spacing: 15px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #E0E0E0;
+}
+
+.top-bar .text-field-busqueda {
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #A0A0A0;
+    -fx-pref-width: 300px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.top-bar .button {
+    -fx-font-size: 13px;
+    -fx-background-color: #E9ECEF;
+    -fx-text-fill: #343A40;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+}
+
+.top-bar .button:hover {
+    -fx-background-color: #DEE2E6;
+}
+
+/* Contenedores principales de productos y carrito */
+.split-pane-content {
+    -fx-padding: 10px;
+    -fx-background-color: transparent; /* Hereda del root o VBox contenedor */
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+/* Estilo para la VBox que contiene los resultados de búsqueda de productos */
+.productos-box {
+    -fx-spacing: 8px;
+    -fx-padding: 10px;
+}
+
+.producto-item-card {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 15px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0.2, 0, 2);
+}
+
+.producto-item-card .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #495057;
+}
+
+.producto-item-card .label-nombre {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #007BFF; /* Azul para el nombre del producto */
+}
+
+.producto-item-card .label-precio {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #28A745; /* Verde para el precio */
+}
+
+.producto-item-card .button-agregar {
+    -fx-background-color: #007BFF;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 12px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.producto-item-card .button-agregar:hover {
+    -fx-background-color: #0056b3;
+}
+
+
+/* Estilo para el header del carrito */
+.carrito-header {
+    -fx-background-color: #6C757D; /* Un gris oscuro para el header */
+    -fx-padding: 8px 10px;
+    -fx-border-radius: 5px 5px 0 0; /* Bordes redondeados solo arriba */
+    -fx-background-radius: 5px 5px 0 0;
+}
+
+.carrito-header .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: white; /* Texto blanco para el header */
+    -fx-padding: 0 5px; /* Añadir un poco de padding horizontal para que no esté pegado */
+}
+
+/* Nueva clase para las etiquetas del header del carrito para un control más fino */
+.carrito-header-label {
+    /* Hereda de .carrito-header .label, se pueden añadir especificidades aquí si es necesario */
+    /* Por ejemplo, para asegurar alineación vertical si los contenidos varían en altura */
+    -fx-alignment: CENTER_LEFT; /* Alineación base, se sobreescribe en Java para center/right según columna */
+}
+
+/* Estilo para los items en el carrito */
+.carrito-item {
+    -fx-padding: 10px;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 0 0 1 0; /* Borde inferior sutil */
+    -fx-background-color: #FFFFFF; /* Fondo blanco para los items */
+}
+
+.carrito-item:hover {
+    -fx-background-color: #F8F9FA; /* Un gris muy claro al pasar el mouse */
+}
+
+.carrito-item .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #343A40;
+    -fx-padding: 0 5px; /* Añadir un poco de padding horizontal */
+    -fx-alignment: CENTER_LEFT; /* Alineación base para las etiquetas de item */
+}
+
+.carrito-item .spinner .increment-arrow-button,
+.carrito-item .spinner .decrement-arrow-button {
+    -fx-background-color: #007BFF;
+    -fx-background-radius: 3px;
+}
+.carrito-item .spinner .increment-arrow-button:hover,
+.carrito-item .spinner .decrement-arrow-button:hover {
+    -fx-background-color: #0056b3;
+}
+.carrito-item .spinner .arrow {
+    -fx-background-color: white;
+}
+
+/* Nueva clase para el spinner de cantidad para añadir padding/margin */
+.cantidad-spinner {
+    -fx-padding: 0 5px; /* Ajusta el padding horizontal para separar los botones del número */
+    -fx-alignment: CENTER; /* Asegurar que el spinner en sí esté centrado en su celda */
+}
+.cantidad-spinner .text-field { /* Para el editor del spinner */
+    -fx-alignment: CENTER; /* Centrar el texto del número */
+    -fx-font-size: 13px;
+}
+
+.carrito-item .text-field { /* Para el editor del spinner */
+    -fx-font-size: 13px;
+}
+
+.carrito-item-precio,
+.carrito-item-subtotal {
+    -fx-font-size: 13px;
+    -fx-alignment: center-right;
+    -fx-font-weight: bold;
+}
+
+.boton-eliminar-carrito {
+    -fx-background-color: transparent; /* Fondo transparente */
+    -fx-padding: 2px; /* Padding pequeño para que el icono no esté pegado al borde */
+    -fx-border-color: transparent; /* Sin borde */
+    -fx-effect: none; /* Sin sombra u otros efectos */
+    -fx-alignment: CENTER; /* Centrar el contenido del botón (el icono) */
+}
+.boton-eliminar-carrito:hover {
+    -fx-background-color: #E0E0E0; /* Un ligero fondo al pasar el mouse para feedback */
+}
+
+.boton-eliminar-carrito .image-view { /* Si el icono está dentro de un ImageView */
+    /* No se necesita estilo específico aquí si el tamaño se controla en Java,
+       pero podrías forzarlo si fuera necesario:
+    -fx-fit-height: 18px;
+    -fx-fit-width: 18px;
+    */
+}
+
+/* Zona inferior: Total y botones de acción */
+.bottom-bar {
+    -fx-padding: 15px;
+    -fx-spacing: 20px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 1 0 0 0;
+    -fx-border-color: #E0E0E0;
+}
+
+.boton-accion-principal {
+    -fx-font-size: 15px;
+    -fx-pref-height: 90px; /* Ajustar altura */
+    -fx-pref-width: 220px; /* Ajustar ancho */
+    -fx-text-fill: white;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0.1, 0, 1);
+}
+
+.boton-accion-imprimir {
+    -fx-background-color: #17A2B8; /* Color cian para imprimir */
+}
+.boton-accion-imprimir:hover {
+    -fx-background-color: #138496;
+}
+
+.boton-accion-procesar {
+    -fx-background-color: #28A745; /* Color verde para procesar */
+}
+.boton-accion-procesar:hover {
+    -fx-background-color: #218838;
+}
+
+.boton-accion-principal .image-view {
+    -fx-fit-height: 45px; /* Ajustar icono */
+    -fx-fit-width: 45px;
+}
+
+.total-box {
+    -fx-background-color: #E9F5FF; /* Un azul muy claro, más sutil */
+    -fx-padding: 20px;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.total-box .label-total-titulo {
+    -fx-font-size: 18px; /* Ligeramente más pequeño */
+    -fx-font-weight: bold;
+    -fx-text-fill: #0056b3; /* Azul oscuro para el título "TOTAL" */
+}
+
+.total-box .text-field-total {
+    -fx-font-size: 40px; /* Mantener grande */
+    -fx-font-weight: bold;
+    -fx-text-fill: #007BFF; /* Azul principal para el monto */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 5px 0 0 0; /* Ajustar padding si es necesario */
+}
+
+/* Estilos para el diálogo de procesar venta (manteniendo los existentes) */
+.dialog-pane-procesar-venta .label {
+    -fx-font-size: 14px;
+}
+
+.dialog-pane-procesar-venta .text-field,
+.dialog-pane-procesar-venta .combo-box {
+    -fx-font-size: 14px;
+    -fx-pref-width: 250px;
+}
+
+.dialog-pane-procesar-venta .radio-button {
+    -fx-font-size: 14px;
+}
+
+.dialog-pane-procesar-venta .grid-pane {
+    -fx-hgap: 10px;
+    -fx-vgap: 10px;
+}
+
+.dialog-pane-procesar-venta .button-bar .button {
+    -fx-font-size: 14px;
+}
+
+/* Clase para el VBox que contiene los items del carrito, para el scroll */
+.carrito-items-container {
+    -fx-padding: 0; /* El padding ya está en .carrito-item */
+}
+
+/* Clase para el VBox que contiene los items de producto, para el scroll */
+.productos-items-container {
+    -fx-padding: 0; /* El padding ya está en .producto-item-card */
+}

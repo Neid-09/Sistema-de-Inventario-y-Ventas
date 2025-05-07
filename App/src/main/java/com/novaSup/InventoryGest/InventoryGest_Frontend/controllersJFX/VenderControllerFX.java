@@ -1,29 +1,36 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo; // Nueva importación
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaRequest;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaResponse;
-// Eliminada la importación de ProductoServiceImplFX ya que no se instancia aquí
-// Eliminada la importación de VentaServiceImplFX ya que no se instancia aquí
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice; // Corregido el nombre de la interfaz
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
+import javafx.stage.Window;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -42,7 +49,7 @@ public class VenderControllerFX implements Initializable {
     private VBox productosBox;
 
     @FXML
-    private VBox carritoBox;
+    private VBox carritoBox; // Este VBox contendrá el header y luego los items
 
     @FXML
     private TextField txtTotal;
@@ -51,23 +58,72 @@ public class VenderControllerFX implements Initializable {
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
     private BigDecimal totalVenta = BigDecimal.ZERO;
 
-    // Constructor único para inyección de dependencias
     public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService) {
         this.productoService = productoService;
         this.ventaService = ventaService;
     }
 
-    // Eliminado el constructor por defecto que instanciaba los servicios directamente
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             cargarProductos();
-            txtTotal.setText(formatoMoneda.format(totalVenta));
+            actualizarTotal(); // Usar el método para formatear
+            crearHeaderCarrito(); // Añadir el header al carrito
+            // Aplicar estilos al TextField de total (opcional, si no se hace en FXML/CSS)
+            txtTotal.getStyleClass().add("text-field-total");
+            txtBusqueda.getStyleClass().add("text-field-busqueda");
+
+            // Considerar la reasignación o eliminación del botón btnImprimir aquí
+            // Por ahora, lo dejaremos como está, pero su funcionalidad original de imprimir
+            // la venta actual se moverá al flujo de "Procesar Venta".
+            // btnImprimir.setOnAction(e -> System.out.println("Funcionalidad de Imprimir Venta Anterior pendiente"));
+
         } catch (Exception e) {
-            mostrarError("Error al cargar productos", e.getMessage());
+            mostrarError("Error al inicializar", "Error al cargar productos o configurar la vista: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    private void crearHeaderCarrito() {
+        HBox header = new HBox(10); // Espaciado entre elementos del header
+        header.setPadding(new Insets(8, 12, 8, 12)); // Padding interior del header
+        header.getStyleClass().add("carrito-header");
+        header.setAlignment(Pos.CENTER_LEFT); // Alineación general de los elementos del header
+
+        Label lblCodigoH = new Label("CÓDIGO");
+        lblCodigoH.setPrefWidth(80); // Ancho ajustado
+        lblCodigoH.getStyleClass().add("carrito-header-label");
+
+        Label lblNombreH = new Label("NOMBRE");
+        // lblNombreH.setPrefWidth(250); // Se gestionará con HGrow
+        HBox.setHgrow(lblNombreH, Priority.ALWAYS); // Permitir que la columna nombre crezca
+        lblNombreH.setMaxWidth(Double.MAX_VALUE); // Permitir que la columna nombre crezca
+        lblNombreH.getStyleClass().add("carrito-header-label");
+
+        Label lblCantidadH = new Label("CANTIDAD");
+        lblCantidadH.setPrefWidth(100); // Ancho ajustado
+        lblCantidadH.setAlignment(Pos.CENTER); // Centrar texto
+        lblCantidadH.getStyleClass().add("carrito-header-label");
+
+        Label lblPrecioH = new Label("PRECIO");
+        lblPrecioH.setPrefWidth(120); // Ancho ajustado
+        lblPrecioH.setAlignment(Pos.CENTER_RIGHT); // Alinear a la derecha
+        lblPrecioH.getStyleClass().add("carrito-header-label");
+
+        Label lblSubtotalH = new Label("SUBTOTAL");
+        lblSubtotalH.setPrefWidth(120); // Ancho ajustado
+        lblSubtotalH.setAlignment(Pos.CENTER_RIGHT); // Alinear a la derecha
+        lblSubtotalH.getStyleClass().add("carrito-header-label");
+
+        Label lblAccionesH = new Label("ACCIÓN");
+        lblAccionesH.setPrefWidth(80); // Ancho ajustado
+        lblAccionesH.setAlignment(Pos.CENTER); // Centrar texto
+        lblAccionesH.getStyleClass().add("carrito-header-label");
+
+        header.getChildren().addAll(lblCodigoH, lblNombreH, lblCantidadH, lblPrecioH, lblSubtotalH, lblAccionesH);
+        carritoBox.getChildren().add(header);
+    }
+
 
     private void cargarProductos() throws Exception {
         todosLosProductos = productoService.obtenerTodos().stream()
@@ -132,53 +188,112 @@ public class VenderControllerFX implements Initializable {
     }
 
     private void agregarAlCarrito(ProductoFX producto) {
-        // Guardar el ProductoFX en el UserData del item del carrito para fácil recuperación
+        // Verificar si el producto ya está en el carrito
+        for (Node node : carritoBox.getChildren()) {
+            if (node instanceof HBox && node.getUserData() instanceof ProductoFX) {
+                ProductoFX productoEnCarrito = (ProductoFX) node.getUserData();
+                if (productoEnCarrito.getIdProducto() == producto.getIdProducto()) {
+                    // Producto ya existe, podríamos incrementar cantidad o notificar
+                    mostrarAlerta("Producto ya agregado", "El producto '" + producto.getNombre() + "' ya está en el carrito.");
+                    return;
+                }
+            }
+        }
+
         HBox itemCarrito = new HBox(10);
-        itemCarrito.setPadding(new Insets(5));
-        itemCarrito.setStyle("-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0;");
-        itemCarrito.setUserData(producto); // Guardar el producto aquí
+        itemCarrito.setPadding(new Insets(8));
+        itemCarrito.getStyleClass().add("carrito-item"); // Para CSS
+        itemCarrito.setUserData(producto);
+
+        Label lblCodigo = new Label(String.valueOf(producto.getIdProducto()));
+        lblCodigo.setPrefWidth(80); // Ancho ajustado
+        lblCodigo.getStyleClass().add("carrito-item-label");
 
         Label lblNombre = new Label(producto.getNombre());
-        HBox.setHgrow(lblNombre, Priority.ALWAYS);
+        // lblNombre.setPrefWidth(250); // Se gestionará con HGrow
+        HBox.setHgrow(lblNombre, Priority.ALWAYS); // Permitir que la columna nombre crezca
+        lblNombre.setMaxWidth(Double.MAX_VALUE); // Permitir que la columna nombre crezca
+        lblNombre.getStyleClass().add("carrito-item-label");
+        lblNombre.setWrapText(true); // Permitir que el texto del nombre se ajuste si es muy largo
 
         Spinner<Integer> spCantidad = new Spinner<>(1, producto.getStock(), 1);
-        spCantidad.setPrefWidth(70);
+        spCantidad.setPrefWidth(100); // Ancho ajustado
+        spCantidad.setEditable(true); // Permitir edición manual
+        // Aplicar un estilo para posible padding/margin desde CSS si es necesario
+        spCantidad.getStyleClass().add("cantidad-spinner");
+        // Centrar el spinner visualmente (el contenido ya se centra con CSS)
+        VBox cantidadContainer = new VBox(spCantidad);
+        cantidadContainer.setAlignment(Pos.CENTER);
+        cantidadContainer.setPrefWidth(100); // Mantener el ancho del spinner
 
         Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecioVenta()));
-        lblPrecio.setMinWidth(80);
+        lblPrecio.setPrefWidth(120); // Ancho ajustado
+        lblPrecio.setAlignment(Pos.CENTER_RIGHT);
+        lblPrecio.getStyleClass().add("carrito-item-precio");
 
-        Button btnEliminar = new Button("X");
-        btnEliminar.setStyle("-fx-text-fill: red;");
+        Label lblSubtotal = new Label(formatoMoneda.format(producto.getPrecioVenta())); // Subtotal inicial para cantidad 1
+        lblSubtotal.setPrefWidth(120); // Ancho ajustado
+        lblSubtotal.setAlignment(Pos.CENTER_RIGHT);
+        lblSubtotal.getStyleClass().add("carrito-item-subtotal");
+
+        Button btnEliminar = new Button(); // Se quita el texto o emoji
+        btnEliminar.getStyleClass().add("boton-eliminar-carrito"); // Aplicar clase CSS para transparencia y estilo
+        btnEliminar.setPrefWidth(80); // Ancho ajustado
+        btnEliminar.setAlignment(Pos.CENTER); // Centrar el icono en el botón
+        // El tamaño se controlará mejor desde CSS o con el fit del ImageView
+        try {
+            Image imgEliminar = new Image(getClass().getResourceAsStream("/img/moduloVentas/borrar.png"));
+            ImageView ivEliminar = new ImageView(imgEliminar);
+            ivEliminar.setFitHeight(20); // Ajusta el tamaño del icono
+            ivEliminar.setFitWidth(20);  // Ajusta el tamaño del icono
+            btnEliminar.setGraphic(ivEliminar);
+        } catch (Exception e) {
+            btnEliminar.setText("X"); // Fallback si no se carga el icono
+            System.err.println("No se pudo cargar el icono de eliminar: " + e.getMessage());
+        }
+
         btnEliminar.setOnAction(e -> {
             carritoBox.getChildren().remove(itemCarrito);
-            // Recuperar el producto del UserData
-            ProductoFX productoEliminado = (ProductoFX) itemCarrito.getUserData();
-            if (productoEliminado != null) {
-                BigDecimal subtotal = productoEliminado.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue()));
-                totalVenta = totalVenta.subtract(subtotal);
-                actualizarTotal();
-            }
+            BigDecimal subtotalItem = producto.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue()));
+            totalVenta = totalVenta.subtract(subtotalItem);
+            actualizarTotal();
         });
 
         spCantidad.valueProperty().addListener((obs, oldValue, newValue) -> {
-            // Recuperar el producto del UserData
-            ProductoFX productoActualizado = (ProductoFX) itemCarrito.getUserData();
-            if (productoActualizado != null) {
-                BigDecimal diferencia = productoActualizado.getPrecioVenta().multiply(BigDecimal.valueOf(newValue - oldValue));
-                totalVenta = totalVenta.add(diferencia);
-                actualizarTotal();
+            if (newValue == null || newValue < 1) {
+                spCantidad.getValueFactory().setValue(oldValue != null && oldValue >=1 ? oldValue : 1); // Evitar valores nulos o menores a 1
+                return;
             }
-        });
+            if (newValue > producto.getStock()) {
+                mostrarAlerta("Stock insuficiente", "Solo hay " + producto.getStock() + " unidades de " + producto.getNombre());
+                spCantidad.getValueFactory().setValue(oldValue); // Revertir al valor anterior o al stock máximo
+                return;
+            }
 
-        itemCarrito.getChildren().addAll(lblNombre, spCantidad, lblPrecio, btnEliminar);
-        carritoBox.getChildren().add(0, itemCarrito);
+            BigDecimal subtotalAnterior = producto.getPrecioVenta().multiply(BigDecimal.valueOf(oldValue != null ? oldValue : 0));
+            BigDecimal subtotalNuevo = producto.getPrecioVenta().multiply(BigDecimal.valueOf(newValue));
+            lblSubtotal.setText(formatoMoneda.format(subtotalNuevo));
 
-        // Recuperar el producto del UserData para el cálculo inicial
-        ProductoFX productoAgregado = (ProductoFX) itemCarrito.getUserData();
-        if (productoAgregado != null) {
-            totalVenta = totalVenta.add(productoAgregado.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue())));
+            totalVenta = totalVenta.subtract(subtotalAnterior).add(subtotalNuevo);
             actualizarTotal();
+        });
+        // Forzar la actualización del listener para el valor inicial si es necesario, aunque el cálculo inicial ya lo hace.
+        // totalVenta = totalVenta.add(producto.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue())));
+        // actualizarTotal(); // Se llama después de añadir al carrito
+
+        itemCarrito.getChildren().addAll(lblCodigo, lblNombre, cantidadContainer, lblPrecio, lblSubtotal, btnEliminar);
+
+        // Insertar después del header (índice 1)
+        if (carritoBox.getChildren().size() > 0) { // Asegurarse que el header existe
+            carritoBox.getChildren().add(1, itemCarrito);
+        } else {
+            carritoBox.getChildren().add(itemCarrito); // Fallback si no hay header (no debería pasar)
         }
+
+        // Actualizar total general
+        BigDecimal subtotalInicialItem = producto.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue()));
+        totalVenta = totalVenta.add(subtotalInicialItem);
+        actualizarTotal();
     }
 
     private void actualizarTotal() {
@@ -192,85 +307,202 @@ public class VenderControllerFX implements Initializable {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
+    
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
+    }
 
     @FXML
     private void procesarVenta() {
-        try {
-            if (carritoBox.getChildren().isEmpty()) {
-                mostrarError("Carrito vacío", "No hay productos en el carrito para procesar la venta.");
-                return;
-            }
+        if (carritoBox.getChildren().size() <= 1) { // Solo el header o vacío
+            mostrarError("Carrito vacío", "No hay productos en el carrito para procesar la venta.");
+            return;
+        }
 
-            VentaRequest ventaRequest = new VentaRequest();
-            // Estos IDs deberían obtenerse de la sesión del usuario o campos de la UI
-            // Por ahora, se usarán valores placeholder o null.
-            ventaRequest.setIdCliente(null); // Placeholder: obtener de la UI o sesión
-            ventaRequest.setIdVendedor(1); // Placeholder: obtener de la UI o sesión (ej. ID del usuario logueado si es vendedor)
-            ventaRequest.setRequiereFactura(false); // Placeholder: obtener de la UI
-            ventaRequest.setAplicarImpuestos(true); // Placeholder: obtener de la UI
-            // numeroVenta podría ser generado por el backend o ingresado manualmente
-            ventaRequest.setNumeroVenta("VTA-" + System.currentTimeMillis());
+        List<ProductoVentaInfo> productosParaVenta = new ArrayList<>();
+        for (Node itemNode : carritoBox.getChildren()) {
+            if (itemNode instanceof HBox && itemNode.getUserData() instanceof ProductoFX) {
+                HBox itemCarrito = (HBox) itemNode;
+                ProductoFX productoEnCarrito = (ProductoFX) itemCarrito.getUserData();
+                Spinner<Integer> spCantidad = null;
 
-
-            List<VentaRequest.DetalleVenta> detalles = new ArrayList<>();
-            for (Node itemNode : carritoBox.getChildren()) {
-                if (itemNode instanceof HBox) {
-                    HBox itemCarrito = (HBox) itemNode;
-                    ProductoFX productoEnCarrito = (ProductoFX) itemCarrito.getUserData(); // Recuperar producto
-                    Node node = itemCarrito.getChildren().get(1); // Asumiendo que el Spinner es el segundo elemento
-                    Spinner<Integer> spCantidad = null;
-                    if (node instanceof Spinner<?>) {
-                        try {
-                            @SuppressWarnings("unchecked")
-                            Spinner<Integer> tempSpinner = (Spinner<Integer>) node;
-                            spCantidad = tempSpinner;
-                        } catch (ClassCastException ex) {
-                            mostrarError("Error Interno", "El componente de cantidad no es del tipo esperado.");
-                            return;
+                // Buscar el VBox que contiene el Spinner
+                VBox cantidadContainerNode = null;
+                for (Node child : itemCarrito.getChildren()) {
+                    if (child instanceof VBox) { // Asumimos que el VBox es el contenedor del spinner
+                        VBox tempVBox = (VBox) child;
+                        if (!tempVBox.getChildren().isEmpty() && tempVBox.getChildren().get(0) instanceof Spinner) {
+                            cantidadContainerNode = tempVBox;
+                            break;
                         }
                     }
+                }
 
-                    if (productoEnCarrito != null && spCantidad != null) {
-                        VentaRequest.DetalleVenta detalle = new VentaRequest.DetalleVenta();
-                        detalle.setIdProducto(productoEnCarrito.getIdProducto());
-                        detalle.setCantidad(spCantidad.getValue());
-                        detalle.setPrecioUnitario(productoEnCarrito.getPrecioVenta());
-                        detalles.add(detalle);
-                    } else {
-                        mostrarError("Error Interno", "No se pudo obtener la información del producto en el carrito.");
+                if (cantidadContainerNode != null) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        Spinner<Integer> tempSpinner = (Spinner<Integer>) cantidadContainerNode.getChildren().get(0);
+                        spCantidad = tempSpinner;
+                    } catch (ClassCastException ex) {
+                        mostrarError("Error Interno", "El componente de cantidad no es del tipo esperado dentro de su contenedor.");
                         return;
                     }
+                } else {
+                    // Fallback por si el Spinner estuviera directamente (aunque no debería ser el caso ahora)
+                    for (Node child : itemCarrito.getChildren()) {
+                        if (child instanceof Spinner) {
+                            try {
+                                @SuppressWarnings("unchecked")
+                                Spinner<Integer> tempSpinner = (Spinner<Integer>) child;
+                                spCantidad = tempSpinner;
+                                break;
+                            } catch (ClassCastException ex) {
+                                mostrarError("Error Interno", "El componente de cantidad no es del tipo esperado.");
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                if (productoEnCarrito != null && spCantidad != null) {
+                    productosParaVenta.add(new ProductoVentaInfo(
+                            productoEnCarrito.getIdProducto(),
+                            productoEnCarrito.getNombre(),
+                            spCantidad.getValue(),
+                            productoEnCarrito.getPrecioVenta()
+                    ));
+                } else {
+                    mostrarError("Error Interno", "No se pudo obtener información completa del producto en el carrito.");
+                    return;
                 }
             }
-            ventaRequest.setDetalles(detalles);
+        }
 
-            // Llamar al servicio para registrar la venta
-            VentaResponse ventaResponse = ventaService.registrarVenta(ventaRequest);
+        if (productosParaVenta.isEmpty()) {
+            mostrarError("Error en Carrito", "No se pudieron procesar los productos del carrito.");
+            return;
+        }
 
-            // Si la venta fue exitosa (ventaResponse no es null y no hubo excepciones)
-            // La actualización de stock ahora la maneja el backend.
-            // Solo necesitamos recargar los productos para reflejar el stock actualizado.
-            try {
-                cargarProductos();
-            } catch (Exception loadEx) {
-                 mostrarError("Error post-venta", "No se pudo recargar la lista de productos: " + loadEx.getMessage());
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloVentas/ProcesarVentaDialog.fxml"));
+            DialogPane dialogContentPane = loader.load(); // Carga el DialogPane
+            ProcesarVentaDialogController dialogController = loader.getController();
+
+            dialogController.setDatosVenta(productosParaVenta, totalVenta);
+
+            // Crear un Dialog<ButtonType> y establecer su DialogPane
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogContentPane);
+            dialog.setTitle("Confirmar y Procesar Venta");
+            
+            // Configurar el propietario del diálogo si es posible (para la modalidad)
+            Window ownerWindow = null;
+            if (btnProcesarVenta != null && btnProcesarVenta.getScene() != null) {
+                 ownerWindow = btnProcesarVenta.getScene().getWindow();
+            }
+            if (ownerWindow != null) {
+                dialog.initOwner(ownerWindow);
+                dialog.initModality(Modality.WINDOW_MODAL); // Asegurar modalidad correcta
             }
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Venta Procesada");
-            alert.setHeaderText("Venta registrada con ID: " + ventaResponse.getIdVenta());
-            alert.setContentText("La venta fue procesada con éxito. Total: " + formatoMoneda.format(ventaResponse.getTotal()));
-            alert.showAndWait();
+            dialogController.configurarValidacionBotonConfirmar(); // Se necesitará este método en ProcesarVentaDialogController
 
-            carritoBox.getChildren().clear();
-            totalVenta = BigDecimal.ZERO;
-            actualizarTotal();
-            productosBox.getChildren().clear();
-            txtBusqueda.clear();
+            // Mostrar el diálogo y esperar el resultado
+            Optional<ButtonType> result = dialog.showAndWait();
 
+            if (result.isPresent() && result.get() == dialogController.getBtnConfirmarType()) {
+                dialogController.setConfirmado(true);
+            } else {
+                dialogController.setConfirmado(false);
+            }
+
+            if (dialogController.isConfirmado()) {
+                VentaRequest ventaRequest = new VentaRequest();
+                ventaRequest.setIdVendedor(1);
+                ventaRequest.setNumeroVenta("VTA-" + System.currentTimeMillis());
+
+                String formaPago = dialogController.getFormaDePago();
+                boolean requiereFactura = dialogController.isRequiereFactura();
+                ventaRequest.setRequiereFactura(requiereFactura);
+
+                if (requiereFactura) {
+                    System.out.println("Factura solicitada para:");
+                    System.out.println("  Documento: " + dialogController.getDocumentoCliente());
+                    System.out.println("  Nombre: " + dialogController.getNombreCliente());
+                    System.out.println("  Dirección: " + dialogController.getDireccionCliente());
+                    System.out.println("  Teléfono: " + dialogController.getTelefonoCliente());
+                    System.out.println("  Correo: " + dialogController.getCorreoCliente());
+                    ventaRequest.setIdCliente(null); // Placeholder
+                } else {
+                    ventaRequest.setIdCliente(null);
+                }
+
+                ventaRequest.setAplicarImpuestos(true);
+
+                List<VentaRequest.DetalleVenta> detalles = new ArrayList<>();
+                for (ProductoVentaInfo pInfo : productosParaVenta) {
+                    VentaRequest.DetalleVenta detalle = new VentaRequest.DetalleVenta();
+                    detalle.setIdProducto(pInfo.getIdProducto());
+                    detalle.setCantidad(pInfo.getCantidad());
+                    detalle.setPrecioUnitario(pInfo.getPrecioVentaUnitario());
+                    detalles.add(detalle);
+                }
+                ventaRequest.setDetalles(detalles);
+
+                VentaResponse ventaResponse = ventaService.registrarVenta(ventaRequest);
+
+                System.out.println("-----------------------------------------------------");
+                System.out.println("VENTA REGISTRADA CON ÉXITO - SIMULACIÓN DE IMPRESIÓN");
+                System.out.println("ID Venta: " + ventaResponse.getIdVenta());
+                System.out.println("Fecha: " + ventaResponse.getFecha());
+                System.out.println("Forma de Pago: " + formaPago);
+                if (requiereFactura) {
+                    System.out.println("Cliente: " + dialogController.getNombreCliente() + " (Doc: " + dialogController.getDocumentoCliente() + ")");
+                    System.out.println("Dirección: " + dialogController.getDireccionCliente());
+                }
+                System.out.println("--- Detalles ---");
+                for (ProductoVentaInfo pInfo : productosParaVenta) {
+                    System.out.println(String.format("%s (x%d) - %s c/u - Subtotal: %s",
+                            pInfo.getNombre(), pInfo.getCantidad(),
+                            formatoMoneda.format(pInfo.getPrecioVentaUnitario()),
+                            formatoMoneda.format(pInfo.getSubtotal())));
+                }
+                System.out.println("TOTAL VENTA: " + formatoMoneda.format(ventaResponse.getTotal()));
+                System.out.println("-----------------------------------------------------");
+
+                mostrarAlerta("Venta Procesada",
+                        "Venta registrada con ID: " + ventaResponse.getIdVenta() +
+                        "\nTotal: " + formatoMoneda.format(ventaResponse.getTotal()) +
+                        "\nForma de pago: " + formaPago + "\n\nSimulando impresión en consola...");
+
+                limpiarVenta();
+                try {
+                    cargarProductos();
+                } catch (Exception loadEx) {
+                    mostrarError("Error post-venta", "No se pudo recargar la lista de productos: " + loadEx.getMessage());
+                }
+            }
+        } catch (IOException ioEx) {
+            mostrarError("Error al abrir diálogo", "No se pudo cargar la ventana de procesamiento de venta: " + ioEx.getMessage());
+            ioEx.printStackTrace();
         } catch (Exception e) {
-            mostrarError("Error al procesar la venta", "Ocurrió un error: " + e.getMessage());
-            e.printStackTrace(); // Mantener para depuración
+            mostrarError("Error al procesar la venta", "Ocurrió un error general: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
+    
+    private void limpiarVenta() {
+        // Limpiar carrito excepto el header
+        if (carritoBox.getChildren().size() > 1) {
+            carritoBox.getChildren().remove(1, carritoBox.getChildren().size());
+        }
+        totalVenta = BigDecimal.ZERO;
+        actualizarTotal();
+        productosBox.getChildren().clear(); // Limpiar resultados de búsqueda
+        txtBusqueda.clear();
     }
 }
