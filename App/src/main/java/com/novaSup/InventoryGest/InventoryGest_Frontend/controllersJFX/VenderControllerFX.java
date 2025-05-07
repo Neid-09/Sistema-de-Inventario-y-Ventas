@@ -1,8 +1,12 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.ProductoServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaRequest;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaResponse;
+// Eliminada la importación de ProductoServiceImplFX ya que no se instancia aquí
+// Eliminada la importación de VentaServiceImplFX ya que no se instancia aquí
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice; // Corregido el nombre de la interfaz
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,6 +21,7 @@ import javafx.scene.text.FontWeight;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -25,6 +30,10 @@ import java.util.stream.Collectors;
 public class VenderControllerFX implements Initializable {
 
     private final IProductoService productoService;
+    private final IVentaSerivice ventaService;
+
+    @FXML
+    private Button btnProcesarVenta;
 
     @FXML
     private TextField txtBusqueda;
@@ -39,13 +48,16 @@ public class VenderControllerFX implements Initializable {
     private TextField txtTotal;
 
     private List<ProductoFX> todosLosProductos;
-    private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(new Locale("es", "CO"));
+    private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
     private BigDecimal totalVenta = BigDecimal.ZERO;
 
-    // Añadir constructor para inicializar el servicio
-    public VenderControllerFX() {
-        this.productoService = new ProductoServiceImplFX(); // Instanciación directa
+    // Constructor único para inyección de dependencias
+    public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService) {
+        this.productoService = productoService;
+        this.ventaService = ventaService;
     }
+
+    // Eliminado el constructor por defecto que instanciaba los servicios directamente
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -120,9 +132,11 @@ public class VenderControllerFX implements Initializable {
     }
 
     private void agregarAlCarrito(ProductoFX producto) {
+        // Guardar el ProductoFX en el UserData del item del carrito para fácil recuperación
         HBox itemCarrito = new HBox(10);
         itemCarrito.setPadding(new Insets(5));
         itemCarrito.setStyle("-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0;");
+        itemCarrito.setUserData(producto); // Guardar el producto aquí
 
         Label lblNombre = new Label(producto.getNombre());
         HBox.setHgrow(lblNombre, Priority.ALWAYS);
@@ -137,22 +151,34 @@ public class VenderControllerFX implements Initializable {
         btnEliminar.setStyle("-fx-text-fill: red;");
         btnEliminar.setOnAction(e -> {
             carritoBox.getChildren().remove(itemCarrito);
-            BigDecimal subtotal = producto.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue()));
-            totalVenta = totalVenta.subtract(subtotal);
-            actualizarTotal();
+            // Recuperar el producto del UserData
+            ProductoFX productoEliminado = (ProductoFX) itemCarrito.getUserData();
+            if (productoEliminado != null) {
+                BigDecimal subtotal = productoEliminado.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue()));
+                totalVenta = totalVenta.subtract(subtotal);
+                actualizarTotal();
+            }
         });
 
         spCantidad.valueProperty().addListener((obs, oldValue, newValue) -> {
-            BigDecimal diferencia = producto.getPrecioVenta().multiply(BigDecimal.valueOf(newValue - oldValue));
-            totalVenta = totalVenta.add(diferencia);
-            actualizarTotal();
+            // Recuperar el producto del UserData
+            ProductoFX productoActualizado = (ProductoFX) itemCarrito.getUserData();
+            if (productoActualizado != null) {
+                BigDecimal diferencia = productoActualizado.getPrecioVenta().multiply(BigDecimal.valueOf(newValue - oldValue));
+                totalVenta = totalVenta.add(diferencia);
+                actualizarTotal();
+            }
         });
 
         itemCarrito.getChildren().addAll(lblNombre, spCantidad, lblPrecio, btnEliminar);
         carritoBox.getChildren().add(0, itemCarrito);
 
-        totalVenta = totalVenta.add(producto.getPrecioVenta());
-        actualizarTotal();
+        // Recuperar el producto del UserData para el cálculo inicial
+        ProductoFX productoAgregado = (ProductoFX) itemCarrito.getUserData();
+        if (productoAgregado != null) {
+            totalVenta = totalVenta.add(productoAgregado.getPrecioVenta().multiply(BigDecimal.valueOf(spCantidad.getValue())));
+            actualizarTotal();
+        }
     }
 
     private void actualizarTotal() {
@@ -175,63 +201,75 @@ public class VenderControllerFX implements Initializable {
                 return;
             }
 
-            // Opcional: Usar setUserData/getUserData como se sugirió antes para más robustez
-            for (Node item : carritoBox.getChildren()) {
-                if (item instanceof HBox) {
-                    HBox itemCarrito = (HBox) item;
-                    // Asumiendo que recuperas el producto de alguna forma (getUserData o búsqueda por nombre)
-                    ProductoFX producto = null; // = obtenerProductoDelItem(itemCarrito);
-
-                    // --- Inicio: Lógica para obtener el producto (ejemplo con búsqueda por nombre) ---
-                    Label lblNombre = (Label) itemCarrito.getChildren().get(0);
-                    producto = todosLosProductos.stream()
-                            .filter(p -> p.getNombre().equals(lblNombre.getText()))
-                            .findFirst()
-                            .orElse(null);
-                    // --- Fin: Lógica para obtener el producto ---
+            VentaRequest ventaRequest = new VentaRequest();
+            // Estos IDs deberían obtenerse de la sesión del usuario o campos de la UI
+            // Por ahora, se usarán valores placeholder o null.
+            ventaRequest.setIdCliente(null); // Placeholder: obtener de la UI o sesión
+            ventaRequest.setIdVendedor(1); // Placeholder: obtener de la UI o sesión (ej. ID del usuario logueado si es vendedor)
+            ventaRequest.setRequiereFactura(false); // Placeholder: obtener de la UI
+            ventaRequest.setAplicarImpuestos(true); // Placeholder: obtener de la UI
+            // numeroVenta podría ser generado por el backend o ingresado manualmente
+            ventaRequest.setNumeroVenta("VTA-" + System.currentTimeMillis());
 
 
-                    Spinner<Integer> spCantidad = (Spinner<Integer>) itemCarrito.getChildren().get(1);
+            List<VentaRequest.DetalleVenta> detalles = new ArrayList<>();
+            for (Node itemNode : carritoBox.getChildren()) {
+                if (itemNode instanceof HBox) {
+                    HBox itemCarrito = (HBox) itemNode;
+                    ProductoFX productoEnCarrito = (ProductoFX) itemCarrito.getUserData(); // Recuperar producto
+                    Node node = itemCarrito.getChildren().get(1); // Asumiendo que el Spinner es el segundo elemento
+                    Spinner<Integer> spCantidad = null;
+                    if (node instanceof Spinner<?>) {
+                        try {
+                            @SuppressWarnings("unchecked")
+                            Spinner<Integer> tempSpinner = (Spinner<Integer>) node;
+                            spCantidad = tempSpinner;
+                        } catch (ClassCastException ex) {
+                            mostrarError("Error Interno", "El componente de cantidad no es del tipo esperado.");
+                            return;
+                        }
+                    }
 
-                    if (producto != null) {
-                        int cantidadVendida = spCantidad.getValue();
-
-                        // *** Cambio Principal: Llamar a actualizarStock ***
-                        // No necesitas hacer producto.setStock(...) aquí
-                        // Pasa el ID del producto y la cantidad vendida como negativa
-                        productoService.actualizarStock(producto.getIdProducto(), -cantidadVendida);
-
+                    if (productoEnCarrito != null && spCantidad != null) {
+                        VentaRequest.DetalleVenta detalle = new VentaRequest.DetalleVenta();
+                        detalle.setIdProducto(productoEnCarrito.getIdProducto());
+                        detalle.setCantidad(spCantidad.getValue());
+                        detalle.setPrecioUnitario(productoEnCarrito.getPrecioVenta());
+                        detalles.add(detalle);
                     } else {
-                         mostrarError("Error Interno", "No se pudo encontrar el producto en el carrito.");
-                         return; // Detener si un producto no se encuentra
+                        mostrarError("Error Interno", "No se pudo obtener la información del producto en el carrito.");
+                        return;
                     }
                 }
             }
+            ventaRequest.setDetalles(detalles);
 
-            // --- Recargar productos después de la venta para reflejar stock actualizado ---
+            // Llamar al servicio para registrar la venta
+            VentaResponse ventaResponse = ventaService.registrarVenta(ventaRequest);
+
+            // Si la venta fue exitosa (ventaResponse no es null y no hubo excepciones)
+            // La actualización de stock ahora la maneja el backend.
+            // Solo necesitamos recargar los productos para reflejar el stock actualizado.
             try {
-                cargarProductos(); // Vuelve a cargar la lista 'todosLosProductos' desde la API
+                cargarProductos();
             } catch (Exception loadEx) {
                  mostrarError("Error post-venta", "No se pudo recargar la lista de productos: " + loadEx.getMessage());
             }
-            // --- Fin recarga ---
-
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Venta Procesada");
-            alert.setHeaderText(null);
-            alert.setContentText("La venta fue procesada con éxito. Total: " + txtTotal.getText());
+            alert.setHeaderText("Venta registrada con ID: " + ventaResponse.getIdVenta());
+            alert.setContentText("La venta fue procesada con éxito. Total: " + formatoMoneda.format(ventaResponse.getTotal()));
             alert.showAndWait();
 
             carritoBox.getChildren().clear();
             totalVenta = BigDecimal.ZERO;
             actualizarTotal();
-            // Limpiar también los resultados de búsqueda si es necesario
             productosBox.getChildren().clear();
             txtBusqueda.clear();
 
         } catch (Exception e) {
-            mostrarError("Error al procesar la venta", e.getMessage());
+            mostrarError("Error al procesar la venta", "Ocurrió un error: " + e.getMessage());
             e.printStackTrace(); // Mantener para depuración
         }
     }

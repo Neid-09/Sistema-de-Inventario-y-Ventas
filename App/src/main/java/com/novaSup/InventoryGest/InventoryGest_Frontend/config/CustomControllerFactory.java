@@ -3,7 +3,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.config;
 import javafx.util.Callback;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Factoría de controladores personalizada para JavaFX.

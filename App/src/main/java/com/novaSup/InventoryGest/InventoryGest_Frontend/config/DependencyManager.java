@@ -32,7 +32,7 @@ public class DependencyManager {
         services.put(IConfiguracionServiceFX.class, new ConfiguracionServiceImplFX()); // Registrar el nuevo servicio
         services.put(IRegistMovimientService.class, new RegistMovimientServiceImplFX()); // Registrar movimiento de inventario
         services.put(IClienteService.class, new ClienteServiceImplFX()); // Registrar movimiento de inventario
-
+        services.put(IVentaSerivice.class, new VentaServiceImplFX()); // Registrar movimiento de inventario
         // ... Agrega aquí todas las interfaces y sus implementaciones FX correspondientes
     }
 
