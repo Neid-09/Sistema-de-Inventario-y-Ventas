@@ -69,6 +69,7 @@ public class VentaServiceImpl implements VentaService {
         venta.setRequiereFactura(ventaRequest.getRequiereFactura());
         venta.setAplicarImpuestos(ventaRequest.getAplicarImpuestos());
         venta.setNumeroVenta(ventaRequest.getNumeroVenta());
+        venta.setTipoPago(ventaRequest.getTipoPago());
 
         // 3. Procesar detalles y calcular total
         BigDecimal totalVenta = BigDecimal.ZERO;

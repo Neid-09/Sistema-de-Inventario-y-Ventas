@@ -39,6 +39,9 @@ public class Venta {
     @Column(name = "total", precision = 10, scale = 2) // Mapea al nombre y tipo de columna correcto
     private BigDecimal total;
 
+    @Column(name = "tipo_pago", length = 50, nullable = false)
+    private String tipoPago;
+
     @Column(name = "requiere_factura") // Mapea al nombre de columna correcto
     private Boolean requiereFactura; // tinyint(1) mapea a Boolean
 

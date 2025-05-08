@@ -16,6 +16,7 @@ public class VentaRequestDTO {
     private Boolean requiereFactura;
     private Boolean aplicarImpuestos;
     private String numeroVenta; // Podría generarse automáticamente
+    private String tipoPago; // Añadir este campo para el tipo de pago
 
     private List<DetalleVentaDTO> detalles;
 
