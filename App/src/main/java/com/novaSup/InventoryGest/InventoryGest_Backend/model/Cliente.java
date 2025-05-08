@@ -4,15 +4,15 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault; // Para @ColumnDefault si se usa Hibernate
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
 @Table(name = "clientes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "cedula", name = "uk_clientes_cedula"), // Constraint explícito para cédula
-    @UniqueConstraint(columnNames = "correo", name = "uk_clientes_correo")   // Constraint explícito para correo
+    @UniqueConstraint(columnNames = "correo", name = "uk_clientes_correo")
 })
 @Data
 @NoArgsConstructor
@@ -24,36 +24,63 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Integer idCliente;
 
+    @Column(name = "cedula", length = 20)
+    private String cedula;
+
     @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
 
-    @Column(name = "cedula", length = 20, nullable = false, unique = true) // unique = true aquí también es válido
-    private String cedula;
-
-    @Column(name = "celular", length = 20)
+    @Column(name = "celular", length = 15)
     private String celular;
 
-    @Column(name = "correo", length = 100, unique = true) // unique = true aquí también es válido
+    @Column(name = "correo", length = 100)
     private String correo;
 
-    @Column(name = "direccion", length = 150)
+    @Column(name = "direccion", length = 255)
     private String direccion;
 
-    @Column(name = "total_comprado", precision = 10, scale = 2)
-    @ColumnDefault("0.0") // Anotación de Hibernate para el valor por defecto (alternativa a inicializar)
-    private BigDecimal totalComprado = BigDecimal.ZERO; // Inicialización en Java
+    @Column(name = "requiere_factura_default", columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean requiereFacturaDefault = false;
 
-    @Column(name = "puntos_fidelidad")
-    @ColumnDefault("0") // Anotación de Hibernate
-    private Integer puntosFidelidad = 0; // Inicialización en Java
+    @Column(name = "razon_social_fiscal", length = 255)
+    private String razonSocialFiscal;
+
+    @Column(name = "rfc_fiscal", length = 20)
+    private String rfcFiscal;
+
+    @Lob
+    @Column(name = "direccion_fiscal", columnDefinition = "TEXT")
+    private String direccionFiscal;
+
+    @Column(name = "correo_fiscal", length = 100)
+    private String correoFiscal;
+
+    @Column(name = "uso_cfdi_default", length = 10)
+    private String usoCfdiDefault;
+
+    @Column(name = "total_comprado", precision = 12, scale = 2, columnDefinition = "DECIMAL(12,2) DEFAULT 0.00")
+    private BigDecimal totalComprado = BigDecimal.ZERO;
+
+    @Column(name = "puntos_fidelidad", columnDefinition = "INT(11) DEFAULT 0")
+    private Integer puntosFidelidad = 0;
 
     @Column(name = "ultima_compra")
     @Temporal(TemporalType.TIMESTAMP)
     private Timestamp ultimaCompra;
 
-    @Column(name = "limite_credito", precision = 10, scale = 2)
-    @ColumnDefault("1000.00") // Opcional: si quieres reflejar el default de DB en Hibernate
-    private BigDecimal limiteCredito; // Nuevo campo para limite_credito
+    @Column(name = "limite_credito", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) DEFAULT 0.00")
+    private BigDecimal limiteCredito = BigDecimal.ZERO;
+
+    @CreationTimestamp
+    @Column(name = "fecha_registro", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private Timestamp fechaRegistro;
+
+    @UpdateTimestamp
+    @Column(name = "fecha_actualizacion", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    private Timestamp fechaActualizacion;
+
+    @Column(name = "activo", columnDefinition = "TINYINT(1) DEFAULT 1")
+    private Boolean activo = true;
 
     // Getters y Setters generados por Lombok (@Data)
 

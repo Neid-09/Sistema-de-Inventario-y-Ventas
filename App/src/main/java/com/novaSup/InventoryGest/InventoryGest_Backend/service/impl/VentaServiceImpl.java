@@ -5,7 +5,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.VentaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoCalculoImpuestosDTO;
-import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoFacturaTemporalDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +48,9 @@ public class VentaServiceImpl implements VentaService {
     private final InventarioService inventarioService;
     private final PromocionService promocionService; // Inyectar PromocionService
     private final CalculoImpuestoService calculoImpuestoService;
+    private final FacturaService facturaService;
 
-    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService) {
+    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService, FacturaService facturaService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaService = detalleVentaService;
         this.productoService = productoService;
@@ -60,6 +61,7 @@ public class VentaServiceImpl implements VentaService {
         this.inventarioService = inventarioService;
         this.promocionService = promocionService;
         this.calculoImpuestoService = calculoImpuestoService;
+        this.facturaService = facturaService;
     }
 
     @Override
@@ -160,8 +162,7 @@ public class VentaServiceImpl implements VentaService {
 
         // 4. Calcular impuestos y establecer totales en la venta
         BigDecimal totalImpuestosCalculado = BigDecimal.ZERO;
-        @SuppressWarnings("unused")
-        List<DetalleImpuestoFacturaTemporalDTO> desgloseImpuestosParaFactura = new ArrayList<>();
+        List<com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoFacturaTemporalDTO> desgloseImpuestosParaFactura = new ArrayList<>();
 
         if (Boolean.TRUE.equals(venta.getAplicarImpuestos())) {
             if (calculoImpuestoService == null) {
@@ -184,6 +185,19 @@ public class VentaServiceImpl implements VentaService {
             detalle.setVenta(ventaGuardada);
         }
         detalleVentaService.guardarDetalles(detallesParaGuardar);
+
+        // ****** INICIO: LÓGICA DE FACTURACIÓN ******
+        if (Boolean.TRUE.equals(ventaGuardada.getRequiereFactura())) {
+            if (facturaService == null) {
+                throw new IllegalStateException("FacturaService no ha sido inyectado correctamente y se requiere factura.");
+            }
+            try {
+                facturaService.generarFactura(ventaGuardada, desgloseImpuestosParaFactura);
+            } catch (Exception e) {
+                throw new RuntimeException("Error durante la generación de la factura para la venta " + ventaGuardada.getIdVenta(), e);
+            }
+        }
+        // ****** FIN: LÓGICA DE FACTURACIÓN ******
 
         // 6. Actualizar datos del cliente (si aplica)
         if (ventaGuardada.getCliente() != null) {
