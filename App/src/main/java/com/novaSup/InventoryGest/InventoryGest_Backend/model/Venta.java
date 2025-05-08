@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-// import java.util.List; // Para la relación con DetalleVenta si se activa
+import java.util.List; // Para la relación con DetalleVenta si se activa
 
 @Entity
 @Table(name = "ventas")
@@ -68,8 +68,8 @@ public class Venta {
     @Column(name = "fecha_actualizacion")
     private Timestamp fechaActualizacion;
 
-    // @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<DetalleVenta> detallesVenta;
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<DetalleVenta> detallesVenta;
 
     @PrePersist
     protected void onCreate() {

@@ -151,7 +151,10 @@ public class VentaServiceImpl implements VentaService {
             detalle.setSubtotal(subtotal);
 
             // Calcular ganancia (opcional)
-            BigDecimal costoUnitario = producto.getPrecioCosto() != null ? producto.getPrecioCosto() : BigDecimal.ZERO;
+            BigDecimal costoUnitario = producto.getPrecioCosto();
+            if (costoUnitario == null) {
+                throw new IllegalStateException("El producto '" + producto.getNombre() + "' (ID: " + producto.getIdProducto() + ") no tiene un precio de costo definido. No se puede calcular la ganancia.");
+            }
             detalle.setCostoUnitarioProducto(costoUnitario);
             BigDecimal gananciaDetalle = precioFinalUnitario.subtract(costoUnitario).multiply(new BigDecimal(detalleDTO.getCantidad()));
             detalle.setGananciaDetalle(gananciaDetalle);

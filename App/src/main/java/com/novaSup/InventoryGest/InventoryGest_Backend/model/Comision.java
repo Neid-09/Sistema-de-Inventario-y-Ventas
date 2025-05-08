@@ -28,8 +28,8 @@ public class Comision {
     @JoinColumn(name = "id_venta", nullable = false)
     private Venta venta;
 
-    @Column(name = "monto_venta", precision = 10, scale = 2, nullable = false)
-    private BigDecimal montoVenta;
+    @Column(name = "base_comisionable", precision = 10, scale = 2, nullable = false)
+    private BigDecimal baseComisionable;
 
     @Column(name = "porcentaje_comision", precision = 5, scale = 2, nullable = false)
     private BigDecimal porcentajeComision;

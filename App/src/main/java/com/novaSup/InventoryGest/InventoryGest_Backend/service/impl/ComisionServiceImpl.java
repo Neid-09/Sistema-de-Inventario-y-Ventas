@@ -1,12 +1,16 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Comision;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVenta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Venta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Vendedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ComisionRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ComisionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.VendedorService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionService;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,33 +26,41 @@ import java.util.List;
 @Service
 public class ComisionServiceImpl implements ComisionService {
 
-    private final ComisionRepository comisionRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ComisionServiceImpl.class);
 
-    private final VendedorService vendedorService; // Para obtener datos del vendedor
+    private final ComisionRepository comisionRepository;
+    private final VendedorService vendedorService;
+    private final ConfiguracionService configuracionService;
 
     // Constante para el estado inicial de la comisión
     private static final String ESTADO_PENDIENTE = "PENDIENTE";
     private static final String ESTADO_PAGADO = "PAGADO";
 
-    // Definir cómo se obtiene el porcentaje de comisión.
-    // Opciones:
-    // 1. Añadir un campo 'porcentajeComision' a la entidad Vendedor (requiere cambio en DB y modelo).
-    // 2. Obtenerlo de una configuración global (application.properties o tabla de configuración).
-    // 3. Obtenerlo basado en el Rol del Usuario asociado al Vendedor.
-    // Por ahora, usaremos un valor fijo como placeholder.
-    private static final BigDecimal DEFAULT_PORCENTAJE_COMISION = new BigDecimal("5.00"); // Ejemplo: 5%
+    // Clave para obtener el porcentaje de comisión por defecto desde la configuración
+    private static final String CLAVE_PORCENTAJE_COMISION_DEFAULT_CONFIG = "comision.porcentaje.default.global";
 
-    public ComisionServiceImpl(ComisionRepository comisionRepository, VendedorService vendedorService) {
+    // Valor de fallback si no se encuentra en configuración o es inválido
+    private static final BigDecimal FALLBACK_PORCENTAJE_COMISION = new BigDecimal("5.00"); // Ejemplo: 5%
+
+    public ComisionServiceImpl(ComisionRepository comisionRepository,
+                               VendedorService vendedorService,
+                               ConfiguracionService configuracionService) {
         this.comisionRepository = comisionRepository;
         this.vendedorService = vendedorService;
+        this.configuracionService = configuracionService;
     }
 
     @Override
     @Transactional
     public Comision calcularYGuardarComision(Venta venta) {
         if (venta == null || venta.getVendedor() == null) {
-            // Loggear advertencia o lanzar excepción si es un error crítico
-            System.err.println("Intento de calcular comisión para una venta nula o sin vendedor.");
+            logger.warn("Intento de calcular comisión para una venta nula o sin vendedor.");
+            return null;
+        }
+
+        // Asegurarse de que los detalles de la venta están disponibles
+        if (venta.getDetallesVenta() == null || venta.getDetallesVenta().isEmpty()) {
+            logger.warn("Intento de calcular comisión para una venta sin detalles. Venta ID: {}", venta.getIdVenta());
             return null;
         }
 
@@ -56,32 +68,54 @@ public class ComisionServiceImpl implements ComisionService {
                 .orElseThrow(() -> new EntityNotFoundException("Vendedor no encontrado para calcular comisión: " + venta.getVendedor().getIdVendedor()));
 
         // --- Lógica de Porcentaje de Comisión ---
-        // Reemplazar esto con la lógica real cuando se defina cómo obtener el porcentaje.
-        BigDecimal porcentajeComision = DEFAULT_PORCENTAJE_COMISION;
-        // Ejemplo si viniera del vendedor (requiere añadir campo a Vendedor.java y DB):
-        // BigDecimal porcentajeComision = vendedor.getPorcentajeComision();
+        BigDecimal porcentajeComision = FALLBACK_PORCENTAJE_COMISION; // Inicializar con el fallback
 
-        if (porcentajeComision == null || porcentajeComision.compareTo(BigDecimal.ZERO) <= 0) {
-            // No hay comisión aplicable (porcentaje es 0 o no definido)
-             System.out.println("No se aplica comisión para el vendedor ID: " + vendedor.getIdVendedor() + " (porcentaje <= 0 o nulo)");
+        String porcentajeConfigStr = configuracionService.obtenerValorConfiguracion(CLAVE_PORCENTAJE_COMISION_DEFAULT_CONFIG, null);
+
+        if (porcentajeConfigStr != null && !porcentajeConfigStr.trim().isEmpty()) {
+            try {
+                BigDecimal porcentajeConfig = new BigDecimal(porcentajeConfigStr.trim());
+                if (porcentajeConfig.compareTo(BigDecimal.ZERO) > 0) {
+                    porcentajeComision = porcentajeConfig;
+                    logger.debug("Usando porcentaje de comisión desde configuración ({}%): {}", CLAVE_PORCENTAJE_COMISION_DEFAULT_CONFIG, porcentajeComision);
+                } else {
+                    logger.warn("Porcentaje de comisión desde configuración ('{}'='{}') no es válido (debe ser > 0). Usando fallback: {}%", CLAVE_PORCENTAJE_COMISION_DEFAULT_CONFIG, porcentajeConfigStr, FALLBACK_PORCENTAJE_COMISION);
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("Error al convertir el porcentaje de comisión desde configuración ('{}'='{}') a BigDecimal. Usando fallback: {}%", CLAVE_PORCENTAJE_COMISION_DEFAULT_CONFIG, porcentajeConfigStr, FALLBACK_PORCENTAJE_COMISION, e);
+            }
+        } else {
+            logger.info("No se encontró configuración para '{}' o está vacía. Usando porcentaje de comisión de fallback: {}%", CLAVE_PORCENTAJE_COMISION_DEFAULT_CONFIG, FALLBACK_PORCENTAJE_COMISION);
+        }
+        // Futuro: reemplazar esto con la lógica real para obtener el porcentaje específico del vendedor, si existe.
+        // Si el vendedor tiene un porcentaje específico, debería sobreescribir este valor por defecto/global.
+
+        if (porcentajeComision.compareTo(BigDecimal.ZERO) <= 0) { // Esta validación ahora cubre tanto el configurado como el fallback
+            logger.warn("No se aplica comisión para el vendedor ID: {} (porcentaje {}% <= 0)", vendedor.getIdVendedor(), porcentajeComision);
             return null;
         }
         // --- Fin Lógica de Porcentaje ---
 
-
-        BigDecimal montoVenta = venta.getTotalConImpuestos();
-        if (montoVenta == null || montoVenta.compareTo(BigDecimal.ZERO) <= 0) {
-             System.out.println("No se calcula comisión para venta ID: " + venta.getIdVenta() + " (monto <= 0 o nulo)");
-             return null; // No calcular comisión para ventas sin monto positivo
+        // Calcular la ganancia total de la venta
+        BigDecimal gananciaTotalVenta = BigDecimal.ZERO;
+        for (DetalleVenta detalle : venta.getDetallesVenta()) { // Especificar tipo y usar getDetallesVenta()
+            if (detalle != null && detalle.getGananciaDetalle() != null) {
+                gananciaTotalVenta = gananciaTotalVenta.add(detalle.getGananciaDetalle());
+            }
         }
 
-        BigDecimal montoComision = montoVenta.multiply(porcentajeComision.divide(new BigDecimal("100.00"), 4, RoundingMode.HALF_UP)) // Usar 4 decimales para precisión intermedia
+        if (gananciaTotalVenta.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.info("No se calcula comisión para venta ID: {} (ganancia total <= 0)", venta.getIdVenta());
+            return null; // No calcular comisión si no hay ganancia positiva
+        }
+
+        BigDecimal montoComision = gananciaTotalVenta.multiply(porcentajeComision.divide(new BigDecimal("100.00"), 4, RoundingMode.HALF_UP))
                                         .setScale(2, RoundingMode.HALF_UP); // Redondear al final a 2 decimales
 
         Comision comision = new Comision();
-        comision.setVendedor(vendedor); // Asignar la entidad Vendedor completa
-        comision.setVenta(venta);       // Asignar la entidad Venta completa
-        comision.setMontoVenta(montoVenta);
+        comision.setVendedor(vendedor);
+        comision.setVenta(venta);
+        comision.setBaseComisionable(gananciaTotalVenta); // Usar la ganancia total como base comisionable
         comision.setPorcentajeComision(porcentajeComision); // Guardar el porcentaje usado
         comision.setMontoComision(montoComision);
         comision.setFechaCalculo(Timestamp.from(Instant.now()));

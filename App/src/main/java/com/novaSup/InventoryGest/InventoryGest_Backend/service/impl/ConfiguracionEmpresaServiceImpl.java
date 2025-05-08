@@ -4,7 +4,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DatosFiscalesEmisorDT
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.ConfiguracionEmpresa;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ConfiguracionEmpresaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionEmpresaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,7 +11,6 @@ public class ConfiguracionEmpresaServiceImpl implements ConfiguracionEmpresaServ
 
     private final ConfiguracionEmpresaRepository configuracionEmpresaRepository;
 
-    @Autowired
     public ConfiguracionEmpresaServiceImpl(ConfiguracionEmpresaRepository configuracionEmpresaRepository) {
         this.configuracionEmpresaRepository = configuracionEmpresaRepository;
     }
