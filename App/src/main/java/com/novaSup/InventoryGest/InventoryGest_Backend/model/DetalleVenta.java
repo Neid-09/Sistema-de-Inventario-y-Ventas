@@ -16,7 +16,7 @@ public class DetalleVenta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_detalle")
+    @Column(name = "id_detalle_venta")
     private Integer idDetalle;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,20 +28,33 @@ public class DetalleVenta {
     private Producto producto;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_lote") // Puede ser nulo si no se maneja inventario por lotes estrictamente en todas las ventas
+    @JoinColumn(name = "id_lote")
     private Lote lote;
 
     @Column(nullable = false)
     private Integer cantidad;
 
-    @Column(name = "precio_unitario", precision = 10, scale = 2, nullable = false)
-    private BigDecimal precioUnitario;
+    @Column(name = "precio_unitario_original", precision = 10, scale = 2, nullable = true)
+    private BigDecimal precioUnitarioOriginal;
 
-    @Column(precision = 10, scale = 2, nullable = false)
+    @Column(name = "id_promocion_aplicada", nullable = true)
+    private Integer idPromocionAplicada;
+
+    @Column(name = "precio_unitario_final", precision = 10, scale = 2, nullable = false)
+    private BigDecimal precioUnitarioFinal;
+
+    @Column(precision = 12, scale = 2, nullable = false)
     private BigDecimal subtotal;
 
-    @Column(precision = 10, scale = 2) // La ganancia podría calcularse o ser nula
-    private BigDecimal ganancia;
+    @Column(name = "costo_unitario_producto", precision = 10, scale = 2, nullable = true)
+    private BigDecimal costoUnitarioProducto;
+
+    @Column(name = "ganancia_detalle", precision = 12, scale = 2)
+    private BigDecimal gananciaDetalle;
+
+    @Column(name = "fecha_creacion", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.sql.Timestamp fechaCreacion;
 
     // Lombok genera getters, setters, etc.
 }

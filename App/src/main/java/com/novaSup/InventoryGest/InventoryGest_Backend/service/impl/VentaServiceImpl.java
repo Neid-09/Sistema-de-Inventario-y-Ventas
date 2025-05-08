@@ -42,8 +42,9 @@ public class VentaServiceImpl implements VentaService {
 
     // <--- Inyectar InventarioService
     private final InventarioService inventarioService;
+    private final PromocionService promocionService; // Inyectar PromocionService
 
-    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService) {
+    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService, PromocionService promocionService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaService = detalleVentaService;
         this.productoService = productoService;
@@ -52,6 +53,7 @@ public class VentaServiceImpl implements VentaService {
         this.vendedorService = vendedorService;
         this.loteService = loteService;
         this.inventarioService = inventarioService;
+        this.promocionService = promocionService; // Añadir al constructor
     }
 
     @Override
@@ -83,16 +85,29 @@ public class VentaServiceImpl implements VentaService {
                  throw new IllegalStateException("El producto '" + producto.getNombre() + "' está inactivo y no se puede vender.");
             }
 
-            BigDecimal precioVentaProducto = producto.getPrecioVenta();
-            if (precioVentaProducto == null || precioVentaProducto.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalStateException("El producto '" + producto.getNombre() + "' no tiene un precio de venta válido configurado.");
+            BigDecimal precioVentaOriginal = producto.getPrecioVenta();
+            BigDecimal precioFinalUnitario = precioVentaOriginal;
+            Integer idPromocionAplicada = null;
+
+            Integer idCategoria = (producto.getCategoria() != null) ? producto.getCategoria().getIdCategoria() : null;
+
+            Optional<Promocion> promocionOpt = promocionService.buscarPromocionAplicable(
+                    producto.getIdProducto(),
+                    idCategoria,
+                    java.time.LocalDate.now()
+            );
+
+            if (promocionOpt.isPresent()) {
+                Promocion promocionEncontrada = promocionOpt.get();
+                precioFinalUnitario = promocionService.aplicarDescuento(precioVentaOriginal, promocionEncontrada);
+                idPromocionAplicada = promocionEncontrada.getIdPromocion();
             }
 
             // --- Inicio: Lógica de Inventario Centralizada ---
             // 1. Registrar la salida de inventario (esto reduce lotes y crea movimiento)
             String motivoVenta = "Venta " + (venta.getNumeroVenta() != null ? venta.getNumeroVenta() : "[Pendiente]");
             // La validación de stock suficiente ahora ocurre dentro de inventarioService.registrarVentaProducto
-            inventarioService.registrarVentaProducto(producto, detalleDTO.getCantidad(), precioVentaProducto, motivoVenta);
+            inventarioService.registrarVentaProducto(producto, detalleDTO.getCantidad(), precioFinalUnitario, motivoVenta);
 
             // 2. Obtener el lote específico para asociar al detalle (después de la reducción)
             // Buscamos el lote más próximo a vencer que aún podría tener stock o del que se acaba de descontar.
@@ -111,14 +126,18 @@ public class VentaServiceImpl implements VentaService {
             detalle.setProducto(producto);
             detalle.setLote(loteParaDetalle); // Asignar el Lote encontrado
             detalle.setCantidad(detalleDTO.getCantidad());
-            detalle.setPrecioUnitario(precioVentaProducto);
-            BigDecimal subtotal = precioVentaProducto.multiply(new BigDecimal(detalleDTO.getCantidad()));
+            detalle.setPrecioUnitarioOriginal(precioVentaOriginal);
+            detalle.setPrecioUnitarioFinal(precioFinalUnitario);
+            detalle.setIdPromocionAplicada(idPromocionAplicada);
+
+            BigDecimal subtotal = precioFinalUnitario.multiply(new BigDecimal(detalleDTO.getCantidad()));
             detalle.setSubtotal(subtotal);
 
             // Calcular ganancia (opcional)
             BigDecimal costoUnitario = producto.getPrecioCosto() != null ? producto.getPrecioCosto() : BigDecimal.ZERO;
-            BigDecimal gananciaDetalle = precioVentaProducto.subtract(costoUnitario).multiply(new BigDecimal(detalleDTO.getCantidad()));
-            detalle.setGanancia(gananciaDetalle);
+            detalle.setCostoUnitarioProducto(costoUnitario);
+            BigDecimal gananciaDetalle = precioFinalUnitario.subtract(costoUnitario).multiply(new BigDecimal(detalleDTO.getCantidad()));
+            detalle.setGananciaDetalle(gananciaDetalle);
 
             detallesParaGuardar.add(detalle);
             totalVenta = totalVenta.add(subtotal);
