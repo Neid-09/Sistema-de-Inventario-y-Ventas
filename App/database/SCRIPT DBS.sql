@@ -7,6 +7,8 @@ select * from vendedores;
 select * from productos;
 select * from clientes;
 select * from ventas;
+select * from detalle_venta_lote_uso;
+select * from detalle_venta;
 select * from entradas_productos;
 
 select * from facturas;
