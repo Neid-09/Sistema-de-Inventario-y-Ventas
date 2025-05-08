@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Auditoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.AuditoriaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.novaSup.InventoryGest.InventoryGest_Backend.security.service.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -16,13 +16,10 @@ public class AuditoriaServiceImpl implements AuditoriaService {
 
     private final AuditoriaRepository auditoriaRepository;
 
-    private final HttpServletRequest request;
-
     private final ObjectMapper objectMapper;
 
-    public AuditoriaServiceImpl(AuditoriaRepository auditoriaRepository, HttpServletRequest request, ObjectMapper objectMapper) {
+    public AuditoriaServiceImpl(AuditoriaRepository auditoriaRepository, ObjectMapper objectMapper) {
         this.auditoriaRepository = auditoriaRepository;
-        this.request = request;
         this.objectMapper = objectMapper;
     }
 
@@ -40,10 +37,15 @@ public class AuditoriaServiceImpl implements AuditoriaService {
             if (idUsuario == null) {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 if (auth != null && auth.isAuthenticated()) {
-                    // Aquí deberías extraer el ID del usuario según tu implementación
-                    // Este es un ejemplo genérico
                     Object principal = auth.getPrincipal();
-                    // Lógica para extraer el ID del usuario desde el principal
+                    if (principal instanceof CustomUserDetails) {
+                        CustomUserDetails userDetails = (CustomUserDetails) principal;
+                        auditoria.setIdUsuario(userDetails.getIdUsuario());
+                    } else {
+                        // Opcional: Loggear una advertencia si el principal no es del tipo esperado
+                        // logger.warn("El principal autenticado no es una instancia de CustomUserDetails: {}", principal.getClass().getName());
+                        // Podrías decidir no setear el idUsuario o setearlo a un valor por defecto si esto ocurre.
+                    }
                 }
             } else {
                 auditoria.setIdUsuario(idUsuario);

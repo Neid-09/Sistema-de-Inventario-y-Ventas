@@ -6,6 +6,9 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.VentaRepositor
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoCalculoImpuestosDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.LoteReducidoInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVentaLoteUso;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +41,6 @@ public class VentaServiceImpl implements VentaService {
 
     private final VendedorService vendedorService;
 
-    private final LoteService loteService; // Necesario para obtener el lote para el detalle
-
     // Eliminar si no se usa en otro lugar
     // @Autowired
     // private RegistMovimientService registMovimientService;
@@ -50,14 +51,13 @@ public class VentaServiceImpl implements VentaService {
     private final CalculoImpuestoService calculoImpuestoService;
     private final FacturaService facturaService;
 
-    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService, FacturaService facturaService) {
+    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService, FacturaService facturaService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaService = detalleVentaService;
         this.productoService = productoService;
         this.clienteService = clienteService;
         this.comisionService = comisionService;
         this.vendedorService = vendedorService;
-        this.loteService = loteService;
         this.inventarioService = inventarioService;
         this.promocionService = promocionService;
         this.calculoImpuestoService = calculoImpuestoService;
@@ -124,24 +124,28 @@ public class VentaServiceImpl implements VentaService {
             // 1. Registrar la salida de inventario (esto reduce lotes y crea movimiento)
             String motivoVenta = "Venta " + (venta.getNumeroVenta() != null ? venta.getNumeroVenta() : "[Pendiente]");
             // La validación de stock suficiente ahora ocurre dentro de inventarioService.registrarVentaProducto
-            inventarioService.registrarVentaProducto(producto, detalleDTO.getCantidad(), precioFinalUnitario, motivoVenta);
+            ResultadoRegistroVentaProductoDTO resultadoInventario = inventarioService.registrarVentaProducto(
+                producto, 
+                detalleDTO.getCantidad(), 
+                precioFinalUnitario, 
+                motivoVenta
+            );
 
             // 2. Obtener el lote específico para asociar al detalle (después de la reducción)
             // Buscamos el lote más próximo a vencer que aún podría tener stock o del que se acaba de descontar.
             // Esta lógica podría necesitar refinamiento dependiendo de si necesitas el lote *antes* o *después* de descontar.
             // Asumimos que queremos el lote más próximo a vencer que fue afectado o aún tiene stock.
-            List<Lote> lotesActivosProducto = loteService.obtenerPorProducto(producto.getIdProducto()); // Ordenados por fecha_vencimiento ASC
-            Lote loteParaDetalle = lotesActivosProducto.stream()
-                                      // .filter(l -> l.getCantidad() >= 0) // Podríamos necesitar ajustar este filtro
-                                      .findFirst()
-                                      .orElse(null); // Considerar qué hacer si no se encuentra un lote (aunque no debería pasar si registrarVentaProducto tuvo éxito)
+            // List<Lote> lotesActivosProducto = loteService.obtenerPorProducto(producto.getIdProducto()); 
+            // Lote loteParaDetalle = lotesActivosProducto.stream()
+            //                           .findFirst()
+            //                           .orElse(null); 
             // --- Fin: Lógica de Inventario Centralizada ---
 
             // Crear DetalleVenta
             DetalleVenta detalle = new DetalleVenta();
             detalle.setVenta(venta);
             detalle.setProducto(producto);
-            detalle.setLote(loteParaDetalle); // Asignar el Lote encontrado
+            // detalle.setLote(loteParaDetalle); // LÍNEA A ELIMINAR
             detalle.setCantidad(detalleDTO.getCantidad());
             detalle.setPrecioUnitarioOriginal(precioVentaOriginal);
             detalle.setPrecioUnitarioFinal(precioFinalUnitario);
@@ -158,6 +162,17 @@ public class VentaServiceImpl implements VentaService {
             detalle.setCostoUnitarioProducto(costoUnitario);
             BigDecimal gananciaDetalle = precioFinalUnitario.subtract(costoUnitario).multiply(new BigDecimal(detalleDTO.getCantidad()));
             detalle.setGananciaDetalle(gananciaDetalle);
+
+            // NUEVA LÓGICA: Asociar los lotes usados al detalleVenta
+            if (resultadoInventario != null && resultadoInventario.getLotesAfectados() != null) {
+                for (LoteReducidoInfoDTO loteInfo : resultadoInventario.getLotesAfectados()) {
+                    DetalleVentaLoteUso dvu = new DetalleVentaLoteUso();
+                    dvu.setDetalleVenta(detalle); // Se asocia aquí, antes de guardar el detalle
+                    dvu.setLote(loteInfo.getLote());
+                    dvu.setCantidadTomada(loteInfo.getCantidadTomada());
+                    detalle.getDetalleLotesUsados().add(dvu);
+                }
+            }
 
             detallesParaGuardar.add(detalle);
             subtotalGeneralVenta = subtotalGeneralVenta.add(subtotal);

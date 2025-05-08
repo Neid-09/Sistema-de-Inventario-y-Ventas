@@ -4,6 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.AuditoriaStock;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.InventarioService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
@@ -84,12 +85,13 @@ public class InventarioController {
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
 
             // Registrar la venta
-            RegistMovimient movimiento = inventarioService.registrarVentaProducto(
+            ResultadoRegistroVentaProductoDTO resultadoVentaProducto = inventarioService.registrarVentaProducto(
                     producto,
                     ventaDTO.cantidad,
                     ventaDTO.precioUnitario != null ? ventaDTO.precioUnitario : producto.getPrecioVenta(),
                     ventaDTO.motivo
             );
+            RegistMovimient movimiento = resultadoVentaProducto.getMovimiento();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(movimiento);
         } catch (IllegalArgumentException e) {

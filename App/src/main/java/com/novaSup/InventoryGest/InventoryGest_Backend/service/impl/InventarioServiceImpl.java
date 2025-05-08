@@ -9,6 +9,8 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaStockSer
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.InventarioService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.LoteReducidoInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,7 +89,7 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     @Transactional
-    public RegistMovimient registrarVentaProducto(
+    public ResultadoRegistroVentaProductoDTO registrarVentaProducto(
             Producto producto,
             Integer cantidad,
             BigDecimal precioUnitario,
@@ -119,10 +121,10 @@ public class InventarioServiceImpl implements InventarioService {
                 idProveedor // <--- Pasar el idProveedor obtenido
         );
 
-        // 2. Reducir la cantidad en los lotes (FIFO/FEFO)
-        loteService.reducirCantidadDeLotes(producto.getIdProducto(), cantidad);
+        // 2. Reducir la cantidad en los lotes (FIFO/FEFO) y obtener información de lotes afectados
+        List<LoteReducidoInfoDTO> lotesAfectados = loteService.reducirCantidadDeLotes(producto.getIdProducto(), cantidad);
 
-        return movimiento;
+        return new ResultadoRegistroVentaProductoDTO(movimiento, lotesAfectados); // Devolver DTO con movimiento y lotes
     }
 
     @Override

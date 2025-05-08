@@ -8,6 +8,8 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService; // Import ProductoService
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.LoteReducidoInfoDTO; // Importar DTO
+import java.util.ArrayList; // Importar ArrayList
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -263,54 +265,64 @@ public class LoteServiceImpl implements LoteService {
 
     @Override
     @Transactional
-    public void reducirCantidadDeLotes(Integer idProducto, Integer cantidadTotal) throws Exception {
-        if (cantidadTotal <= 0) {
-            throw new IllegalArgumentException("La cantidad total a reducir debe ser mayor que cero");
+    public List<LoteReducidoInfoDTO> reducirCantidadDeLotes(Integer idProducto, Integer cantidadTotalAReducir) throws Exception { // Firma modificada
+        if (cantidadTotalAReducir <= 0) {
+            throw new IllegalArgumentException("La cantidad a reducir debe ser mayor que cero.");
         }
 
-        // Verificar si el producto está activo antes de buscar lotes
-        Producto producto = productoService.obtenerPorId(idProducto) // Use productoService
+        Producto producto = productoService.obtenerPorId(idProducto)
                 .orElseThrow(() -> new Exception("Producto no encontrado con ID: " + idProducto));
-        if (!producto.getEstado()) { // Use getEstado()
-            throw new Exception("No se puede reducir cantidad de lotes para un producto inactivo");
-        }
 
-        // Obtener lotes activos ordenados por fecha de vencimiento (FEFO)
-        List<Lote> lotes = loteRepository.findByProductoIdProductoAndActivoTrueOrderByFechaVencimientoAsc(idProducto);
+        // Validar stock general primero (opcional, pero buena práctica)
+        // Esta validación ya existe en InventarioServiceImpl -> validarStockSuficiente
+        // if (producto.getStock() < cantidadTotalAReducir) {
+        //     throw new Exception("Stock insuficiente para el producto " + producto.getNombre() +
+        //                       ". Stock actual: " + producto.getStock() + ", Solicitado: " + cantidadTotalAReducir);
+        // }
 
-        if (lotes.isEmpty()) {
-            throw new Exception("No hay lotes activos para el producto");
-        }
+        // Obtener lotes activos, ordenados por fecha de vencimiento y luego por fecha de entrada (FIFO/FEFO)
+        List<Lote> lotesDisponibles = loteRepository.findByProductoIdProductoAndActivoTrueOrderByFechaVencimientoAscFechaEntradaAsc(idProducto);
 
-        // Calcular stock total disponible
-        int stockDisponible = lotes.stream().mapToInt(Lote::getCantidad).sum();
+        List<LoteReducidoInfoDTO> lotesAfectados = new ArrayList<>();
+        int cantidadRestanteAReducir = cantidadTotalAReducir;
 
-        if (stockDisponible < cantidadTotal) {
-            throw new Exception("No hay suficiente stock disponible en los lotes");
-        }
-
-        int cantidadPendiente = cantidadTotal;
-
-        // Reducir de cada lote siguiendo FEFO
-        for (Lote lote : lotes) {
-            if (cantidadPendiente <= 0) break;
-
-            if (lote.getCantidad() <= cantidadPendiente) {
-                // Consumir todo el lote
-                cantidadPendiente -= lote.getCantidad();
-                lote.setCantidad(0);
-                lote.setActivo(false);
-            } else {
-                // Consumir parte del lote
-                lote.setCantidad(lote.getCantidad() - cantidadPendiente);
-                cantidadPendiente = 0;
+        for (Lote lote : lotesDisponibles) {
+            if (cantidadRestanteAReducir == 0) {
+                break; // Ya se cubrió la cantidad necesaria
             }
 
-            loteRepository.save(lote);
+            if (lote.getCantidad() == null || lote.getCantidad() <= 0) {
+                continue; // Lote sin stock, pasar al siguiente
+            }
+
+            int cantidadTomadaDeEsteLote = Math.min(lote.getCantidad(), cantidadRestanteAReducir);
+
+            lote.setCantidad(lote.getCantidad() - cantidadTomadaDeEsteLote);
+            cantidadRestanteAReducir -= cantidadTomadaDeEsteLote;
+
+            lotesAfectados.add(new LoteReducidoInfoDTO(lote, cantidadTomadaDeEsteLote));
+
+            if (lote.getCantidad() == 0) {
+                lote.setActivo(false); // Desactivar lote si se agota
+            }
+            loteRepository.save(lote); // Guardar cambios en el lote
         }
 
-        // Actualizar stock del producto
-        stockService.actualizarStockProducto(idProducto);
+        if (cantidadRestanteAReducir > 0) {
+            // Esto no debería ocurrir si la validación de stock general en InventarioService es correcta
+            // y la suma de cantidades en lotes es consistente con el stock del producto.
+            throw new Exception("Stock insuficiente en los lotes para el producto " + producto.getNombre() +
+                              ". Faltaron: " + cantidadRestanteAReducir + " unidades por asignar desde lotes.");
+        }
+
+        // La actualización del stock general del producto se maneja en StockServiceImpl,
+        // que debería ser llamado después de esta operación (por ejemplo, desde InventarioServiceImpl o VentaServiceImpl)
+        // o mediante triggers/eventos si el diseño lo permite.
+        // Por ahora, asumimos que stockService.actualizarStockProducto(idProducto) será llamado.
+        // Es importante asegurar que se llame para mantener la consistencia del campo 'stock' en Producto.
+        stockService.actualizarStockProducto(idProducto); // Asegurar que el stock total del producto se actualice
+
+        return lotesAfectados;
     }
 
     @Override

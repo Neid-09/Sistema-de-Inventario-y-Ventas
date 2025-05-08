@@ -4,6 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.AuditoriaStock;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -47,7 +48,7 @@ public interface InventarioService {
      * @return El registro de movimiento creado
      * @throws Exception Si no hay suficiente stock disponible
      */
-    RegistMovimient registrarVentaProducto(
+    ResultadoRegistroVentaProductoDTO registrarVentaProducto(
         Producto producto,
         Integer cantidad,
         BigDecimal precioUnitario,

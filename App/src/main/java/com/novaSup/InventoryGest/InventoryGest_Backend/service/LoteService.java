@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.LoteReducidoInfoDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +20,7 @@ public interface LoteService {
     Optional<Lote> desactivarLote(Integer id);
     List<Lote> obtenerLotesInactivos();
     Lote reducirCantidadLote(Integer idLote, Integer cantidad) throws Exception;
-    void reducirCantidadDeLotes(Integer idProducto, Integer cantidadTotal) throws Exception;
+    List<LoteReducidoInfoDTO> reducirCantidadDeLotes(Integer idProducto, Integer cantidadTotal) throws Exception;
     Lote procesarDevolucion(Integer idLote, Integer cantidad) throws Exception;
     List<Lote> obtenerLotesActivos();
 

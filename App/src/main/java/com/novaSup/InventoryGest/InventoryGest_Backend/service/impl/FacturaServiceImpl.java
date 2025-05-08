@@ -10,7 +10,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.DetalleImpuestoFacturaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.FacturaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.TipoImpuestoRepository; // Asumiendo que existe este repositorio
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService; // Inyectado según especificación
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionEmpresaService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaService;
 import org.springframework.stereotype.Service;
@@ -27,20 +26,17 @@ public class FacturaServiceImpl implements FacturaService {
     private final FacturaRepository facturaRepository;
     private final DetalleImpuestoFacturaRepository detalleImpuestoFacturaRepository;
     private final ConfiguracionEmpresaService configuracionEmpresaService;
-    private final ClienteService clienteService; // Aunque no se use directamente, se inyecta según lo pedido
     private final TipoImpuestoRepository tipoImpuestoRepository; // Necesario para obtener TipoImpuesto
     private final ObjectMapper objectMapper;
 
     public FacturaServiceImpl(FacturaRepository facturaRepository,
                               DetalleImpuestoFacturaRepository detalleImpuestoFacturaRepository,
                               ConfiguracionEmpresaService configuracionEmpresaService,
-                              ClienteService clienteService,
                               TipoImpuestoRepository tipoImpuestoRepository,
                               ObjectMapper objectMapper) {
         this.facturaRepository = facturaRepository;
         this.detalleImpuestoFacturaRepository = detalleImpuestoFacturaRepository;
         this.configuracionEmpresaService = configuracionEmpresaService;
-        this.clienteService = clienteService;
         this.tipoImpuestoRepository = tipoImpuestoRepository;
         this.objectMapper = objectMapper;
     }
@@ -69,21 +65,13 @@ public class FacturaServiceImpl implements FacturaService {
 
         String rfcPublicoGeneral = configuracionEmpresaService.obtenerRfcPublicoGeneral();
 
-        // Determinar si es público en general o un cliente específico con datos fiscales
-        boolean usarDatosPublicoGeneral = cliente == null || 
-                                          cliente.getRfcFiscal() == null || 
-                                          cliente.getRfcFiscal().trim().isEmpty() || 
-                                          cliente.getRfcFiscal().trim().equalsIgnoreCase(rfcPublicoGeneral);
-
-        if (usarDatosPublicoGeneral) {
-            receptorDTO = new DatosFiscalesReceptorDTO(
-                    "PÚBLICO EN GENERAL",
-                    rfcPublicoGeneral,
-                    emisorDTO.getDomicilio(), // Considerar un domicilio genérico para público en general si es diferente al del emisor
-                    "S01" // Uso CFDI: Sin efectos fiscales (común para público en general)
-            );
-        } else {
-            // Usar los datos fiscales específicos del cliente
+        // Determinar si se usan datos específicos del cliente o público en general
+        if (cliente != null && 
+            cliente.getRfcFiscal() != null && 
+            !cliente.getRfcFiscal().trim().isEmpty() && 
+            !cliente.getRfcFiscal().trim().equalsIgnoreCase(rfcPublicoGeneral)) {
+            
+            // Usar los datos fiscales específicos del cliente (cliente y rfcFiscal son válidos)
             String razonSocialReceptor = (cliente.getRazonSocialFiscal() != null && !cliente.getRazonSocialFiscal().trim().isEmpty()) 
                                          ? cliente.getRazonSocialFiscal() 
                                          : cliente.getNombre(); // Fallback al nombre general si no hay razón social fiscal
@@ -101,6 +89,14 @@ public class FacturaServiceImpl implements FacturaService {
                     cliente.getRfcFiscal(),
                     direccionReceptor,
                     usoCfdiCliente
+            );
+        } else {
+            // Usar datos de PÚBLICO EN GENERAL (si cliente es null, o rfcFiscal es null/vacío/público general)
+            receptorDTO = new DatosFiscalesReceptorDTO(
+                    "PÚBLICO EN GENERAL",
+                    rfcPublicoGeneral,
+                    emisorDTO.getDomicilio(), // Considerar un domicilio genérico para público en general si es diferente al del emisor
+                    "S01" // Uso CFDI: Sin efectos fiscales (común para público en general)
             );
         }
 
