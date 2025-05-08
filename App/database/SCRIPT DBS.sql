@@ -1,4 +1,5 @@
 -- Ya integrado 
+select * from clientes;
 select * from comisiones;
 
 select * from facturas;
@@ -14,3 +15,4 @@ SELECT * FROM venta;
 -- SET FOREIGN_KEY_CHECKS = 1;
 -- DROP TABLE IF EXISTS clientes;
 
+        SELECT VERSION();

@@ -20,11 +20,11 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
     List<Venta> findAllWithDetails();
 
     // Método para buscar ventas por cliente cargando Vendedor y Usuario asociado
-    @Query("SELECT v FROM Venta v LEFT JOIN FETCH v.vendedor ven LEFT JOIN FETCH ven.usuario WHERE v.idCliente = :idCliente")
+    @Query("SELECT v FROM Venta v LEFT JOIN FETCH v.vendedor ven LEFT JOIN FETCH ven.usuario WHERE v.cliente.idCliente = :idCliente")
     List<Venta> findByIdClienteWithDetails(@Param("idCliente") Integer idCliente);
 
     // Método para buscar ventas por vendedor cargando Vendedor y Usuario asociado
-    @Query("SELECT v FROM Venta v LEFT JOIN FETCH v.vendedor ven LEFT JOIN FETCH ven.usuario WHERE v.idVendedor = :idVendedor")
+    @Query("SELECT v FROM Venta v LEFT JOIN FETCH v.vendedor ven LEFT JOIN FETCH ven.usuario WHERE ven.idVendedor = :idVendedor")
     List<Venta> findByIdVendedorWithDetails(@Param("idVendedor") Integer idVendedor);
 
     // Métodos originales de JpaRepository (findById, findAll, save, etc.) siguen disponibles
