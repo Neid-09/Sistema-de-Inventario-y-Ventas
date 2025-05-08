@@ -60,6 +60,10 @@ public class ClienteServiceImpl implements ClienteService {
         if (cliente.getPuntosFidelidad() == null) {
             cliente.setPuntosFidelidad(0);
         }
+        // Establecer valor por defecto para limiteCredito si es nulo al crear
+        if (cliente.getLimiteCredito() == null) {
+            cliente.setLimiteCredito(new BigDecimal("1000.00")); // Asumiendo 1000.00 como default
+        }
         return clienteRepository.save(cliente);
     }
 
@@ -69,24 +73,58 @@ public class ClienteServiceImpl implements ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado con id: " + id));
 
-        // Validar unicidad de cédula y correo si cambian
-        if (!cliente.getCedula().equals(clienteDetalles.getCedula()) &&
-            clienteRepository.findByCedula(clienteDetalles.getCedula()).filter(c -> !c.getIdCliente().equals(id)).isPresent()) {
-             throw new IllegalArgumentException("La nueva cédula ya está registrada por otro cliente.");
+        // Actualizar y validar cédula si es necesario
+        String nuevaCedula = clienteDetalles.getCedula();
+        // Solo validar si la cédula se proporciona y es diferente a la actual (o la actual es null)
+        if (nuevaCedula != null && (cliente.getCedula() == null || !cliente.getCedula().equals(nuevaCedula))) {
+            Optional<Cliente> cedulaExistente = clienteRepository.findByCedula(nuevaCedula)
+                    .filter(c -> !c.getIdCliente().equals(id));
+            if (cedulaExistente.isPresent()) {
+                throw new IllegalArgumentException("La nueva cédula ya está registrada por otro cliente.");
+            }
         }
-         if (clienteDetalles.getCorreo() != null && !clienteDetalles.getCorreo().equals(cliente.getCorreo()) &&
-            clienteRepository.findByCorreo(clienteDetalles.getCorreo()).filter(c -> !c.getIdCliente().equals(id)).isPresent()) {
-             throw new IllegalArgumentException("El nuevo correo electrónico ya está registrado por otro cliente.");
+        // Asignar la cédula proporcionada (puede ser null si se envió así explícitamente o si no se envió y el DTO la tiene null)
+        cliente.setCedula(nuevaCedula);
+
+        // Actualizar y validar correo si es necesario
+        String nuevoCorreo = clienteDetalles.getCorreo();
+        // Solo validar si el correo se proporciona y es diferente al actual (o el actual es null)
+        if (nuevoCorreo != null && (cliente.getCorreo() == null || !cliente.getCorreo().equals(nuevoCorreo))) {
+            Optional<Cliente> correoExistente = clienteRepository.findByCorreo(nuevoCorreo)
+                    .filter(c -> !c.getIdCliente().equals(id));
+            if (correoExistente.isPresent()) {
+                throw new IllegalArgumentException("El nuevo correo electrónico ya está registrado por otro cliente.");
+            }
         }
+        // Asignar el correo proporcionado
+        cliente.setCorreo(nuevoCorreo);
 
-
+        // Campos de asignación directa (si se envían nulos y el campo no es nullable=false en BD, se harán null)
         cliente.setNombre(clienteDetalles.getNombre());
-        cliente.setCedula(clienteDetalles.getCedula());
         cliente.setCelular(clienteDetalles.getCelular());
-        cliente.setCorreo(clienteDetalles.getCorreo());
         cliente.setDireccion(clienteDetalles.getDireccion());
-        // Actualizar el nuevo campo
-        if (clienteDetalles.getLimiteCredito() != null) { // Solo actualizar si se proporciona un valor
+
+        // Actualizar otros campos solo si se proporcionan explícitamente (no nulos en la solicitud)
+        if (clienteDetalles.getRequiereFacturaDefault() != null) {
+            cliente.setRequiereFacturaDefault(clienteDetalles.getRequiereFacturaDefault());
+        }
+        if (clienteDetalles.getRazonSocialFiscal() != null) {
+            cliente.setRazonSocialFiscal(clienteDetalles.getRazonSocialFiscal());
+        }
+        if (clienteDetalles.getRfcFiscal() != null) {
+            cliente.setRfcFiscal(clienteDetalles.getRfcFiscal());
+        }
+        if (clienteDetalles.getDireccionFiscal() != null) {
+            cliente.setDireccionFiscal(clienteDetalles.getDireccionFiscal());
+        }
+        if (clienteDetalles.getCorreoFiscal() != null) {
+            cliente.setCorreoFiscal(clienteDetalles.getCorreoFiscal());
+        }
+        if (clienteDetalles.getUsoCfdiDefault() != null) {
+            cliente.setUsoCfdiDefault(clienteDetalles.getUsoCfdiDefault());
+        }
+        
+        if (clienteDetalles.getLimiteCredito() != null) {
              cliente.setLimiteCredito(clienteDetalles.getLimiteCredito());
         }
         // No actualizamos total_comprado, puntos_fidelidad ni ultima_compra directamente aquí
