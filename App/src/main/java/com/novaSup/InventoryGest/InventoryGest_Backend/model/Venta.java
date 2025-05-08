@@ -7,53 +7,81 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+// import java.util.List; // Para la relación con DetalleVenta si se activa
 
 @Entity
-@Table(name = "venta") // Especifica el nombre de la tabla
-@Data // Lombok: Genera getters, setters, toString, equals, hashCode
-@NoArgsConstructor // Lombok: Genera constructor sin argumentos
-@AllArgsConstructor // Lombok: Genera constructor con todos los argumentos
+@Table(name = "ventas")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Venta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_venta") // Mapea al nombre de columna correcto
-    private Integer idVenta; // Cambiado a Integer para coincidir con int(11)
+    @Column(name = "id_venta")
+    private Integer idVenta;
 
-    @Column(name = "fecha") // Mapea al nombre de columna correcto
-    private Timestamp fecha;
+    // Relación con Cliente
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente", referencedColumnName = "id_cliente") // FK en 'ventas' que referencia PK 'id_cliente' en 'clientes'
+    private Cliente cliente; 
 
-    @Column(name = "id_cliente") // Mapea al nombre de columna correcto
-    private Integer idCliente; // Asumiendo que existe una entidad Cliente o se maneja solo el ID
-
-    // @ManyToOne // Descomentar si existe entidad Cliente y se quiere mapear la relación
-    // @JoinColumn(name = "id_cliente", insertable = false, updatable = false)
-    // private Cliente cliente;
-
-    @Column(name = "id_vendedor") // Mapea al nombre de columna correcto
-    private Integer idVendedor;
-
-    @ManyToOne(fetch = FetchType.LAZY) // Relación con Vendedor
-    @JoinColumn(name = "id_vendedor", referencedColumnName = "id_vendedor", insertable = false, updatable = false) // Mapea la FK
+    // Relación con Vendedor
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vendedor", referencedColumnName = "id_vendedor") // FK en 'ventas' que referencia PK 'id_vendedor' en 'vendedores' (asumiendo nombre de tabla y PK)
     private Vendedor vendedor;
 
-    @Column(name = "total", precision = 10, scale = 2) // Mapea al nombre y tipo de columna correcto
-    private BigDecimal total;
-
-    @Column(name = "tipo_pago", length = 50, nullable = false)
-    private String tipoPago;
-
-    @Column(name = "requiere_factura") // Mapea al nombre de columna correcto
-    private Boolean requiereFactura; // tinyint(1) mapea a Boolean
-
-    @Column(name = "numero_venta", length = 50) // Mapea al nombre y tipo de columna correcto
+    @Column(name = "numero_venta", length = 50)
     private String numeroVenta;
 
-    @Column(name = "aplicar_impuestos") // Mapea al nombre de columna correcto
-    private Boolean aplicarImpuestos; // tinyint(1) mapea a Boolean
+    @Column(name = "fecha")
+    private Timestamp fecha;
 
-    // Comentado o eliminado si no se usa DetallesVenta por ahora
-    // @OneToMany(cascade = CascadeType.ALL, mappedBy = "venta")
-    // private List<DetalleVenta> detalles;
+    @Column(name = "requiere_factura")
+    private Boolean requiereFactura;
 
-    // Los Getters y Setters son generados por Lombok (@Data)
+    @Column(name = "aplicar_impuestos")
+    private Boolean aplicarImpuestos;
+
+    @Column(name = "tipo_pago", length = 50)
+    private String tipoPago;
+
+    @Column(name = "subtotal", precision = 12, scale = 2)
+    private BigDecimal subtotal;
+
+    @Column(name = "total_impuestos", precision = 12, scale = 2)
+    private BigDecimal totalImpuestos;
+
+    @Column(name = "total_con_impuestos", precision = 12, scale = 2)
+    private BigDecimal totalConImpuestos;
+
+    @Column(name = "estado_venta", length = 50)
+    private String estadoVenta;
+
+    @Lob
+    @Column(name = "observaciones")
+    private String observaciones;
+
+    @Column(name = "fecha_creacion", updatable = false)
+    private Timestamp fechaCreacion;
+
+    @Column(name = "fecha_actualizacion")
+    private Timestamp fechaActualizacion;
+
+    // @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // private List<DetalleVenta> detallesVenta;
+
+    @PrePersist
+    protected void onCreate() {
+        fechaCreacion = new Timestamp(System.currentTimeMillis());
+        fechaActualizacion = new Timestamp(System.currentTimeMillis());
+        if (this.subtotal == null) this.subtotal = BigDecimal.ZERO;
+        if (this.totalImpuestos == null) this.totalImpuestos = BigDecimal.ZERO;
+        if (this.totalConImpuestos == null) this.totalConImpuestos = BigDecimal.ZERO;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        fechaActualizacion = new Timestamp(System.currentTimeMillis());
+    }
 }

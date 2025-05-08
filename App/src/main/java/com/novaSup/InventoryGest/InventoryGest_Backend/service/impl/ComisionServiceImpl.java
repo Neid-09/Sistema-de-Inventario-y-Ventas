@@ -46,14 +46,14 @@ public class ComisionServiceImpl implements ComisionService {
     @Override
     @Transactional
     public Comision calcularYGuardarComision(Venta venta) {
-        if (venta == null || venta.getIdVendedor() == null) {
+        if (venta == null || venta.getVendedor() == null) {
             // Loggear advertencia o lanzar excepción si es un error crítico
             System.err.println("Intento de calcular comisión para una venta nula o sin vendedor.");
             return null;
         }
 
-        Vendedor vendedor = vendedorService.obtenerPorId(venta.getIdVendedor())
-                .orElseThrow(() -> new EntityNotFoundException("Vendedor no encontrado para calcular comisión: " + venta.getIdVendedor()));
+        Vendedor vendedor = vendedorService.obtenerPorId(venta.getVendedor().getIdVendedor())
+                .orElseThrow(() -> new EntityNotFoundException("Vendedor no encontrado para calcular comisión: " + venta.getVendedor().getIdVendedor()));
 
         // --- Lógica de Porcentaje de Comisión ---
         // Reemplazar esto con la lógica real cuando se defina cómo obtener el porcentaje.
@@ -69,7 +69,7 @@ public class ComisionServiceImpl implements ComisionService {
         // --- Fin Lógica de Porcentaje ---
 
 
-        BigDecimal montoVenta = venta.getTotal();
+        BigDecimal montoVenta = venta.getTotalConImpuestos();
         if (montoVenta == null || montoVenta.compareTo(BigDecimal.ZERO) <= 0) {
              System.out.println("No se calcula comisión para venta ID: " + venta.getIdVenta() + " (monto <= 0 o nulo)");
              return null; // No calcular comisión para ventas sin monto positivo

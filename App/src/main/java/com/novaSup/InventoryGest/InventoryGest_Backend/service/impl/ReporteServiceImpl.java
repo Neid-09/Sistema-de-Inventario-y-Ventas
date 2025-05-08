@@ -52,13 +52,13 @@ public class ReporteServiceImpl implements ReporteService {
         dto.setFormaDePago(venta.getTipoPago()); 
 
         if (Boolean.TRUE.equals(venta.getRequiereFactura())) {
-            if (venta.getIdCliente() != null) {
-                Optional<Cliente> clienteOpt = clienteService.obtenerClientePorId(venta.getIdCliente());
+            if (venta.getCliente() != null) {
+                Optional<Cliente> clienteOpt = clienteService.obtenerClientePorId(venta.getCliente().getIdCliente());
                 if (clienteOpt.isPresent()) {
                     Cliente cliente = clienteOpt.get();
                     dto.setNombreCliente(cliente.getNombre());
                 } else {
-                    dto.setNombreCliente("Cliente Factura ID: " + venta.getIdCliente() + " (No encontrado)");
+                    dto.setNombreCliente("Cliente Factura ID: " + venta.getCliente().getIdCliente() + " (No encontrado)");
                 }
             } else {
                 dto.setNombreCliente("Factura Solicitada (Cliente no especificado)");
@@ -67,7 +67,7 @@ public class ReporteServiceImpl implements ReporteService {
             dto.setNombreCliente("Público General");
         }
 
-        dto.setTotalVenta(venta.getTotal());
+        dto.setTotalVenta(venta.getTotalConImpuestos());
 
         return dto;
     }

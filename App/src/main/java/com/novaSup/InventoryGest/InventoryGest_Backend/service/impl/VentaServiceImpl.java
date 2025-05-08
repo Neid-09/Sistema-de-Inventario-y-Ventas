@@ -4,14 +4,18 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaRequestDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.VentaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoCalculoImpuestosDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoFacturaTemporalDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,8 +47,9 @@ public class VentaServiceImpl implements VentaService {
     // <--- Inyectar InventarioService
     private final InventarioService inventarioService;
     private final PromocionService promocionService; // Inyectar PromocionService
+    private final CalculoImpuestoService calculoImpuestoService;
 
-    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService, PromocionService promocionService) {
+    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, LoteService loteService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaService = detalleVentaService;
         this.productoService = productoService;
@@ -53,7 +58,8 @@ public class VentaServiceImpl implements VentaService {
         this.vendedorService = vendedorService;
         this.loteService = loteService;
         this.inventarioService = inventarioService;
-        this.promocionService = promocionService; // Añadir al constructor
+        this.promocionService = promocionService;
+        this.calculoImpuestoService = calculoImpuestoService;
     }
 
     @Override
@@ -64,17 +70,26 @@ public class VentaServiceImpl implements VentaService {
 
         // 2. Crear la entidad Venta (cabecera)
         Venta venta = new Venta();
-        // ... (asignar datos a la venta)
+        // Asignar cliente y vendedor si los IDs están presentes
+        if (ventaRequest.getIdCliente() != null) {
+            Cliente cliente = clienteService.obtenerClientePorId(ventaRequest.getIdCliente())
+                .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado: " + ventaRequest.getIdCliente()));
+            venta.setCliente(cliente);
+        }
+        if (ventaRequest.getIdVendedor() != null) {
+            Vendedor vendedor = vendedorService.obtenerVendedorConUsuario(ventaRequest.getIdVendedor())
+                .orElseThrow(() -> new EntityNotFoundException("Vendedor no encontrado o sin usuario activo: " + ventaRequest.getIdVendedor()));
+            venta.setVendedor(vendedor);
+        }
+        
         venta.setFecha(Timestamp.from(Instant.now()));
-        venta.setIdCliente(ventaRequest.getIdCliente());
-        venta.setIdVendedor(ventaRequest.getIdVendedor());
         venta.setRequiereFactura(ventaRequest.getRequiereFactura());
         venta.setAplicarImpuestos(ventaRequest.getAplicarImpuestos());
         venta.setNumeroVenta(ventaRequest.getNumeroVenta());
         venta.setTipoPago(ventaRequest.getTipoPago());
 
-        // 3. Procesar detalles y calcular total
-        BigDecimal totalVenta = BigDecimal.ZERO;
+        // 3. Procesar detalles y calcular subtotal general
+        BigDecimal subtotalGeneralVenta = BigDecimal.ZERO;
         List<DetalleVenta> detallesParaGuardar = new ArrayList<>();
 
         for (VentaRequestDTO.DetalleVentaDTO detalleDTO : ventaRequest.getDetalles()) {
@@ -140,15 +155,28 @@ public class VentaServiceImpl implements VentaService {
             detalle.setGananciaDetalle(gananciaDetalle);
 
             detallesParaGuardar.add(detalle);
-            totalVenta = totalVenta.add(subtotal);
-
-            // Ya no se llaman los servicios individuales aquí
-            // loteService.reducirCantidadDeLotes(producto.getIdProducto(), detalleDTO.getCantidad());
-            // registMovimientService.registrarVentaProducto(producto, detalleDTO.getCantidad(), precioVentaProducto, motivoVenta);
+            subtotalGeneralVenta = subtotalGeneralVenta.add(subtotal);
         }
 
-        // 4. Establecer total en la venta y guardar cabecera
-        venta.setTotal(totalVenta);
+        // 4. Calcular impuestos y establecer totales en la venta
+        BigDecimal totalImpuestosCalculado = BigDecimal.ZERO;
+        @SuppressWarnings("unused")
+        List<DetalleImpuestoFacturaTemporalDTO> desgloseImpuestosParaFactura = new ArrayList<>();
+
+        if (Boolean.TRUE.equals(venta.getAplicarImpuestos())) {
+            if (calculoImpuestoService == null) {
+                 throw new IllegalStateException("CalculoImpuestoService no ha sido inyectado correctamente y se requieren impuestos.");
+            }
+            ResultadoCalculoImpuestosDTO resultadoCalculo = calculoImpuestoService.calcularImpuestosParaVenta(detallesParaGuardar, new Date(venta.getFecha().getTime()));
+            totalImpuestosCalculado = resultadoCalculo.getTotalImpuestosVenta();
+            desgloseImpuestosParaFactura = resultadoCalculo.getDesgloseImpuestos();
+        }
+
+        venta.setSubtotal(subtotalGeneralVenta.setScale(2, RoundingMode.HALF_UP));
+        venta.setTotalImpuestos(totalImpuestosCalculado.setScale(2, RoundingMode.HALF_UP));
+        venta.setTotalConImpuestos(subtotalGeneralVenta.add(totalImpuestosCalculado).setScale(2, RoundingMode.HALF_UP));
+
+        // Guardar cabecera de Venta
         Venta ventaGuardada = ventaRepository.save(venta);
 
         // 5. Asociar la venta guardada a los detalles y guardarlos
@@ -158,8 +186,8 @@ public class VentaServiceImpl implements VentaService {
         detalleVentaService.guardarDetalles(detallesParaGuardar);
 
         // 6. Actualizar datos del cliente (si aplica)
-        if (ventaGuardada.getIdCliente() != null) {
-            clienteService.actualizarTotalComprado(ventaGuardada.getIdCliente(), totalVenta);
+        if (ventaGuardada.getCliente() != null) {
+            clienteService.actualizarTotalComprado(ventaGuardada.getCliente().getIdCliente(), ventaGuardada.getTotalConImpuestos());
         }
 
         // 7. Calcular y guardar comisión
@@ -205,7 +233,7 @@ public class VentaServiceImpl implements VentaService {
             throw new IllegalArgumentException("El ID del vendedor es obligatorio.");
         }
         // Validar que el vendedor exista y su usuario asociado esté activo
-        Vendedor vendedor = vendedorService.obtenerVendedorConUsuario(request.getIdVendedor()) // Asumiendo que existe este método en VendedorService
+        Vendedor vendedor = vendedorService.obtenerVendedorConUsuario(request.getIdVendedor())
                  .orElseThrow(() -> new EntityNotFoundException("Vendedor no encontrado con ID: " + request.getIdVendedor()));
 
         // Ahora valida el estado del Usuario asociado al Vendedor

@@ -33,9 +33,9 @@ public class VentaController {
         VentaResponseDTO dto = new VentaResponseDTO();
         dto.setIdVenta(venta.getIdVenta());
         dto.setFecha(venta.getFecha());
-        dto.setIdCliente(venta.getIdCliente());
-        dto.setIdVendedor(venta.getIdVendedor());
-        dto.setTotal(venta.getTotal());
+        dto.setIdCliente(venta.getCliente().getIdCliente());
+        dto.setIdVendedor(venta.getVendedor().getIdVendedor());
+        dto.setTotal(venta.getTotalConImpuestos());
         dto.setRequiereFactura(venta.getRequiereFactura());
         dto.setNumeroVenta(venta.getNumeroVenta());
         dto.setAplicarImpuestos(venta.getAplicarImpuestos());
