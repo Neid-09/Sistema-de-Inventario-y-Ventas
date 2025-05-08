@@ -77,6 +77,13 @@ public class VentaServiceImpl implements VentaService {
             Cliente cliente = clienteService.obtenerClientePorId(ventaRequest.getIdCliente())
                 .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado: " + ventaRequest.getIdCliente()));
             venta.setCliente(cliente);
+        } else {
+            // Si no se proporciona idCliente, se busca el cliente "Venta General"
+            final String NOMBRE_CLIENTE_GENERAL = "Venta General";
+            Cliente clienteGeneral = clienteService.obtenerClientePorNombre(NOMBRE_CLIENTE_GENERAL)
+                    .orElseThrow(() -> new EntityNotFoundException("Cliente '" + NOMBRE_CLIENTE_GENERAL + "' no encontrado. " +
+                            "Asegúrese de que exista este cliente en la base de datos para ventas sin cliente específico."));
+            venta.setCliente(clienteGeneral);
         }
         if (ventaRequest.getIdVendedor() != null) {
             Vendedor vendedor = vendedorService.obtenerVendedorConUsuario(ventaRequest.getIdVendedor())

@@ -15,6 +15,9 @@ public interface ClienteRepository extends JpaRepository<Cliente, Integer> { // 
     // Método para buscar un cliente por su correo electrónico (asumiendo que es único)
     Optional<Cliente> findByCorreo(String correo);
 
+    // Método para buscar un cliente por su nombre
+    Optional<Cliente> findByNombre(String nombre);
+
     // Puedes añadir más métodos de consulta personalizados aquí si los necesitas
     // Por ejemplo, buscar clientes por nombre, etc.
 }

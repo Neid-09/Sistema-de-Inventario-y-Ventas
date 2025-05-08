@@ -1,10 +1,17 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "configuracion_empresa")
+@Data // Incluye @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConfiguracionEmpresa {
 
     @Id
@@ -71,185 +78,4 @@ public class ConfiguracionEmpresa {
 
     @Column(name = "fecha_actualizacion", columnDefinition = "TIMESTAMP")
     private LocalDateTime fechaActualizacion;
-
-    @Column(name = "rfc_publico_general", length = 20)
-    private String rfcPublicoGeneral; // RFC para ventas a público en general
-
-    // Getters y Setters
-
-    public Long getIdConfiguracion() {
-        return idConfiguracion;
-    }
-
-    public void setIdConfiguracion(Long idConfiguracion) {
-        this.idConfiguracion = idConfiguracion;
-    }
-
-    public String getRazonSocialEmisor() {
-        return razonSocialEmisor;
-    }
-
-    public void setRazonSocialEmisor(String razonSocialEmisor) {
-        this.razonSocialEmisor = razonSocialEmisor;
-    }
-
-    public String getNombreComercialEmisor() {
-        return nombreComercialEmisor;
-    }
-
-    public void setNombreComercialEmisor(String nombreComercialEmisor) {
-        this.nombreComercialEmisor = nombreComercialEmisor;
-    }
-
-    public String getIdentificacionFiscalEmisor() {
-        return identificacionFiscalEmisor;
-    }
-
-    public void setIdentificacionFiscalEmisor(String identificacionFiscalEmisor) {
-        this.identificacionFiscalEmisor = identificacionFiscalEmisor;
-    }
-
-    public String getDomicilioCalle() {
-        return domicilioCalle;
-    }
-
-    public void setDomicilioCalle(String domicilioCalle) {
-        this.domicilioCalle = domicilioCalle;
-    }
-
-    public String getDomicilioNumeroExterior() {
-        return domicilioNumeroExterior;
-    }
-
-    public void setDomicilioNumeroExterior(String domicilioNumeroExterior) {
-        this.domicilioNumeroExterior = domicilioNumeroExterior;
-    }
-
-    public String getDomicilioNumeroInterior() {
-        return domicilioNumeroInterior;
-    }
-
-    public void setDomicilioNumeroInterior(String domicilioNumeroInterior) {
-        this.domicilioNumeroInterior = domicilioNumeroInterior;
-    }
-
-    public String getDomicilioBarrioColonia() {
-        return domicilioBarrioColonia;
-    }
-
-    public void setDomicilioBarrioColonia(String domicilioBarrioColonia) {
-        this.domicilioBarrioColonia = domicilioBarrioColonia;
-    }
-
-    public String getDomicilioLocalidad() {
-        return domicilioLocalidad;
-    }
-
-    public void setDomicilioLocalidad(String domicilioLocalidad) {
-        this.domicilioLocalidad = domicilioLocalidad;
-    }
-
-    public String getDomicilioMunicipio() {
-        return domicilioMunicipio;
-    }
-
-    public void setDomicilioMunicipio(String domicilioMunicipio) {
-        this.domicilioMunicipio = domicilioMunicipio;
-    }
-
-    public String getDomicilioEstadoProvincia() {
-        return domicilioEstadoProvincia;
-    }
-
-    public void setDomicilioEstadoProvincia(String domicilioEstadoProvincia) {
-        this.domicilioEstadoProvincia = domicilioEstadoProvincia;
-    }
-
-    public String getDomicilioPais() {
-        return domicilioPais;
-    }
-
-    public void setDomicilioPais(String domicilioPais) {
-        this.domicilioPais = domicilioPais;
-    }
-
-    public String getDomicilioCodigoPostal() {
-        return domicilioCodigoPostal;
-    }
-
-    public void setDomicilioCodigoPostal(String domicilioCodigoPostal) {
-        this.domicilioCodigoPostal = domicilioCodigoPostal;
-    }
-
-    public String getRegimenFiscalEmisor() {
-        return regimenFiscalEmisor;
-    }
-
-    public void setRegimenFiscalEmisor(String regimenFiscalEmisor) {
-        this.regimenFiscalEmisor = regimenFiscalEmisor;
-    }
-
-    public String getTelefonoContacto() {
-        return telefonoContacto;
-    }
-
-    public void setTelefonoContacto(String telefonoContacto) {
-        this.telefonoContacto = telefonoContacto;
-    }
-
-    public String getEmailContacto() {
-        return emailContacto;
-    }
-
-    public void setEmailContacto(String emailContacto) {
-        this.emailContacto = emailContacto;
-    }
-
-    public String getPaginaWeb() {
-        return paginaWeb;
-    }
-
-    public void setPaginaWeb(String paginaWeb) {
-        this.paginaWeb = paginaWeb;
-    }
-
-    public String getEmailFacturacion() {
-        return emailFacturacion;
-    }
-
-    public void setEmailFacturacion(String emailFacturacion) {
-        this.emailFacturacion = emailFacturacion;
-    }
-
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public LocalDateTime getFechaActualizacion() {
-        return fechaActualizacion;
-    }
-
-    public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
-        this.fechaActualizacion = fechaActualizacion;
-    }
-
-    public String getRfcPublicoGeneral() {
-        return rfcPublicoGeneral;
-    }
-
-    public void setRfcPublicoGeneral(String rfcPublicoGeneral) {
-        this.rfcPublicoGeneral = rfcPublicoGeneral;
-    }
 } 

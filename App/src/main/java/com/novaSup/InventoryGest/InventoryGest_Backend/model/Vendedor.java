@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.sql.Date; // Usar java.sql.Date para mapear DATE de SQL
 
 @Entity
-@Table(name = "vendedor")
+@Table(name = "vendedores")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

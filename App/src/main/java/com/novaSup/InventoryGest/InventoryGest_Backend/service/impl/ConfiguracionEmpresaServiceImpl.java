@@ -39,14 +39,4 @@ public class ConfiguracionEmpresaServiceImpl implements ConfiguracionEmpresaServ
                 config.getRegimenFiscalEmisor()
         );
     }
-
-    @Override
-    public String obtenerRfcPublicoGeneral() {
-        ConfiguracionEmpresa config = configuracionEmpresaRepository.findFirstByOrderByIdConfiguracionAsc()
-                .orElseThrow(() -> new RuntimeException("Configuración de la empresa no encontrada."));
-        if (config.getRfcPublicoGeneral() == null || config.getRfcPublicoGeneral().trim().isEmpty()) {
-            throw new RuntimeException("RFC para público en general no configurado.");
-        }
-        return config.getRfcPublicoGeneral();
-    }
 } 

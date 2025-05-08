@@ -9,11 +9,4 @@ public interface ConfiguracionEmpresaService {
      * @throws RuntimeException si no se encuentra la configuración de la empresa.
      */
     DatosFiscalesEmisorDTO obtenerDatosFiscalesEmisor();
-
-    /**
-     * Obtiene el RFC genérico para ser utilizado en facturas a "público en general".
-     * @return El RFC genérico.
-     * @throws RuntimeException si no se encuentra la configuración de la empresa o el RFC genérico.
-     */
-    String obtenerRfcPublicoGeneral();
 } 

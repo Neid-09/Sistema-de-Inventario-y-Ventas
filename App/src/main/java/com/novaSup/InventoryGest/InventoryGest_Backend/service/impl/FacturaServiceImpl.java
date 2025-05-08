@@ -63,15 +63,19 @@ public class FacturaServiceImpl implements FacturaService {
         DatosFiscalesReceptorDTO receptorDTO;
         Cliente cliente = ventaGuardada.getCliente();
 
-        String rfcPublicoGeneral = configuracionEmpresaService.obtenerRfcPublicoGeneral();
+        // Definir el identificador para "Público en General" o "Consumidor Final"
+        // Este valor podría ser específico para Colombia (ej. "222222222222")
+        // o un estándar si tu sistema debe ser más genérico.
+        // Por ahora, usaremos un placeholder o un valor común si no hay cliente específico.
+        final String ID_FISCAL_PUBLICO_GENERAL = "222222222222"; // Ejemplo para Colombia, ajustar según necesidad.
 
         // Determinar si se usan datos específicos del cliente o público en general
         if (cliente != null && 
             cliente.getRfcFiscal() != null && 
-            !cliente.getRfcFiscal().trim().isEmpty() && 
-            !cliente.getRfcFiscal().trim().equalsIgnoreCase(rfcPublicoGeneral)) {
+            !cliente.getRfcFiscal().trim().isEmpty() &&
+            !cliente.getRfcFiscal().trim().equalsIgnoreCase(ID_FISCAL_PUBLICO_GENERAL)) { // Comparar con el ID definido
             
-            // Usar los datos fiscales específicos del cliente (cliente y rfcFiscal son válidos)
+            // Usar los datos fiscales específicos del cliente
             String razonSocialReceptor = (cliente.getRazonSocialFiscal() != null && !cliente.getRazonSocialFiscal().trim().isEmpty()) 
                                          ? cliente.getRazonSocialFiscal() 
                                          : cliente.getNombre(); // Fallback al nombre general si no hay razón social fiscal
@@ -82,7 +86,7 @@ public class FacturaServiceImpl implements FacturaService {
             
             String usoCfdiCliente = (cliente.getUsoCfdiDefault() != null && !cliente.getUsoCfdiDefault().trim().isEmpty())
                                     ? cliente.getUsoCfdiDefault()
-                                    : "P01"; // P01: Por definir (default si no se especifica en cliente)
+                                    : "P01"; // P01: Por definir (o el código de uso fiscal que aplique)
 
             receptorDTO = new DatosFiscalesReceptorDTO(
                     razonSocialReceptor,
@@ -91,12 +95,12 @@ public class FacturaServiceImpl implements FacturaService {
                     usoCfdiCliente
             );
         } else {
-            // Usar datos de PÚBLICO EN GENERAL (si cliente es null, o rfcFiscal es null/vacío/público general)
+            // Usar datos de PÚBLICO EN GENERAL
             receptorDTO = new DatosFiscalesReceptorDTO(
-                    "PÚBLICO EN GENERAL",
-                    rfcPublicoGeneral,
+                    "PÚBLICO EN GENERAL", // O "CONSUMIDOR FINAL" para Colombia
+                    ID_FISCAL_PUBLICO_GENERAL,
                     emisorDTO.getDomicilio(), // Considerar un domicilio genérico para público en general si es diferente al del emisor
-                    "S01" // Uso CFDI: Sin efectos fiscales (común para público en general)
+                    "S01" // Uso CFDI: Sin efectos fiscales (o el código de uso que aplique)
             );
         }
 

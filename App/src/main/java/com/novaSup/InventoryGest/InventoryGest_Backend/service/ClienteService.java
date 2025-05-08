@@ -8,6 +8,7 @@ public interface ClienteService {
     List<Cliente> obtenerTodosLosClientes();
     Optional<Cliente> obtenerClientePorId(Integer id);
     Optional<Cliente> obtenerClientePorCedula(String cedula);
+    Optional<Cliente> obtenerClientePorNombre(String nombre);
     Cliente guardarCliente(Cliente cliente);
     Cliente actualizarCliente(Integer id, Cliente clienteDetalles);
     void eliminarCliente(Integer id);

@@ -44,6 +44,12 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Cliente> obtenerClientePorNombre(String nombre) {
+        return clienteRepository.findByNombre(nombre);
+    }
+
+    @Override
     @Transactional
     public Cliente guardarCliente(Cliente cliente) {
         // Validaciones básicas (puedes añadir más)
@@ -148,6 +154,15 @@ public class ClienteServiceImpl implements ClienteService {
     public Cliente anadirPuntosFidelidad(Integer idCliente, int puntos) {
          Cliente cliente = clienteRepository.findById(idCliente)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado con id: " + idCliente));
+
+        // Nombre constante para el cliente general
+        final String NOMBRE_CLIENTE_GENERAL = "Venta General";
+
+        // No asignar puntos si es el cliente general o si los puntos a añadir son cero o negativos
+        if (NOMBRE_CLIENTE_GENERAL.equals(cliente.getNombre()) || puntos <= 0) {
+            return cliente; // Retornar el cliente sin modificar puntos
+        }
+
         cliente.setPuntosFidelidad(cliente.getPuntosFidelidad() + puntos);
         return clienteRepository.save(cliente);
     }
