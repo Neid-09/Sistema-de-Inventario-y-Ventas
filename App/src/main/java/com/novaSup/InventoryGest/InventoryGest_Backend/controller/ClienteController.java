@@ -3,11 +3,9 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Cliente;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.List;
 
@@ -21,8 +19,11 @@ public class ClienteController {
      * FIJAR ESO PARA CAMBIOS
      */
 
-    @Autowired
-    private ClienteService clienteService;
+    private final ClienteService clienteService;
+
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
+    }
 
     // Obtener todos los clientes
     @GetMapping
@@ -38,14 +39,50 @@ public class ClienteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-     // Obtener un cliente por Cédula
-    @GetMapping("/cedula/{cedula}")
-    public ResponseEntity<Cliente> getClienteByCedula(@PathVariable String cedula) {
-        return clienteService.obtenerClientePorCedula(cedula)
+     // Obtener un cliente por Documento Identidad
+    @GetMapping("/documento-identidad/{documentoIdentidad}")
+    public ResponseEntity<Cliente> getClienteByDocumentoIdentidad(@PathVariable String documentoIdentidad) {
+        return clienteService.obtenerClientePorDocumentoIdentidad(documentoIdentidad)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Obtener un cliente por Nombre
+    @GetMapping("/nombre/{nombre}")
+    public ResponseEntity<Cliente> getClienteByNombre(@PathVariable String nombre) {
+        return clienteService.obtenerClientePorNombre(nombre)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Obtener un cliente por Identificacion Fiscal
+    @GetMapping("/identificacion-fiscal/{identificacionFiscal}")
+    public ResponseEntity<Cliente> getClienteByIdentificacionFiscal(@PathVariable String identificacionFiscal) {
+        return clienteService.obtenerClientePorIdentificacionFiscal(identificacionFiscal)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Obtener clientes por estado (activo/inactivo)
+    @GetMapping("/estado")
+    public ResponseEntity<List<Cliente>> getClientesByEstado(@RequestParam boolean activo) {
+        List<Cliente> clientes = clienteService.obtenerClientesPorEstado(activo);
+        if (clientes.isEmpty()) {
+            // Devolver una lista vacía con OK 200 es también una opción válida si no se encuentran
+            // pero para consistencia con otros Optional, podemos devolver Not Found si la lista está vacía.
+            // Opcionalmente: return ResponseEntity.ok(clientes);
+            return ResponseEntity.notFound().build(); 
+        }
+        return ResponseEntity.ok(clientes);
+    }
+
+    // Obtener un cliente por número de celular
+    @GetMapping("/celular/{celular}")
+    public ResponseEntity<Cliente> getClienteByCelular(@PathVariable String celular) {
+        return clienteService.obtenerClientePorCelular(celular)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     // Crear un nuevo cliente
     @PostMapping

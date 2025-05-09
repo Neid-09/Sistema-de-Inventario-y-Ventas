@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DatosFiscalesReceptorDTO {
     private String razonSocial;
-    private String rfc;
-    private String domicilio;
-    private String usoFactura; // Ejemplo: G01 Adquisición de mercancías, P01 Por definir
+    private String identificacionFiscal;
+    private String direccionFacturacion;
+    private String tipoFactura; // Ejemplo: G01 Adquisición de mercancías, P01 Por definir
 } 

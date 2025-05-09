@@ -24,8 +24,8 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Integer idCliente;
 
-    @Column(name = "cedula", length = 20)
-    private String cedula;
+    @Column(name = "documento_identidad", length = 20)
+    private String documentoIdentidad;
 
     @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
@@ -42,21 +42,21 @@ public class Cliente {
     @Column(name = "requiere_factura_default", columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean requiereFacturaDefault = false;
 
-    @Column(name = "razon_social_fiscal", length = 255)
-    private String razonSocialFiscal;
+    @Column(name = "razon_social", length = 255)
+    private String razonSocial;
 
-    @Column(name = "rfc_fiscal", length = 20)
-    private String rfcFiscal;
+    @Column(name = "identificacion_fiscal", length = 20)
+    private String identificacionFiscal;
 
     @Lob
-    @Column(name = "direccion_fiscal", columnDefinition = "TEXT")
-    private String direccionFiscal;
+    @Column(name = "direccion_facturacion", columnDefinition = "TEXT")
+    private String direccionFacturacion;
 
-    @Column(name = "correo_fiscal", length = 100)
-    private String correoFiscal;
+    @Column(name = "correo_facturacion", length = 100)
+    private String correoFacturacion;
 
-    @Column(name = "uso_cfdi_default", length = 10)
-    private String usoCfdiDefault;
+    @Column(name = "tipo_factura_default", length = 10)
+    private String tipoFacturaDefault;
 
     @Column(name = "total_comprado", precision = 12, scale = 2, columnDefinition = "DECIMAL(12,2) DEFAULT 0.00")
     private BigDecimal totalComprado = BigDecimal.ZERO;

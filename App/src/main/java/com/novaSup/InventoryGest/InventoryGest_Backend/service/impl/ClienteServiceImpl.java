@@ -39,8 +39,8 @@ public class ClienteServiceImpl implements ClienteService {
 
      @Override
     @Transactional(readOnly = true)
-    public Optional<Cliente> obtenerClientePorCedula(String cedula) {
-        return clienteRepository.findByCedula(cedula);
+    public Optional<Cliente> obtenerClientePorDocumentoIdentidad(String documentoIdentidad) {
+        return clienteRepository.findByDocumentoIdentidad(documentoIdentidad);
     }
 
     @Override
@@ -50,10 +50,28 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Cliente> obtenerClientePorIdentificacionFiscal(String identificacionFiscal) {
+        return clienteRepository.findByIdentificacionFiscal(identificacionFiscal);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Cliente> obtenerClientesPorEstado(boolean activo) {
+        return clienteRepository.findByActivo(activo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Cliente> obtenerClientePorCelular(String celular) {
+        return clienteRepository.findByCelular(celular);
+    }
+
+    @Override
     @Transactional
     public Cliente guardarCliente(Cliente cliente) {
         // Validaciones básicas (puedes añadir más)
-        if (clienteRepository.findByCedula(cliente.getCedula()).isPresent()) {
+        if (clienteRepository.findByDocumentoIdentidad(cliente.getDocumentoIdentidad()).isPresent()) {
             throw new IllegalArgumentException("La cédula ya está registrada.");
         }
         if (cliente.getCorreo() != null && clienteRepository.findByCorreo(cliente.getCorreo()).isPresent()) {
@@ -76,66 +94,96 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional
     public Cliente actualizarCliente(Integer id, Cliente clienteDetalles) {
-        Cliente cliente = clienteRepository.findById(id)
+        Cliente clienteExistente = clienteRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado con id: " + id));
 
-        // Actualizar y validar cédula si es necesario
-        String nuevaCedula = clienteDetalles.getCedula();
-        // Solo validar si la cédula se proporciona y es diferente a la actual (o la actual es null)
-        if (nuevaCedula != null && (cliente.getCedula() == null || !cliente.getCedula().equals(nuevaCedula))) {
-            Optional<Cliente> cedulaExistente = clienteRepository.findByCedula(nuevaCedula)
-                    .filter(c -> !c.getIdCliente().equals(id));
-            if (cedulaExistente.isPresent()) {
-                throw new IllegalArgumentException("La nueva cédula ya está registrada por otro cliente.");
-            }
-        }
-        // Asignar la cédula proporcionada (puede ser null si se envió así explícitamente o si no se envió y el DTO la tiene null)
-        cliente.setCedula(nuevaCedula);
+        // Actualizar solo los campos que se proporcionan (no son nulos) en clienteDetalles
 
-        // Actualizar y validar correo si es necesario
-        String nuevoCorreo = clienteDetalles.getCorreo();
-        // Solo validar si el correo se proporciona y es diferente al actual (o el actual es null)
-        if (nuevoCorreo != null && (cliente.getCorreo() == null || !cliente.getCorreo().equals(nuevoCorreo))) {
-            Optional<Cliente> correoExistente = clienteRepository.findByCorreo(nuevoCorreo)
+        // Nombre (nullable = false en la entidad, pero se puede querer no actualizarlo si no se manda)
+        if (clienteDetalles.getNombre() != null && !clienteDetalles.getNombre().isEmpty()) {
+            clienteExistente.setNombre(clienteDetalles.getNombre());
+        }
+
+        // Documento de identidad (con validación de unicidad si cambia)
+        if (clienteDetalles.getDocumentoIdentidad() != null && 
+            !clienteDetalles.getDocumentoIdentidad().equals(clienteExistente.getDocumentoIdentidad())) {
+            Optional<Cliente> otroClienteConMismoDocumento = clienteRepository.findByDocumentoIdentidad(clienteDetalles.getDocumentoIdentidad())
                     .filter(c -> !c.getIdCliente().equals(id));
-            if (correoExistente.isPresent()) {
+            if (otroClienteConMismoDocumento.isPresent()) {
+                throw new IllegalArgumentException("El nuevo documento de identidad ya está registrado por otro cliente.");
+            }
+            clienteExistente.setDocumentoIdentidad(clienteDetalles.getDocumentoIdentidad());
+        } else if (clienteDetalles.getDocumentoIdentidad() != null && clienteDetalles.getDocumentoIdentidad().isEmpty()) {
+            // Si se envía un documento vacío, podría interpretarse como querer borrarlo (si la lógica de negocio lo permite)
+            // Por ahora, lo dejaremos tal cual o se puede lanzar un error si no se permite vacío.
+            // Si la columna en BD no permite null, esto daría error al guardar.
+            // Si se quiere permitir borrarlo, se asignaría: clienteExistente.setDocumentoIdentidad(null);
+            // O clienteExistente.setDocumentoIdentidad(""); // si la BD lo permite
+        }
+
+
+        // Correo (con validación de unicidad si cambia)
+        if (clienteDetalles.getCorreo() != null && 
+            !clienteDetalles.getCorreo().equals(clienteExistente.getCorreo())) {
+            Optional<Cliente> otroClienteConMismoCorreo = clienteRepository.findByCorreo(clienteDetalles.getCorreo())
+                    .filter(c -> !c.getIdCliente().equals(id));
+            if (otroClienteConMismoCorreo.isPresent()) {
                 throw new IllegalArgumentException("El nuevo correo electrónico ya está registrado por otro cliente.");
             }
+            clienteExistente.setCorreo(clienteDetalles.getCorreo());
+        } else if (clienteDetalles.getCorreo() != null && clienteDetalles.getCorreo().isEmpty()) {
+             // Permitir borrar el correo si se envía vacío y la entidad lo permite
+             clienteExistente.setCorreo(null);
         }
-        // Asignar el correo proporcionado
-        cliente.setCorreo(nuevoCorreo);
 
-        // Campos de asignación directa (si se envían nulos y el campo no es nullable=false en BD, se harán null)
-        cliente.setNombre(clienteDetalles.getNombre());
-        cliente.setCelular(clienteDetalles.getCelular());
-        cliente.setDireccion(clienteDetalles.getDireccion());
 
-        // Actualizar otros campos solo si se proporcionan explícitamente (no nulos en la solicitud)
+        if (clienteDetalles.getCelular() != null) {
+            clienteExistente.setCelular(clienteDetalles.getCelular().isEmpty() ? null : clienteDetalles.getCelular());
+        }
+
+        if (clienteDetalles.getDireccion() != null) {
+            clienteExistente.setDireccion(clienteDetalles.getDireccion().isEmpty() ? null : clienteDetalles.getDireccion());
+        }
+
         if (clienteDetalles.getRequiereFacturaDefault() != null) {
-            cliente.setRequiereFacturaDefault(clienteDetalles.getRequiereFacturaDefault());
+            clienteExistente.setRequiereFacturaDefault(clienteDetalles.getRequiereFacturaDefault());
         }
-        if (clienteDetalles.getRazonSocialFiscal() != null) {
-            cliente.setRazonSocialFiscal(clienteDetalles.getRazonSocialFiscal());
+
+        if (clienteDetalles.getRazonSocial() != null) {
+            clienteExistente.setRazonSocial(clienteDetalles.getRazonSocial().isEmpty() ? null : clienteDetalles.getRazonSocial());
         }
-        if (clienteDetalles.getRfcFiscal() != null) {
-            cliente.setRfcFiscal(clienteDetalles.getRfcFiscal());
+
+        if (clienteDetalles.getIdentificacionFiscal() != null) {
+            clienteExistente.setIdentificacionFiscal(clienteDetalles.getIdentificacionFiscal().isEmpty() ? null : clienteDetalles.getIdentificacionFiscal());
         }
-        if (clienteDetalles.getDireccionFiscal() != null) {
-            cliente.setDireccionFiscal(clienteDetalles.getDireccionFiscal());
+
+        if (clienteDetalles.getDireccionFacturacion() != null) {
+            clienteExistente.setDireccionFacturacion(clienteDetalles.getDireccionFacturacion().isEmpty() ? null : clienteDetalles.getDireccionFacturacion());
         }
-        if (clienteDetalles.getCorreoFiscal() != null) {
-            cliente.setCorreoFiscal(clienteDetalles.getCorreoFiscal());
+
+        if (clienteDetalles.getCorreoFacturacion() != null) {
+            clienteExistente.setCorreoFacturacion(clienteDetalles.getCorreoFacturacion().isEmpty() ? null : clienteDetalles.getCorreoFacturacion());
         }
-        if (clienteDetalles.getUsoCfdiDefault() != null) {
-            cliente.setUsoCfdiDefault(clienteDetalles.getUsoCfdiDefault());
+
+        if (clienteDetalles.getTipoFacturaDefault() != null) {
+            clienteExistente.setTipoFacturaDefault(clienteDetalles.getTipoFacturaDefault().isEmpty() ? null : clienteDetalles.getTipoFacturaDefault());
         }
         
         if (clienteDetalles.getLimiteCredito() != null) {
-             cliente.setLimiteCredito(clienteDetalles.getLimiteCredito());
+             clienteExistente.setLimiteCredito(clienteDetalles.getLimiteCredito());
         }
-        // No actualizamos total_comprado, puntos_fidelidad ni ultima_compra directamente aquí
 
-        return clienteRepository.save(cliente);
+        // Campos como 'totalComprado', 'puntosFidelidad', 'ultimaCompra'
+        // generalmente no se actualizan directamente a través de este endpoint,
+        // sino como resultado de otras operaciones (ej. una venta).
+        // 'activo' y 'fechaRegistro' tampoco deberían actualizarse por esta vía.
+        // 'fechaActualizacion' se actualiza automáticamente por @UpdateTimestamp
+
+        if (clienteDetalles.getActivo() != null) {
+            clienteExistente.setActivo(clienteDetalles.getActivo());
+        }
+
+        return clienteRepository.save(clienteExistente);
     }
 
     @Override

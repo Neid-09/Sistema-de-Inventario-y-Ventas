@@ -71,35 +71,35 @@ public class FacturaServiceImpl implements FacturaService {
 
         // Determinar si se usan datos específicos del cliente o público en general
         if (cliente != null && 
-            cliente.getRfcFiscal() != null && 
-            !cliente.getRfcFiscal().trim().isEmpty() &&
-            !cliente.getRfcFiscal().trim().equalsIgnoreCase(ID_FISCAL_PUBLICO_GENERAL)) { // Comparar con el ID definido
+            cliente.getIdentificacionFiscal() != null && 
+            !cliente.getIdentificacionFiscal().trim().isEmpty() &&
+            !cliente.getIdentificacionFiscal().trim().equalsIgnoreCase(ID_FISCAL_PUBLICO_GENERAL)) { // Comparar con el ID definido
             
             // Usar los datos fiscales específicos del cliente
-            String razonSocialReceptor = (cliente.getRazonSocialFiscal() != null && !cliente.getRazonSocialFiscal().trim().isEmpty()) 
-                                         ? cliente.getRazonSocialFiscal() 
+            String razonSocialReceptor = (cliente.getRazonSocial() != null && !cliente.getRazonSocial().trim().isEmpty()) 
+                                         ? cliente.getRazonSocial() 
                                          : cliente.getNombre(); // Fallback al nombre general si no hay razón social fiscal
 
-            String direccionReceptor = (cliente.getDireccionFiscal() != null && !cliente.getDireccionFiscal().trim().isEmpty())
-                                       ? cliente.getDireccionFiscal()
+            String direccionReceptor = (cliente.getDireccionFacturacion() != null && !cliente.getDireccionFacturacion().trim().isEmpty())
+                                       ? cliente.getDireccionFacturacion()
                                        : cliente.getDireccion(); // Fallback a la dirección general
             
-            String usoCfdiCliente = (cliente.getUsoCfdiDefault() != null && !cliente.getUsoCfdiDefault().trim().isEmpty())
-                                    ? cliente.getUsoCfdiDefault()
+            String tipoFacturaCliente = (cliente.getTipoFacturaDefault() != null && !cliente.getTipoFacturaDefault().trim().isEmpty())
+                                    ? cliente.getTipoFacturaDefault()
                                     : "P01"; // P01: Por definir (o el código de uso fiscal que aplique)
 
             receptorDTO = new DatosFiscalesReceptorDTO(
                     razonSocialReceptor,
-                    cliente.getRfcFiscal(),
+                    cliente.getIdentificacionFiscal(),
                     direccionReceptor,
-                    usoCfdiCliente
+                    tipoFacturaCliente
             );
         } else {
             // Usar datos de PÚBLICO EN GENERAL
             receptorDTO = new DatosFiscalesReceptorDTO(
                     "PÚBLICO EN GENERAL", // O "CONSUMIDOR FINAL" para Colombia
                     ID_FISCAL_PUBLICO_GENERAL,
-                    emisorDTO.getDomicilio(), // Considerar un domicilio genérico para público en general si es diferente al del emisor
+                    emisorDTO.getDireccionFacturacion(), // Considerar un domicilio genérico para público en general si es diferente al del emisor
                     "S01" // Uso CFDI: Sin efectos fiscales (o el código de uso que aplique)
             );
         }

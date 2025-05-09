@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class DatosFiscalesEmisorDTO {
     private String razonSocial;
-    private String rfc;
-    private String domicilio;
+    private String identificacionFiscal;
+    private String direccionFacturacion;
     private String regimenFiscal;
 } 
