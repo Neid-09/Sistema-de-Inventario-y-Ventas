@@ -1,18 +1,26 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService; // Importar la interfaz
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML; // Importar PathsFXML
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
@@ -20,10 +28,10 @@ import java.util.ResourceBundle;
 
 public class GestionClientesControllerFX implements Initializable {
 
-    // ... (FXML fields - txtSearch, cmbStatusFilter, clientesTable, columns, buttons) ...
     @FXML private TextField txtSearch;
     @FXML private ComboBox<String> cmbStatusFilter;
     @FXML private TableView<ClienteFX> clientesTable;
+
     @FXML private TableColumn<ClienteFX, String> colNombre;
     @FXML private TableColumn<ClienteFX, String> colDocumentoIdentidad;
     @FXML private TableColumn<ClienteFX, String> colIdentificacionFiscal;
@@ -39,17 +47,13 @@ public class GestionClientesControllerFX implements Initializable {
 
     @FXML private VBox detailsPanelContainer;
     @FXML private Label lblDetailsTitle;
-    @FXML private Label lblDetailNombre;
-    @FXML private Label lblDetailDocumento;
-    @FXML private Label lblDetailCorreo;
-    @FXML private Label lblDetailTotalCompras;
+    // Los Labels individuales para detalles (lblDetailNombre, etc.) se manejan dinámicamente.
 
-    private final IClienteService clienteService; // Campo para el servicio inyectado
+    private final IClienteService clienteService;
     private ObservableList<ClienteFX> masterData = FXCollections.observableArrayList();
     private FilteredList<ClienteFX> filteredData;
     private SortedList<ClienteFX> sortedData;
 
-    // Constructor para inyección de dependencias
     public GestionClientesControllerFX(IClienteService clienteService) {
         this.clienteService = clienteService;
     }
@@ -58,8 +62,23 @@ public class GestionClientesControllerFX implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         configurarTabla();
         configurarFiltros();
-        cargarClientes(); // Usará el servicio inyectado
+        cargarClientes();
         configurarBotones();
+        // Inicialmente ocultar el panel de detalles del lado derecho
+        detailsPanelContainer.setVisible(false);
+        lblDetailsTitle.setVisible(false);
+        // Listener para limpiar/ocultar panel de detalles si no hay selección
+        clientesTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection == null) {
+                detailsPanelContainer.setVisible(false);
+                lblDetailsTitle.setVisible(false);
+                detailsPanelContainer.getChildren().clear(); // Limpiar contenido
+            } else {
+                // Si se desea que el panel derecho se actualice con la selección (además del botón "Ver Detalles")
+                // se puede llamar a un método similar a handleViewDetails aquí, pero solo para el panel.
+                 // por ahora, el panel derecho solo se llena explícitamente con el botón.
+            }
+        });
     }
 
     private void configurarTabla() {
@@ -71,13 +90,11 @@ public class GestionClientesControllerFX implements Initializable {
         colLimiteCredito.setCellValueFactory(new PropertyValueFactory<>("limiteCredito"));
         colActivo.setCellValueFactory(new PropertyValueFactory<>("activo"));
 
-        // Celda para el booleano de activo (usando CheckBox)
         colActivo.setCellFactory(column -> new TableCell<ClienteFX, Boolean>() {
             private final CheckBox checkBox = new CheckBox();
             {
-                // Deshabilitar el checkbox para que sea solo visual
                 checkBox.setDisable(true);
-                checkBox.setStyle("-fx-opacity: 1;"); // Para que no se vea grisáceo por estar deshabilitado
+                checkBox.setStyle("-fx-opacity: 1;");
                 setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             }
             @Override
@@ -88,13 +105,12 @@ public class GestionClientesControllerFX implements Initializable {
                 } else {
                     checkBox.setSelected(item);
                     setGraphic(checkBox);
-                    setAlignment(javafx.geometry.Pos.CENTER); // Centrar el CheckBox
+                    setAlignment(javafx.geometry.Pos.CENTER);
                 }
             }
         });
         colActivo.setStyle("-fx-alignment: CENTER;");
 
-        // Configuración de listas filtrada y ordenada
         filteredData = new FilteredList<>(masterData, p -> true);
         sortedData = new SortedList<>(filteredData);
         sortedData.comparatorProperty().bind(clientesTable.comparatorProperty());
@@ -103,14 +119,12 @@ public class GestionClientesControllerFX implements Initializable {
 
     private void configurarFiltros() {
         txtSearch.textProperty().addListener((observable, oldValue, newValue) -> actualizarFiltro());
-        
-        // Configuración de cmbStatusFilter
         cmbStatusFilter.setItems(FXCollections.observableArrayList("Todos", "Activos", "Inactivos"));
-        cmbStatusFilter.setValue("Todos"); // Valor por defecto
+        cmbStatusFilter.setValue("Todos");
         cmbStatusFilter.setOnAction(event -> actualizarFiltro());
     }
 
-     private void actualizarFiltro() {
+    private void actualizarFiltro() {
         String filtroTexto = txtSearch.getText() == null ? "" : txtSearch.getText().toLowerCase().trim();
         String filtroEstado = cmbStatusFilter.getValue();
 
@@ -122,13 +136,13 @@ public class GestionClientesControllerFX implements Initializable {
                                  (cliente.getIdentificacionFiscal() != null && cliente.getIdentificacionFiscal().toLowerCase().contains(filtroTexto)) ||
                                  (cliente.getCelular() != null && cliente.getCelular().toLowerCase().contains(filtroTexto));
 
-            boolean matchEstado = false;
-            if (filtroEstado == null || filtroEstado.equals("Todos")) {
-                matchEstado = true;
-            } else if (filtroEstado.equals("Activos")) {
-                matchEstado = cliente.isActivo();
-            } else if (filtroEstado.equals("Inactivos")) {
-                matchEstado = !cliente.isActivo();
+            boolean matchEstado = true; // Default to true
+            if (filtroEstado != null && !filtroEstado.equals("Todos")) {
+                if (filtroEstado.equals("Activos")) {
+                    matchEstado = cliente.isActivo();
+                } else if (filtroEstado.equals("Inactivos")) {
+                    matchEstado = !cliente.isActivo();
+                }
             }
             return matchTexto && matchEstado;
         });
@@ -136,46 +150,61 @@ public class GestionClientesControllerFX implements Initializable {
 
     private void cargarClientes() {
         try {
-            // Usar la instancia del servicio inyectado
             masterData.setAll(clienteService.obtenerTodosLosClientes());
-            clientesTable.refresh();
+            clientesTable.refresh(); 
         } catch (Exception e) {
-            // Manejo de errores mejorado (mostrar alerta)
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error de Carga");
-            alert.setHeaderText("No se pudieron cargar los clientes");
-            alert.setContentText("Detalles: " + e.getMessage());
-            alert.showAndWait();
-            logger.error("Error al cargar clientes: {}", e.getMessage(), e); // Usar logger si está configurado
+            mostrarAlertaError("Error de Carga", "No se pudieron cargar los clientes", "Detalles: " + e.getMessage());
+            logger.error("Error al cargar clientes: {}", e.getMessage(), e);
             masterData.clear();
         }
     }
 
     private void configurarBotones() {
-        btnAddCliente.setOnAction(event -> handleAddCliente());
-        btnEditCliente.setOnAction(event -> handleEditCliente());
-        btnDeleteCliente.setOnAction(event -> handleDeleteCliente()); // Usará el servicio
-        btnViewDetails.setOnAction(event -> handleViewDetails());
+        btnAddCliente.setOnAction(event -> handleAddEditCliente(null)); // null para nuevo cliente
+        btnEditCliente.setOnAction(event -> {
+            ClienteFX selectedCliente = clientesTable.getSelectionModel().getSelectedItem();
+            if (selectedCliente != null) {
+                handleAddEditCliente(selectedCliente); // cliente seleccionado para editar
+            }
+        });
+        btnDeleteCliente.setOnAction(event -> handleDeleteCliente());
+        btnViewDetails.setOnAction(event -> handleViewDetailsInNewWindow()); // Cambiado para nueva ventana
 
         btnEditCliente.disableProperty().bind(clientesTable.getSelectionModel().selectedItemProperty().isNull());
         btnDeleteCliente.disableProperty().bind(clientesTable.getSelectionModel().selectedItemProperty().isNull());
         btnViewDetails.disableProperty().bind(clientesTable.getSelectionModel().selectedItemProperty().isNull());
     }
 
-    @FXML
-    private void handleAddCliente() {
-        System.out.println("Abrir diálogo/vista para agregar cliente...");
-        // Lógica para mostrar diálogo de agregar
-        // Si se guarda exitosamente: cargarClientes();
-    }
+    private void handleAddEditCliente(ClienteFX cliente) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.DIALOG_ADD_EDIT_CLIENTE));
+            Parent root = loader.load();
 
-    @FXML
-    private void handleEditCliente() {
-        ClienteFX selectedCliente = clientesTable.getSelectionModel().getSelectedItem();
-        if (selectedCliente != null) {
-            System.out.println("Abrir diálogo/vista para editar cliente: " + selectedCliente.getNombre());
-            // Lógica para mostrar diálogo de editar con selectedCliente
-            // Si se guarda exitosamente: cargarClientes();
+            AddEditClienteDialogController controller = loader.getController();
+            controller.setClienteParaOperacion(cliente, clienteService); // Pasa el cliente y el servicio
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(cliente == null ? "Agregar Nuevo Cliente" : "Editar Cliente");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            Window owner = btnAddCliente.getScene().getWindow(); // o cualquier nodo de la escena actual
+            if (owner != null) { 
+                dialogStage.initOwner(owner);
+            }
+            dialogStage.setScene(new Scene(root));
+            
+            controller.setDialogStage(dialogStage); // Para que el diálogo pueda cerrarse a sí mismo
+            controller.setClienteParaOperacion(cliente, clienteService); // Método unificado para pasar datos
+
+            dialogStage.showAndWait(); // Espera a que el diálogo se cierre
+
+            if (controller.isGuardadoExitosamente()) {
+                cargarClientes(); // Recargar datos si se guardó
+                // Opcionalmente, seleccionar el cliente recién añadido/editado en la tabla
+            }
+
+        } catch (IOException e) {
+            logger.error("Error al abrir diálogo de agregar/editar cliente: {}", e.getMessage(), e);
+            mostrarAlertaError("Error de UI", "No se pudo abrir la ventana de edición.", e.getMessage());
         }
     }
 
@@ -186,86 +215,42 @@ public class GestionClientesControllerFX implements Initializable {
             Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
             confirmacion.setTitle("Confirmar Eliminación");
             confirmacion.setHeaderText("Eliminar Cliente: " + selectedCliente.getNombre());
-            confirmacion.setContentText("¿Está seguro?");
+            confirmacion.setContentText("¿Está seguro de que desea eliminar a este cliente?\nEsta acción no se puede deshacer.");
+            confirmacion.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
 
             confirmacion.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
+                if (response == ButtonType.YES) {
                     try {
-                        // Usar la instancia del servicio inyectado
                         boolean eliminado = clienteService.eliminarCliente(selectedCliente.getIdCliente());
                         if (eliminado) {
-                            cargarClientes(); // Recargar la lista
+                            cargarClientes();
+                            detailsPanelContainer.setVisible(false); // Ocultar panel si el cliente eliminado estaba mostrándose
+                            lblDetailsTitle.setVisible(false);
                         } else {
-                            // Mostrar error si la API devuelve false (ej. no encontrado)
-                            Alert errorAlert = new Alert(Alert.AlertType.WARNING);
-                            errorAlert.setTitle("Eliminación Fallida");
-                            errorAlert.setHeaderText("No se pudo eliminar el cliente.");
-                            errorAlert.setContentText("El cliente no fue encontrado o no se pudo eliminar.");
-                            errorAlert.showAndWait();
+                            mostrarAlertaError("Eliminación Fallida", "No se pudo eliminar el cliente.", "El cliente no fue encontrado o ya había sido eliminado.");
                         }
                     } catch (Exception e) {
-                        // Mostrar error si ocurre una excepción
-                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                        errorAlert.setTitle("Error al Eliminar");
-                        errorAlert.setHeaderText("Ocurrió un error al intentar eliminar el cliente.");
-                        errorAlert.setContentText("Detalles: " + e.getMessage());
-                        errorAlert.showAndWait();
+                        mostrarAlertaError("Error al Eliminar", "Ocurrió un error.", e.getMessage());
                         logger.error("Error al eliminar cliente: {}", e.getMessage(), e);
                     }
                 }
             });
         }
     }
-
+    
     @FXML
-    private void handleViewDetails() {
+    private void handleViewDetailsInPanel() { // Muestra detalles en el panel derecho
         ClienteFX selectedCliente = clientesTable.getSelectionModel().getSelectedItem();
         if (selectedCliente != null) {
-            detailsPanelContainer.getChildren().clear(); // Limpiar detalles anteriores
+            detailsPanelContainer.getChildren().clear(); 
             detailsPanelContainer.setVisible(true);
-            lblDetailsTitle.setVisible(true); // El título ya está en FXML, solo hacerlo visible.
+            lblDetailsTitle.setVisible(true);
 
-            // Añadir título al VBox si no está ya como un Label separado.
-            Label title = new Label("Detalles del Cliente:");
-            title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding-bottom: 8px;"); // Coincide con .details-title-label
+            Label title = new Label("Detalles del Cliente (Panel):");
+            title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding-bottom: 8px;");
             detailsPanelContainer.getChildren().add(title);
 
-            // Añadir detalles dinámicamente
-            addDetailRow("ID Cliente:", String.valueOf(selectedCliente.getIdCliente()));
-            addDetailRow("Nombre:", selectedCliente.getNombre());
-            addDetailRow("Doc. Identidad:", selectedCliente.getDocumentoIdentidad());
-            addDetailRow("ID Fiscal:", selectedCliente.getIdentificacionFiscal());
-            addDetailRow("Correo:", selectedCliente.getCorreo());
-            addDetailRow("Celular:", selectedCliente.getCelular());
-            addDetailRow("Dirección:", selectedCliente.getDireccion());
-            addDetailRow("Activo:", selectedCliente.isActivo() ? "Sí" : "No");
-            addDetailRow("Límite Crédito:", selectedCliente.getLimiteCredito() != null ? selectedCliente.getLimiteCredito().toString() + " €" : "N/A");
-            addDetailRow("Total Comprado:", selectedCliente.getTotalComprado() != null ? selectedCliente.getTotalComprado().toString() + " €" : "N/A");
-            addDetailRow("Puntos Fidelidad:", selectedCliente.getPuntosFidelidad() != null ? String.valueOf(selectedCliente.getPuntosFidelidad()) : "N/A");
-            
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            if (selectedCliente.getUltimaCompra() != null) {
-                addDetailRow("Última Compra:", selectedCliente.getUltimaCompra().format(formatter));
-            }
-             if (selectedCliente.getFechaRegistro() != null) {
-                addDetailRow("Fecha Registro:", selectedCliente.getFechaRegistro().format(formatter));
-            }
-            if (selectedCliente.getFechaActualizacion() != null) {
-                addDetailRow("Fecha Actualización:", selectedCliente.getFechaActualizacion().format(formatter));
-            }
-
-            addDetailRow("Requiere Factura Default:", selectedCliente.isRequiereFacturaDefault() ? "Sí" : "No");
-            addDetailRow("Razón Social:", selectedCliente.getRazonSocial());
-            addDetailRow("Dirección Facturación:", selectedCliente.getDireccionFacturacion());
-            addDetailRow("Correo Facturación:", selectedCliente.getCorreoFacturacion());
-            addDetailRow("Tipo Factura Default:", selectedCliente.getTipoFacturaDefault());
-            // Ocultar el panel si no hay cliente seleccionado (o al deseleccionar)
-             clientesTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-                if (newSelection == null) {
-                    detailsPanelContainer.setVisible(false);
-                    lblDetailsTitle.setVisible(false);
-                }
-            });
+            populateDetailsInPanel(selectedCliente);
 
         } else {
             detailsPanelContainer.setVisible(false);
@@ -273,23 +258,107 @@ public class GestionClientesControllerFX implements Initializable {
         }
     }
 
-    // Método helper para añadir filas al panel de detalles
+    private void populateDetailsInPanel(ClienteFX cliente) {
+        addDetailRow("ID Cliente:", String.valueOf(cliente.getIdCliente()));
+        addDetailRow("Nombre:", cliente.getNombre());
+        addDetailRow("Doc. Identidad:", cliente.getDocumentoIdentidad());
+        addDetailRow("ID Fiscal:", cliente.getIdentificacionFiscal());
+        addDetailRow("Correo:", cliente.getCorreo());
+        addDetailRow("Celular:", cliente.getCelular());
+        addDetailRow("Dirección:", cliente.getDireccion());
+        addDetailRow("Activo:", cliente.isActivo() ? "Sí" : "No");
+        addDetailRow("Límite Crédito:", cliente.getLimiteCredito() != null ? cliente.getLimiteCredito().toString() + " $" : "N/A");
+        addDetailRow("Total Comprado:", cliente.getTotalComprado() != null ? cliente.getTotalComprado().toString() + " $" : "N/A");
+        addDetailRow("Puntos Fidelidad:", cliente.getPuntosFidelidad() != null ? String.valueOf(cliente.getPuntosFidelidad()) : "N/A");
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        if (cliente.getUltimaCompra() != null) {
+            addDetailRow("Última Compra:", cliente.getUltimaCompra().format(formatter));
+        }
+        if (cliente.getFechaRegistro() != null) {
+            addDetailRow("Fecha Registro:", cliente.getFechaRegistro().format(formatter));
+        }
+        if (cliente.getFechaActualizacion() != null) {
+            addDetailRow("Fecha Actualización:", cliente.getFechaActualizacion().format(formatter));
+        }
+        addDetailRow("Requiere Factura:", cliente.isRequiereFacturaDefault() ? "Sí" : "No");
+        addDetailRow("Razón Social:", cliente.getRazonSocial());
+        addDetailRow("Dir. Facturación:", cliente.getDireccionFacturacion());
+        addDetailRow("Correo Facturación:", cliente.getCorreoFacturacion());
+        addDetailRow("Tipo Factura:", cliente.getTipoFacturaDefault());
+    }
+
+    @FXML
+    private void handleViewDetailsInNewWindow() {
+        ClienteFX selectedCliente = clientesTable.getSelectionModel().getSelectedItem();
+        if (selectedCliente == null) {
+            mostrarAlertaInformacion("Sin Selección", "No hay cliente seleccionado", "Por favor, seleccione un cliente de la tabla para ver sus detalles.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.VIEW_CLIENTE_DETALLES));
+            Parent root = loader.load();
+
+            ClienteDetallesViewController controller = loader.getController();
+            // Es importante pasar el Stage al controlador de detalles si este tiene un botón "Cerrar" propio que dependa del Stage.
+            // Y también para que el propio controlador de detalles pueda gestionar su cierre si es necesario.
+            
+            Stage detailsStage = new Stage();
+            controller.setStage(detailsStage); // Pasar el Stage al controlador de detalles
+            controller.setCliente(selectedCliente);
+
+            detailsStage.setTitle("Detalles del Cliente: " + selectedCliente.getNombre());
+            detailsStage.initModality(Modality.WINDOW_MODAL);
+            Window owner = btnViewDetails.getScene().getWindow();
+            if (owner != null) { 
+                detailsStage.initOwner(owner);
+            }
+            detailsStage.setScene(new Scene(root));
+            
+            // Configurar para que la ventana se abra maximizada
+            detailsStage.setMaximized(true);
+
+            detailsStage.showAndWait();
+
+        } catch (IOException e) {
+            logger.error("Error al abrir la vista de detalles del cliente: {}", e.getMessage(), e);
+            mostrarAlertaError("Error de UI", "No se pudo abrir la ventana de detalles.", e.getMessage());
+        } catch (Exception e) { // Captura genérica por si el controlador no es el esperado
+            logger.error("Error al configurar el controlador de detalles: {}", e.getMessage(), e);
+            mostrarAlertaError("Error Interno", "Ocurrió un error al preparar la vista de detalles.", e.getMessage());
+        }
+    }
+
     private void addDetailRow(String labelText, String valueText) {
-        HBox row = new HBox(5); // Espaciado entre etiqueta y valor
+        HBox row = new HBox(5);
         Label label = new Label(labelText);
-        // Aplicar estilo directamente o usar clases de estilo si están definidas en el CSS para estos elementos
-        label.setStyle("-fx-font-weight: bold; -fx-text-fill: #37474F; -fx-pref-width: 150px;"); 
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: #37474F; -fx-pref-width: 150px; -fx-min-width: 150px;");
         
         Label value = new Label(valueText != null && !valueText.trim().isEmpty() ? valueText : "N/A");
         value.setStyle("-fx-text-fill: #455A64;");
-        value.setWrapText(true); // Para que el texto se ajuste si es largo
-        HBox.setHgrow(value, javafx.scene.layout.Priority.ALWAYS); // Para que el valor ocupe el espacio restante
+        value.setWrapText(true);
+        HBox.setHgrow(value, javafx.scene.layout.Priority.ALWAYS);
 
         row.getChildren().addAll(label, value);
         detailsPanelContainer.getChildren().add(row);
     }
 
-    // Logger (opcional pero recomendado)
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GestionClientesControllerFX.class);
+    private void mostrarAlertaError(String titulo, String cabecera, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(cabecera);
+        alert.setContentText(contenido);
+        alert.showAndWait();
+    }
 
+    private void mostrarAlertaInformacion(String titulo, String cabecera, String contenido) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(cabecera);
+        alert.setContentText(contenido);
+        alert.showAndWait();
+    }
+
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GestionClientesControllerFX.class);
 }

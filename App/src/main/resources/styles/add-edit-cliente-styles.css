@@ -1,0 +1,99 @@
+/* styles/add-edit-cliente-styles.css */
+
+.dialog-pane {
+    -fx-background-color: #FFFFFF; /* Fondo blanco */
+    -fx-border-color: #B0BEC5; /* Borde gris claro */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
+    -fx-padding: 25px;
+}
+
+.dialog-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #007AFF; /* Azul primario Apple */
+    -fx-padding-bottom: 15px;
+}
+
+.form-grid-pane {
+    -fx-hgap: 15px;
+    -fx-vgap: 12px;
+}
+
+.form-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #37474F; /* Gris oscuro para etiquetas */
+    -fx-font-weight: normal;
+}
+
+.form-textfield {
+    -fx-font-size: 14px;
+    -fx-background-color: #F5F7F9;
+    -fx-border-color: #CFD8DC; /* Borde sutil para campos */
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 10px;
+    -fx-prompt-text-fill: #90A4AE;
+}
+
+.form-textfield:focused {
+    -fx-border-color: #007AFF; /* Resaltar borde en foco */
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(0,122,255,0.2), 5, 0, 0, 1);
+}
+
+.action-buttons-hbox {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-spacing: 12px;
+    -fx-padding-top: 20px;
+}
+
+.button-primary {
+    -fx-background-color: #007AFF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+.button-primary:hover {
+    -fx-background-color: #005ECB;
+}
+.button-primary:pressed {
+    -fx-background-color: #004A9E;
+}
+
+
+.button-secondary-dialog {
+    -fx-background-color: #E0E0E0; /* Gris claro para secundario */
+    -fx-text-fill: #333333;
+    -fx-font-weight: normal;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-border-color: #CCCCCC;
+    -fx-border-width: 1px;
+}
+.button-secondary-dialog:hover {
+    -fx-background-color: #D0D0D0;
+}
+.button-secondary-dialog:pressed {
+    -fx-background-color: #C0C0C0;
+}
+
+/* Estilos para validación (opcional, si se implementa) */
+.form-textfield-error {
+    -fx-border-color: #D32F2F; /* Rojo para error */
+    -fx-border-width: 1.5px;
+}
+
+.error-label {
+    -fx-text-fill: #D32F2F;
+    -fx-font-size: 12px;
+} 
