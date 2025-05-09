@@ -61,4 +61,36 @@ public interface IClienteService {
      * @throws Exception Si ocurre un error, el cliente no existe o los puntos son inválidos.
      */
     ClienteFX anadirPuntosFidelidad(Integer idCliente, int puntos) throws Exception;
+
+    /**
+     * Obtiene un cliente específico por su nombre.
+     * @param nombre El nombre del cliente a buscar.
+     * @return Un Optional que contiene el ClienteFX si se encuentra, o vacío si no.
+     * @throws Exception Si ocurre un error durante la comunicación con la API.
+     */
+    Optional<ClienteFX> obtenerClientePorNombre(String nombre) throws Exception;
+
+    /**
+     * Obtiene un cliente específico por su identificación fiscal.
+     * @param identificacionFiscal La identificación fiscal del cliente a buscar.
+     * @return Un Optional que contiene el ClienteFX si se encuentra, o vacío si no.
+     * @throws Exception Si ocurre un error durante la comunicación con la API.
+     */
+    Optional<ClienteFX> obtenerClientePorIdentificacionFiscal(String identificacionFiscal) throws Exception;
+
+    /**
+     * Obtiene clientes por su estado (activo/inactivo).
+     * @param activo True para buscar clientes activos, false para inactivos.
+     * @return Lista de ClienteFX que coinciden con el estado.
+     * @throws Exception Si ocurre un error durante la comunicación con la API.
+     */
+    List<ClienteFX> obtenerClientesPorEstado(boolean activo) throws Exception;
+
+    /**
+     * Obtiene un cliente específico por su número de celular.
+     * @param celular El número de celular del cliente a buscar.
+     * @return Un Optional que contiene el ClienteFX si se encuentra, o vacío si no.
+     * @throws Exception Si ocurre un error durante la comunicación con la API.
+     */
+    Optional<ClienteFX> obtenerClientePorCelular(String celular) throws Exception;
 }

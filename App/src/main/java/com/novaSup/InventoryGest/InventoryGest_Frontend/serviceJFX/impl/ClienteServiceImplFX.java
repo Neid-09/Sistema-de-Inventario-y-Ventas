@@ -75,7 +75,7 @@ public class ClienteServiceImplFX implements IClienteService {
         }
         try {
             // Asegúrate de que la cédula esté codificada correctamente para la URL si contiene caracteres especiales
-            String url = API_URL + "/cedula/" + java.net.URLEncoder.encode(cedula, "UTF-8");
+            String url = API_URL + "/documento-identidad/" + java.net.URLEncoder.encode(cedula, "UTF-8");
             String response = HttpClient.get(url);
             ClienteDTO clienteDTO = objectMapper.readValue(response, ClienteDTO.class);
             return Optional.of(convertirAClienteFX(clienteDTO));
@@ -172,6 +172,77 @@ public class ClienteServiceImplFX implements IClienteService {
         }
     }
 
+    // --- Implementación de nuevos métodos de IClienteService ---
+
+    @Override
+    public Optional<ClienteFX> obtenerClientePorNombre(String nombre) throws Exception {
+        if (nombre == null || nombre.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        try {
+            String url = API_URL + "/nombre/" + java.net.URLEncoder.encode(nombre, "UTF-8");
+            logger.debug("Enviando GET a {}", url);
+            String response = HttpClient.get(url);
+            ClienteDTO clienteDTO = objectMapper.readValue(response, ClienteDTO.class);
+            return Optional.of(convertirAClienteFX(clienteDTO));
+        } catch (Exception e) {
+            logger.warn("Cliente con nombre '{}' no encontrado o error al obtener: {}", nombre, e.getMessage());
+            return Optional.empty(); // Devolver vacío si no se encuentra o hay error
+        }
+    }
+
+    @Override
+    public Optional<ClienteFX> obtenerClientePorIdentificacionFiscal(String identificacionFiscal) throws Exception {
+        if (identificacionFiscal == null || identificacionFiscal.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        try {
+            String url = API_URL + "/identificacion-fiscal/" + java.net.URLEncoder.encode(identificacionFiscal, "UTF-8");
+            logger.debug("Enviando GET a {}", url);
+            String response = HttpClient.get(url);
+            ClienteDTO clienteDTO = objectMapper.readValue(response, ClienteDTO.class);
+            return Optional.of(convertirAClienteFX(clienteDTO));
+        } catch (Exception e) {
+            logger.warn("Cliente con identificación fiscal '{}' no encontrado o error al obtener: {}", identificacionFiscal, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<ClienteFX> obtenerClientesPorEstado(boolean activo) throws Exception {
+        try {
+            String url = API_URL + "/estado?activo=" + activo;
+            logger.debug("Enviando GET a {}", url);
+            String response = HttpClient.get(url);
+            List<ClienteDTO> clientesDTO = objectMapper.readValue(response, new TypeReference<List<ClienteDTO>>() {});
+            return clientesDTO.stream()
+                    .map(this::convertirAClienteFX)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            logger.error("Error al obtener clientes por estado (activo={}): {}", activo, e.getMessage(), e);
+            // Devolver lista vacía en caso de error o si la API devuelve 404 (que podría ser interpretado como "no hay clientes con ese estado")
+            // Opcionalmente, se podría lanzar la excepción para que la UI la maneje de forma más específica.
+            return List.of(); 
+        }
+    }
+
+    @Override
+    public Optional<ClienteFX> obtenerClientePorCelular(String celular) throws Exception {
+        if (celular == null || celular.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        try {
+            String url = API_URL + "/celular/" + java.net.URLEncoder.encode(celular, "UTF-8");
+            logger.debug("Enviando GET a {}", url);
+            String response = HttpClient.get(url);
+            ClienteDTO clienteDTO = objectMapper.readValue(response, ClienteDTO.class);
+            return Optional.of(convertirAClienteFX(clienteDTO));
+        } catch (Exception e) {
+            logger.warn("Cliente con celular '{}' no encontrado o error al obtener: {}", celular, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     // --- Métodos de Conversión ---
 
     /**
@@ -181,7 +252,7 @@ public class ClienteServiceImplFX implements IClienteService {
         if (dto == null) return null;
         return new ClienteFX(
                 dto.idCliente,
-                dto.cedula,
+                dto.documentoIdentidad,
                 dto.nombre,
                 dto.correo,
                 dto.celular,
@@ -189,8 +260,17 @@ public class ClienteServiceImplFX implements IClienteService {
                 dto.puntosFidelidad,
                 dto.limiteCredito,
                 dto.totalComprado,
-                dto.ultimaCompra, // Pasa OffsetDateTime
-                dto.tieneCreditos // Pasa el nuevo boolean
+                dto.ultimaCompra,
+                dto.tieneCreditos,
+                dto.requiereFacturaDefault,
+                dto.razonSocial,
+                dto.identificacionFiscal,
+                dto.direccionFacturacion,
+                dto.correoFacturacion,
+                dto.tipoFacturaDefault,
+                dto.fechaRegistro,
+                dto.fechaActualizacion,
+                dto.activo
         );
     }
 
@@ -200,20 +280,27 @@ public class ClienteServiceImplFX implements IClienteService {
     private ClienteDTO convertirAClienteDTO(ClienteFX fx) {
         if (fx == null) return null;
         ClienteDTO dto = new ClienteDTO();
-        // Si el ID es 0 o null, no lo enviamos o lo enviamos como null para creación
         dto.idCliente = (fx.getIdCliente() != null && fx.getIdCliente() > 0) ? fx.getIdCliente() : null;
-        dto.cedula = fx.getCedula();
+        dto.documentoIdentidad = fx.getDocumentoIdentidad();
         dto.nombre = fx.getNombre();
         dto.correo = fx.getCorreo();
         dto.celular = fx.getCelular();
         dto.direccion = fx.getDireccion();
         dto.puntosFidelidad = fx.getPuntosFidelidad();
         dto.limiteCredito = fx.getLimiteCredito();
-        // Estos campos usualmente no se envían desde el frontend para crear/actualizar,
-        // son calculados por el backend, pero los incluimos por completitud del DTO.
         dto.totalComprado = fx.getTotalComprado();
-        dto.ultimaCompra = fx.getUltimaCompra(); // Obtiene OffsetDateTime
-        dto.tieneCreditos = fx.isTieneCreditos(); // Obtiene el boolean
+        dto.ultimaCompra = fx.getUltimaCompra();
+        dto.tieneCreditos = fx.isTieneCreditos();
+
+        dto.requiereFacturaDefault = fx.isRequiereFacturaDefault();
+        dto.razonSocial = fx.getRazonSocial();
+        dto.identificacionFiscal = fx.getIdentificacionFiscal();
+        dto.direccionFacturacion = fx.getDireccionFacturacion();
+        dto.correoFacturacion = fx.getCorreoFacturacion();
+        dto.tipoFacturaDefault = fx.getTipoFacturaDefault();
+        dto.fechaRegistro = fx.getFechaRegistro();
+        dto.fechaActualizacion = fx.getFechaActualizacion();
+        dto.activo = fx.isActivo();
         return dto;
     }
 
@@ -227,7 +314,7 @@ public class ClienteServiceImplFX implements IClienteService {
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class ClienteDTO {
         public Integer idCliente;
-        public String cedula;
+        public String documentoIdentidad;
         public String nombre;
         public String correo;
         public String celular;
@@ -235,7 +322,17 @@ public class ClienteServiceImplFX implements IClienteService {
         public Integer puntosFidelidad;
         public BigDecimal limiteCredito;
         public BigDecimal totalComprado;
-        public OffsetDateTime ultimaCompra; // CORREGIDO: Cambiado a OffsetDateTime
-        public Boolean tieneCreditos; // Nuevo campo
+        public OffsetDateTime ultimaCompra;
+        public Boolean tieneCreditos;
+
+        public Boolean requiereFacturaDefault;
+        public String razonSocial;
+        public String identificacionFiscal;
+        public String direccionFacturacion;
+        public String correoFacturacion;
+        public String tipoFacturaDefault;
+        public OffsetDateTime fechaRegistro;
+        public OffsetDateTime fechaActualizacion;
+        public Boolean activo;
     }
 }
