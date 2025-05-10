@@ -7,7 +7,7 @@
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<BorderPane xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario.LoteControllerFX"
             prefHeight="600.0" prefWidth="1000.0">
 
