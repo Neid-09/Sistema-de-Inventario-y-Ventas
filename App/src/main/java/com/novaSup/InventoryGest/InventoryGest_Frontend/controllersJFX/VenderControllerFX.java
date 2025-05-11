@@ -6,6 +6,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaRequest;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaResponse;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -388,7 +389,7 @@ public class VenderControllerFX implements Initializable {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloVentas/ProcesarVentaDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.DIALOG_PROCESAR_VENTA));
             DialogPane dialogContentPane = loader.load(); // Carga el DialogPane
             ProcesarVentaDialogController dialogController = loader.getController();
 

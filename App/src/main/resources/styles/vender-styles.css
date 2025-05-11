@@ -280,3 +280,108 @@
 .productos-items-container {
     -fx-padding: 0; /* El padding ya está en .producto-item-card */
 }
+
+/* Estilos para los botones del DialogPane en ProcesarVentaDialog.fxml */
+.dialog-pane .button-bar .button {
+    -fx-font-size: 14px;
+    -fx-padding: 8px 15px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+/* Estilo para el botón Confirmar y Finalizar Venta (verde) */
+.dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta") {
+    -fx-background-color: #4CAF50; /* Verde */
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta"):hover {
+    -fx-background-color: #45a049; /* Verde más oscuro al pasar el mouse */
+}
+
+/* Estilo para el botón Cancelar (rojo) */
+.dialog-pane .button-bar .button:contains("Cancelar") {
+    -fx-background-color: #f44336; /* Rojo */
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button-bar .button:contains("Cancelar"):hover {
+    -fx-background-color: #da190b; /* Rojo más oscuro al pasar el mouse */
+}
+
+/* Estilos específicos para botones dentro del contenido si es necesario */
+#btnBuscarCliente {
+    -fx-background-color: #2196F3; /* Azul */
+    -fx-text-fill: white;
+}
+
+#btnBuscarCliente:hover {
+    -fx-background-color: #1e88e5;
+}
+
+#btnRegistrarNuevoCliente {
+     -fx-background-color: #FF9800; /* Naranja */
+     -fx-text-fill: white;
+     -fx-font-weight: bold;
+}
+
+#btnRegistrarNuevoCliente:hover {
+    -fx-background-color: #fb8c00;
+}
+
+/* Ajustes para el Label de Monto Total */
+#lblMontoTotal {
+    -fx-padding: 10px;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-color: #f9f9f9;
+}
+
+/* Estilos para ToggleButtons (si decides usarlos en vez de RadioButtons) */
+.toggle-button-group .toggle-button {
+    -fx-background-color: #e0e0e0;
+    -fx-border-color: #c0c0c0;
+    -fx-border-width: 1px;
+}
+
+.toggle-button-group .toggle-button:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-border-color: #0056b3;
+}
+
+.toggle-button-group .toggle-button:hover {
+    -fx-background-color: #d0d0d0;
+}
+
+.toggle-button-group .toggle-button:selected:hover {
+    -fx-background-color: #0069d9;
+}
+
+/* Estilos para la sección de Vuelto en ProcesarVentaDialog */
+.vuelto-seccion-label {
+    -fx-font-size: 14px; /* Mismo tamaño que otros labels de sección */
+    -fx-font-weight: bold;
+}
+
+.vuelto-textfield {
+    -fx-font-size: 22px; /* Tamaño de fuente más grande */
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 8px;
+}
+
+#txtTotalRecibido {
+    /* Puedes añadir estilos específicos si es necesario */
+}
+
+#txtCambioEntregar {
+    -fx-background-color: #e9ecef; /* Color de fondo ligeramente diferente para destacar que es calculado */
+    -fx-text-fill: #28a745; /* Color verde para el cambio positivo */
+}
+
+#txtCambioEntregar.monto-insuficiente,
+#txtCambioEntregar.valor-invalido {
+    -fx-text-fill: #dc3545; /* Color rojo para errores */
+}

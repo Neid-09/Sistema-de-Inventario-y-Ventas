@@ -38,4 +38,7 @@ public class PathsFXML {
     public static final String DIALOG_CREDITO_DETALLES = "/views/ModuloClientes/CreditoDetallesDialog.fxml";
     public static final String DIALOG_REGISTRAR_PAGO = "/views/ModuloClientes/RegistrarPagoDialog.fxml";
 
+    /* MODULO VENTAS */
+    public static final String DIALOG_PROCESAR_VENTA = "/views/ModuloVentas/ProcesarVentaDialog.fxml";
+
 }

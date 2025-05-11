@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="views.Modificar">
+   <children>
+      <Label prefHeight="86.0" prefWidth="600.0" style="-fx-background-color: #286299;" text="MODIFICAR" textFill="WHITE">
+         <font>
+            <Font size="49.0" />
+         </font>
+      </Label>
+      <TextField layoutX="8.0" layoutY="122.0" prefHeight="19.0" prefWidth="132.0" />
+      <Label layoutX="8.0" layoutY="101.0" prefHeight="14.0" prefWidth="58.0" text="Código ">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField layoutX="155.0" layoutY="122.0" prefHeight="19.0" prefWidth="132.0" />
+      <TextField layoutX="300.0" layoutY="122.0" prefHeight="19.0" prefWidth="132.0" />
+      <Spinner layoutX="445.0" layoutY="122.0" />
+      <Label layoutX="155.0" layoutY="102.0" prefHeight="26.0" prefWidth="70.0" text="Cantidad">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Label layoutX="300.0" layoutY="101.0" prefHeight="26.0" prefWidth="87.0" text="Precio Real">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Label layoutX="445.0" layoutY="101.0" prefHeight="26.0" prefWidth="102.0" text="Nuevo Precio">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField layoutX="8.0" layoutY="181.0" prefHeight="26.0" prefWidth="289.0" />
+      <Label layoutX="8.0" layoutY="161.0" prefHeight="26.0" prefWidth="102.0" text="Descripción">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TextField layoutX="344.0" layoutY="181.0" prefHeight="10.0" prefWidth="102.0" />
+      <Label layoutX="344.0" layoutY="161.0" prefHeight="26.0" prefWidth="102.0" text="Descuento">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <Label layoutX="454.0" layoutY="185.0" text="\%" />
+      <Button layoutX="11.0" layoutY="286.0" mnemonicParsing="false" prefHeight="86.0" prefWidth="87.0" style="-fx-background-color: RED;" text="DEVOLVER" />
+      <Button layoutX="289.0" layoutY="286.0" mnemonicParsing="false" prefHeight="86.0" prefWidth="87.0" style="-fx-background-color: grey;" text="INVENTARIO" />
+      <Button layoutX="384.0" layoutY="286.0" mnemonicParsing="false" prefHeight="86.0" prefWidth="87.0" style="-fx-background-color: grey;" text="SALIR" />
+      <Button layoutX="479.0" layoutY="286.0" mnemonicParsing="false" prefHeight="86.0" prefWidth="87.0" style="-fx-background-color: #A7E8A0;;" text="APLICAR" />
+   </children>
+</AnchorPane>
