@@ -18,6 +18,8 @@ public class PathsFXML {
     public static final String PLANTILLAS_ROLES= "/views/ModuloConfigurar/PlantillaPermisosRoles.fxml";
     public static final String PERMISOS_USUARIOS= "/views/ModuloConfigurar/PermisosUsuario.fxml";
 
+    public static final String CONFIGURACION_IMPUESTOS = "/views/ModuloConfigurar/Impuestos/ConfiguracionImpuestos.fxml";
+
     /*MODULO INVENTARIO*/
     public static final String MOD_INVENTARIO = "/views/Inventario.fxml";
     public static final String CRUD_PRDUCTOS = "/views/ModuloInventario/CRUDProductos.fxml";

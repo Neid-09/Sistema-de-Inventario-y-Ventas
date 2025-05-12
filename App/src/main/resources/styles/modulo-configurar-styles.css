@@ -1,0 +1,50 @@
+/* Estilos para ModuloConfigurar.fxml */
+.root-pane {
+    -fx-background-color: #f4f7f9; /* Un fondo claro y moderno */
+    -fx-font-family: "Segoe UI", Arial, sans-serif; /* Fuente moderna */
+}
+
+.title-label {
+    -fx-font-size: 28px; /* Tamaño de fuente más grande para el título */
+    -fx-text-fill: #333333; /* Color de texto oscuro para el título */
+    -fx-font-weight: bold;
+    -fx-padding: 10px 0 20px 0; /* Espaciado alrededor del título */
+}
+
+.config-button {
+    -fx-background-color: #4CAF50; /* Verde para acciones positivas */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-pref-width: 250px; /* Ancho preferido más grande */
+    -fx-pref-height: 45px; /* Altura preferida */
+    -fx-background-radius: 5px; /* Bordes redondeados */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0.5, 0, 1); /* Sombra sutil */
+    -fx-cursor: hand; /* Cursor de mano al pasar por encima */
+}
+
+.config-button:hover {
+    -fx-background-color: #45a049; /* Color más oscuro al pasar el ratón */
+}
+
+.config-button:pressed {
+    -fx-background-color: #3e8e41; /* Color aún más oscuro al presionar */
+}
+
+.info-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #757575; /* Gris para el texto informativo */
+    -fx-font-style: italic;
+}
+
+/* Estilo específico para el nuevo botón de impuestos si se desea diferenciarlo */
+#btnConfigurarImpuestos {
+    -fx-background-color: #007bff; /* Azul para distinguirlo si es necesario */
+}
+
+#btnConfigurarImpuestos:hover {
+    -fx-background-color: #0069d9;
+}
+
+#btnConfigurarImpuestos:pressed {
+    -fx-background-color: #005cbf;
+} 
