@@ -18,8 +18,11 @@ public class TasaImpuesto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tasa")
     private Integer idTasa;
+    
+    @Transient // Campo para almacenar el ID del tipo de impuesto
+    private Integer tipoImpuestoId;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_tipo_impuesto", nullable = false)
     private TipoImpuesto tipoImpuesto;
 
@@ -37,4 +40,13 @@ public class TasaImpuesto {
     @Lob
     @Column(name = "descripcion")
     private String descripcion;
+
+    @PostLoad
+    private void onLoad() {
+        if (this.tipoImpuesto != null) {
+            // Acceder al ID de un proxy generalmente es seguro y no debería
+            // desencadenar la inicialización completa del proxy.
+            this.tipoImpuestoId = this.tipoImpuesto.getIdTipoImpuesto();
+        }
+    }
 } 

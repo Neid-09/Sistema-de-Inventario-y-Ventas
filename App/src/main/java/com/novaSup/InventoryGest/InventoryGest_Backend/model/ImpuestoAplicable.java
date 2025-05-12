@@ -18,17 +18,26 @@ public class ImpuestoAplicable {
     @Column(name = "id_impuesto_aplicable")
     private Integer idImpuestoAplicable;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_tasa", nullable = false)
     private TasaImpuesto tasaImpuesto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Transient
+    private Integer idTasa;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_producto", nullable = true) // Puede ser nullable si el impuesto aplica a categoría
     private Producto producto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Transient
+    private Integer idProducto;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_categoria", nullable = true) // Puede ser nullable si el impuesto aplica a producto
     private Categoria categoria;
+
+    @Transient
+    private Integer idCategoria;
 
     @Column(name = "aplica")
     private Boolean aplica;
@@ -40,4 +49,17 @@ public class ImpuestoAplicable {
     @Temporal(TemporalType.DATE)
     @Column(name = "fecha_fin")
     private Date fechaFin;
+
+    @PostLoad
+    private void loadTransientIds() {
+        if (this.tasaImpuesto != null) {
+            this.idTasa = this.tasaImpuesto.getIdTasa();
+        }
+        if (this.producto != null) {
+            this.idProducto = this.producto.getIdProducto();
+        }
+        if (this.categoria != null) {
+            this.idCategoria = this.categoria.getIdCategoria();
+        }
+    }
 } 
