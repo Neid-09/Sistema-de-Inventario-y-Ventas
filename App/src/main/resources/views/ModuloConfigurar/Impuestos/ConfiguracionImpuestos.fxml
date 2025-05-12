@@ -16,106 +16,20 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.fxml.FXMLLoader?>
 
-<AnchorPane prefHeight="700.0" prefWidth="900.0" styleClass="root-pane-impuestos" stylesheets="@../../../styles/configuracion-impuestos-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.impuestos.ConfigImptsCtrlFX">
+<AnchorPane prefHeight="700.0" prefWidth="900.0" styleClass="root-pane-impuestos" stylesheets="@../../../styles/configuracion-impuestos-styles.css" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.impuestos.ConfigImptsCtrlFX">
    <children>
       <TabPane fx:id="tabPaneImpuestos" layoutX="14.0" layoutY="14.0" prefHeight="672.0" prefWidth="872.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <tabs>
           <Tab fx:id="tabTiposImpuesto" text="Tipos de Impuesto">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox layoutX="14.0" layoutY="14.0" prefHeight="600.0" prefWidth="840.0" spacing="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
-                           <children>
-                              <Label styleClass="section-title" text="Administrar Tipos de Impuesto" />
-                              <TableView fx:id="tableViewTiposImpuesto" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                                <columns>
-                                  <TableColumn fx:id="colTipoNombre" prefWidth="150.0" text="Nombre" />
-                                  <TableColumn fx:id="colTipoDescripcion" prefWidth="300.0" text="Descripción" />
-                                    <TableColumn fx:id="colTipoEsPorcentual" prefWidth="120.0" text="Es Porcentual" />
-                                    <TableColumn fx:id="colTipoActivo" prefWidth="100.0" text="Activo" />
-                                </columns>
-                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy>
-                              </TableView>
-                              <HBox styleClass="hbox-buttons">
-                                 <children>
-                                    <Button fx:id="btnNuevoTipoImpuesto" mnemonicParsing="false" onAction="#handleNuevoTipoImpuesto" styleClass="button-primary" text="Nuevo Tipo" />
-                                    <Button fx:id="btnEditarTipoImpuesto" mnemonicParsing="false" onAction="#handleEditarTipoImpuesto" styleClass="button-primary" text="Editar Tipo" />
-                                    <Button fx:id="btnEliminarTipoImpuesto" mnemonicParsing="false" onAction="#handleEliminarTipoImpuesto" styleClass="button-danger" text="Eliminar Tipo" />
-                                 </children>
-                              </HBox>
-                              <VBox fx:id="formTipoImpuestoContainer" managed="false" spacing="10" styleClass="form-container" visible="false">
-                                  <Label styleClass="section-title" text="Detalles del Tipo de Impuesto" />
-                                  <GridPane hgap="10" vgap="8">
-                                      <columnConstraints>
-                                          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="120.0" />
-                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
-                                      </columnConstraints>
-                                      <rowConstraints>
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                      </rowConstraints>
-                                      <Label styleClass="form-label" text="Nombre:" GridPane.rowIndex="0" />
-                                      <TextField fx:id="txtTipoNombre" styleClass="form-input" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                                      
-                                      <Label styleClass="form-label" text="Descripción:" GridPane.rowIndex="1" />
-                                      <TextArea fx:id="txtTipoDescripcion" prefHeight="50.0" styleClass="form-input" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                      
-                                      <Label styleClass="form-label" text="Es Porcentual:" GridPane.rowIndex="2" />
-                                      <CheckBox fx:id="chkTipoEsPorcentual" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                      
-                                      <Label styleClass="form-label" text="Activo:" GridPane.rowIndex="3" />
-                                      <CheckBox fx:id="chkTipoActivo" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                  </GridPane>
-                                  <HBox alignment="CENTER_LEFT" spacing="10">
-                                      <Button fx:id="btnGuardarTipoImpuesto" onAction="#handleGuardarTipoImpuesto" styleClass="button-primary" text="Guardar" />
-                                      <Button fx:id="btnCancelarTipoImpuesto" onAction="#handleCancelarTipoImpuesto" text="Cancelar" />
-                                  </HBox>
-                                   <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </VBox>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
+              <fx:include fx:id="tipoImpuestoTabContent" source="tipo_impuesto_tab.fxml" />
             </content>
           </Tab>
           <Tab fx:id="tabTasasImpuesto" text="Tasas de Impuesto">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox prefHeight="200.0" prefWidth="100.0" spacing="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
-                           <children>
-                              <Label styleClass="section-title" text="Administrar Tasas de Impuesto" />
-                              <TableView fx:id="tableViewTasasImpuesto" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                                <columns>
-                                  <TableColumn fx:id="colTasaTipoImpuesto" prefWidth="150.0" text="Tipo de Impuesto" />
-                                  <TableColumn fx:id="colTasaValor" prefWidth="100.0" text="Tasa (%)" />
-                                    <TableColumn fx:id="colTasaFechaInicio" prefWidth="120.0" text="Fecha Inicio" />
-                                    <TableColumn fx:id="colTasaFechaFin" prefWidth="120.0" text="Fecha Fin" />
-                                    <TableColumn fx:id="colTasaDescripcion" prefWidth="250.0" text="Descripción" />
-                                </columns>
-                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy>
-                              </TableView>
-                              <HBox styleClass="hbox-buttons">
-                                 <children>
-                                    <Button fx:id="btnNuevaTasa" mnemonicParsing="false" styleClass="button-primary" text="Nueva Tasa" />
-                                    <Button fx:id="btnEditarTasa" mnemonicParsing="false" styleClass="button-primary" text="Editar Tasa" />
-                                    <Button fx:id="btnEliminarTasa" mnemonicParsing="false" styleClass="button-danger" text="Eliminar Tasa" />
-                                 </children>
-                              </HBox>
-                              <!-- Aquí iría el formulario para agregar/editar tasas, similar al de Tipos de Impuesto -->
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
+              <fx:include fx:id="tasaImpuestoTabContent" source="tasa_impuesto_tab.fxml" />
             </content>
           </Tab>
           <Tab fx:id="tabImpuestosAplicables" text="Impuestos Aplicables">

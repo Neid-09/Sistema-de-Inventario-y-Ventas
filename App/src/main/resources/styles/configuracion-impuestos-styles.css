@@ -46,7 +46,46 @@
 
 .form-input {
     -fx-font-size: 13px;
-    -fx-pref-width: 250px; /* Ancho estándar para campos de texto */
+    -fx-max-width: 250px;
+    -fx-min-width: 110px;
+    -fx-padding: 5px 8px;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-color: white;
+}
+
+.form-input:focused {
+    -fx-border-color: #007bff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 123, 255, 0.25), 5, 0, 0, 1);
+}
+
+/* Asegurar que el DatePicker también use estos estilos */
+.date-picker.form-input .text-field {
+    -fx-border-color: transparent; /* Evitar doble borde */
+    -fx-background-color: transparent;
+}
+
+/* Estilo para ComboBox con clase form-input */
+.combo-box.form-input {
+    /* Hereda la mayoría de los estilos de .form-input */
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.combo-box.form-input .list-cell {
+    -fx-padding: 5px 8px;
+    -fx-font-size: 13px;
+}
+
+/* Estilo para TextArea */
+.text-area.form-input {
+    -fx-wrap-text: true;
+}
+
+/* Estilo para CheckBox dentro del formulario */
+.form-checkbox {
+    -fx-font-size: 13px;
 }
 
 .table-view {
@@ -89,16 +128,95 @@
     -fx-background-color: #c82333;
 }
 
+.button-secondary {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.button-secondary:hover {
+    -fx-background-color: #5a6268;
+}
+
 .form-container {
-    -fx-padding: 15px;
+    -fx-padding: 20px;
     -fx-border-color: #ddd;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
     -fx-background-color: #fdfdfd;
 }
 
+/* Ajustes para el GridPane dentro del formulario */
+.form-container .grid-pane {
+    -fx-hgap: 15px; /* Espacio horizontal */
+    -fx-vgap: 12px; /* Espacio vertical aumentado */
+}
+
 .hbox-buttons {
     -fx-spacing: 10px;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding-top: 15px;
+    -fx-padding: 15px 0 0 0; /* Añadido padding superior para separar de la tabla, sin padding lateral o inferior */
+}
+
+/* Estilos compactos para el formulario */
+.form-container-compact {
+    -fx-padding: 5px;
+    -fx-border-color: #ddd;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-background-color: #fdfdfd;
+}
+
+.section-title-small {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-padding: 0 0 2px 0;
+}
+
+.form-label-compact {
+    -fx-font-size: 12px;
+    -fx-text-fill: #444;
+}
+
+.form-input-compact {
+    -fx-font-size: 12px;
+    -fx-padding: 3px 5px;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-background-color: white;
+}
+
+.button-primary-small, .button-secondary-small {
+    -fx-font-size: 12px;
+    -fx-padding: 4px 10px;
+    -fx-background-radius: 3px;
+}
+
+.button-primary-small {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+
+.button-primary-small:hover {
+    -fx-background-color: #0069d9;
+}
+
+.button-secondary-small {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+}
+
+.button-secondary-small:hover {
+    -fx-background-color: #5a6268;
+}
+
+.form-checkbox-compact {
+    -fx-font-size: 12px;
+    -fx-padding: 0 0 0 0;
+    -fx-text-fill: #444;
 } 
