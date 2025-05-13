@@ -34,36 +34,7 @@
           </Tab>
           <Tab fx:id="tabImpuestosAplicables" text="Impuestos Aplicables">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <VBox prefHeight="200.0" prefWidth="100.0" spacing="15.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
-                           <children>
-                              <Label styleClass="section-title" text="Administrar Impuestos Aplicables" />
-                              <TableView fx:id="tableViewImpuestosAplicables" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                                <columns>
-                                  <TableColumn fx:id="colApTasaImpuesto" prefWidth="150.0" text="Tasa de Impuesto" />
-                                  <TableColumn fx:id="colApAplicaA" prefWidth="120.0" text="Aplica A" />
-                                    <TableColumn fx:id="colApNombreAplicable" prefWidth="200.0" text="Producto/Categoría" />
-                                    <TableColumn fx:id="colApFechaInicio" prefWidth="120.0" text="Fecha Inicio" />
-                                    <TableColumn fx:id="colApFechaFin" prefWidth="120.0" text="Fecha Fin" />
-                                    <TableColumn fx:id="colApAplica" prefWidth="100.0" text="¿Aplica?" />
-                                </columns>
-                                 <columnResizePolicy>
-                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                                 </columnResizePolicy>
-                              </TableView>
-                              <HBox styleClass="hbox-buttons">
-                                 <children>
-                                    <Button fx:id="btnNuevoImpuestoAplicable" mnemonicParsing="false" styleClass="button-primary" text="Nuevo Aplicable" />
-                                    <Button fx:id="btnEditarImpuestoAplicable" mnemonicParsing="false" styleClass="button-primary" text="Editar Aplicable" />
-                                    <Button fx:id="btnEliminarImpuestoAplicable" mnemonicParsing="false" styleClass="button-danger" text="Eliminar Aplicable" />
-                                 </children>
-                              </HBox>
-                              <!-- Aquí iría el formulario para agregar/editar impuestos aplicables -->
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
+              <fx:include fx:id="impuestoAplicableTabContent" source="impuesto_aplicable_tab.fxml" />
             </content>
           </Tab>
         </tabs>

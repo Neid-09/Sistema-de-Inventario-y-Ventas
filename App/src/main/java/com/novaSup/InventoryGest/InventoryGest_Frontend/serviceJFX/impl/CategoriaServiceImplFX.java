@@ -1,6 +1,5 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // Necesario para ignorar propiedades desconocidas
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +9,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICategoriaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.CategoriaDTO;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,17 +122,5 @@ public class CategoriaServiceImplFX implements ICategoriaService {
         dto.estado = categoriaFX.getEstado();
         dto.duracionGarantia = categoriaFX.getDuracionGarantia();
         return dto;
-    }
-
-    // Clase DTO interna para representar la estructura JSON de la API
-    @JsonIgnoreProperties(ignoreUnknown = true) // Ignora campos extra en el JSON
-    private static class CategoriaDTO {
-        public Integer idCategoria;
-        public String nombre;
-        public String descripcion;
-        public Boolean estado;
-        public Integer duracionGarantia;
-        // No se necesitan constructores, getters o setters si los campos son públicos
-        // y solo se usa para la deserialización/serialización con Jackson.
     }
 }

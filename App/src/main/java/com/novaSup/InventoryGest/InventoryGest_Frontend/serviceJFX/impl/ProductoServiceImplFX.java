@@ -10,8 +10,10 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.ProductoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.CategoriaDTO;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.ProveedorDTO;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -116,7 +118,7 @@ public class ProductoServiceImplFX implements IProductoService {
     @Override
     public void eliminar(Integer id) throws Exception {
         try {
-            String respuesta = HttpClient.delete(API_URL + "/" + id);
+            HttpClient.delete(API_URL + "/" + id);
             // Si llegamos aquí, es que el producto se eliminó con éxito
         } catch (Exception e) {
             // Extraer el mensaje de error
@@ -236,40 +238,5 @@ public class ProductoServiceImplFX implements IProductoService {
                 dto.correo,
                 dto.direccion
         );
-    }
-
-    // Clases DTO para deserialización
-    private static class ProductoDTO {
-        public Integer idProducto;
-        public String codigo;
-        public String nombre;
-        public String descripcion;
-        public BigDecimal precioCosto;
-        public BigDecimal precioVenta;
-        public Integer stock;
-        public Integer stockMinimo;
-        public Integer stockMaximo;
-        public Integer idCategoria;
-        public CategoriaDTO categoria;
-        public Integer idProveedor;
-        public ProveedorDTO proveedor;
-        public Boolean estado;
-    }
-
-    private static class CategoriaDTO {
-        public Integer idCategoria;
-        public String nombre;
-        public String descripcion;
-        public Boolean estado;
-        public Integer duracionGarantia;
-    }
-
-    private static class ProveedorDTO {
-        public Integer idProveedor;
-        public String nombre;
-        public String contacto;
-        public String telefono;
-        public String correo;
-        public String direccion;
     }
 }
