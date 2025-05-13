@@ -64,8 +64,16 @@
 }
 
 .scroll-pane-productos {
-    -fx-background-color: transparent;
+    -fx-background-color: transparent; /* Asegura que el fondo del scrollpane no interfiera */
     -fx-border-color: transparent; /* Sin bordes para el scrollpane de productos */
+    -fx-fit-to-width: true; /* Importante para que el FlowPane se ajuste correctamente */
+}
+
+/* Estilo para el FlowPane que contiene las tarjetas de producto */
+.flow-pane-productos {
+    -fx-padding: 15px; /* Espaciado alrededor del conjunto de tarjetas */
+    -fx-alignment: TOP_LEFT; /* Alineación de las tarjetas */
+    /* hgap y vgap se establecen en el FXML o en el controlador */
 }
 
 .productos-container-modern {
@@ -75,41 +83,92 @@
     /* -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.1, 0, 1); */
 }
 
-/* Estilos para las tarjetas de producto (adaptar de .producto-item-card si es necesario) */
-.producto-item-card { /* Manteniendo y ajustando si es necesario */
-    -fx-background-color: #FFFFFF;
-    -fx-padding: 15px;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0.1, 0, 2); /* Sombra más sutil */
+/* Estilos para las tarjetas de producto individuales */
+.producto-item-card {
+    -fx-background-color: white; /* Fondo blanco para la tarjeta */
+    -fx-border-color: #E0E0E0; /* Borde gris claro y sutil */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px; /* Esquinas redondeadas para el borde */
+    -fx-background-radius: 8px; /* Esquinas redondeadas para el fondo */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0.15, 0, 2); /* Sombra suave */
+    /* El ancho (prefWidth) se establece en el controlador JavaFX (ej. 200px) */
+    -fx-min-height: 250px; /* Altura mínima para consistencia, ajustar según contenido */
+    -fx-display: INLINE_BLOCK; /* Comportamiento de bloque en línea */
 }
 
-.producto-item-card .label-nombre {
-    -fx-font-size: 16px; /* Un poco más grande */
+/* Placeholder para la imagen del producto */
+.image-placeholder {
+    /* -fx-pref-height: 120px; Se establece en el controlador */
+    -fx-background-color: #F4F6F8; /* Color de fondo gris muy claro */
+    /* -fx-border-color: #E0E0E0; */ /* Opcional: borde para el placeholder */
+    /* -fx-border-width: 0 0 1px 0; */ /* Solo borde inferior si se prefiere */
+    -fx-background-radius: 7px 7px 0 0; /* Esquinas superiores redondeadas (interior al borde de la tarjeta) */
+    /* -fx-border-radius: 8px 8px 0 0; */
+    -fx-alignment: CENTER; /* Por si se añade texto o un icono al placeholder */
+    /* Si usas ImageView directamente, puedes aplicar estilos aquí también */
+}
+
+/* Estilos para los textos dentro de la tarjeta */
+.producto-item-card .label-nombre-card {
+    -fx-font-size: 13px; /* Tamaño ajustado */
     -fx-font-weight: bold;
-    -fx-text-fill: #0056b3; /* Azul oscuro para el nombre */
+    -fx-text-fill: #333333; /* Negro suave */
+    -fx-padding: 0 5px 0 0; /* Espacio a la derecha del nombre antes del precio */
 }
 
-.producto-item-card .label-precio {
-    -fx-font-size: 15px;
+.producto-item-card .label-precio-card {
+    -fx-font-size: 13px; /* Tamaño ajustado */
     -fx-font-weight: bold;
-    -fx-text-fill: #218838; /* Verde oscuro para el precio */
+    -fx-text-fill: #27AE60; /* Verde para el precio */
 }
 
-.producto-item-card .button-agregar {
-    -fx-background-color: #007BFF; /* Azul primario */
+.producto-item-card .label-categoria-tag {
+    -fx-font-size: 10px; /* Más pequeño para el tag */
+    -fx-text-fill: #5D6D7E; /* Gris azulado */
+    -fx-background-color: #EBF5FB; /* Fondo azul muy claro para el tag */
+    -fx-padding: 2px 6px; /* Padding interno del tag */
+    -fx-background-radius: 4px; /* Esquinas redondeadas para el tag */
+    -fx-border-radius: 4px;
+}
+
+/* Estilo para el código del producto en la tarjeta */
+.producto-item-card .label-codigo-card {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7F8C8D; /* Gris más sutil para el código */
+    -fx-padding: 2px 0; /* Un poco de padding vertical */
+}
+
+/* Botón de agregar dentro de la tarjeta */
+.producto-item-card .button-agregar-card {
+    -fx-font-size: 12px;
     -fx-text-fill: white;
-    -fx-font-size: 13px;
-    -fx-padding: 8px 15px;
+    -fx-background-color: #34495E; /* Azul oscuro/gris */
+    -fx-font-weight: bold;
+    -fx-pref-height: 30px; /* Altura ajustada */
+    -fx-background-radius: 5px; /* Esquinas redondeadas para el botón */
     -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
     -fx-cursor: hand;
 }
 
-.producto-item-card .button-agregar:hover {
-    -fx-background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+.producto-item-card .button-agregar-card:hover {
+    -fx-background-color: #002d86; /* Un poco más claro al pasar el mouse */
 }
 
+.producto-item-card .label-nombre { /* Estilo anterior, podría eliminarse si .label-nombre-card lo reemplaza completamente */
+    /* ... */
+}
+.producto-item-card .label-codigo { /* Estilo anterior, ya no se usa en la tarjeta */
+    /* ... */
+}
+.producto-item-card .label-categoria { /* Estilo anterior, podría eliminarse si .label-categoria-tag lo reemplaza */
+    /* ... */
+}
+.producto-item-card .label-precio { /* Estilo anterior, podría eliminarse si .label-precio-card lo reemplaza */
+    /* ... */
+}
+.producto-item-card .button-agregar { /* Estilo anterior, podría eliminarse si .button-agregar-card lo reemplaza */
+    /* ... */
+}
 
 /* Sección del Carrito (Derecha) */
 .carrito-sidebar {
@@ -231,7 +290,6 @@
 .button-procesar-venta-modern:hover {
     -fx-background-color: #218838; /* Verde más oscuro al pasar el mouse */
 }
-
 
 /* Estilos que ya estaban y podrían seguir siendo útiles o necesitar ajustes menores */
 .top-bar {

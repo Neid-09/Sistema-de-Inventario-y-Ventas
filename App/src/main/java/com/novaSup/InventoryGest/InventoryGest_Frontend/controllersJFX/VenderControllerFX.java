@@ -1,12 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo; // Nueva importación
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -14,18 +11,12 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.stage.Modality;
-import javafx.stage.Window;
-
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode; // Para el cálculo del IVA
+import java.math.RoundingMode;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -36,23 +27,21 @@ public class VenderControllerFX implements Initializable {
     @FXML
     private Button btnProcesarVenta;
     @FXML
-    private Button btnProductoComun; // No se implementará ahora
+    private Button btnProductoComun;
     @FXML
-    private Button btnBuscarVenta; // No se implementará ahora
+    private Button btnBuscarVenta;
     @FXML
-    private Button btnNuevaVenta; // No se implementará ahora
-
+    private Button btnNuevaVenta;
 
     @FXML
     private TextField txtBusqueda;
 
     @FXML
-    private VBox productosBox;
+    private FlowPane productosBox;
 
     @FXML
-    private VBox carritoBox; // Contiene los items del carrito
+    private VBox carritoBox;
 
-    // Labels para el resumen del carrito del FXML
     @FXML
     private Label lblSubtotal;
     @FXML
@@ -62,10 +51,8 @@ public class VenderControllerFX implements Initializable {
     @FXML
     private Label lblItemsCarrito;
 
-
     private List<ProductoFX> todosLosProductos;
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
-    // totalVenta se calculará dinámicamente, no es necesario un campo global si se recalcula siempre.
 
     public VenderControllerFX(IProductoService productoService) {
         this.productoService = productoService;
@@ -73,198 +60,157 @@ public class VenderControllerFX implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        formatoMoneda.setMaximumFractionDigits(2); // Asegurar 2 decimales para COP
+        formatoMoneda.setMaximumFractionDigits(2);
         try {
             cargarProductos();
-            buscarProductos(null); // Mostrar todos los productos al inicio
-            actualizarTotalCarrito(); // Inicializar etiquetas de totales y contador
+            buscarProductos(null);
         } catch (Exception e) {
-            mostrarError("Error al inicializar", "No se pudieron cargar los productos: " + e.getMessage());
+            mostrarError("Error al cargar productos", "No se pudieron cargar los productos: " + e.getMessage());
             e.printStackTrace();
         }
-        // Configurar acciones para botones no implementados (opcional)
         if (btnProductoComun != null) {
-            btnProductoComun.setOnAction(event -> mostrarAlerta("Función no implementada", "La opción 'Producto Común' aún no está disponible."));
+            btnProductoComun.setOnAction(e -> mostrarAlerta("Funcionalidad no implementada", "El botón 'Producto Común' aún no está implementado."));
         }
         if (btnBuscarVenta != null) {
-            btnBuscarVenta.setOnAction(event -> mostrarAlerta("Función no implementada", "La opción 'Buscar Venta' aún no está disponible."));
+            btnBuscarVenta.setOnAction(e -> mostrarAlerta("Funcionalidad no implementada", "El botón 'Buscar Venta' aún no está implementado."));
         }
         if (btnNuevaVenta != null) {
-            btnNuevaVenta.setOnAction(event -> {
-                limpiarVenta();
-                mostrarAlerta("Nueva Venta", "Se ha iniciado una nueva venta. El carrito está vacío.");
-            });
+            btnNuevaVenta.setOnAction(e -> limpiarVenta());
         }
     }
 
-    // crearHeaderCarrito ya no es necesario si el FXML lo define o si los items son auto-descriptivos.
-    // Si el FXML no tiene un header para el carrito, y se desea uno dinámico, se podría mantener.
-    // Por ahora, asumimos que el FXML maneja la estructura visual del carrito y sus items.
-
     private void cargarProductos() throws Exception {
         todosLosProductos = productoService.obtenerTodos().stream()
-                .filter(ProductoFX::getEstado) // Solo productos activos
+                .filter(ProductoFX::getEstado)
                 .collect(Collectors.toList());
     }
 
     @FXML
-    void buscarProductos(KeyEvent event) { // Puede ser llamado sin evento al inicio
+    void buscarProductos(KeyEvent event) {
         String textoBusqueda = "";
         if (txtBusqueda != null && txtBusqueda.getText() != null) {
-            textoBusqueda = txtBusqueda.getText().trim().toLowerCase();
+            textoBusqueda = txtBusqueda.getText().toLowerCase().trim();
         }
 
-        productosBox.getChildren().clear(); // Limpiar resultados anteriores
+        productosBox.getChildren().clear();
 
         if (todosLosProductos == null) {
             mostrarError("Error", "La lista de productos no ha sido cargada.");
             return;
         }
 
-        String finalTextoBusqueda = textoBusqueda; // Necesario para lambda
+        String finalTextoBusqueda = textoBusqueda;
         todosLosProductos.stream()
                 .filter(p -> p.getNombre().toLowerCase().contains(finalTextoBusqueda) ||
+                             String.valueOf(p.getCodigo()).toLowerCase().contains(finalTextoBusqueda) ||
                              String.valueOf(p.getIdProducto()).toLowerCase().contains(finalTextoBusqueda))
                 .forEach(this::agregarProductoAResultados);
     }
 
     private void agregarProductoAResultados(ProductoFX producto) {
-        // Contenedor principal para la tarjeta del producto
-        HBox productoCard = new HBox(15); // Espaciado entre imagen (futura) y detalles
-        productoCard.setPadding(new Insets(10));
-        productoCard.getStyleClass().add("producto-item-card"); // Usar clase CSS del FXML
-        productoCard.setAlignment(Pos.CENTER_LEFT);
+        VBox productoCard = new VBox();
+        productoCard.getStyleClass().add("producto-item-card");
+        productoCard.setPrefWidth(200);
+        productoCard.setMinWidth(Region.USE_PREF_SIZE);
+        productoCard.setMaxWidth(Region.USE_PREF_SIZE);
 
-        // Espacio para la imagen (Placeholder)
-        StackPane imagenPlaceholder = new StackPane();
-        imagenPlaceholder.setPrefSize(80, 80); // Tamaño deseado para la imagen
-        imagenPlaceholder.setMinSize(80, 80);
-        imagenPlaceholder.setStyle("-fx-background-color: #e0e0e0; -fx-background-radius: 5;");
-        Label lblPlaceholder = new Label("Img");
-        imagenPlaceholder.getChildren().add(lblPlaceholder);
-        // Cuando tengas la imagen:
-        // ImageView imageView = new ImageView(new Image(producto.getRutaImagen()));
-        // imageView.setFitHeight(80);
-        // imageView.setFitWidth(80);
-        // imageView.setPreserveRatio(true);
-        // imagenPlaceholder.getChildren().setAll(imageView);
+        StackPane imagePlaceholder = new StackPane();
+        imagePlaceholder.setPrefHeight(120);
+        imagePlaceholder.getStyleClass().add("image-placeholder");
+        imagePlaceholder.setPrefWidth(Double.MAX_VALUE);
 
-        // VBox para detalles del producto (Nombre, Stock, Precio)
-        VBox detallesBox = new VBox(5);
-        detallesBox.setAlignment(Pos.CENTER_LEFT);
+        VBox contentVBox = new VBox(5);
+        contentVBox.setPadding(new Insets(8, 10, 10, 10));
+        VBox.setVgrow(contentVBox, Priority.ALWAYS);
 
+        HBox namePriceHBox = new HBox();
         Label lblNombre = new Label(producto.getNombre());
-        lblNombre.getStyleClass().add("label-nombre"); // Clase CSS del FXML
+        lblNombre.getStyleClass().add("label-nombre-card");
+        lblNombre.setWrapText(true);
+        HBox.setHgrow(lblNombre, Priority.SOMETIMES);
 
-        Label lblStock = new Label("Stock: " + producto.getStock());
-        // lblStock.getStyleClass().add("label-stock"); // Añadir si se define en CSS
+        Region namePriceSpacer = new Region();
+        HBox.setHgrow(namePriceSpacer, Priority.ALWAYS);
 
         Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecioVenta()));
-        lblPrecio.getStyleClass().add("label-precio"); // Clase CSS del FXML
+        lblPrecio.getStyleClass().add("label-precio-card");
+        namePriceHBox.getChildren().addAll(lblNombre, namePriceSpacer, lblPrecio);
 
-        detallesBox.getChildren().addAll(lblNombre, lblStock, lblPrecio);
+        Label lblCategoria = new Label(producto.getCategoria());
+        lblCategoria.getStyleClass().add("label-categoria-tag");
+        HBox categoriaContainer = new HBox(lblCategoria);
+        categoriaContainer.setPadding(new Insets(4, 0, 6, 0));
 
-        // Botón para agregar al carrito
+        Label lblCodigo = new Label("Cód: " + producto.getCodigo());
+        lblCodigo.getStyleClass().add("label-codigo-card");
+        HBox codigoContainer = new HBox(lblCodigo);
+        codigoContainer.setPadding(new Insets(0, 0, 4, 0));
+
+        Region contentSpacer = new Region();
+        VBox.setVgrow(contentSpacer, Priority.ALWAYS);
+
         Button btnAgregar = new Button("Agregar");
-        btnAgregar.getStyleClass().add("button-agregar"); // Clase CSS del FXML
+        btnAgregar.getStyleClass().add("button-agregar-card");
+        btnAgregar.setMaxWidth(Double.MAX_VALUE);
         btnAgregar.setOnAction(e -> agregarAlCarrito(producto));
 
-        // HBox para alinear el botón a la derecha si es necesario o simplemente añadirlo
-        // Si se quiere el botón debajo de los detalles, añadirlo al VBox detallesBox
-        // Si se quiere al lado, añadirlo al HBox productoCard directamente o en un contenedor.
-        // Por simplicidad, lo añadimos al lado de los detalles, pero podría necesitar un Pane para empujar.
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        contentVBox.getChildren().addAll(namePriceHBox, categoriaContainer, codigoContainer, contentSpacer, btnAgregar);
+        productoCard.getChildren().addAll(imagePlaceholder, contentVBox);
 
-        productoCard.getChildren().addAll(imagenPlaceholder, detallesBox, spacer, btnAgregar);
         productosBox.getChildren().add(productoCard);
     }
 
     private void agregarAlCarrito(ProductoFX producto) {
-        // Verificar si el producto ya está en el carrito
-        for (Node node : carritoBox.getChildren()) {
-            if (node.getUserData() instanceof ProductoFX) {
-                ProductoFX productoEnCarrito = (ProductoFX) node.getUserData();
-                if (productoEnCarrito.getIdProducto() == producto.getIdProducto()) {
-                    // Producto ya existe, podríamos incrementar cantidad o mostrar mensaje
-                    HBox itemExistente = (HBox) node;
-                    Spinner<Integer> spinnerCantidad = encontrarSpinnerEnItem(itemExistente);
-                    if (spinnerCantidad != null) {
-                        int nuevaCantidad = spinnerCantidad.getValue() + 1;
-                        if (nuevaCantidad <= producto.getStock()) {
-                            spinnerCantidad.getValueFactory().setValue(nuevaCantidad);
-                        } else {
-                            mostrarAlerta("Stock insuficiente", "No hay suficiente stock para agregar más unidades de " + producto.getNombre());
-                        }
-                    }
-                    actualizarTotalCarrito();
-                    return;
-                }
-            }
-        }
+        boolean productoYaEnCarrito = carritoBox.getChildren().stream()
+            .anyMatch(node -> node.getUserData() instanceof ProductoFX && ((ProductoFX)node.getUserData()).getIdProducto() == producto.getIdProducto());
 
+        if (productoYaEnCarrito) {
+            mostrarAlerta("Producto ya en carrito", producto.getNombre() + " ya ha sido agregado.");
+            return;
+        }
+        
         if (producto.getStock() <= 0) {
-            mostrarAlerta("Sin Stock", "El producto " + producto.getNombre() + " no tiene stock disponible.");
+            mostrarError("Stock Agotado", "No hay stock disponible para " + producto.getNombre());
             return;
         }
 
-        HBox itemCarrito = new HBox(10); // Espaciado entre elementos
-        itemCarrito.setPadding(new Insets(8));
+        HBox itemCarrito = new HBox(10);
+        itemCarrito.setUserData(producto);
         itemCarrito.setAlignment(Pos.CENTER_LEFT);
-        itemCarrito.getStyleClass().add("carrito-item"); // Para CSS si se define
-        itemCarrito.setUserData(producto); // Guardar el objeto ProductoFX
+        itemCarrito.setPadding(new Insets(5));
+        itemCarrito.getStyleClass().add("carrito-item");
 
-        Label lblNombre = new Label(producto.getNombre());
-        lblNombre.setPrefWidth(150); // Ajustar según necesidad
-        lblNombre.setWrapText(true);
-        HBox.setHgrow(lblNombre, Priority.ALWAYS);
+        Label nombreProductoCarrito = new Label(producto.getNombre());
+        nombreProductoCarrito.setMaxWidth(150);
+        nombreProductoCarrito.setWrapText(true);
 
-        Spinner<Integer> spinnerCantidad = new Spinner<>(1, producto.getStock(), 1);
-        spinnerCantidad.setPrefWidth(70);
-        spinnerCantidad.setEditable(true); // Permitir edición manual
-        spinnerCantidad.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue > producto.getStock()) {
-                spinnerCantidad.getValueFactory().setValue(oldValue); // Revertir si excede stock
-                mostrarAlerta("Stock limitado", "La cantidad no puede exceder el stock disponible (" + producto.getStock() + ").");
-            } else if (newValue <= 0) {
-                 spinnerCantidad.getValueFactory().setValue(1); // No permitir cero o negativo directamente aquí, el botón eliminar es para eso
-            }
-            actualizarTotalCarrito();
+        Spinner<Integer> cantidadSpinner = new Spinner<>(1, producto.getStock(), 1);
+        cantidadSpinner.setPrefWidth(70);
+        cantidadSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+            actualizarTotalCarrito(); 
         });
 
-        Label lblPrecioUnitario = new Label(formatoMoneda.format(producto.getPrecioVenta()));
-        lblPrecioUnitario.setPrefWidth(80);
-        lblPrecioUnitario.setAlignment(Pos.CENTER_RIGHT);
+        Label precioUnitarioLabel = new Label(formatoMoneda.format(producto.getPrecioVenta()));
 
-        Label lblSubtotalItem = new Label(formatoMoneda.format(producto.getPrecioVenta().multiply(BigDecimal.valueOf(spinnerCantidad.getValue()))));
-        lblSubtotalItem.setPrefWidth(90);
-        lblSubtotalItem.setAlignment(Pos.CENTER_RIGHT);
-        // Actualizar subtotal del item cuando cambia la cantidad
-        spinnerCantidad.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue > 0) {
-                lblSubtotalItem.setText(formatoMoneda.format(producto.getPrecioVenta().multiply(BigDecimal.valueOf(newValue))));
-            }
-        });
-
-
-        Button btnEliminar = new Button("X"); // O un icono
-        btnEliminar.getStyleClass().add("button-eliminar-item"); // Estilo para el botón
+        Button btnEliminar = new Button("X");
+        btnEliminar.getStyleClass().add("button-eliminar-item");
         btnEliminar.setOnAction(e -> eliminarDelCarrito(itemCarrito));
 
-        itemCarrito.getChildren().addAll(lblNombre, spinnerCantidad, lblPrecioUnitario, lblSubtotalItem, btnEliminar);
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        itemCarrito.getChildren().addAll(nombreProductoCarrito, spacer, cantidadSpinner, precioUnitarioLabel, btnEliminar);
         carritoBox.getChildren().add(itemCarrito);
+
         actualizarTotalCarrito();
     }
 
+    @SuppressWarnings("unchecked")
     private Spinner<Integer> encontrarSpinnerEnItem(HBox itemCarrito) {
-        for (Node child : itemCarrito.getChildren()) {
-            if (child instanceof Spinner) {
-                @SuppressWarnings("unchecked")
-                Spinner<Integer> spinner = (Spinner<Integer>) child;
-                return spinner;
-            }
-        }
-        return null;
+        return itemCarrito.getChildren().stream()
+                .filter(node -> node instanceof Spinner)
+                .map(node -> (Spinner<Integer>) node)
+                .findFirst().orElse(null);
     }
 
     private void eliminarDelCarrito(Node itemNode) {
@@ -272,175 +218,63 @@ public class VenderControllerFX implements Initializable {
         actualizarTotalCarrito();
     }
 
-
     private void actualizarTotalCarrito() {
-        BigDecimal subtotalCalculado = BigDecimal.ZERO;
-        int cantidadItems = 0;
+        BigDecimal subtotal = BigDecimal.ZERO;
+        int totalItems = 0;
 
         for (Node node : carritoBox.getChildren()) {
-            if (node.getUserData() instanceof ProductoFX) { // Asegurarse que es un item de producto
+            if (node instanceof HBox && node.getUserData() instanceof ProductoFX) {
                 HBox itemCarrito = (HBox) node;
                 ProductoFX producto = (ProductoFX) itemCarrito.getUserData();
-                Spinner<Integer> spinnerCantidad = encontrarSpinnerEnItem(itemCarrito);
+                Spinner<Integer> cantidadSpinner = encontrarSpinnerEnItem(itemCarrito);
+                int cantidad = (cantidadSpinner != null) ? cantidadSpinner.getValue() : 0;
 
-                if (spinnerCantidad != null) {
-                    int cantidad = spinnerCantidad.getValue();
-                    subtotalCalculado = subtotalCalculado.add(producto.getPrecioVenta().multiply(BigDecimal.valueOf(cantidad)));
-                    cantidadItems++;
-                }
+                subtotal = subtotal.add(producto.getPrecioVenta().multiply(new BigDecimal(cantidad)));
+                totalItems += cantidad;
             }
         }
 
-        BigDecimal ivaCalculado = subtotalCalculado.multiply(new BigDecimal("0.12")).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal totalGeneralCalculado = subtotalCalculado.add(ivaCalculado);
+        BigDecimal iva = subtotal.multiply(new BigDecimal("0.12")).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalGeneral = subtotal.add(iva);
 
-        lblSubtotal.setText(formatoMoneda.format(subtotalCalculado));
-        lblIVA.setText(formatoMoneda.format(ivaCalculado));
-        lblTotalGeneral.setText(formatoMoneda.format(totalGeneralCalculado));
-        lblItemsCarrito.setText(cantidadItems + (cantidadItems == 1 ? " Item" : " Items"));
+        lblSubtotal.setText(formatoMoneda.format(subtotal));
+        lblIVA.setText(formatoMoneda.format(iva));
+        lblTotalGeneral.setText(formatoMoneda.format(totalGeneral));
+        lblItemsCarrito.setText(totalItems + (totalItems == 1 ? " Item" : " Items"));
     }
 
-
     private void mostrarError(String titulo, String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.ERROR);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
     
     private void mostrarAlerta(String titulo, String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
     @FXML
     private void procesarVenta() {
-        if (carritoBox.getChildren().isEmpty() || carritoBox.getChildren().stream().noneMatch(node -> node.getUserData() instanceof ProductoFX)) {
-            mostrarError("Carrito vacío", "No hay productos en el carrito para procesar la venta.");
+        if (carritoBox.getChildren().isEmpty()) {
+            mostrarAlerta("Carrito Vacío", "Agrega productos al carrito antes de procesar la venta.");
             return;
         }
-
-        List<ProductoVentaInfo> productosParaVenta = new ArrayList<>();
-        BigDecimal totalVentaCalculado = BigDecimal.ZERO;
-
-        for (Node itemNode : carritoBox.getChildren()) {
-            if (itemNode instanceof HBox && itemNode.getUserData() instanceof ProductoFX) {
-                HBox itemCarrito = (HBox) itemNode;
-                ProductoFX productoEnCarrito = (ProductoFX) itemCarrito.getUserData();
-                Spinner<Integer> spCantidad = encontrarSpinnerEnItem(itemCarrito);
-
-                if (productoEnCarrito != null && spCantidad != null) {
-                    int cantidad = spCantidad.getValue();
-                    if (cantidad <= 0) {
-                        mostrarError("Error en Carrito", "El producto '" + productoEnCarrito.getNombre() + "' tiene cantidad cero o negativa.");
-                        return;
-                    }
-                    if (cantidad > productoEnCarrito.getStock()) {
-                         mostrarError("Stock Insuficiente", "No hay suficiente stock para '" + productoEnCarrito.getNombre() + "'. Disponible: " + productoEnCarrito.getStock() + ", Solicitado: " + cantidad);
-                        return;
-                    }
-                    productosParaVenta.add(new ProductoVentaInfo(
-                            productoEnCarrito.getIdProducto(),
-                            productoEnCarrito.getNombre(),
-                            cantidad,
-                            productoEnCarrito.getPrecioVenta()
-                    ));
-                    totalVentaCalculado = totalVentaCalculado.add(productoEnCarrito.getPrecioVenta().multiply(BigDecimal.valueOf(cantidad)));
-                } else {
-                    mostrarError("Error Interno", "No se pudo obtener información completa de un producto en el carrito.");
-                    return;
-                }
-            }
-        }
-
-        if (productosParaVenta.isEmpty()) {
-            mostrarError("Error en Carrito", "No se pudieron procesar los productos del carrito.");
-            return;
-        }
-        
-        // El IVA y el total final para el diálogo se calculan a partir del totalVentaCalculado (que es el subtotal)
-        BigDecimal ivaDialogo = totalVentaCalculado.multiply(new BigDecimal("0.12")).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal totalConIvaDialogo = totalVentaCalculado.add(ivaDialogo);
-
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.DIALOG_PROCESAR_VENTA));
-            DialogPane dialogContentPane = loader.load();
-            ProcesarVentaDialogController dialogController = loader.getController();
-
-            // Pasar el total SIN IVA (subtotal) al diálogo, el diálogo podría calcular su propio IVA y total si es necesario
-            // o pasar el total CON IVA. Aquí pasamos el total CON IVA.
-            dialogController.setDatosVenta(productosParaVenta, totalConIvaDialogo);
-
-
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setDialogPane(dialogContentPane);
-            dialog.setTitle("Confirmar y Procesar Venta");
-            
-            // Configurar el propietario del diálogo si es posible (para la modalidad)
-            Window ownerWindow = null;
-            if (btnProcesarVenta != null && btnProcesarVenta.getScene() != null) {
-                 ownerWindow = btnProcesarVenta.getScene().getWindow();
-            }
-            if (ownerWindow != null) {
-                dialog.initOwner(ownerWindow);
-                dialog.initModality(Modality.WINDOW_MODAL); // Asegurar modalidad correcta
-            }
-
-            dialogController.configurarValidacionBotonConfirmar(); // Se necesitará este método en ProcesarVentaDialogController
-
-            // Mostrar el diálogo y esperar el resultado
-            Optional<ButtonType> result = dialog.showAndWait();
-
-            // Si el diálogo se cierra presionando el botón de confirmación del ProcesarVentaDialogController
-            if (result.isPresent() && result.get() == dialogController.getBtnConfirmarType()) {
-                // Se asume que ProcesarVentaDialogController manejó la venta.
-                // VenderControllerFX solo necesita limpiar su estado para una nueva venta.
-                limpiarVenta();
-                // Opcionalmente, un mensaje indicando que el proceso continúa/finaliza en el diálogo
-                // mostrarAlerta("Información", "El proceso de venta ha sido gestionado. Puede iniciar una nueva venta.");
-            } else {
-                // El usuario cerró el diálogo de otra manera (ej. Cancelar o botón de cierre de ventana)
-                // No se realiza ninguna acción de limpieza de venta aquí, el carrito permanece como estaba.
-            }
-
-        } catch (IOException ioEx) {
-            mostrarError("Error al cargar diálogo", "No se pudo cargar la ventana de procesamiento: " + ioEx.getMessage());
-            ioEx.printStackTrace();
-        } catch (Exception e) {
-            mostrarError("Error Inesperado", "Ocurrió un error inesperado: " + e.getMessage());
-            e.printStackTrace();
-        }
+        mostrarAlerta("Procesar Venta", "Funcionalidad de procesar venta aún no implementada completamente.");
     }
     
     private void limpiarVenta() {
-        if (carritoBox != null) {
-            // Dejar solo el header si existe, o limpiar todo si no hay header persistente.
-            // Si el FXML define el header, no necesitamos recrearlo.
-            // Si el header es dinámico (como en el código original), se debe manejar aquí.
-            // Por ahora, limpiamos todos los items de producto.
-            carritoBox.getChildren().removeIf(node -> node.getUserData() instanceof ProductoFX);
-            if (carritoBox.getChildren().isEmpty() && lblItemsCarrito != null) { // Si no hay header y el carrito está realmente vacío
-                 // No hacer nada si el header es parte del FXML y debe permanecer.
-            }
-        }
-        if (productosBox != null) {
-            productosBox.getChildren().clear(); // Limpiar los productos mostrados
-        }
+        carritoBox.getChildren().clear();
+        actualizarTotalCarrito();
         if (txtBusqueda != null) {
             txtBusqueda.clear();
         }
-        
-        try {
-            cargarProductos(); // Recargar la lista original de todos los productos
-            buscarProductos(null); // Mostrar todos los productos de nuevo
-        } catch (Exception e) {
-            mostrarError("Error", "No se pudieron recargar los productos: " + e.getMessage());
-        }
-        actualizarTotalCarrito(); // Reiniciar los totales a cero y contador de items
+        buscarProductos(null);
+        mostrarAlerta("Nueva Venta", "Se ha iniciado una nueva venta. El carrito está vacío.");
     }
 }

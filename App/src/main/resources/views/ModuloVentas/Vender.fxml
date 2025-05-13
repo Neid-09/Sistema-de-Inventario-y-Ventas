@@ -10,8 +10,8 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?> <!-- Nueva importación -->
 
 <BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-pane" stylesheets="@../../styles/vender-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.VenderControllerFX">
 
@@ -46,7 +46,7 @@
                     <Button fx:id="btnNuevaVenta" styleClass="utility-button" text="Nueva Venta" />
                 </HBox>
                 <ScrollPane fx:id="scrollProductos" fitToHeight="true" fitToWidth="true" styleClass="scroll-pane-productos" VBox.vgrow="ALWAYS">
-                    <VBox fx:id="productosBox" spacing="10" styleClass="productos-container-modern" />
+                    <FlowPane fx:id="productosBox" hgap="15" vgap="15" styleClass="flow-pane-productos" prefWrapLength="700"/>
                 </ScrollPane>
             </VBox>
 
@@ -80,9 +80,6 @@
                     <Button fx:id="btnProcesarVenta" maxWidth="Infinity" onAction="#procesarVenta" styleClass="button-procesar-venta-modern" text="Procesar Venta" />
                 </VBox>
             </VBox>
-         <rowConstraints>
-            <RowConstraints />
-         </rowConstraints>
         </GridPane>
     </center>
 </BorderPane>
