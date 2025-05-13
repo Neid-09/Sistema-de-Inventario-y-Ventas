@@ -6,7 +6,7 @@ public class PathsFXML {
     public  static final String CONTROLSTOCK_FXML = "/views/ModuloInventario/RegistroMovimientos.fxml";
     public static final String INICIO_FXML = "/views/InicioMenuP.fxml";
     public static final String CONFIGURACION_FXML = "/views/ModuloConfigurar.fxml";
-    public static final String VENDER_FXML = "/views/Vender.fxml";
+    public static final String VENDER_FXML = "/views/ModuloVentas/Vender.fxml";
 
     /*MODULO CONFIGURAR*/
     public static final String CONFIGURACIONES_GLOBALES = "/views/ModuloConfigurar/Configuraciones.fxml";

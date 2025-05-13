@@ -3,80 +3,86 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Region?>
 
-<BorderPane prefHeight="700.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.VenderControllerFX"
-            stylesheets="@../../styles/vender-styles.css">
+<BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-pane" stylesheets="@../../styles/vender-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.VenderControllerFX">
 
-   <!-- Zona Central: SplitPane con tablas o listas -->
-   <center>
-      <VBox spacing="0" style="-fx-background-color: -fx-background;">
-         <HBox alignment="CENTER_LEFT" styleClass="top-bar">
-            <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
-               <image>
-                  <Image url="@../img/moduloVentas/codigo-de-barras.png" />
-               </image>
-            </ImageView>
-            <TextField fx:id="txtBusqueda" promptText="Ingresar código o nombre del producto" onKeyReleased="#buscarProductos" styleClass="text-field-busqueda" />
-            <Button text="Producto Común" />
-            <Button text="Buscar Venta" />
-            <Button text="Nueva Venta" />
-         </HBox>
+    <!-- Barra Superior: Título y Búsqueda -->
+    <top>
+        <HBox alignment="CENTER_LEFT" styleClass="top-bar-header">
+            <Label styleClass="header-title" text="Módulo de Ventas" />
+        </HBox>
+    </top>
 
-         <SplitPane dividerPositions="0.4" style="-fx-background-color: transparent;">
-            <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="scroll-pane">
-               <content>
-                  <VBox fx:id="productosBox" styleClass="productos-items-container"/>
-               </content>
-            </ScrollPane>
-            <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="scroll-pane">
-               <content>
-                  <VBox fx:id="carritoBox" styleClass="carrito-items-container" />
-               </content>
-            </ScrollPane>
-         </SplitPane>
-      </VBox>
-   </center>
+    <!-- Contenido Principal: Productos a la izquierda, Carrito a la derecha -->
+    <center>
+        <GridPane hgap="20" styleClass="main-content-pane">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="65.0" />
+                <ColumnConstraints percentWidth="35.0" />
+            </columnConstraints>
 
-   <!-- Zona Inferior: Total y botones de acción -->
-   <bottom>
-      <HBox alignment="CENTER" spacing="30.0" styleClass="bottom-bar">
-         <VBox alignment="CENTER">
-            <Button contentDisplay="BOTTOM" text="IMPRIMIR" styleClass="boton-accion-principal boton-accion-imprimir">
-               <graphic>
-                  <ImageView fitHeight="45" fitWidth="45" preserveRatio="true">
-                     <image>
-                        <Image url="@../img/moduloVentas/imprimir.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </Button>
-         </VBox>
-         <VBox alignment="CENTER">
-            <Button fx:id="btnProcesarVenta" onAction="#procesarVenta" contentDisplay="BOTTOM" text="PROCESAR VENTA" styleClass="boton-accion-principal boton-accion-procesar">
-               <graphic>
-                  <ImageView fitHeight="45" fitWidth="45" preserveRatio="true">
-                     <image>
-                        <Image url="@../img/moduloVentas/proceso.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-            </Button>
-         </VBox>
-         
-         <Region HBox.hgrow="ALWAYS" minWidth="30.0" />
-         
-         <VBox alignment="CENTER_RIGHT" styleClass="total-box">
-            <Label text="TOTAL" styleClass="label-total-titulo"/>
-            <TextField fx:id="txtTotal" editable="false" styleClass="text-field-total" />
-         </VBox>
-      </HBox>
-   </bottom>
+            <!-- Sección de Productos -->
+            <VBox spacing="15" GridPane.columnIndex="0">
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-bar-container">
+                    <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                        <image>
+                            <Image url="@../../img/moduloVentas/codigo-de-barras.png" /> <!-- Asegúrate que este icono exista o cámbialo -->
+                        </image>
+                    </ImageView>
+                    <TextField fx:id="txtBusqueda" onKeyReleased="#buscarProductos" promptText="Buscar productos por código o nombre..." styleClass="text-field-busqueda-modern" HBox.hgrow="ALWAYS" />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="utility-buttons-container">
+                    <Button fx:id="btnProductoComun" styleClass="utility-button" text="Producto Común" />
+                    <Button fx:id="btnBuscarVenta" styleClass="utility-button" text="Buscar Venta" />
+                    <Button fx:id="btnNuevaVenta" styleClass="utility-button" text="Nueva Venta" />
+                </HBox>
+                <ScrollPane fx:id="scrollProductos" fitToHeight="true" fitToWidth="true" styleClass="scroll-pane-productos" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="productosBox" spacing="10" styleClass="productos-container-modern" />
+                </ScrollPane>
+            </VBox>
+
+            <!-- Sección del Carrito -->
+            <VBox styleClass="carrito-sidebar" GridPane.columnIndex="1">
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="carrito-header-modern">
+                    <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
+                        <image>
+                            <Image url="@../../img/moduloVentas/carrito-de-compras.png" /> <!-- Asegúrate que este icono exista o cámbialo -->
+                        </image>
+                    </ImageView>
+                    <Label styleClass="carrito-title" text="Carrito" />
+                    <Label fx:id="lblItemsCarrito" styleClass="carrito-items-count" text="0 Items" />
+                </HBox>
+                <ScrollPane fx:id="scrollCarrito" fitToHeight="true" fitToWidth="true" styleClass="scroll-pane-carrito" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="carritoBox" spacing="10" styleClass="carrito-items-container-modern" />
+                </ScrollPane>
+                <VBox styleClass="carrito-summary">
+                    <HBox alignment="CENTER_RIGHT">
+                        <Label styleClass="summary-label" text="Subtotal:" />
+                        <Label fx:id="lblSubtotal" styleClass="summary-value" text="\$0.00" />
+                    </HBox>
+                    <HBox alignment="CENTER_RIGHT">
+                        <Label styleClass="summary-label" text="IVA (12%):" />
+                        <Label fx:id="lblIVA" styleClass="summary-value" text="\$0.00" />
+                    </HBox>
+                    <HBox alignment="CENTER_RIGHT" styleClass="total-container-modern">
+                        <Label styleClass="summary-label-total" text="Total:" />
+                        <Label fx:id="lblTotalGeneral" styleClass="summary-value-total" text="\$0.00" />
+                    </HBox>
+                    <Button fx:id="btnProcesarVenta" maxWidth="Infinity" onAction="#procesarVenta" styleClass="button-procesar-venta-modern" text="Procesar Venta" />
+                </VBox>
+            </VBox>
+         <rowConstraints>
+            <RowConstraints />
+         </rowConstraints>
+        </GridPane>
+    </center>
 </BorderPane>
