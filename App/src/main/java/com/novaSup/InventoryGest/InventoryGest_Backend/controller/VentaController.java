@@ -2,57 +2,113 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaRequestDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaResponseDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleVentaResponseDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleVentaLoteUsoResponseDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Venta;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Vendedor; // Import Vendedor
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario; // Import Usuario
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVenta;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVentaLoteUso;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Vendedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.VentaService;
 
-import jakarta.persistence.EntityNotFoundException; // Mantener para manejo específico o relanzamiento
-import lombok.RequiredArgsConstructor; // Usar inyección por constructor
-import lombok.extern.slf4j.Slf4j; // Usar Lombok para logging
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException; // Usar para respuestas de error más claras
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
-// Se eliminó la importación de Optional ya que se maneja de forma diferente ahora
 
 @RestController
 @RequestMapping("/api/ventas")
-@RequiredArgsConstructor // Inyecta dependencias vía constructor
-@Slf4j // Añade una instancia de logger llamada 'log'
+@RequiredArgsConstructor
+@Slf4j
 public class VentaController {
 
-    private final VentaService ventaService; // Usar final para dependencias inyectadas
-    // No necesitamos UsuarioRepository aquí, el servicio se encargará
+    private final VentaService ventaService;
+
+    // Método helper para convertir DetalleVentaLoteUso a DetalleVentaLoteUsoResponseDTO
+    private DetalleVentaLoteUsoResponseDTO convertToLoteUsoDto(DetalleVentaLoteUso loteUso) {
+        if (loteUso == null) return null;
+        DetalleVentaLoteUsoResponseDTO dto = new DetalleVentaLoteUsoResponseDTO();
+        Lote lote = loteUso.getLote();
+        if (lote != null) {
+            dto.setIdLote(lote.getIdLote());
+            dto.setCodigoLote(lote.getNumeroLote());
+        }
+        dto.setCantidadTomada(loteUso.getCantidadTomada());
+        return dto;
+    }
+
+    // Método helper para convertir DetalleVenta a DetalleVentaResponseDTO
+    private DetalleVentaResponseDTO convertToDetalleDto(DetalleVenta detalleVenta) {
+        if (detalleVenta == null) return null;
+        DetalleVentaResponseDTO dto = new DetalleVentaResponseDTO();
+        dto.setIdDetalleVenta(detalleVenta.getIdDetalle());
+        
+        Producto producto = detalleVenta.getProducto();
+        if (producto != null) {
+            dto.setIdProducto(producto.getIdProducto());
+            dto.setNombreProducto(producto.getNombre());
+        }
+        
+        dto.setCantidad(detalleVenta.getCantidad());
+        dto.setPrecioUnitarioOriginal(detalleVenta.getPrecioUnitarioOriginal());
+        dto.setIdPromocionAplicada(detalleVenta.getIdPromocionAplicada());
+        dto.setPrecioUnitarioFinal(detalleVenta.getPrecioUnitarioFinal());
+        dto.setSubtotal(detalleVenta.getSubtotal());
+
+        if (detalleVenta.getDetalleLotesUsados() != null && !detalleVenta.getDetalleLotesUsados().isEmpty()) {
+            dto.setLotesUsados(detalleVenta.getDetalleLotesUsados().stream()
+                .map(this::convertToLoteUsoDto)
+                .collect(Collectors.toList()));
+        } else {
+            dto.setLotesUsados(new ArrayList<>());
+        }
+        return dto;
+    }
 
     // Método helper simplificado para convertir Venta a VentaResponseDTO
     private VentaResponseDTO convertToDto(Venta venta) {
         VentaResponseDTO dto = new VentaResponseDTO();
         dto.setIdVenta(venta.getIdVenta());
         dto.setFecha(venta.getFecha());
-        dto.setIdCliente(venta.getCliente().getIdCliente());
-        dto.setIdVendedor(venta.getVendedor().getIdVendedor());
+        if (venta.getCliente() != null) {
+            dto.setIdCliente(venta.getCliente().getIdCliente());
+            if (venta.getCliente().getNombre() != null) {
+                dto.setNombreCliente(venta.getCliente().getNombre());
+            } else {
+                log.trace("Cliente ID: {} no tiene un nombre asignado.", venta.getCliente().getIdCliente());
+            }
+        }
+        if (venta.getVendedor() != null) {
+            dto.setIdVendedor(venta.getVendedor().getIdVendedor());
+            Vendedor vendedor = venta.getVendedor();
+            if (vendedor != null && vendedor.getUsuario() != null) {
+                 dto.setNombreVendedor(vendedor.getUsuario().getNombre());
+            } else {
+                 log.trace("Usuario no cargado para Vendedor ID: {} en Venta ID: {}", (vendedor != null ? vendedor.getIdVendedor() : "null"), venta.getIdVenta());
+            }
+        } else {
+             log.trace("Vendedor no cargado para Venta ID: {}", venta.getIdVenta());
+        }
+
         dto.setTotal(venta.getTotalConImpuestos());
         dto.setRequiereFactura(venta.getRequiereFactura());
         dto.setNumeroVenta(venta.getNumeroVenta());
         dto.setAplicarImpuestos(venta.getAplicarImpuestos());
 
-        // Asigna el nombre del vendedor SI la información ya fue cargada por el servicio
-        Vendedor vendedor = venta.getVendedor();
-        if (vendedor != null) {
-            Usuario usuario = vendedor.getUsuario();
-            if (usuario != null) {
-                dto.setNombreVendedor(usuario.getNombre());
-            } else {
-                 // Opcional: Log si el usuario es null aunque el vendedor no lo sea
-                 log.trace("Usuario no cargado para Vendedor ID: {} en Venta ID: {}", vendedor.getIdVendedor(), venta.getIdVenta());
-            }
+        if (venta.getDetallesVenta() != null && !venta.getDetallesVenta().isEmpty()) {
+            dto.setDetalles(venta.getDetallesVenta().stream()
+                .map(this::convertToDetalleDto)
+                .collect(Collectors.toList()));
         } else {
-             // Opcional: Log si el vendedor es null
-             log.trace("Vendedor no cargado para Venta ID: {}", venta.getIdVenta());
+            dto.setDetalles(new ArrayList<>());
         }
 
         return dto;
@@ -68,22 +124,18 @@ public class VentaController {
     public ResponseEntity<VentaResponseDTO> procesarVentaCompleta(@RequestBody VentaRequestDTO ventaRequest) {
         log.info("Intentando registrar una venta completa: {}", ventaRequest);
         try {
-            // El servicio debe devolver la Venta con el Vendedor y Usuario cargados si es posible
             Venta nuevaVenta = ventaService.registrarVentaCompleta(ventaRequest);
             log.info("Venta registrada exitosamente con ID: {}", nuevaVenta.getIdVenta());
             VentaResponseDTO responseDto = convertToDto(nuevaVenta);
             return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
         } catch (IllegalArgumentException | IllegalStateException e) {
             log.warn("Error de validación o estado durante el registro de la venta: {}", e.getMessage());
-            // Considerar usar @ControllerAdvice para manejo centralizado de excepciones
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (EntityNotFoundException e) {
             log.warn("Entidad no encontrada durante el registro de la venta: {}", e.getMessage());
-            // Considerar usar @ControllerAdvice para manejo centralizado de excepciones
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (Exception e) {
             log.error("Error inesperado procesando la venta: {}", ventaRequest, e);
-            // Considerar usar @ControllerAdvice para manejo centralizado de excepciones
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno al procesar la venta.", e);
         }
     }
@@ -96,16 +148,14 @@ public class VentaController {
     @GetMapping("/{id}")
     public ResponseEntity<VentaResponseDTO> obtenerVentaPorId(@PathVariable Integer id) {
         log.info("Buscando venta con ID: {}", id);
-        // El servicio debe devolver la Venta con el Vendedor y Usuario cargados
         return ventaService.obtenerVentaPorId(id)
                 .map(this::convertToDto)
                 .map(dto -> {
-                    log.info("Venta encontrada con ID: {}", id);
+                    log.info("Venta encontrada con ID: {} y {} detalles", id, (dto.getDetalles() != null ? dto.getDetalles().size() : 0));
                     return ResponseEntity.ok(dto);
                 })
                 .orElseGet(() -> {
                     log.warn("Venta no encontrada con ID: {}", id);
-                    // No es necesario lanzar ResponseStatusException aquí, solo devolver 404
                     return ResponseEntity.notFound().build();
                 });
     }
@@ -117,7 +167,6 @@ public class VentaController {
     @GetMapping
     public ResponseEntity<List<VentaResponseDTO>> listarVentas() {
         log.info("Buscando todas las ventas");
-        // El servicio debe devolver la lista de Ventas con Vendedor y Usuario cargados
         List<Venta> ventas = ventaService.listarVentas();
         List<VentaResponseDTO> dtos = ventas.stream()
                                             .map(this::convertToDto)
@@ -136,7 +185,6 @@ public class VentaController {
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<VentaResponseDTO>> obtenerVentasPorCliente(@PathVariable Integer idCliente) {
          log.info("Buscando ventas para el cliente ID: {}", idCliente);
-         // El servicio debe devolver las Ventas con Vendedor y Usuario cargados
          List<Venta> ventas = ventaService.obtenerVentasPorCliente(idCliente);
          List<VentaResponseDTO> dtos = ventas.stream()
                                              .map(this::convertToDto)
@@ -153,7 +201,6 @@ public class VentaController {
     @GetMapping("/vendedor/{idVendedor}")
     public ResponseEntity<List<VentaResponseDTO>> obtenerVentasPorVendedor(@PathVariable Integer idVendedor) {
          log.info("Buscando ventas para el vendedor ID: {}", idVendedor);
-         // El servicio debe devolver las Ventas con Vendedor y Usuario cargados
          List<Venta> ventas = ventaService.obtenerVentasPorVendedor(idVendedor);
          List<VentaResponseDTO> dtos = ventas.stream()
                                              .map(this::convertToDto)

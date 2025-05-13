@@ -18,9 +18,14 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Implementación del servicio para la gestión de Ventas.
@@ -172,9 +177,10 @@ public class VentaServiceImpl implements VentaService {
 
             // NUEVA LÓGICA: Asociar los lotes usados al detalleVenta
             if (resultadoInventario != null && resultadoInventario.getLotesAfectados() != null) {
+                detalle.getDetalleLotesUsados().clear(); // Limpiar por si acaso
                 for (LoteReducidoInfoDTO loteInfo : resultadoInventario.getLotesAfectados()) {
                     DetalleVentaLoteUso dvu = new DetalleVentaLoteUso();
-                    dvu.setDetalleVenta(detalle); // Se asocia aquí, antes de guardar el detalle
+                    dvu.setDetalleVenta(detalle); 
                     dvu.setLote(loteInfo.getLote());
                     dvu.setCantidadTomada(loteInfo.getCantidadTomada());
                     detalle.getDetalleLotesUsados().add(dvu);
@@ -233,68 +239,154 @@ public class VentaServiceImpl implements VentaService {
         comisionService.calcularYGuardarComision(ventaGuardada);
 
         // 8. Devolver la venta completa RECARGADA
-        return ventaRepository.findWithDetailsById(ventaGuardada.getIdVenta())
-                .orElseThrow(() -> new EntityNotFoundException("Error al recargar la venta recién creada: " + ventaGuardada.getIdVenta()));
+        Optional<Venta> ventaRecargadaOpt = ventaRepository.findVentaWithPrimaryDetailsById(ventaGuardada.getIdVenta());
+        if (ventaRecargadaOpt.isEmpty()) {
+            throw new EntityNotFoundException("Error al recargar la venta recién creada: " + ventaGuardada.getIdVenta());
+        }
+        Venta ventaRecargada = ventaRecargadaOpt.get();
+        if (ventaRecargada.getDetallesVenta() != null && !ventaRecargada.getDetallesVenta().isEmpty()) {
+            completarDetallesVentaConLotes(ventaRecargada.getDetallesVenta());
+        }
+        return ventaRecargada;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<Venta> obtenerVentaPorId(Integer id) {
-        // Usar el método con JOIN FETCH
-        return ventaRepository.findWithDetailsById(id);
+        // Paso 1: Obtener la Venta con detalles primarios (incluyendo DetalleVenta y Producto)
+        Optional<Venta> ventaOptional = ventaRepository.findVentaWithPrimaryDetailsById(id);
+
+        if (ventaOptional.isPresent()) {
+            Venta venta = ventaOptional.get();
+            // Paso 2: Si la venta tiene detalles, cargar sus DetalleVentaLoteUso
+            if (venta.getDetallesVenta() != null && !venta.getDetallesVenta().isEmpty()) {
+                completarDetallesVentaConLotes(venta.getDetallesVenta());
+            }
+        }
+        return ventaOptional;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Venta> listarVentas() {
-        // Usar el método con JOIN FETCH
-        return ventaRepository.findAllWithDetails();
+        // Paso 1: Obtener todas las Ventas con detalles primarios
+        List<Venta> ventas = ventaRepository.findAllVentasWithPrimaryDetails();
+
+        // Paso 2: Para cada venta, si tiene detalles, cargar sus DetalleVentaLoteUso
+        // Recolectar todos los DetalleVenta de todas las ventas en una sola lista
+        List<DetalleVenta> todosLosDetallesVenta = ventas.stream()
+                .filter(v -> v.getDetallesVenta() != null)
+                .flatMap(v -> v.getDetallesVenta().stream())
+                .collect(Collectors.toList());
+
+        if (!todosLosDetallesVenta.isEmpty()) {
+            completarDetallesVentaConLotes(todosLosDetallesVenta);
+        }
+        return ventas;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Venta> obtenerVentasPorCliente(Integer idCliente) {
-        // Usar el método con JOIN FETCH
-        return ventaRepository.findByIdClienteWithDetails(idCliente);
+        // Paso 1: Obtener las Ventas del cliente con detalles primarios
+        List<Venta> ventas = ventaRepository.findVentasByClienteWithPrimaryDetails(idCliente);
+        
+        List<DetalleVenta> todosLosDetallesVenta = ventas.stream()
+                .filter(v -> v.getDetallesVenta() != null)
+                .flatMap(v -> v.getDetallesVenta().stream())
+                .collect(Collectors.toList());
+
+        if (!todosLosDetallesVenta.isEmpty()) {
+            completarDetallesVentaConLotes(todosLosDetallesVenta);
+        }
+        return ventas;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Venta> obtenerVentasPorVendedor(Integer idVendedor) {
-        // Usar el método con JOIN FETCH
-        return ventaRepository.findByIdVendedorWithDetails(idVendedor);
+        // Paso 1: Obtener las Ventas del vendedor con detalles primarios
+        List<Venta> ventas = ventaRepository.findVentasByVendedorWithPrimaryDetails(idVendedor);
+
+        List<DetalleVenta> todosLosDetallesVenta = ventas.stream()
+                .filter(v -> v.getDetallesVenta() != null)
+                .flatMap(v -> v.getDetallesVenta().stream())
+                .collect(Collectors.toList());
+
+        if (!todosLosDetallesVenta.isEmpty()) {
+            completarDetallesVentaConLotes(todosLosDetallesVenta);
+        }
+        return ventas;
+    }
+
+    /**
+     * Método helper para cargar y adjuntar DetalleVentaLoteUso a una lista de DetalleVenta.
+     * @param detallesVentaOriginales Lista de DetalleVenta cuyas colecciones detalleLotesUsados necesitan ser pobladas.
+     */
+    private void completarDetallesVentaConLotes(List<DetalleVenta> detallesVentaOriginales) {
+        if (detallesVentaOriginales == null || detallesVentaOriginales.isEmpty()) {
+            return;
+        }
+
+        // Extraer los IDs de los DetalleVenta para la consulta secundaria
+        Set<Integer> detalleVentaIds = detallesVentaOriginales.stream()
+                .map(DetalleVenta::getIdDetalle)
+                .collect(Collectors.toSet());
+
+        // Paso 2.1: Cargar los DetalleVenta (con sus DetalleVentaLoteUso y Lotes) usando los IDs recolectados
+        List<DetalleVenta> detallesConLotesCargados = ventaRepository.findDetalleVentaWithLotesByIdIn(detalleVentaIds);
+
+        // Crear un mapa para un acceso eficiente a los detalles cargados por su ID
+        Map<Integer, DetalleVenta> mapaDetallesConLotes = detallesConLotesCargados.stream()
+                .collect(Collectors.toMap(DetalleVenta::getIdDetalle, Function.identity()));
+
+        // Paso 2.2: Iterar sobre los detalles originales y establecer su colección de lotes usados
+        // con la información obtenida en el paso anterior.
+        detallesVentaOriginales.forEach(detalleOriginal -> {
+            DetalleVenta detalleConLotes = mapaDetallesConLotes.get(detalleOriginal.getIdDetalle());
+            if (detalleConLotes != null && detalleConLotes.getDetalleLotesUsados() != null) {
+                // Reemplazamos la colección (posiblemente proxy no inicializado)
+                // con la colección completamente cargada.
+                // Es importante asegurarse de que DetalleVenta.detalleLotesUsados pueda ser modificado.
+                // Si la colección original es inmutable o gestionada de forma especial, esto podría necesitar ajuste.
+                // Usualmente, si es una List o Set estándar, esto funciona.
+                detalleOriginal.setDetalleLotesUsados(new ArrayList<>(detalleConLotes.getDetalleLotesUsados()));
+            } else {
+                // Si por alguna razón no se encontraron lotes (o el detalle mismo), asegurar que sea una lista vacía
+                detalleOriginal.setDetalleLotesUsados(Collections.emptyList());
+            }
+        });
     }
 
     // --- Métodos privados de validación ---
 
     private void validarRequest(VentaRequestDTO request) throws Exception {
-        if (request.getIdVendedor() == null) {
-            throw new IllegalArgumentException("El ID del vendedor es obligatorio.");
+        if (request == null) {
+            throw new IllegalArgumentException("La solicitud de venta no puede ser nula.");
         }
-        // Validar que el vendedor exista y su usuario asociado esté activo
-        Vendedor vendedor = vendedorService.obtenerVendedorConUsuario(request.getIdVendedor())
-                 .orElseThrow(() -> new EntityNotFoundException("Vendedor no encontrado con ID: " + request.getIdVendedor()));
-
-        // Ahora valida el estado del Usuario asociado al Vendedor
-        if (vendedor.getUsuario() == null) {
-             throw new IllegalStateException("El vendedor ID " + request.getIdVendedor() + " no tiene un usuario asociado.");
-        }
-        if (!Boolean.TRUE.equals(vendedor.getUsuario().getEstado())) {
-             throw new IllegalStateException("El usuario asociado al vendedor ID " + request.getIdVendedor() + " no está activo.");
-        }
-
         if (request.getDetalles() == null || request.getDetalles().isEmpty()) {
             throw new IllegalArgumentException("La venta debe tener al menos un detalle.");
         }
-        for (VentaRequestDTO.DetalleVentaDTO detalle : request.getDetalles()) {
-            if (detalle.getIdProducto() == null || detalle.getCantidad() == null || detalle.getCantidad() <= 0) {
-                throw new IllegalArgumentException("Datos inválidos (ID Producto o Cantidad) en el detalle del producto ID: " + detalle.getIdProducto());
-            }
+        // Validar que idVendedor exista, si se proporciona
+        if (request.getIdVendedor() != null && vendedorService.obtenerPorId(request.getIdVendedor()).isEmpty()) {
+            throw new EntityNotFoundException("El vendedor con ID " + request.getIdVendedor() + " no existe.");
         }
-        // Validar cliente si se proporciona ID
-        if (request.getIdCliente() != null) {
-             clienteService.obtenerClientePorId(request.getIdCliente())
-                     .orElseThrow(() -> new EntityNotFoundException("Cliente no encontrado: " + request.getIdCliente()));
+        // Validar que idCliente exista, si se proporciona
+        if (request.getIdCliente() != null && clienteService.obtenerClientePorId(request.getIdCliente()).isEmpty()) {
+            throw new EntityNotFoundException("El cliente con ID " + request.getIdCliente() + " no existe.");
+        }
+         for (VentaRequestDTO.DetalleVentaDTO detalleDTO : request.getDetalles()) {
+            if (detalleDTO.getIdProducto() == null || detalleDTO.getCantidad() == null) {
+                throw new IllegalArgumentException("Cada detalle de venta debe tener ID de producto y cantidad.");
+            }
+            if (detalleDTO.getCantidad() <= 0) {
+                throw new IllegalArgumentException("La cantidad del producto debe ser mayor que cero.");
+            }
+            Producto producto = productoService.obtenerPorId(detalleDTO.getIdProducto())
+                    .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado: " + detalleDTO.getIdProducto()));
+            if (!producto.getEstado()) {
+                throw new IllegalStateException("El producto '" + producto.getNombre() + "' está inactivo y no se puede vender.");
+            }
         }
     }
 

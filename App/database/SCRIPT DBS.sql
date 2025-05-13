@@ -7,18 +7,18 @@ select * from vendedores;
 select * from productos;
 select * from clientes;
 select * from ventas;
-select * from detalle_venta_lote_uso;
 select * from detalle_venta;
+select * from detalle_venta_lote_uso;
+select * from detalle_impuestos_factura;
 select * from entradas_productos;
 
 select * from facturas;
-select * from detalle_impuestos_factura;
+
 select * from impuestos_aplicables;
 select * from tasas_impuestos;
 select * from tipos_impuestos;
 select * from promociones;
 select * from configuracion_empresa;
-
 
 SELECT * FROM ventas;
 
