@@ -4,7 +4,6 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface IProductoService {

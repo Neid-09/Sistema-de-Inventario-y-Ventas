@@ -26,7 +26,6 @@ public class ProveedorControllerFX implements Initializable {
     private static final Logger logger = LoggerFactory.getLogger(ProveedorControllerFX.class);
     private final IProveedorService proveedorService; // Mantener como final
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
-    private ProveedorFX proveedorSeleccionado;
     private boolean modoEdicion = false;
 
     // Constructor para inyección de dependencias
@@ -142,7 +141,7 @@ public class ProveedorControllerFX implements Initializable {
 
         // Configurar listener de selección
         tablaProveedores.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            proveedorSeleccionado = newSelection;
+            // proveedorSeleccionado = newSelection; // Asignación eliminada
         });
 
         // Configurar panel de formulario

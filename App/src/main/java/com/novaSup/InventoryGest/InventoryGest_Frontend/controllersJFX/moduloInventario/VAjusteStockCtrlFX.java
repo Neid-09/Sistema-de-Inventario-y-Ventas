@@ -1,13 +1,14 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloInventario;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IInventarioService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+//TODO: VERIFICAR SI ESTA BIEN YA QUE SOLO MODIFIQUE PARTES DE CONTROLADOR Y NO DE VENTANA
 
 public class VAjusteStockCtrlFX {
 
@@ -20,8 +21,7 @@ public class VAjusteStockCtrlFX {
     @FXML private Button btnCancelar;
 
     private ProductoFX producto;
-    private final ILoteService loteService;
-    private final IProductoService productoService;
+    private final IInventarioService inventarioService;
 
     // Listas de motivos según el tipo de ajuste
     private final ObservableList<String> motivosAumentar = FXCollections.observableArrayList(
@@ -33,9 +33,8 @@ public class VAjusteStockCtrlFX {
     );
 
     // Constructor para inyección de dependencias
-    public VAjusteStockCtrlFX(ILoteService loteService, IProductoService productoService) {
-        this.loteService = loteService;
-        this.productoService = productoService;
+    public VAjusteStockCtrlFX(IInventarioService inventarioService) {
+        this.inventarioService = inventarioService;
     }
 
     public void inicializar(ProductoFX producto) {
@@ -71,7 +70,7 @@ public class VAjusteStockCtrlFX {
 
     @FXML
     public void guardar() {
-/*        try {
+        try {
             // Validar que se haya ingresado una cantidad
             if (txtCantidad.getText().isEmpty()) {
                 mostrarAlerta(Alert.AlertType.ERROR, "Error", "Cantidad requerida", "Debe ingresar una cantidad para realizar el ajuste.");
@@ -98,17 +97,15 @@ public class VAjusteStockCtrlFX {
                 return;
             }
 
-
             // Realizar el ajuste según el tipo
             if (rbAumentar.isSelected()) {
-                // Aumentar stock manualmente
-                loteService.aumentarStockManual(producto.getIdProducto(), cantidad, motivo);
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Stock aumentado",
+                inventarioService.registrarAjuste(producto.getIdProducto(), cantidad, motivo);
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Stock ajustado",
                         "Se ha aumentado el stock en " + cantidad + " unidades.");
             } else {
-                // Disminuir stock manualmente
-                loteService.reducirStockManual(producto.getIdProducto(), cantidad, motivo);
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Stock disminuido",
+                // Para disminuir, la cantidad debe ser negativa para el método registrarAjuste
+                inventarioService.registrarAjuste(producto.getIdProducto(), -cantidad, motivo);
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Stock ajustado",
                         "Se ha disminuido el stock en " + cantidad + " unidades.");
             }
 
@@ -120,7 +117,7 @@ public class VAjusteStockCtrlFX {
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error en la operación",
                     "No se pudo realizar el ajuste de stock: " + e.getMessage());
-        }*/
+        }
     }
 
     @FXML

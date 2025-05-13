@@ -191,7 +191,7 @@ public class CategoriaControllerFX implements Initializable {
             }
 
             // Guardar en la BD
-            CategoriaFX guardada = categoriaService.guardar(categoria);
+            categoriaService.guardar(categoria);
 
             // Actualizar UI
             limpiarFormulario();

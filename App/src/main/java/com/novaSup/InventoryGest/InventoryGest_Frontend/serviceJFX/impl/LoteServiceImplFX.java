@@ -340,26 +340,34 @@ public class LoteServiceImplFX implements ILoteService {
             Integer stockMinimo = productoJson.has("stockMinimo") ? productoJson.get("stockMinimo").asInt() : 0;
             Integer stockMaximo = productoJson.has("stockMaximo") ? productoJson.get("stockMaximo").asInt() : 0;
 
+            Integer idCategoria = null;
+            if (productoJson.hasNonNull("idCategoria") && productoJson.get("idCategoria").isInt()) {
+                idCategoria = productoJson.get("idCategoria").asInt();
+            } else if (productoJson.hasNonNull("categoria") && productoJson.get("categoria").isObject()) {
+                JsonNode categoriaNode = productoJson.get("categoria");
+                if (categoriaNode.hasNonNull("idCategoria") && categoriaNode.get("idCategoria").isInt()) {
+                    idCategoria = categoriaNode.get("idCategoria").asInt();
+                }
+            }
+
             String categoria = productoJson.has("categoria") ?
                     (productoJson.get("categoria").isObject() ?
                             productoJson.get("categoria").get("nombre").asText() : null) : null;
 
-            Integer idCategoria = productoJson.has("idCategoria") ? productoJson.get("idCategoria").asInt() :
-                    (productoJson.has("categoria") && productoJson.get("categoria").has("idCategoria") ?
-                            productoJson.get("categoria").get("idCategoria").asInt() : null);
-
-            String proveedor = productoJson.has("proveedor") ?
-                    (productoJson.get("proveedor").isObject() ?
-                            productoJson.get("proveedor").get("nombre").asText() : null) : null;
-
-            Integer idProveedor = productoJson.has("idProveedor") ? productoJson.get("idProveedor").asInt() :
-                    (productoJson.has("proveedor") && productoJson.get("proveedor").has("idProveedor") ?
-                            productoJson.get("proveedor").get("idProveedor").asInt() : null);
+            Integer idProveedor = null;
+            if (productoJson.hasNonNull("idProveedor") && productoJson.get("idProveedor").isInt()) {
+                idProveedor = productoJson.get("idProveedor").asInt();
+            } else if (productoJson.hasNonNull("proveedor") && productoJson.get("proveedor").isObject()) {
+                JsonNode proveedorNode = productoJson.get("proveedor");
+                if (proveedorNode.hasNonNull("idProveedor") && proveedorNode.get("idProveedor").isInt()) {
+                    idProveedor = proveedorNode.get("idProveedor").asInt();
+                }
+            }
 
             Boolean estado = productoJson.has("estado") ? productoJson.get("estado").asBoolean() : true;
 
             return new ProductoFX(idProducto, codigo, nombre, descripcion, precioCosto, precioVenta,
-                    stock, stockMinimo, stockMaximo, categoria, idCategoria, proveedor, idProveedor, estado);
+                    stock, stockMinimo, stockMaximo, categoria, idCategoria, null, idProveedor, estado);
         } catch (Exception e) {
             logger.warn("Error al construir objeto ProductoFX: {}", e.getMessage());
             return null;

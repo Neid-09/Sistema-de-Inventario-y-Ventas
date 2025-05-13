@@ -602,7 +602,7 @@ public class ProductoControllerFX implements Initializable {
             producto.setEstado(chkEstado.isSelected());
 
             // Actualizar
-            ProductoFX productoActualizado = productoService.actualizar(producto);
+            productoService.actualizar(producto);
 
             // Mostrar mensaje de éxito y actualizar la vista
             lblMensaje.setText("Producto actualizado correctamente");
@@ -887,58 +887,6 @@ public class ProductoControllerFX implements Initializable {
         }
 
         return true;
-    }
-
-    private ProductoFX obtenerProductoDesdeFormulario() {
-        ProductoFX producto = new ProductoFX();
-
-        if (!txtId.getText().isEmpty()) {
-            producto.setIdProducto(Integer.parseInt(txtId.getText()));
-        }
-
-        producto.setCodigo(txtCodigo.getText());
-        producto.setNombre(txtNombre.getText());
-        producto.setDescripcion(txtDescripcion.getText());
-
-        if (!txtPrecioCosto.getText().isEmpty()) {
-            producto.setPrecioCosto(new BigDecimal(txtPrecioCosto.getText()));
-        }
-
-        if (!txtPrecioVenta.getText().isEmpty()) {
-            producto.setPrecioVenta(new BigDecimal(txtPrecioVenta.getText()));
-        }
-
-        if (!txtStockMinimo.getText().isEmpty()) {
-            producto.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
-        }
-
-        if (!txtStockMaximo.getText().isEmpty()) {
-            producto.setStockMaximo(Integer.parseInt(txtStockMaximo.getText()));
-        }
-
-        producto.setEstado(chkEstado.isSelected());
-
-        // Configurar categoría (puede ser null)
-        CategoriaFX categoriaSeleccionada = cmbCategoria.getSelectionModel().getSelectedItem();
-        if (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null) {
-            producto.setIdCategoria(categoriaSeleccionada.getIdCategoria());
-            producto.setCategoria(categoriaSeleccionada.getNombre());
-        } else {
-            producto.setIdCategoria(null);
-            producto.setCategoria(null);
-        }
-
-        // Configurar proveedor (puede ser null)
-        ProveedorFX proveedorSeleccionado = cmbProveedor.getSelectionModel().getSelectedItem();
-        if (proveedorSeleccionado != null && proveedorSeleccionado.getIdProveedor() != null) {
-            producto.setIdProveedor(proveedorSeleccionado.getIdProveedor());
-            producto.setProveedor(proveedorSeleccionado.getNombre());
-        } else {
-            producto.setIdProveedor(null);
-            producto.setProveedor(null);
-        }
-
-        return producto;
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String header, String mensaje) {
