@@ -2,8 +2,9 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo; // Nueva importación
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaRequest;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaResponse;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX; // Cambio aquí
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaCreateRequestFX; // Nueva importación para detalles
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX; // Cambio aquí
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
@@ -422,11 +423,18 @@ public class VenderControllerFX implements Initializable {
             }
 
             if (dialogController.isConfirmado()) {
-                VentaRequest ventaRequest = new VentaRequest();
-                ventaRequest.setIdVendedor(1);
+                VentaCreateRequestFX ventaRequest = new VentaCreateRequestFX(); // Cambio aquí
+                // Asumiendo que tienes una forma de obtener el ID del vendedor actual.
+                // Por ahora, usaremos un valor placeholder o uno predeterminado si es aplicable.
+                // Si tienes un sistema de login, deberías obtener el ID del vendedor logueado.
+                ventaRequest.setIdVendedor(1); // TODO: Reemplazar con el ID del vendedor real
+                
+                // El número de venta podría ser generado por el backend, pero si se requiere desde el frontend:
                 ventaRequest.setNumeroVenta("VTA-" + System.currentTimeMillis());
 
                 String formaPago = dialogController.getFormaDePago();
+                ventaRequest.setTipoPago(formaPago); // Añadir forma de pago
+
                 boolean requiereFactura = dialogController.isRequiereFactura();
                 ventaRequest.setRequiereFactura(requiereFactura);
 
@@ -437,24 +445,35 @@ public class VenderControllerFX implements Initializable {
                     System.out.println("  Dirección: " + dialogController.getDireccionCliente());
                     System.out.println("  Teléfono: " + dialogController.getTelefonoCliente());
                     System.out.println("  Correo: " + dialogController.getCorreoCliente());
-                    ventaRequest.setIdCliente(null); // Placeholder
+                    // Aquí deberías tener lógica para obtener/crear un ID de cliente si es necesario,
+                    // o enviar los datos del cliente para que el backend los procese.
+                    // Por ahora, se envía null como en el código original si no hay un cliente específico.
+                    // int idClienteFactura = obtenerOcrearCliente(dialogController.getDocumentoCliente(), ...);
+                    // ventaRequest.setIdCliente(idClienteFactura); 
+                    ventaRequest.setIdCliente(null); // Placeholder o lógica para cliente de factura
                 } else {
-                    ventaRequest.setIdCliente(null);
+                    // Para ventas generales sin factura específica, se podría usar un ID de cliente genérico o null
+                    // si el backend lo maneja como "Público General".
+                    ventaRequest.setIdCliente(null); // Cliente general o nulo
                 }
 
-                ventaRequest.setAplicarImpuestos(true);
+                // Según el markdown, aplicarImpuestos es un campo de la solicitud.
+                // Asumimos que siempre se aplican impuestos a menos que haya una lógica específica para no hacerlo.
+                ventaRequest.setAplicarImpuestos(true); 
 
-                List<VentaRequest.DetalleVenta> detalles = new ArrayList<>();
+                List<DetalleVentaCreateRequestFX> detalles = new ArrayList<>(); // Cambio aquí
                 for (ProductoVentaInfo pInfo : productosParaVenta) {
-                    VentaRequest.DetalleVenta detalle = new VentaRequest.DetalleVenta();
+                    DetalleVentaCreateRequestFX detalle = new DetalleVentaCreateRequestFX(); // Cambio aquí
                     detalle.setIdProducto(pInfo.getIdProducto());
                     detalle.setCantidad(pInfo.getCantidad());
-                    detalle.setPrecioUnitario(pInfo.getPrecioVentaUnitario());
+                    // El precioUnitario no está en DetalleVentaCreateRequestFX porque el backend lo tomará del producto.
+                    // Si se necesitara enviar explícitamente (por ejemplo, por promociones ya calculadas en frontend),
+                    // se debería añadir el campo a DetalleVentaCreateRequestFX y establecerlo aquí.
                     detalles.add(detalle);
                 }
                 ventaRequest.setDetalles(detalles);
 
-                VentaResponse ventaResponse = ventaService.registrarVenta(ventaRequest);
+                VentaFX ventaResponse = ventaService.registrarVenta(ventaRequest); // Cambio aquí
 
                 System.out.println("-----------------------------------------------------");
                 System.out.println("VENTA REGISTRADA CON ÉXITO - SIMULACIÓN DE IMPRESIÓN");
