@@ -89,6 +89,7 @@ public class JwtTokenProvider {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    @SuppressWarnings("unchecked")
     public List<SimpleGrantedAuthority> getAuthoritiesFromToken(String token) {
         Claims claims = extractAllClaims(token);
         List<String> authorities = claims.get("authorities", List.class);
