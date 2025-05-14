@@ -1,85 +1,160 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.FlowPane?> <!-- Nueva importación -->
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.*?>
 
-<BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-pane" stylesheets="@../../styles/vender-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.VenderControllerFX">
+<VBox spacing="10" style="-fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.VenderControllerFX">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10" />
+    </padding>
 
-    <!-- Barra Superior: Título y Búsqueda -->
-    <top>
-        <HBox alignment="CENTER_LEFT" styleClass="top-bar-header">
-            <Label styleClass="header-title" text="Módulo de Ventas" />
-        </HBox>
-    </top>
+    <!-- Título -->
+    <Label text="Procesar Venta" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+    
+    <!-- Contenedor principal con división horizontal -->
+    <BorderPane VBox.vgrow="ALWAYS">        <!-- Panel izquierdo: Cliente y Vendedor -->
+        <left>
+            <VBox spacing="10" style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5;">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15" />
+                </padding>
+                <VBox.margin>
+                    <Insets right="10" />
+                </VBox.margin>
+                <prefWidth>270</prefWidth>
 
-    <!-- Contenido Principal: Productos a la izquierda, Carrito a la derecha -->
-    <center>
-        <GridPane hgap="20" styleClass="main-content-pane">
-            <columnConstraints>
-                <ColumnConstraints percentWidth="65.0" />
-                <ColumnConstraints percentWidth="35.0" />
-            </columnConstraints>
+                <!-- Título de la sección -->
+                <Label text="INFORMACIÓN DE VENTA" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                
+                <!-- Vendedor (Automático) -->
+                <VBox spacing="5">
+                    <Label text="Vendedor" style="-fx-font-size: 14px;" />
+                    <TextField fx:id="txtVendedor" editable="false" promptText="Vendedor automático" style="-fx-background-color: #f5f5f5;" />
+                </VBox>
 
-            <!-- Sección de Productos -->
-            <VBox spacing="15" GridPane.columnIndex="0">
-                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-bar-container">
-                    <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
-                        <image>
-                            <Image url="@../../img/moduloVentas/codigo-de-barras.png" /> <!-- Asegúrate que este icono exista o cámbialo -->
-                        </image>
-                    </ImageView>
-                    <TextField fx:id="txtBusqueda" onKeyReleased="#buscarProductos" promptText="Buscar productos por código o nombre..." styleClass="text-field-busqueda-modern" HBox.hgrow="ALWAYS" />
-                </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="utility-buttons-container">
-                    <Button fx:id="btnProductoComun" styleClass="utility-button" text="Producto Común" />
-                    <Button fx:id="btnBuscarVenta" styleClass="utility-button" text="Buscar Venta" />
-                    <Button fx:id="btnNuevaVenta" styleClass="utility-button" text="Nueva Venta" />
-                </HBox>
-                <ScrollPane fx:id="scrollProductos" fitToHeight="true" fitToWidth="true" styleClass="scroll-pane-productos" VBox.vgrow="ALWAYS">
-                    <FlowPane fx:id="productosBox" hgap="15" vgap="15" styleClass="flow-pane-productos" prefWrapLength="700"/>
-                </ScrollPane>
-            </VBox>
+                <!-- Cliente (Campo de búsqueda) -->
+                <VBox spacing="5">
+                    <Label text="Cliente" style="-fx-font-size: 14px;" />
+                    <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por ID, cédula o nombre..." />
+                </VBox>
 
-            <!-- Sección del Carrito -->
-            <VBox styleClass="carrito-sidebar" GridPane.columnIndex="1">
-                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="carrito-header-modern">
-                    <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
-                        <image>
-                            <Image url="@../../img/moduloVentas/carrito-de-compras.png" /> <!-- Asegúrate que este icono exista o cámbialo -->
-                        </image>
-                    </ImageView>
-                    <Label styleClass="carrito-title" text="Carrito" />
-                    <Label fx:id="lblItemsCarrito" styleClass="carrito-items-count" text="0 Items" />
-                </HBox>
-                <ScrollPane fx:id="scrollCarrito" fitToHeight="true" fitToWidth="true" styleClass="scroll-pane-carrito" VBox.vgrow="ALWAYS">
-                    <VBox fx:id="carritoBox" spacing="10" styleClass="carrito-items-container-modern" />
-                </ScrollPane>
-                <VBox styleClass="carrito-summary">
-                    <HBox alignment="CENTER_RIGHT">
-                        <Label styleClass="summary-label" text="Subtotal:" />
-                        <Label fx:id="lblSubtotal" styleClass="summary-value" text="\$0.00" />
+                <!-- Información del cliente y tipo pago -->
+                <VBox spacing="10" style="-fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-padding: 10;">
+                    
+                    <!-- Checkbox para factura -->
+                    <HBox spacing="10">
+                        <CheckBox fx:id="chkRequiereFactura" />
+                        <Label text="Requiere factura" style="-fx-font-size: 14px;" />
                     </HBox>
-                    <HBox alignment="CENTER_RIGHT">
-                        <Label styleClass="summary-label" text="IVA (12%):" />
-                        <Label fx:id="lblIVA" styleClass="summary-value" text="\$0.00" />
-                    </HBox>
-                    <HBox alignment="CENTER_RIGHT" styleClass="total-container-modern">
-                        <Label styleClass="summary-label-total" text="Total:" />
-                        <Label fx:id="lblTotalGeneral" styleClass="summary-value-total" text="\$0.00" />
-                    </HBox>
-                    <Button fx:id="btnProcesarVenta" maxWidth="Infinity" onAction="#procesarVenta" styleClass="button-procesar-venta-modern" text="Procesar Venta" />
+
+                    <!-- Opción de tipo de pago -->
+                    <VBox spacing="5">
+                        <Label text="Tipo de pago:" style="-fx-font-size: 14px;" />
+                        <ComboBox fx:id="cmbTipoPago" prefWidth="220" />
+                    </VBox>
+                </VBox>
+                
+                <!-- Espacio en blanco -->
+                <Pane VBox.vgrow="ALWAYS" />
+                
+                <!-- Botón u otros elementos en parte inferior izquierda -->
+                <VBox alignment="CENTER">
+                    <Button text="Opciones avanzadas" styleClass="btn-secondary" />
                 </VBox>
             </VBox>
-        </GridPane>
-    </center>
-</BorderPane>
+        </left>
+        
+        <!-- Panel derecho: Productos y Precios/Botones -->
+        <center>
+            <VBox spacing="10">
+                <!-- Sección superior: Productos -->
+                <VBox spacing="10" style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5;" VBox.vgrow="ALWAYS">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15" />
+                    </padding>
+                    
+                    <Label text="PRODUCTOS" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                    <!-- Búsqueda de productos y lista de sugerencias -->
+                    <VBox spacing="0">
+                        <TextField fx:id="txtBuscarProducto" promptText="Buscar productos por código o nombre..." />
+                    </VBox>
+
+                    <!-- Tabla de productos -->
+                    <TableView fx:id="tablaProductos" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colCodigo" text="Código" prefWidth="80">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="codigo" />
+                                </cellValueFactory>
+                            </TableColumn>
+                            <TableColumn fx:id="colProducto" text="Producto" prefWidth="200">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="nombre" />
+                                </cellValueFactory>
+                            </TableColumn>
+                            <TableColumn fx:id="colPrecio" text="Precio" prefWidth="100">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="precio" />
+                                </cellValueFactory>
+                            </TableColumn>
+                            <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="80">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="cantidad" />
+                                </cellValueFactory>
+                            </TableColumn>
+                            <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="100">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="subtotal" />
+                                </cellValueFactory>
+                            </TableColumn>
+                            <TableColumn fx:id="colAcciones" text="" prefWidth="60" />
+                        </columns>
+                        <placeholder>
+                            <Label text="No hay productos agregados a la venta" />
+                        </placeholder>
+                    </TableView>
+                    
+                    <Label text="No hay productos agregados a la venta" fx:id="lblNotaProductos" style="-fx-font-style: italic;" />
+                </VBox>                <!-- Sección inferior: Precios y Botones -->
+                <VBox spacing="10" style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5;">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15" />
+                    </padding>
+                    
+                    <HBox spacing="20">
+                        <!-- Área de precios y totales a la izquierda -->
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="PRECIOS Y BOTONES" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                            
+                            <GridPane hgap="10" vgap="8">
+                                <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="120" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="100" />
+                                </columnConstraints>
+
+                                <Label text="Subtotal:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-size: 14px;" />
+                                <Label fx:id="lblSubtotal" text="0.00" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+
+                                <Label text="IVA (16%):" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-size: 14px;" />
+                                <Label fx:id="lblIVA" text="0.00" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+
+                                <Label text="Total:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                                <Label fx:id="lblTotal" text="0.00" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                            </GridPane>
+                        </VBox>
+                        
+                        <!-- Botones de acción a la derecha -->
+                        <HBox spacing="10" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                            <Button fx:id="btnCancelar" text="Cancelar" styleClass="btn-secondary" onAction="#cancelarVenta" />
+                            <Button fx:id="btnProcesarVenta" text="Finalizar Venta" styleClass="btn-primary" onAction="#procesarVenta" />
+                            <Button fx:id="btnImprimirComprobante" text="Finalizar e Imprimir" styleClass="btn-success" onAction="#finalizarEImprimir" />
+                        </HBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </center>
+    </BorderPane>
+</VBox>

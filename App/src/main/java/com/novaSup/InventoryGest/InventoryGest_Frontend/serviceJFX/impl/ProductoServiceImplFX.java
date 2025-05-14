@@ -86,9 +86,7 @@ public class ProductoServiceImplFX implements IProductoService {
             estadoStr = estado.toString();
         }
         url.append("&estado=").append(estadoStr);
-
-        System.out.println("URL de filtrado: " + url.toString());
-
+        
         String respuesta = HttpClient.get(url.toString());
         List<ProductoDTO> productos = objectMapper.readValue(respuesta,
                 new TypeReference<List<ProductoDTO>>() {});
