@@ -602,7 +602,7 @@ public class ProductoControllerFX implements Initializable {
             producto.setEstado(chkEstado.isSelected());
 
             // Actualizar
-            productoService.actualizar(producto);
+            productoService.actualizar(producto.getIdProducto(), producto);
 
             // Mostrar mensaje de éxito y actualizar la vista
             lblMensaje.setText("Producto actualizado correctamente");
