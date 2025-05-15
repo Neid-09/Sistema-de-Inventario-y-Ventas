@@ -71,7 +71,6 @@ public class VenderControllerFX {
     @FXML private TextField txtBuscarCliente;
     @FXML private CheckBox chkRequiereFactura;
     @FXML private TextField txtBuscarProducto;
-    // @FXML private ListView<ProductoFX> sugerenciasProductoListView; // Eliminado en FXML y aquí
 
     @FXML private TableView<ProductoVentaAdapter> tablaProductos;
     @FXML private TableColumn<ProductoVentaAdapter, String> colCodigo;
@@ -81,13 +80,15 @@ public class VenderControllerFX {
     @FXML private TableColumn<ProductoVentaAdapter, Double> colSubtotal;
     @FXML private TableColumn<ProductoVentaAdapter, Void> colAcciones;
 
-    @FXML private Label lblSubtotal;
-    @FXML private Label lblIVA;
-    @FXML private Label lblTotal;
+    @FXML private Label lblSubtotal; // Descomentado
+    @FXML private Label lblIVA;      // Descomentado
+    @FXML private Label lblTotal;    // Descomentado
 
     @FXML private Button btnCancelar;
     @FXML private Button btnProcesarVenta;
-    @FXML private Button btnImprimirComprobante; // El texto de este botón cambiará
+    @FXML private Button btnImprimirComprobante;
+    
+    @FXML private ComboBox<String> cmbTipoPago;
 
     // --- Servicios ---
     private IProductoService productoService; // Añadido
@@ -113,15 +114,11 @@ public class VenderControllerFX {
         // 1. Asignar Vendedor (manual/automático)
         vendedorActual = new Vendedor("V001", "Vendedor Principal"); // Ejemplo
         txtVendedor.setText(vendedorActual.getNombre());
+        // txtVendedor.getStyleClass().add("readonly-textfield"); // Estilo aplicado vía FXML o CSS global
 
         // 2. Configurar CheckBox de Factura
         chkRequiereFactura.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            actualizarEstadoUIFactura(newVal); 
-            if (newVal) {
-                btnImprimirComprobante.setText("Finalizar e Imprimir Factura");
-            } else {
-                btnImprimirComprobante.setText("Finalizar e Imprimir Comprobante");
-            }
+            actualizarEstadoUIFactura(newVal);
         });
         actualizarEstadoUIFactura(chkRequiereFactura.isSelected()); // Estado inicial basado en el checkbox
 
@@ -135,7 +132,7 @@ public class VenderControllerFX {
         configurarColumnaCantidad(); // <--- NUEVA LLAMADA
 
         tablaProductos.setItems(productosEnVenta);
-        tablaProductos.setPlaceholder(new Label("No hay productos agregados a la venta"));
+        // tablaProductos.setPlaceholder(new Label("No hay productos agregados a la venta")); // Estilo aplicado vía FXML o CSS
 
         // 4. Configurar Búsqueda de Productos con Popup de Sugerencias
         inicializarPopupSugerencias();
@@ -143,9 +140,16 @@ public class VenderControllerFX {
 
         // Listener para búsqueda de clientes al presionar Enter en txtBuscarCliente
         txtBuscarCliente.setOnAction(event -> handleBuscarCliente());
-
+        
+        // Configurar ComboBox de tipo de pago (ejemplo de ítems)
+        ObservableList<String> tiposPago = FXCollections.observableArrayList("Efectivo", "Tarjeta de Crédito", "Transferencia");
+        cmbTipoPago.setItems(tiposPago);
+        if (!tiposPago.isEmpty()) {
+            cmbTipoPago.getSelectionModel().selectFirst();
+        }
+        
         // Estado inicial de los totales
-        actualizarTotales();
+        actualizarTotales(); // Asegúrate que esto se llama después de inicializar los labels
     }
 
     private void inicializarPopupSugerencias() {
@@ -252,6 +256,9 @@ public class VenderControllerFX {
                 });
             }
         });
+
+        // Aplicar estilo al ListView del Popup si es necesario (o hacerlo en CSS)
+        // sugerenciasListViewPopup.getStyleClass().add("list-view-popup-sugerencias");
     }
 
     // Clase interna para la celda personalizada de sugerencias de producto en el Popup
@@ -347,13 +354,20 @@ public class VenderControllerFX {
     }
 
     private void actualizarEstadoUIFactura(boolean requiereFactura) {
-        txtBuscarCliente.setDisable(!requiereFactura);
-        if (!requiereFactura) {
-            txtBuscarCliente.clear();
-            clienteActual = null;
-            txtBuscarCliente.setPromptText("Búsqueda de cliente deshabilitada");
+        // Lógica existente para habilitar/deshabilitar campos relacionados con la factura
+        // Por ejemplo:
+        // txtNITCliente.setDisable(!requiereFactura);
+        // txtRazonSocial.setDisable(!requiereFactura);
+        if (requiereFactura) {
+            btnImprimirComprobante.setText("Finalizar y Facturar");
+            // Podrías cambiar el estilo del botón si es necesario:
+            // btnImprimirComprobante.getStyleClass().remove("btn-success");
+            // btnImprimirComprobante.getStyleClass().add("btn-invoice"); // Nueva clase para facturar
         } else {
-            txtBuscarCliente.setPromptText("Buscar cliente por ID, cédula o nombre...");
+            btnImprimirComprobante.setText("Finalizar e Imprimir");
+            // Restaurar estilo original si se cambió:
+            // btnImprimirComprobante.getStyleClass().remove("btn-invoice");
+            // btnImprimirComprobante.getStyleClass().add("btn-success");
         }
     }
 
@@ -540,6 +554,7 @@ public class VenderControllerFX {
         }
         tablaProductos.refresh();
         actualizarTotales();
+        // lblNotaProductos.setVisible(productosEnVenta.isEmpty()); // Controlado por CSS :empty pseudo-class si es posible o FXML placeholder
     }
 
     @FXML
@@ -612,17 +627,30 @@ public class VenderControllerFX {
                 }
             }
         });
+
+        // Considerar aplicar styleClass a los botones dentro de la celda para consistencia
+        // deleteButton.getStyleClass().add("table-action-button");
+        // editButton.getStyleClass().add("table-action-button");
     }
 
 
     private void actualizarTotales() {
-        double subtotalCalc = productosEnVenta.stream().mapToDouble(ProductoVentaAdapter::getSubtotal).sum();
-        double ivaCalc = subtotalCalc * TASA_IVA;
-        double totalCalc = subtotalCalc + ivaCalc;
+        double subtotalCalculado = 0;
+        for (ProductoVentaAdapter pva : productosEnVenta) {
+            subtotalCalculado += pva.getSubtotal();
+        }
+        double ivaCalculado = subtotalCalculado * TASA_IVA;
+        double totalCalculado = subtotalCalculado + ivaCalculado;
 
-        lblSubtotal.setText(String.format("%.2f", subtotalCalc));
-        lblIVA.setText(String.format("%.2f", ivaCalc));
-        lblTotal.setText(String.format("%.2f", totalCalc));
+        if (lblSubtotal != null) {
+            lblSubtotal.setText(String.format("$%.2f", subtotalCalculado));
+        }
+        if (lblIVA != null) {
+            lblIVA.setText(String.format("$%.2f", ivaCalculado));
+        }
+        if (lblTotal != null) {
+            lblTotal.setText(String.format("$%.2f", totalCalculado));
+        }
     }
 
     @FXML
@@ -673,15 +701,19 @@ public class VenderControllerFX {
         }
     }
 
+    @FXML
     private void limpiarParaNuevaVenta() {
-        productosEnVenta.clear();
+        txtBuscarCliente.clear();
         txtBuscarProducto.clear();
-        if (sugerenciasPopup.isShowing()) {
-            sugerenciasPopup.hide();
-        }
+        productosEnVenta.clear();
         chkRequiereFactura.setSelected(false);
-        actualizarEstadoUIFactura(false);
+        if (cmbTipoPago.getItems() != null && !cmbTipoPago.getItems().isEmpty()) {
+            cmbTipoPago.getSelectionModel().selectFirst();
+        }
         actualizarTotales();
+        // lblNotaProductos.setVisible(true); // O manejado por placeholder/CSS
+        clienteActual = null;
+        txtBuscarCliente.requestFocus();
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
@@ -690,6 +722,7 @@ public class VenderControllerFX {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+        // Considerar usar un DialogPane estilizado para las alertas para mantener la consistencia visual
     }
 
     // --- Clase Adaptadora para TableView ---
