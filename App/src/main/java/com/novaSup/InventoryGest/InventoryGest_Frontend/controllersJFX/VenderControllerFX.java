@@ -1,7 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX; // Añadido
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX; // Añadido para usar ClienteFX
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService; // Añadido
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService; // Añadido
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,26 +27,10 @@ import javafx.geometry.Pos;
 
 import java.util.List; // Añadido
 import java.util.Optional;
+import java.util.stream.Collectors; // Añadido para filtrar
 
 // Clases de ejemplo (deberás reemplazarlas o definirlas según tu modelo de datos)
-class Cliente {
-    String id;
-    String nombre;
-    // Otros campos relevantes
-
-    public Cliente(String id, String nombre) {
-        this.id = id;
-        this.nombre = nombre;
-    }
-
-    public String getId() { return id; }
-    public String getNombre() { return nombre; }
-
-    @Override
-    public String toString() {
-        return nombre + " (ID: " + id + ")";
-    }
-}
+// Se elimina la clase Cliente interna
 
 class Vendedor {
     String id;
@@ -94,21 +80,26 @@ public class VenderControllerFX {
 
     // --- Servicios ---
     private IProductoService productoService; // Añadido
+    private IClienteService clienteService; // Añadido
 
     // --- Listas y Modelos ---
     private ObservableList<ProductoVentaAdapter> productosEnVenta = FXCollections.observableArrayList();
     private Vendedor vendedorActual;
-    private Cliente clienteActual;
+    private ClienteFX clienteActual; // Actualizado a ClienteFX
 
     private static final double TASA_IVA = 0.16; // 16%
 
     // --- Componentes para Sugerencias con Popup ---
     private Popup sugerenciasPopup;
     private ListView<ProductoFX> sugerenciasListViewPopup;
+    private Popup sugerenciasClientePopup; // Añadido para clientes
+    private ListView<ClienteFX> sugerenciasClienteListViewPopup; // Añadido para clientes
+
 
     // --- Constructor para Inyección de Dependencias ---
-    public VenderControllerFX(IProductoService productoService) { // Añadido
+    public VenderControllerFX(IProductoService productoService, IClienteService clienteService) { // Añadido IClienteService
         this.productoService = productoService;
+        this.clienteService = clienteService; // Inyección de IClienteService
     }
 
     @FXML
@@ -160,7 +151,9 @@ public class VenderControllerFX {
         configurarBusquedaProductosConPopup();
 
         // Listener para búsqueda de clientes al presionar Enter en txtBuscarCliente
-        txtBuscarCliente.setOnAction(event -> handleBuscarCliente());
+        // txtBuscarCliente.setOnAction(event -> handleBuscarCliente()); // Se manejará con el popup
+        inicializarPopupSugerenciasCliente(); // NUEVA LLAMADA
+        configurarBusquedaClientesConPopup(); // NUEVA LLAMADA
         
         // Configurar ComboBox de tipo de pago (ejemplo de ítems)
         ObservableList<String> tiposPago = FXCollections.observableArrayList("Efectivo", "Tarjeta de Crédito", "Transferencia");
@@ -181,6 +174,27 @@ public class VenderControllerFX {
         sugerenciasPopup.getContent().add(sugerenciasListViewPopup);
         sugerenciasPopup.setAutoHide(true);
     }
+
+    private void inicializarPopupSugerenciasCliente() {
+        sugerenciasClientePopup = new Popup();
+        sugerenciasClienteListViewPopup = new ListView<>();
+        sugerenciasClienteListViewPopup.setPrefHeight(150);
+        // Configurar celda personalizada si es necesario, por ahora toString de ClienteFX
+        sugerenciasClienteListViewPopup.setCellFactory(listView -> new ListCell<ClienteFX>() {
+            @Override
+            protected void updateItem(ClienteFX cliente, boolean empty) {
+                super.updateItem(cliente, empty);
+                if (empty || cliente == null) {
+                    setText(null);
+                } else {
+                    setText(cliente.getNombre() + " " + " (ID: " + cliente.getIdCliente() + ")");
+                }
+            }
+        });
+        sugerenciasClientePopup.getContent().add(sugerenciasClienteListViewPopup);
+        sugerenciasClientePopup.setAutoHide(true);
+    }
+
 
     private void configurarBusquedaProductosConPopup() {
         txtBuscarProducto.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -281,6 +295,97 @@ public class VenderControllerFX {
         // Aplicar estilo al ListView del Popup si es necesario (o hacerlo en CSS)
         // sugerenciasListViewPopup.getStyleClass().add("list-view-popup-sugerencias");
     }
+
+    private void configurarBusquedaClientesConPopup() {
+        txtBuscarCliente.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.trim().isEmpty() || newValue.trim().length() < 2) {
+                sugerenciasClientePopup.hide();
+                sugerenciasClienteListViewPopup.getItems().clear();
+            } else {
+                String terminoBusqueda = newValue.trim().toLowerCase();
+                try {
+                    // Lógica de búsqueda de clientes usando clienteService
+                    List<ClienteFX> todosLosClientes = clienteService.obtenerTodosLosClientes(); // O un método más específico si existe
+                    List<ClienteFX> clientesFiltrados = todosLosClientes.stream()
+                        .filter(c -> (c.getNombre() != null && c.getNombre().toLowerCase().contains(terminoBusqueda)) ||
+                                     // (c.getApellido() != null && c.getApellido().toLowerCase().contains(terminoBusqueda)) || // getApellido() is undefined
+                                     (String.valueOf(c.getIdCliente()).contains(terminoBusqueda)))
+                        .collect(Collectors.toList());
+
+                    if (!clientesFiltrados.isEmpty()) {
+                        sugerenciasClienteListViewPopup.setItems(FXCollections.observableArrayList(clientesFiltrados));
+                        Window owner = txtBuscarCliente.getScene().getWindow();
+                        double x = txtBuscarCliente.localToScreen(0, 0).getX();
+                        double y = txtBuscarCliente.localToScreen(0, 0).getY() + txtBuscarCliente.getHeight() + 5;
+                        sugerenciasClientePopup.show(owner, x, y);
+                        sugerenciasClienteListViewPopup.getSelectionModel().clearSelection();
+                    } else {
+                        sugerenciasClientePopup.hide();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace(); // Manejar la excepción adecuadamente
+                    sugerenciasClientePopup.hide();
+                }
+            }
+        });
+
+        sugerenciasClienteListViewPopup.setOnMouseClicked(event -> {
+            ClienteFX selectedCliente = sugerenciasClienteListViewPopup.getSelectionModel().getSelectedItem();
+            if (selectedCliente != null) {
+                seleccionarCliente(selectedCliente);
+                sugerenciasClientePopup.hide();
+            }
+        });
+
+        sugerenciasClienteListViewPopup.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                ClienteFX selectedCliente = sugerenciasClienteListViewPopup.getSelectionModel().getSelectedItem();
+                if (selectedCliente != null) {
+                    seleccionarCliente(selectedCliente);
+                    sugerenciasClientePopup.hide();
+                }
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                sugerenciasClientePopup.hide();
+            }
+        });
+
+        txtBuscarCliente.setOnAction(event -> { // Al presionar Enter en el TextField
+            if (!sugerenciasClienteListViewPopup.getItems().isEmpty() && !sugerenciasClientePopup.isShowing()) {
+                // Si hay sugerencias pero el popup está oculto (ej. por perder foco y volver), mostrarlo
+                 Window owner = txtBuscarCliente.getScene().getWindow();
+                 double x = txtBuscarCliente.localToScreen(0, 0).getX();
+                 double y = txtBuscarCliente.localToScreen(0, 0).getY() + txtBuscarCliente.getHeight() + 5;
+                 sugerenciasClientePopup.show(owner, x, y);
+                 sugerenciasClienteListViewPopup.getSelectionModel().selectFirst(); // Opcional: seleccionar el primero
+            } else if (sugerenciasClientePopup.isShowing() && sugerenciasClienteListViewPopup.getSelectionModel().getSelectedItem() != null) {
+                 // Si el popup está visible y hay un item seleccionado, procesarlo
+                ClienteFX selectedCliente = sugerenciasClienteListViewPopup.getSelectionModel().getSelectedItem();
+                seleccionarCliente(selectedCliente);
+                sugerenciasClientePopup.hide();
+            } else if (!sugerenciasClienteListViewPopup.getItems().isEmpty() && sugerenciasClienteListViewPopup.getSelectionModel().getSelectedItem() == null && sugerenciasClientePopup.isShowing()){
+                // Si el popup está visible, hay items, pero ninguno seleccionado, selecciona el primero y procesa
+                sugerenciasClienteListViewPopup.getSelectionModel().selectFirst();
+                ClienteFX selectedCliente = sugerenciasClienteListViewPopup.getSelectionModel().getSelectedItem();
+                 if (selectedCliente != null) {
+                    seleccionarCliente(selectedCliente);
+                    sugerenciasClientePopup.hide();
+                }
+            }
+            else {
+                // Si no hay sugerencias o el popup no está visible, intentar búsqueda exacta o crear
+                handleBuscarCliente();
+            }
+        });
+
+        txtBuscarCliente.focusedProperty().addListener((obs, oldVal, fieldHasFocus) -> {
+            if (!fieldHasFocus) {
+                // Considerar si ocultar el popup cuando el campo pierde el foco,
+                // a menos que el foco se mueva al propio popup.
+                // Popup.setAutoHide(true) ya maneja la mayoría de estos casos.
+            }
+        });
+    }
+
 
     // Clase interna para la celda personalizada de sugerencias de producto en el Popup
     private class ProductoSuggestionCellPopup extends ListCell<ProductoFX> {
@@ -601,36 +706,99 @@ public class VenderControllerFX {
     private void handleBuscarCliente() {
         String criterio = txtBuscarCliente.getText().trim();
         if (criterio.isEmpty()) {
-            mostrarAlerta("Información", "Ingrese un criterio de búsqueda para el cliente.");
+            mostrarAlerta("Búsqueda de Cliente", "Ingrese un término de búsqueda para el cliente.");
             return;
         }
-        Cliente clienteEncontrado = buscarClienteEnSistema(criterio);
-        if (clienteEncontrado != null) {
-            clienteActual = clienteEncontrado;
-            txtBuscarCliente.setText(clienteEncontrado.getNombre()); 
-        } else {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Cliente no encontrado");
-            alert.setHeaderText("El cliente no se encuentra en el sistema.");
-            alert.setContentText("¿Desea registrar un nuevo cliente con la información proporcionada?");
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                handleCrearCliente(criterio); 
+
+        try {
+            Optional<ClienteFX> clienteEncontrado = buscarClienteEnSistema(criterio);
+
+            if (clienteEncontrado.isPresent()) {
+                seleccionarCliente(clienteEncontrado.get());
+            } else {
+                // Preguntar si desea crear un nuevo cliente
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Cliente no encontrado");
+                alert.setHeaderText("El cliente con criterio '" + criterio + "' no fue encontrado.");
+                alert.setContentText("¿Desea registrar un nuevo cliente con esta información?");
+
+                ButtonType btnSi = new ButtonType("Sí, registrar");
+                ButtonType btnNo = new ButtonType("No, intentar de nuevo", ButtonBar.ButtonData.CANCEL_CLOSE);
+                alert.getButtonTypes().setAll(btnSi, btnNo);
+
+                Optional<ButtonType> resultado = alert.showAndWait();
+                if (resultado.isPresent() && resultado.get() == btnSi) {
+                    handleCrearCliente(criterio); // Pasar el criterio para pre-llenar
+                } else {
+                    txtBuscarCliente.selectAll();
+                    txtBuscarCliente.requestFocus();
+                }
             }
+        } catch (Exception e) {
+            mostrarAlerta("Error de Búsqueda", "Ocurrió un error al buscar el cliente: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    private void seleccionarCliente(ClienteFX cliente) {
+        this.clienteActual = cliente;
+        txtBuscarCliente.setText(cliente.getNombre() + " " + " (ID: " + cliente.getIdCliente() + ")");
+        // Aquí podrías actualizar otros campos de la UI relacionados con el cliente si los tuvieras
+        // Por ejemplo, si mostraras la dirección o el teléfono del cliente en algún Label.
+        chkRequiereFactura.requestFocus(); // Mover el foco al siguiente campo relevante
+    }
+
 
     private void handleCrearCliente(String infoInicial) {
-        mostrarAlerta("Función no implementada", "La creación de clientes desde aquí aún no está implementada. Info: " + infoInicial);
+        // Aquí iría la lógica para abrir un diálogo/formulario de creación de cliente.
+        // Por ahora, simulamos la creación y asignación.
+        // Deberías usar clienteService.guardarOActualizarCliente(nuevoCliente);
+        System.out.println("Lógica para crear nuevo cliente con info: " + infoInicial);
+        mostrarAlerta("Crear Cliente", "Funcionalidad de crear cliente aún no implementada completamente.\nSe usaría: " + infoInicial);
+        // Ejemplo:
+        // ClienteFX nuevoCliente = new ClienteFX();
+        // nuevoCliente.setNombre(infoInicial); // O parsear infoInicial si es más complejo
+        // try {
+        // clienteActual = clienteService.guardarOActualizarCliente(nuevoCliente);
+        // seleccionarCliente(clienteActual);
+        // } catch (Exception e) {
+        // mostrarAlerta("Error", "No se pudo crear el cliente: " + e.getMessage());
+        // }
     }
 
 
-    private Cliente buscarClienteEnSistema(String criterio) {
-        // Simulación: Reemplazar con lógica real de búsqueda
-        if ("123".equals(criterio) || "Cliente Ejemplo".equalsIgnoreCase(criterio)) {
-            return new Cliente("C001", "Cliente Ejemplo (123)");
+    private Optional<ClienteFX> buscarClienteEnSistema(String criterio) throws Exception {
+        // Intenta buscar por cédula primero (si el criterio parece una cédula)
+        if (criterio.matches("\\d+")) { // Asume que cédula son solo números
+            Optional<ClienteFX> clientePorCedula = clienteService.obtenerClientePorCedula(criterio);
+            if (clientePorCedula.isPresent()) {
+                return clientePorCedula;
+            }
         }
-        return null;
+        // Luego intenta por ID (si el criterio es numérico y podría ser un ID)
+        if (criterio.matches("\\d+")) {
+            try {
+                Integer idCliente = Integer.parseInt(criterio);
+                Optional<ClienteFX> clientePorId = clienteService.obtenerClientePorId(idCliente);
+                if (clientePorId.isPresent()) {
+                    return clientePorId;
+                }
+            } catch (NumberFormatException e) {
+                // No es un ID numérico válido, continuar.
+            }
+        }
+        // Finalmente, busca por nombre (o parte del nombre/apellido)
+        // Esta búsqueda puede ser más amplia y devolver múltiples resultados,
+        // pero para una búsqueda "exacta" en este punto, podríamos tomar el primero si coincide.
+        // O, mejor aún, si el servicio tuviera un "buscarPorTerminoGeneral" sería ideal.
+        // Por ahora, si no es cédula o ID, asumimos que es un nombre/apellido.
+        List<ClienteFX> clientes = clienteService.obtenerTodosLosClientes(); // Podría ser costoso
+        for (ClienteFX cliente : clientes) {
+            if ((cliente.getNombre() != null && cliente.getNombre().equalsIgnoreCase(criterio))) {
+                return Optional.of(cliente);
+            }
+        }
+        return Optional.empty(); // No encontrado
     }
 
     private void configurarColumnaAcciones() {
