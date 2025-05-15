@@ -510,66 +510,62 @@ public class VenderControllerFX {
         // colCantidad.setPrefWidth(120); // Ajustar el ancho si es necesario
     }
 
-    //TODO: Implementar la lógica de búsqueda de productos por código exacto
+    //TODO: Implementar la búsqueda exacta por código de producto
     private void buscarYAgregarProductoPorCodigoExacto(String codigo) {
-        if (codigo == null || codigo.trim().isEmpty()) {
-            return; // Añadido return para evitar procesamiento innecesario
-        }
+        if (codigo == null || codigo.trim().isEmpty()) { return; }
         try {
-            // Asumimos que el servicio tiene un método para buscar por código exacto.
-            // Si no, necesitarías adaptar esto o usar filtrarProductos y luego verificar el código.
-            // ProductoFX producto = productoService.obtenerCategorias(codigo.trim()); // Original erroneous line
-            
-            String codigoBuscado = codigo.trim(); // Trim once for efficiency and clarity
-            List<ProductoFX> productosEncontrados = productoService.filtrarProductos(codigoBuscado, null, null, true);
-            ProductoFX producto = null;
-
-            if (productosEncontrados != null && !productosEncontrados.isEmpty()) {
-                // Find the product with the exact code match, as filtrarProductos might be broad
-                // Using .equalsIgnoreCase for case-insensitive comparison; adjust if exact case is required.
-                Optional<ProductoFX> match = productosEncontrados.stream()
-                    .filter(p -> p.getCodigo().equalsIgnoreCase(codigoBuscado))
-                    .findFirst();
-                if (match.isPresent()) {
-                    producto = match.get();
-                }
-            }
-            
-            if (producto != null) {
-                agregarProductoALaVenta(producto, 1);
-                txtBuscarProducto.clear();
-                sugerenciasPopup.hide(); // Ocultar popup si estaba visible por alguna razón
-            } else {
-                mostrarAlerta("Producto no encontrado", "No se encontró ningún producto con el código: " + codigoBuscado);
-            }
+            // Asumiendo que productoService.buscarPorCodigoExacto devuelve un ProductoFX o null
+            // ProductoFX producto = productoService.buscarPorCodigoExacto(codigo);
+            // if (producto != null) {
+            //     agregarProductoALaVenta(producto, 1); // Agregar una unidad por defecto
+            // } else {
+            //     mostrarAlerta("Producto no encontrado", "No se encontró ningún producto con el código: " + codigo);
+            // }
+            // Temporalmente comentado hasta que se defina bien buscarPorCodigoExacto
+            mostrarAlerta("Info", "Búsqueda exacta por código aún en desarrollo.");
         } catch (Exception e) {
-            mostrarAlerta("Error", "Ocurrió un error al buscar el producto por código.");
-            e.printStackTrace();
+            mostrarAlerta("Error en Búsqueda", "Ocurrió un error al buscar el producto por código.");
+            e.printStackTrace(); // Loggear el error
         }
     }
 
-    private void agregarProductoALaVenta(ProductoFX producto, int cantidad) {
-        if (producto == null) {
-            return; // Añadido return
-        }
-
-        // Validar si la cantidad solicitada excede el stock
-        if (cantidad > producto.getStock()) {
-            mostrarAlerta("Stock Insuficiente", "No hay suficiente stock para '" + producto.getNombre() + "'. Disponible: " + producto.getStock());
+    private void agregarProductoALaVenta(ProductoFX productoArgumento, int cantidad) {
+        if (productoArgumento == null) {
+            mostrarAlerta("Error", "No se ha seleccionado ningún producto.");
             return;
         }
 
         Optional<ProductoVentaAdapter> existente = productosEnVenta.stream()
-                .filter(pva -> pva.getCodigo().equals(producto.getCodigo()))
+                .filter(pva -> pva.getCodigo().equals(productoArgumento.getCodigo()))
                 .findFirst();
 
         if (existente.isPresent()) {
             ProductoVentaAdapter pva = existente.get();
-            // Aquí podrías preguntar si se desea aumentar la cantidad o mostrar un mensaje.
-            // Por ahora, simplemente aumentamos la cantidad.
-            pva.setCantidad(pva.getCantidad() + cantidad);
+            // Usar el producto original que ya está en la tabla para la validación de stock
+            ProductoFX productoEnTabla = pva.getProductoOriginal(); 
+            int cantidadActualEnVenta = pva.getCantidad();
+            int nuevaCantidadTotal = cantidadActualEnVenta + cantidad;
+
+            // VALIDACIÓN CRÍTICA: Usar el stock del producto que ya está en la tabla
+            if (nuevaCantidadTotal > productoEnTabla.getStock()) {
+                mostrarAlerta("Stock Insuficiente",
+                              "No se puede agregar más unidades de '" + productoEnTabla.getNombre() +
+                              "'. Cantidad actual en venta: " + cantidadActualEnVenta +
+                              ", Stock disponible: " + productoEnTabla.getStock() +
+                              ". Solo puede agregar " + (productoEnTabla.getStock() - cantidadActualEnVenta) + " más.");
+                return; // No modificar si excede
+            }
+            pva.setCantidad(nuevaCantidadTotal);
         } else {
-            productosEnVenta.add(new ProductoVentaAdapter(producto, cantidad));
+            // Producto nuevo en la venta. Usar el producto del argumento (del popup) para la validación inicial.
+            if (cantidad > productoArgumento.getStock()) {
+                mostrarAlerta("Stock Insuficiente", "La cantidad solicitada (" + cantidad +
+                                                   ") para '" + productoArgumento.getNombre() +
+                                                   "' excede el stock disponible (" + productoArgumento.getStock() + ").");
+                return;
+            }
+            // Asegurarse de pasar el productoArgumento (que es el ProductoFX completo) al adaptador
+            productosEnVenta.add(new ProductoVentaAdapter(productoArgumento, cantidad)); 
         }
         tablaProductos.refresh();
         actualizarTotales();
