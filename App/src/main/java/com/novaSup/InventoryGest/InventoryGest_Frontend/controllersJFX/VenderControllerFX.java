@@ -512,20 +512,31 @@ public class VenderControllerFX {
 
     //TODO: Implementar la búsqueda exacta por código de producto
     private void buscarYAgregarProductoPorCodigoExacto(String codigo) {
-        if (codigo == null || codigo.trim().isEmpty()) { return; }
+        if (codigo == null || codigo.trim().isEmpty()) {
+            // Opcional: mostrar alerta si se desea notificar sobre código vacío.
+            // mostrarAlerta("Búsqueda por Código", "Por favor, ingrese un código de producto.");
+            return;
+        }
         try {
-            // Asumiendo que productoService.buscarPorCodigoExacto devuelve un ProductoFX o null
-            // ProductoFX producto = productoService.buscarPorCodigoExacto(codigo);
-            // if (producto != null) {
-            //     agregarProductoALaVenta(producto, 1); // Agregar una unidad por defecto
-            // } else {
-            //     mostrarAlerta("Producto no encontrado", "No se encontró ningún producto con el código: " + codigo);
-            // }
-            // Temporalmente comentado hasta que se defina bien buscarPorCodigoExacto
-            mostrarAlerta("Info", "Búsqueda exacta por código aún en desarrollo.");
+            if (productoService == null) {
+                System.err.println("ERROR CRÍTICO: productoService es null en buscarYAgregarProductoPorCodigoExacto.");
+                mostrarAlerta("Error Interno", "No se pudo realizar la búsqueda por un error de configuración. Contacte a soporte.");
+                return;
+            }
+
+            ProductoFX productoEncontrado = productoService.obtenerPorCodigo(codigo.trim()); // Corregido: Usar obtenerPorCodigo
+
+            if (productoEncontrado != null) {
+                agregarProductoALaVenta(productoEncontrado, 1);
+                txtBuscarProducto.clear();
+                // Opcional: txtBuscarProducto.requestFocus(); // Para facilitar búsquedas consecutivas
+            } else {
+                mostrarAlerta("Producto no Encontrado", "No se encontró ningún producto con el código: " + codigo);
+            }
         } catch (Exception e) {
-            mostrarAlerta("Error en Búsqueda", "Ocurrió un error al buscar el producto por código.");
-            e.printStackTrace(); // Loggear el error
+            System.err.println("Error al buscar producto por código exacto '" + codigo + "': " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlerta("Error en Búsqueda", "Ocurrió un error al intentar buscar el producto por código.");
         }
     }
 
