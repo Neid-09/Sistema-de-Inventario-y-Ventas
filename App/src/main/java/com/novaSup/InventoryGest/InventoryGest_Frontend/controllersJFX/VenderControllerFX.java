@@ -112,6 +112,25 @@ public class VenderControllerFX {
     @FXML
     public void initialize() {
         // 1. Asignar Vendedor (manual/automático)
+        // Configurar la política de redimensionamiento de las columnas de la tabla
+        if (tablaProductos != null) {
+            tablaProductos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+
+            // Opcionalmente, puedes definir anchos porcentuales para un control más fino.
+            // Por ejemplo, si quieres que ciertas columnas sean más anchas que otras:
+            // colCodigo.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+            // colProducto.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.30));
+            // colPrecio.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+            // colCantidad.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+            // colSubtotal.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+            // colAcciones.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.10));
+        }
+
+        // Aquí puedes añadir el resto de tu lógica de inicialización si es necesario,
+        // como configurar las factorías de celdas (aunque parece que ya lo haces con @FXML y PropertyValueFactory)
+        // y cualquier otra configuración inicial.
+
+        // 1. Asignar Vendedor (manual/automático)
         vendedorActual = new Vendedor("V001", "Vendedor Principal"); // Ejemplo
         txtVendedor.setText(vendedorActual.getNombre());
         // txtVendedor.getStyleClass().add("readonly-textfield"); // Estilo aplicado vía FXML o CSS global
