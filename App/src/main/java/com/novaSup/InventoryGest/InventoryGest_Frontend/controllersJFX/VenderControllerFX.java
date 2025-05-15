@@ -66,6 +66,8 @@ class Vendedor {
 
 public class VenderControllerFX {
 
+    @FXML private VBox vboxCliente; // Añadido para controlar la visibilidad de la sección cliente
+
     // --- Campos FXML ---
     @FXML private TextField txtVendedor;
     @FXML private TextField txtBuscarCliente;
@@ -373,20 +375,22 @@ public class VenderControllerFX {
     }
 
     private void actualizarEstadoUIFactura(boolean requiereFactura) {
-        // Lógica existente para habilitar/deshabilitar campos relacionados con la factura
-        // Por ejemplo:
-        // txtNITCliente.setDisable(!requiereFactura);
-        // txtRazonSocial.setDisable(!requiereFactura);
+        // Controla la visibilidad de la sección de cliente
+        if (vboxCliente != null) {
+            vboxCliente.setVisible(requiereFactura);
+            vboxCliente.setManaged(requiereFactura);
+        }
+
+        // Aquí puedes añadir lógica adicional si es necesario, como cambiar estilos,
+        // habilitar/deshabilitar campos específicos de la factura, etc.
         if (requiereFactura) {
-            btnImprimirComprobante.setText("Finalizar y Facturar");
-            // Podrías cambiar el estilo del botón si es necesario:
-            // btnImprimirComprobante.getStyleClass().remove("btn-success");
-            // btnImprimirComprobante.getStyleClass().add("btn-invoice"); // Nueva clase para facturar
+            // Lógica cuando se requiere factura
+            // Por ejemplo, hacer visible o editable algún campo específico para la factura
+            System.out.println("Se requiere factura. Mostrando campos de cliente.");
         } else {
-            btnImprimirComprobante.setText("Finalizar e Imprimir");
-            // Restaurar estilo original si se cambió:
-            // btnImprimirComprobante.getStyleClass().remove("btn-invoice");
-            // btnImprimirComprobante.getStyleClass().add("btn-success");
+            // Lógica cuando NO se requiere factura
+            // Por ejemplo, ocultar o deshabilitar campos específicos para la factura
+            System.out.println("No se requiere factura. Ocultando campos de cliente.");
         }
     }
 
@@ -510,7 +514,6 @@ public class VenderControllerFX {
         // colCantidad.setPrefWidth(120); // Ajustar el ancho si es necesario
     }
 
-    //TODO: Implementar la búsqueda exacta por código de producto
     private void buscarYAgregarProductoPorCodigoExacto(String codigo) {
         if (codigo == null || codigo.trim().isEmpty()) {
             // Opcional: mostrar alerta si se desea notificar sobre código vacío.

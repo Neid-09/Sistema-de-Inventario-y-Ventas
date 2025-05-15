@@ -35,7 +35,7 @@
                 </VBox>
 
                 <!-- Cliente (Campo de búsqueda) -->
-                <VBox styleClass="vbox-form-section">
+                <VBox fx:id="vboxCliente" styleClass="vbox-form-section">
                     <Label text="Cliente" styleClass="form-label" />
                     <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por ID, cédula o nombre..." styleClass="text-field" />
                 </VBox>
