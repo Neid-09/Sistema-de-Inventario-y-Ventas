@@ -24,6 +24,10 @@ import javafx.stage.Window; // Añadido para el propietario del Popup
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Pane;
 
 import java.util.List; // Añadido
 import java.util.Optional;
@@ -76,6 +80,8 @@ public class VenderControllerFX {
     @FXML private Button btnProcesarVenta;
     @FXML private Button btnImprimirComprobante;
     
+    private Button btnVerDetalleCliente; // NUEVO: Botón para ver detalles del cliente
+
     @FXML private ComboBox<String> cmbTipoPago;
 
     // --- Servicios ---
@@ -164,6 +170,42 @@ public class VenderControllerFX {
         
         // Estado inicial de los totales
         actualizarTotales(); // Asegúrate que esto se llama después de inicializar los labels
+
+        // NUEVO: Crear y configurar el botón de ver detalle de cliente
+        btnVerDetalleCliente = new Button("Ver Detalle");
+        btnVerDetalleCliente.setOnAction(e -> handleVerDetalleCliente());
+        btnVerDetalleCliente.setVisible(false);
+        btnVerDetalleCliente.setManaged(false); // No ocupa espacio si está invisible
+        HBox.setMargin(btnVerDetalleCliente, new Insets(0, 0, 0, 5)); // Margen a la izquierda del botón
+
+        // Intentar insertar el botón al lado de txtBuscarCliente
+        // Esto asume que txtBuscarCliente tiene un padre que es un Pane (lo cual es típico en FXML)
+        Node parentOfTxtBuscarCliente = txtBuscarCliente.getParent();
+        if (parentOfTxtBuscarCliente instanceof Pane) {
+            Pane parentPane = (Pane) parentOfTxtBuscarCliente;
+            int indexOfTxtBuscar = parentPane.getChildren().indexOf(txtBuscarCliente);
+            if (indexOfTxtBuscar != -1) {
+                // Crear un HBox para agrupar txtBuscarCliente y btnVerDetalleCliente
+                HBox clienteSearchBox = new HBox(5); // 5 es el espaciado entre elementos
+                clienteSearchBox.setAlignment(Pos.CENTER_LEFT); // Alinear contenido
+
+                parentPane.getChildren().remove(indexOfTxtBuscar); // Quitar txtBuscarCliente del padre original
+                clienteSearchBox.getChildren().addAll(txtBuscarCliente, btnVerDetalleCliente); // Añadir ambos al HBox
+                parentPane.getChildren().add(indexOfTxtBuscar, clienteSearchBox); // Añadir el HBox al padre original en la misma posición
+            } else {
+                // Fallback: si txtBuscarCliente no se encuentra en su padre (raro),
+                // añadir el botón directamente a vboxCliente si existe.
+                if (vboxCliente != null) {
+                    vboxCliente.getChildren().add(btnVerDetalleCliente);
+                }
+            }
+        } else {
+            // Fallback: si el padre no es un Pane o es null (muy improbable para un control FXML),
+            // añadir el botón directamente a vboxCliente si existe.
+            if (vboxCliente != null) {
+                vboxCliente.getChildren().add(btnVerDetalleCliente);
+            }
+        }
     }
 
     private void inicializarPopupSugerencias() {
@@ -486,6 +528,17 @@ public class VenderControllerFX {
             vboxCliente.setManaged(requiereFactura);
         }
 
+        // Actualizar visibilidad del botón "Ver Detalle"
+        if (btnVerDetalleCliente != null) {
+            if (requiereFactura && clienteActual != null) {
+                btnVerDetalleCliente.setVisible(true);
+                btnVerDetalleCliente.setManaged(true);
+            } else {
+                btnVerDetalleCliente.setVisible(false);
+                btnVerDetalleCliente.setManaged(false);
+            }
+        }
+
         // Aquí puedes añadir lógica adicional si es necesario, como cambiar estilos,
         // habilitar/deshabilitar campos específicos de la factura, etc.
         if (requiereFactura) {
@@ -745,6 +798,13 @@ public class VenderControllerFX {
         txtBuscarCliente.setText(cliente.getNombre() + " " + " (ID: " + cliente.getIdCliente() + ")");
         // Aquí podrías actualizar otros campos de la UI relacionados con el cliente si los tuvieras
         // Por ejemplo, si mostraras la dirección o el teléfono del cliente en algún Label.
+
+        // Hacer visible el botón de "Ver Detalle" si la factura está requerida
+        if (btnVerDetalleCliente != null && chkRequiereFactura.isSelected()) {
+            btnVerDetalleCliente.setVisible(true);
+            btnVerDetalleCliente.setManaged(true);
+        }
+
         chkRequiereFactura.requestFocus(); // Mover el foco al siguiente campo relevante
     }
 
@@ -911,6 +971,12 @@ public class VenderControllerFX {
         // lblNotaProductos.setVisible(true); // O manejado por placeholder/CSS
         clienteActual = null;
         txtBuscarCliente.requestFocus();
+
+        // Ocultar el botón de "Ver Detalle"
+        if (btnVerDetalleCliente != null) {
+            btnVerDetalleCliente.setVisible(false);
+            btnVerDetalleCliente.setManaged(false);
+        }
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
@@ -920,6 +986,60 @@ public class VenderControllerFX {
         alert.setContentText(mensaje);
         alert.showAndWait();
         // Considerar usar un DialogPane estilizado para las alertas para mantener la consistencia visual
+    }
+
+    // NUEVO: Método para manejar el clic en el botón "Ver Detalle Cliente"
+    private void handleVerDetalleCliente() {
+        if (clienteActual == null) {
+            mostrarAlerta("Error", "No hay un cliente seleccionado.");
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Detalle del Cliente");
+        alert.setHeaderText("Información de: " + clienteActual.getNombre());
+
+        // Construir el contenido del diálogo.
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID Cliente: ").append(clienteActual.getIdCliente()).append("\n");
+        sb.append("Documento Identidad: ").append(clienteActual.getDocumentoIdentidad() != null ? clienteActual.getDocumentoIdentidad() : "N/A").append("\n");
+        sb.append("Nombre: ").append(clienteActual.getNombre() != null ? clienteActual.getNombre() : "N/A").append("\n");
+        sb.append("Correo: ").append(clienteActual.getCorreo() != null && !clienteActual.getCorreo().isEmpty() ? clienteActual.getCorreo() : "N/A").append("\n");
+        sb.append("Celular: ").append(clienteActual.getCelular() != null && !clienteActual.getCelular().isEmpty() ? clienteActual.getCelular() : "N/A").append("\n");
+        sb.append("Dirección: ").append(clienteActual.getDireccion() != null && !clienteActual.getDireccion().isEmpty() ? clienteActual.getDireccion() : "N/A").append("\n");
+        sb.append("Puntos Fidelidad: ").append(clienteActual.getPuntosFidelidad() != null ? clienteActual.getPuntosFidelidad() : "N/A").append("\n");
+        sb.append("Límite Crédito: ").append(clienteActual.getLimiteCredito() != null ? clienteActual.getLimiteCredito().toString() : "N/A").append("\n");
+        sb.append("Total Comprado: ").append(clienteActual.getTotalComprado() != null ? clienteActual.getTotalComprado().toString() : "N/A").append("\n");
+        sb.append("Última Compra: ").append(clienteActual.getUltimaCompra() != null ? clienteActual.getUltimaCompra().toString() : "N/A").append("\n");
+        sb.append("Tiene Créditos: ").append(clienteActual.isTieneCreditos() ? "Sí" : "No").append("\n");
+        sb.append("Requiere Factura por Defecto: ").append(clienteActual.isRequiereFacturaDefault() ? "Sí" : "No").append("\n");
+        sb.append("Razón Social: ").append(clienteActual.getRazonSocial() != null && !clienteActual.getRazonSocial().isEmpty() ? clienteActual.getRazonSocial() : "N/A").append("\n");
+        sb.append("Identificación Fiscal: ").append(clienteActual.getIdentificacionFiscal() != null && !clienteActual.getIdentificacionFiscal().isEmpty() ? clienteActual.getIdentificacionFiscal() : "N/A").append("\n");
+        sb.append("Dirección Facturación: ").append(clienteActual.getDireccionFacturacion() != null && !clienteActual.getDireccionFacturacion().isEmpty() ? clienteActual.getDireccionFacturacion() : "N/A").append("\n");
+        sb.append("Correo Facturación: ").append(clienteActual.getCorreoFacturacion() != null && !clienteActual.getCorreoFacturacion().isEmpty() ? clienteActual.getCorreoFacturacion() : "N/A").append("\n");
+        sb.append("Tipo Factura por Defecto: ").append(clienteActual.getTipoFacturaDefault() != null && !clienteActual.getTipoFacturaDefault().isEmpty() ? clienteActual.getTipoFacturaDefault() : "N/A").append("\n");
+        sb.append("Fecha Registro: ").append(clienteActual.getFechaRegistro() != null ? clienteActual.getFechaRegistro().toString() : "N/A").append("\n");
+        sb.append("Fecha Actualización: ").append(clienteActual.getFechaActualizacion() != null ? clienteActual.getFechaActualizacion().toString() : "N/A").append("\n");
+        sb.append("Activo: ").append(clienteActual.isActivo() ? "Sí" : "No").append("\n");
+
+        alert.setContentText(sb.toString());
+
+        // Añadir botones personalizados
+        ButtonType botonCerrar = new ButtonType("Cerrar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType botonEditar = new ButtonType("Editar Información", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(botonEditar, botonCerrar); // Botones en el orden: Editar, Cerrar
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == botonEditar) {
+            // Lógica para editar información del cliente (actualmente no implementada)
+            Alert notImplementedAlert = new Alert(Alert.AlertType.INFORMATION);
+            notImplementedAlert.setTitle("Función no implementada");
+            notImplementedAlert.setHeaderText(null);
+            notImplementedAlert.setContentText("La funcionalidad de editar la información del cliente aún no está implementada.");
+            notImplementedAlert.showAndWait();
+        }
+        // Si se presiona "Cerrar" o se cierra el diálogo (X), no se hace nada más.
     }
 
     // --- Clase Adaptadora para TableView ---
