@@ -1,195 +1,736 @@
-/* Estilos generales */
+/* Estilos generales para la vista de Vender */
 .root {
-    -fx-font-family: "Segoe UI", Arial, sans-serif; /* Fuente más moderna y legible */
-    -fx-background-color: #f0f4f8; /* Un azul muy claro/grisáceo para el fondo general */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #F5F7FA;
 }
 
-/* Títulos */
-.title-label {
-    -fx-font-size: 24px;
+/* Estilo para el root pane de Vender.fxml */
+.root-pane {
+    -fx-background-color: #F5F7FA; /* Fondo general de la aplicación */
+}
+
+/* Barra Superior con el título "Módulo de Ventas" */
+.top-container {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-spacing: 10;
+}
+
+.header-container {
+    -fx-padding: 15px 20px 10px 20px;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+}
+
+.header-title {
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
-    -fx-text-fill: #003366; /* Azul oscuro para el título principal */
-}
-
-.section-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #004080; /* Un azul un poco más claro para títulos de sección */
-}
-
-/* Paneles */
-.panel {
-    -fx-background-color: white;
-    -fx-border-color: #c5d9e8; /* Borde azul claro sutil */
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0.5, 0, 2); /* Sombra suave */
-}
-
-/* Etiquetas de formulario */
-.form-label {
-    -fx-font-size: 14px;
-    -fx-text-fill: #333333; /* Gris oscuro para buena legibilidad */
-}
-
-.form-label-total {
-    -fx-font-size: 16px; /* Ligeramente más grande para el total final */
-    -fx-font-weight: bold;
-    -fx-text-fill: #003366; /* Azul oscuro */
-}
-
-/* Campos de texto */
-.text-field {
-    -fx-font-size: 13px;
-    -fx-border-color: #b0c4de; /* Borde azul claro */
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-prompt-text-fill: #90a4ae; /* Color del texto de placeholder */
-}
-
-.text-field:focused {
-    -fx-border-color: #0056b3; /* Azul más oscuro al enfocar */
-    -fx-effect: dropshadow(gaussian, rgba(0, 86, 179, 0.3), 5, 0, 0, 0);
-}
-
-.readonly-textfield {
-    -fx-background-color: #e9ecef; /* Fondo gris claro para campos de solo lectura */
-    -fx-control-inner-background: #e9ecef; /* Asegura el color interno también */
-    -fx-text-fill: #495057; /* Texto gris oscuro */
-    -fx-border-color: #ced4da;
-}
-
-/* ComboBox */
-.combo-box {
-    -fx-font-size: 13px;
-    -fx-border-color: #b0c4de;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-background-color: white;
-}
-
-.combo-box .arrow-button .arrow {
-    -fx-background-color: #0056b3; /* Flecha azul */
-}
-
-/* CheckBox */
-.check-box .box {
-    -fx-border-color: #0056b3;
-    -fx-border-radius: 3px;
-}
-.check-box:selected .mark {
-    -fx-background-color: #0056b3; /* Marca de verificación azul */
-}
-.check-box .text {
-    -fx-font-size: 14px;
     -fx-text-fill: #333333;
 }
 
+.search-buttons-container {
+    -fx-padding: 10px 20px;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+}
 
-/* Botones */
-.button {
+/* Contenedor principal (GridPane) */
+.main-content-pane {
+    -fx-padding: 20px;
+    -fx-background-color: transparent; /* El fondo lo da el root-pane */
+}
+
+/* Sección de Productos (Izquierda) */
+.search-bar-container {
+    -fx-padding: 0 0 15px 0; /* Espacio debajo de la barra de búsqueda */
+}
+
+.text-field-busqueda-modern {
     -fx-font-size: 14px;
-    -fx-padding: 8px 15px;
+    -fx-prompt-text-fill: #A0A0A0;
+    -fx-pref-height: 40px;
+    -fx-border-color: #CED4DA;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0.2, 0, 1);
+    -fx-padding: 5px 10px;
+}
+
+/* Contenedor para los botones de utilidad */
+.utility-buttons-container {
+    -fx-padding: 10px 0 0 0; /* Espacio arriba de los botones */
+}
+
+.utility-button {
+    -fx-font-size: 13px;
+    -fx-background-color: #6C757D; /* Gris oscuro, similar al header del carrito original */
+    -fx-text-fill: white;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
     -fx-cursor: hand;
 }
 
-.btn-primary {
-    -fx-background-color: #0056b3; /* Azul primario */
-    -fx-text-fill: white;
-}
-.btn-primary:hover {
-    -fx-background-color: #004080; /* Azul más oscuro al pasar el mouse */
+.utility-button:hover {
+    -fx-background-color: #5A6268; /* Un poco más oscuro al pasar el mouse */
 }
 
-.btn-secondary {
-    -fx-background-color: #6c757d; /* Gris secundario */
-    -fx-text-fill: white;
-}
-.btn-secondary:hover {
-    -fx-background-color: #5a6268;
+.scroll-pane-productos {
+    -fx-background-color: transparent; /* Asegura que el fondo del scrollpane no interfiera */
+    -fx-border-color: transparent; /* Sin bordes para el scrollpane de productos */
+    -fx-fit-to-width: true; /* Importante para que el FlowPane se ajuste correctamente */
 }
 
-.btn-success {
-    -fx-background-color: #28a745; /* Verde para éxito */
-    -fx-text-fill: white;
+/* Estilo para el FlowPane que contiene las tarjetas de producto */
+.flow-pane-productos {
+    -fx-padding: 15px; /* Espaciado alrededor del conjunto de tarjetas */
+    -fx-alignment: TOP_LEFT; /* Alineación de las tarjetas */
+    /* hgap y vgap se establecen en el FXML o en el controlador */
 }
-.btn-success:hover {
+
+.productos-container-modern {
+    -fx-padding: 5px; /* Pequeño padding interno si es necesario */
+    /* -fx-background-color: #FFFFFF; /* Fondo blanco para el área de productos si se desea un contraste */
+    /* -fx-border-radius: 8px; */
+    /* -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.1, 0, 1); */
+}
+
+/* Estilos para las tarjetas de producto individuales */
+.producto-item-card {
+    -fx-background-color: white; /* Fondo blanco para la tarjeta */
+    -fx-border-color: #E0E0E0; /* Borde gris claro y sutil */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px; /* Esquinas redondeadas para el borde */
+    -fx-background-radius: 8px; /* Esquinas redondeadas para el fondo */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0.15, 0, 2); /* Sombra suave */
+    /* El ancho (prefWidth) se establece en el controlador JavaFX (ej. 200px) */
+    -fx-min-height: 250px; /* Altura mínima para consistencia, ajustar según contenido */
+    -fx-display: INLINE_BLOCK; /* Comportamiento de bloque en línea */
+}
+
+/* Placeholder para la imagen del producto */
+.image-placeholder {
+    /* -fx-pref-height: 120px; Se establece en el controlador */
+    -fx-background-color: #F4F6F8; /* Color de fondo gris muy claro */
+    /* -fx-border-color: #E0E0E0; */ /* Opcional: borde para el placeholder */
+    /* -fx-border-width: 0 0 1px 0; */ /* Solo borde inferior si se prefiere */
+    -fx-background-radius: 7px 7px 0 0; /* Esquinas superiores redondeadas (interior al borde de la tarjeta) */
+    /* -fx-border-radius: 8px 8px 0 0; */
+    -fx-alignment: CENTER; /* Por si se añade texto o un icono al placeholder */
+    /* Si usas ImageView directamente, puedes aplicar estilos aquí también */
+}
+
+/* Estilos para los textos dentro de la tarjeta */
+.producto-item-card .label-nombre-card {
+    -fx-font-size: 13px; /* Tamaño ajustado */
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333; /* Negro suave */
+    -fx-padding: 0 5px 0 0; /* Espacio a la derecha del nombre antes del precio */
+}
+
+.producto-item-card .label-precio-card {
+    -fx-font-size: 13px; /* Tamaño ajustado */
+    -fx-font-weight: bold;
+    -fx-text-fill: #27AE60; /* Verde para el precio */
+}
+
+.producto-item-card .label-categoria-tag {
+    -fx-font-size: 10px; /* Más pequeño para el tag */
+    -fx-text-fill: #5D6D7E; /* Gris azulado */
+    -fx-background-color: #EBF5FB; /* Fondo azul muy claro para el tag */
+    -fx-padding: 2px 6px; /* Padding interno del tag */
+    -fx-background-radius: 4px; /* Esquinas redondeadas para el tag */
+    -fx-border-radius: 4px;
+}
+
+/* Estilo para el código del producto en la tarjeta */
+.producto-item-card .label-codigo-card {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7F8C8D; /* Gris más sutil para el código */
+    -fx-padding: 2px 0; /* Un poco de padding vertical */
+}
+
+/* Botón de agregar dentro de la tarjeta */
+.producto-item-card .button-agregar-card {
+    -fx-font-size: 12px;
+    -fx-text-fill: white;
+    -fx-background-color: #34495E; /* Azul oscuro/gris */
+    -fx-font-weight: bold;
+    -fx-pref-height: 30px; /* Altura ajustada */
+    -fx-background-radius: 5px; /* Esquinas redondeadas para el botón */
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.producto-item-card .button-agregar-card:hover {
+    -fx-background-color: #002d86; /* Un poco más claro al pasar el mouse */
+}
+
+.producto-item-card .label-nombre { /* Estilo anterior, podría eliminarse si .label-nombre-card lo reemplaza completamente */
+    /* ... */
+}
+.producto-item-card .label-codigo { /* Estilo anterior, ya no se usa en la tarjeta */
+    /* ... */
+}
+.producto-item-card .label-categoria { /* Estilo anterior, podría eliminarse si .label-categoria-tag lo reemplaza */
+    /* ... */
+}
+.producto-item-card .label-precio { /* Estilo anterior, podría eliminarse si .label-precio-card lo reemplaza */
+    /* ... */
+}
+.producto-item-card .button-agregar { /* Estilo anterior, podría eliminarse si .button-agregar-card lo reemplaza */
+    /* ... */
+}
+
+/* Sección del Carrito (Derecha) */
+.carrito-sidebar {
+    -fx-background-color: #FFFFFF; /* Fondo blanco para la barra lateral del carrito */
+    -fx-padding: 15px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0.1, 0, 2);
+    -fx-spacing: 15px; /* Espacio entre header, scrollpane y summary */
+}
+
+.carrito-header-modern {
+    -fx-padding: 0 0 10px 0;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E9ECEF; /* Borde inferior sutil para separar del contenido */
+    -fx-alignment: CENTER_LEFT;
+}
+
+.carrito-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 0 5px; /* Espacio a la izquierda del texto del título */
+}
+
+.carrito-items-count {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6C757D; /* Gris para el contador de items */
+    -fx-padding: 2px 8px;
+    -fx-background-color: #E9ECEF;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-margin-left: auto; /* Empuja el contador a la derecha */
+}
+
+.scroll-pane-carrito {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.carrito-items-container-modern {
+    /* -fx-padding: 5px; */ /* Ya tiene spacing el VBox padre */
+}
+
+/* Estilos para los items en el carrito (adaptar de .carrito-item) */
+.carrito-item { /* Manteniendo y ajustando si es necesario */
+    -fx-padding: 12px 5px;
+    -fx-border-color: #E9ECEF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-background-color: transparent; /* El fondo lo da el sidebar */
+}
+.carrito-item:last-child {
+    -fx-border-width: 0; /* Sin borde para el último item */
+}
+
+.carrito-item:hover {
+    -fx-background-color: #F8F9FA; /* Ligero hover */
+}
+
+.carrito-item .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #343A40;
+}
+
+/* ... (mantener estilos de spinner y botón eliminar si se usan dentro del item) ... */
+
+/* Sección de Resumen del Carrito */
+.carrito-summary {
+    -fx-padding: 15px 5px 5px 5px; /* Padding superior para separar de la lista */
+    -fx-spacing: 8px;
+}
+
+.summary-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #495057;
+}
+
+.summary-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #343A40;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-pref-width: 100px; /* Ancho para alinear los valores */
+}
+
+.total-container-modern {
+    -fx-padding: 10px 0 0 0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #E9ECEF;
+    -fx-margin-top: 5px;
+}
+
+.summary-label-total {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #28A745; /* Verde para el total */
+}
+
+.summary-value-total {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #28A745; /* Verde para el total */
+    -fx-alignment: CENTER_RIGHT;
+    -fx-pref-width: 100px;
+}
+
+/* Estilos para el contenedor superior */
+.top-container {
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+    -fx-padding: 10px 20px 15px 20px;
+}
+
+/* Estilos para el contenedor de búsqueda */
+.search-container {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+    -fx-max-width: 500px;
+}
+
+.text-field-busqueda-modern {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #A0A0A0;
+}
+
+/* Estilos para el panel de resultados de búsqueda */
+.search-results-panel {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 1px 1px 1px;
+    -fx-border-radius: 0 0 5px 5px;
+    -fx-background-radius: 0 0 5px 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 5);
+    -fx-padding: 0;
+}
+
+.search-results-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.search-results-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.search-results-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 0 0 0 1;
+}
+
+.search-results-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #CED4DA;
+    -fx-background-radius: 3px;
+}
+
+.search-results-container {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+}
+
+/* Estilos para los items de resultados de búsqueda */
+.resultado-item {
+    -fx-background-color: white;
+    -fx-border-color: #E9ECEF;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);
+    -fx-cursor: hand;
+}
+
+.resultado-item:hover {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+}
+
+.resultado-nombre {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.resultado-codigo {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6C757D;
+    -fx-padding: 2px 0 0 0;
+}
+
+.resultado-precio {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0D6EFD;
+    -fx-padding: 0 10px 0 0;
+}
+
+.resultado-stock {
+    -fx-font-size: 12px;
+    -fx-text-fill: #28A745;
+    -fx-padding: 2px 0 0 0;
+}
+
+.button-agregar-resultado {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-padding: 6px 12px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.button-agregar-resultado:hover {
     -fx-background-color: #218838;
 }
 
-/* Tabla */
-.table-view {
-    -fx-border-color: #c5d9e8;
+.button-agregar-resultado:pressed {
+    -fx-background-color: #2471A3;
+    -fx-effect: none;
+}
+
+/* Estilos para los botones de acción en la barra superior */
+.action-button {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 1, 0, 0, 1);
+}
+
+.action-button:hover {
+    -fx-background-color: #2980B9;
+    -fx-border-color: transparent;
+}
+
+.action-button:pressed {
+    -fx-background-color: #2471A3;
+    -fx-effect: none;
+}
+
+/* Estilos para la información de la venta */
+.venta-info-container {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 10px 15px;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
 }
 
-.table-view .column-header-background {
-    -fx-background-color: #e0eaf1; /* Fondo azul claro para encabezados de tabla */
-}
-
-.table-view .column-header .label {
-    -fx-text-fill: #003366; /* Texto azul oscuro para encabezados */
-    -fx-font-weight: bold;
-    -fx-padding: 8px;
-}
-
-.table-view .table-cell {
-    -fx-padding: 8px;
-    -fx-border-color: transparent #e0e0e0 transparent transparent; /* Líneas de celda sutiles */
-}
-
-.table-view .placeholder .label {
-    -fx-text-fill: #546e7a; /* Color del texto del placeholder de la tabla */
-}
-
-/* Estilo para valores de totales */
-.text-bold {
-    -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-text-fill: #202020;
-}
-
-.text-total {
-    -fx-font-size: 18px; /* Más grande para el valor total final */
-    -fx-font-weight: bold;
-    -fx-text-fill: #0056b3; /* Azul primario */
-}
-
-/* Estilos específicos */
-.info-box {
-    -fx-border-color: #d1e0ec; /* Borde azul muy claro */
-    -fx-border-radius: 5px;
-    -fx-padding: 10px;
-}
-
-.italic-note {
-    -fx-font-style: italic;
-    -fx-text-fill: #546e7a; /* Gris azulado para notas */
-}
-
-/* Estilos para los botones de acción en la tabla */
-.table-row-cell .button {
-    -fx-padding: 3px 8px; /* Más pequeños para la tabla */
-    -fx-font-size: 12px;
-}
-
-/* Ajustes de espaciado y alineación si es necesario */
-.hbox-actions {
-    -fx-alignment: center-right;
-}
-
-.vbox-form-section {
+.venta-info-item {
     -fx-spacing: 5px;
+    -fx-alignment: CENTER_LEFT;
 }
 
-.vbox-main-container {
-    -fx-spacing: 15px; /* Aumentar espaciado principal */
+.venta-info-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6C757D;
 }
 
-.border-pane-main > .left {
-    -fx-padding: 0 15px 0 0; /* Espacio entre panel izquierdo y central */
+.venta-info-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #343A40;
 }
+
+/* Estilos para el contenedor principal */
+.main-content-container {
+    -fx-padding: 20px;
+    -fx-background-color: transparent;
+}
+
+/* Estilos para la tabla de productos */
+.productos-table {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0.1, 0, 1);
+}
+
+.productos-table .column-header {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 10px 15px;
+}
+
+.productos-table .column-header-background {
+    -fx-background-color: #F8F9FA;
+}
+
+.productos-table .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+}
+
+.productos-table .table-row-cell {
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.productos-table .table-row-cell:odd {
+    -fx-background-color: #F8F9FA;
+}
+
+.productos-table .table-row-cell:even {
+    -fx-background-color: white;
+}
+
+.productos-table .table-row-cell:hover {
+    -fx-background-color: #E9ECEF;
+}
+
+/* Estilos para el panel lateral */
+.side-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 0 0 1px;
+    -fx-padding: 15px;
+}
+
+/* Estilos para el panel de totales */
+.totales-box {
+    -fx-padding: 15px;
+    -fx-spacing: 15px;
+}
+
+.total-item {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10px;
+}
+
+.total-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #495057;
+}
+
+.total-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.total-final {
+    -fx-padding: 10px 0 0 0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #DEE2E6;
+}
+
+.total-label-final {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.total-value-final {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0D6EFD;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-border-color: #DEE2E6;
+}
+
+/* Estilos para los botones de acciones */
+.button-procesar-venta {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
+}
+
+.button-procesar-venta:hover {
+    -fx-background-color: #218838;
+}
+
+.button-cancelar-venta {
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #6C757D;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button-cancelar-venta:hover {
+    -fx-background-color: #E9ECEF;
+}
+
+/* Estilos para la barra de estado */
+.status-bar {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 8px 20px;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #DEE2E6;
+}
+
+.status-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6C757D;
+}
+
+.button-procesar-venta-modern {
+    -fx-background-color: #28A745; /* Verde para el botón de procesar */
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+    -fx-margin-top: 10px; /* Espacio arriba del botón */
+}
+
+.button-procesar-venta-modern:hover {
+    -fx-background-color: #218838; /* Verde más oscuro al pasar el mouse */
+}
+
+/* Estilos que ya estaban y podrían seguir siendo útiles o necesitar ajustes menores */
+.top-bar {
+    -fx-padding: 10px 15px; /* Ajustado para el nuevo diseño si se reutiliza */
+    -fx-spacing: 10px;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+}
+
+.top-bar .text-field-busqueda { /* Si se mantiene el original en algún lado */
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #A0A0A0;
+    -fx-pref-width: 300px; /* Considerar HBox.hgrow="ALWAYS" para el nuevo */
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.top-bar .button {
+    -fx-font-size: 13px;
+    -fx-background-color: #E9ECEF;
+    -fx-text-fill: #343A40;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+}
+
+.top-bar .button:hover {
+    -fx-background-color: #DEE2E6;
+}
+
+.split-pane-content { /* Ya no se usa SplitPane directamente en el centro */
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+/* .productos-box ya no se usa, ahora es .productos-container-modern */
+
+/* .carrito-header y .carrito-header .label se reemplazan por .carrito-header-modern y sus hijos */
+
+/* .cantidad-spinner y otros elementos internos del carrito-item se mantienen si la estructura interna del item no cambió */
+
+/* Zona inferior: Total y botones de acción (ya no existe esta barra inferior) */
+.bottom-bar { /* Eliminado del FXML, pero se deja por si hay referencias */
+    /* -fx-padding: 15px 30px; ... */
+}
+
+/* ... (Resto de estilos de dialogs, botones específicos por ID, etc., se mantienen sin cambios) ... */
+
+/* Estilos para el diálogo de procesar venta (manteniendo los existentes) */
+.dialog-pane-procesar-venta .label {}
+
+.dialog-pane-procesar-venta .text-field,
+.dialog-pane-procesar-venta .combo-box {}
+
+.dialog-pane-procesar-venta .radio-button {}
+
+.dialog-pane-procesar-venta .grid-pane {}
+
+.dialog-pane-procesar-venta .button-bar .button {}
+
+/* Clase para el VBox que contiene los items del carrito, para el scroll */
+.carrito-items-container {}
+
+/* Clase para el VBox que contiene los items de producto, para el scroll */
+.productos-items-container {}
+
+/* Estilos para los botones del DialogPane en ProcesarVentaDialog.fxml */
+.dialog-pane .button-bar .button {}
+
+/* Estilo para el botón Confirmar y Finalizar Venta (verde) */
+.dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta") {}
+
+.dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta"):hover {}
+
+/* Estilo para el botón Cancelar (rojo) */
+.dialog-pane .button-bar .button:contains("Cancelar") {}
+
+.dialog-pane .button-bar .button:contains("Cancelar"):hover {}
+
+/* Estilos específicos para botones dentro del contenido si es necesario */
+#btnBuscarCliente {}
+
+#btnBuscarCliente:hover {}
+
+#btnRegistrarNuevoCliente {}
+
+#btnRegistrarNuevoCliente:hover {}
+
+/* Ajustes para el Label de Monto Total */
+#lblMontoTotal {}
+
+/* Estilos para ToggleButtons (si decides usarlos en vez de RadioButtons) */
+.toggle-button-group .toggle-button {}
+
+.toggle-button-group .toggle-button:selected {}
+
+.toggle-button-group .toggle-button:hover {}
+
+.toggle-button-group .toggle-button:selected:hover {}
+
+/* Estilos para la sección de Vuelto en ProcesarVentaDialog */
+.vuelto-seccion-label {}
+
+.vuelto-textfield {}
+
+#txtTotalRecibido {}
+
+#txtCambioEntregar {}
+
+#txtCambioEntregar.monto-insuficiente,
+#txtCambioEntregar.valor-invalido {}
