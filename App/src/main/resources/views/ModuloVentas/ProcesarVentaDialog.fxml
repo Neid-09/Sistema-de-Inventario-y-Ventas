@@ -93,12 +93,12 @@
                     <Label text="Tipo de Venta:" style="-fx-font-size: 12;"/>
                     <HBox spacing="10" alignment="CENTER_LEFT">
                         <Label text="¿Factura Legal?" />
-                        <RadioButton fx:id="rbFacturaSi" text="Sí" selected="true">
+                        <RadioButton fx:id="rbFacturaSi" text="Sí">
                             <toggleGroup>
                                 <ToggleGroup fx:id="facturaToggleGroup" />
                             </toggleGroup>
                         </RadioButton>
-                        <RadioButton fx:id="rbFacturaNo" text="No" toggleGroup="$facturaToggleGroup" />
+                        <RadioButton fx:id="rbFacturaNo" text="No" selected="true" toggleGroup="$facturaToggleGroup" />
                     </HBox>
                 </VBox>
 

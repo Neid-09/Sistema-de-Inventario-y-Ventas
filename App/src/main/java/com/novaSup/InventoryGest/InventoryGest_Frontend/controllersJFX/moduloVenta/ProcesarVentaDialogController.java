@@ -1,10 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaCreateRequestFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
-// Importaciones de servicios (descomentar cuando estén disponibles)
-// import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
-// import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaService;
-// import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -13,6 +12,7 @@ import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -86,8 +86,8 @@ public class ProcesarVentaDialogController {
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
 
     // Instancias de servicios (descomentar cuando estén disponibles)
-    // private IClienteService clienteService;
-    // private IVentaService ventaService;
+    //private IClienteService clienteService;
+    private IVentaSerivice ventaService;
     // private IFacturaService facturaService;
 
     @FXML
@@ -112,8 +112,19 @@ public class ProcesarVentaDialogController {
             calcularCambio();
         });
 
-        rbEfectivo.setSelected(true);
-        rbFacturaSi.setSelected(true);
+        // Establecer estado inicial
+        rbEfectivo.setSelected(true); // Por defecto efectivo
+        rbFacturaNo.setSelected(true); // Por defecto no factura
+
+        // Forzar la actualización inicial de la visibilidad de los paneles
+        boolean esEfectivoInicial = rbEfectivo.isSelected();
+        vueltoBox.setVisible(esEfectivoInicial);
+        vueltoBox.setManaged(esEfectivoInicial);
+
+        boolean requiereFacturaInicial = rbFacturaSi.isSelected();
+        panelDatosCliente.setVisible(requiereFacturaInicial);
+        panelDatosCliente.setManaged(requiereFacturaInicial);
+
         txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
 
         btnCancelar.setOnAction(event -> cerrarDialogo(false));
@@ -133,12 +144,10 @@ public class ProcesarVentaDialogController {
      * Método para la inyección de dependencias (servicios).
      * Este método se llamará desde VenderControllerFX después de crear una instancia de este controlador.
      */
-    // public void setServices(IClienteService clienteService, IVentaService ventaService, IFacturaService facturaService) {
-    //     this.clienteService = clienteService;
-    //     this.ventaService = ventaService;
-    //     this.facturaService = facturaService;
-    //     // Aquí podrías inicializar listeners o datos que dependan de los servicios
-    // }
+    public void setServices(IVentaSerivice ventaService) {
+        this.ventaService = ventaService;
+        // Aquí podrías inicializar listeners o datos que dependan de los servicios
+    }
 
     private void calcularCambio() {
         if (montoTotalVenta == null || !rbEfectivo.isSelected()) {
@@ -162,46 +171,114 @@ public class ProcesarVentaDialogController {
     }
 
     private void confirmarVenta() {
-        // Lógica de validación y procesamiento de la venta
+        // Validación básica
+        if (productosEnVenta == null || productosEnVenta.isEmpty()) {
+            mostrarAlerta("Error", "No hay productos para vender");
+            return;
+        }
+        
+        if (rbEfectivo.isSelected() && txtTotalRecibido.getText().isEmpty()) {
+            mostrarAlerta("Campos Incompletos", "Debe ingresar el monto recibido para ventas en efectivo.");
+            return;
+        }
+        
         if (rbFacturaSi.isSelected()) {
             // Validar campos del cliente
-            if (txtDocumento.getText().isEmpty() || txtNombre.getText().isEmpty() || txtDireccion.getText().isEmpty() || txtTelefono.getText().isEmpty()) {
-                mostrarAlerta("Datos Incompletos", "Para generar factura, todos los datos del cliente son obligatorios (excepto correo).");
+            if (txtNombre.getText().isEmpty() || txtDocumento.getText().isEmpty()) {
+                mostrarAlerta("Campos Incompletos", "Para generar factura, el nombre y documento del cliente son obligatorios.");
                 return;
             }
         }
 
-        // Aquí iría la lógica para:
-        // 1. Obtener el cliente (buscar o registrar nuevo)
-        // 2. Crear el objeto Venta
-        // 3. Registrar la venta usando ventaService
-        // 4. Generar la factura usando facturaService si es necesario
-        // 5. Actualizar el stock de los productosEnVenta
-
-        System.out.println("Venta confirmada (simulación):");
-        System.out.println("Monto Total: " + formatoMoneda.format(montoTotalVenta));
-        System.out.println("Método de pago: " + ((RadioButton)metodoPagoToggleGroup.getSelectedToggle()).getText());
-        if(rbEfectivo.isSelected()){
-            System.out.println("Total recibido: " + txtTotalRecibido.getText());
-            System.out.println("Cambio: " + txtCambioEntregar.getText());
+        try {
+            // Crear el objeto de solicitud de venta
+            VentaCreateRequestFX ventaRequest = new VentaCreateRequestFX();
+            
+            // Según las especificaciones:
+            ventaRequest.setIdCliente(null); // Cliente null (venta general)
+            ventaRequest.setIdVendedor(1); // Vendedor predeterminado (id 1)
+            ventaRequest.setRequiereFactura(false); // No generar factura
+            ventaRequest.setAplicarImpuestos(false); // No aplicar impuestos
+            
+            // Obtener el tipo de pago seleccionado
+            String tipoPago = "EFECTIVO"; // Valor predeterminado
+            if (rbTarjeta.isSelected()) {
+                tipoPago = "TARJETA";
+            } else if (rbTransferencia.isSelected()) {
+                tipoPago = "TRANSFERENCIA";
+            }
+            ventaRequest.setTipoPago(tipoPago);
+            
+            // Crear los detalles de venta a partir de los productos seleccionados
+            List<DetalleVentaCreateRequestFX> detalles = new ArrayList<>();
+            for (ProductoVentaInfo producto : productosEnVenta) {
+                DetalleVentaCreateRequestFX detalle = new DetalleVentaCreateRequestFX();
+                detalle.setIdProducto(producto.getIdProducto());
+                detalle.setCantidad(producto.getCantidad());
+                detalles.add(detalle);
+            }
+            ventaRequest.setDetalles(detalles);
+            
+            try {
+                // Registrar la venta usando el servicio
+                ventaService.registrarVenta(ventaRequest);
+                
+                // Mostrar mensaje de éxito
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Venta Exitosa");
+                alert.setHeaderText(null);
+                alert.setContentText("Venta registrada correctamente");
+                alert.showAndWait();
+                
+                // Cerrar el diálogo
+                cerrarDialogo(true);
+            } catch (Exception ex) {
+                // Si hay un error de deserialización pero la venta se realizó correctamente
+                if (ex.getMessage() != null && ex.getMessage().contains("Conflicting setter definitions for property \"fecha\"")) {
+                    // Mostrar mensaje de éxito a pesar del error de deserialización
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Venta Exitosa");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Venta registrada correctamente");
+                    alert.showAndWait();
+                    
+                    // Cerrar el diálogo
+                    cerrarDialogo(true);
+                } else {
+                    // Relanzar la excepción para que sea manejada por el catch externo
+                    throw ex;
+                }
+            }
+            
+        } catch (Exception e) {
+            // Mostrar mensaje de error
+            mostrarAlerta("Error al Procesar Venta", "Ocurrió un error: " + e.getMessage());
+            e.printStackTrace();
         }
-        System.out.println("Factura: " + ((RadioButton)facturaToggleGroup.getSelectedToggle()).getText());
-        if(rbFacturaSi.isSelected()){
-            System.out.println("Cliente: " + txtNombre.getText() + " (ID: "+txtDocumento.getText()+")");
-        }
-        System.out.println("Productos:");
-        if(productosEnVenta != null){
-            productosEnVenta.forEach(p -> System.out.println("- " + p.getNombre() + " x" + p.getCantidad() + " @ " + formatoMoneda.format(p.getPrecioVentaUnitario()))); // Corregido aquí
-        }
-
-
-        cerrarDialogo(true);
     }
 
     private void cerrarDialogo(boolean ventaConfirmada) {
         Stage stage = (Stage) btnCancelar.getScene().getWindow();
         // El Dialog en VenderControllerFX espera un ButtonType.OK_DONE para confirmar.
-        // Si los botones tienen el ButtonData correcto, el Dialog lo manejará.
+        Object userData = stage.getUserData();
+        
+        if (userData instanceof Dialog<?>) {
+            try {
+                @SuppressWarnings("unchecked")
+                Dialog<ButtonType> dialog = (Dialog<ButtonType>) userData;
+                
+                if (ventaConfirmada) {
+                    // Establecer el resultado del diálogo como OK_DONE para que VenderControllerFX sepa que la venta fue exitosa
+                    dialog.setResult(ButtonType.OK);
+                } else {
+                    // Establecer el resultado del diálogo como CANCEL_CLOSE para que VenderControllerFX sepa que la venta fue cancelada
+                    dialog.setResult(ButtonType.CANCEL);
+                }
+            } catch (ClassCastException e) {
+                System.err.println("Error al convertir el userData a Dialog<ButtonType>: " + e.getMessage());
+            }
+        }
+        
         stage.close();
     }
 

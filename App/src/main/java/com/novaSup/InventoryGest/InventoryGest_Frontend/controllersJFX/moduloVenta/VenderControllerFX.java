@@ -3,6 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVe
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 public class VenderControllerFX implements Initializable {
 
     private final IProductoService productoService;
+    private final IVentaSerivice ventaService;
 
     @FXML
     private Button btnProcesarVenta;
@@ -87,8 +89,9 @@ public class VenderControllerFX implements Initializable {
     private List<ProductoFX> todosLosProductos;
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
 
-    public VenderControllerFX(IProductoService productoService) {
+    public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService) {
         this.productoService = productoService;
+        this.ventaService = ventaService;
     }
 
     @Override
@@ -626,10 +629,21 @@ public class VenderControllerFX implements Initializable {
         // Abrir la ventana para procesar la venta
         boolean ventaRealizada = abrirVentanaProcesarVenta();
         
-        // Si la venta se confirmó correctamente, limpiar el carrito
+        // Si la venta se confirmó correctamente, limpiar el carrito y actualizar productos
         if (ventaRealizada) {
-            limpiarVenta();
-            mostrarAlerta("Venta Procesada", "La venta ha sido procesada correctamente.");
+            try {
+                // Recargar los productos para actualizar el stock
+                cargarProductos();
+                
+                // Limpiar la venta actual
+                limpiarVenta();
+                
+                // Mostrar mensaje de éxito
+                mostrarAlerta("Venta Procesada", "La venta ha sido procesada correctamente.");
+            } catch (Exception e) {
+                mostrarError("Error al Actualizar", "La venta se procesó correctamente, pero hubo un error al actualizar los productos: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
     
@@ -655,6 +669,10 @@ public class VenderControllerFX implements Initializable {
             dialog.setTitle("Procesar Venta");
             dialog.initOwner(ownerWindow);
             
+            // Almacenar la referencia del diálogo en el userData de la ventana del diálogo
+            // para que ProcesarVentaDialogController pueda acceder a él
+            dialogPane.getScene().getWindow().setUserData(dialog);
+            
             // Calcular el total de la venta para mostrar en el diálogo
             BigDecimal total = BigDecimal.ZERO;
             for (ProductoFX producto : tablaProductos.getItems()) {
@@ -671,6 +689,7 @@ public class VenderControllerFX implements Initializable {
              * - IFacturaService facturaService para generar facturas
              * controller.setServices(clienteService, ventaService, facturaService);
              */
+            controller.setServices(ventaService);
             
             // Convertir los productos de ProductoFX a ProductoVentaInfo
             List<ProductoVentaInfo> productosInfo = convertirAProductoVentaInfo(tablaProductos.getItems());
