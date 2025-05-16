@@ -1,4 +1,4 @@
-package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
+package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import javafx.fxml.FXML;
