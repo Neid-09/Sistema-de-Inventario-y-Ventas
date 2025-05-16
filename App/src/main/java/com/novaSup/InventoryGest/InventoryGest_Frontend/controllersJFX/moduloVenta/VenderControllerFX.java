@@ -1,22 +1,34 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.Node;
 import javafx.stage.Popup;
+import javafx.stage.Window;
+
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ProcesarVentaDialogController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -34,6 +46,8 @@ public class VenderControllerFX implements Initializable {
     private Button btnBuscarVenta;
     @FXML
     private Button btnNuevaVenta;
+    @FXML
+    private Button btnCancelarVenta;
 
     @FXML
     private TextField txtBusqueda;
@@ -81,11 +95,36 @@ public class VenderControllerFX implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
+            // Cargar productos al inicio
+            cargarProductos();
             // Aplicar estilos explícitamente a elementos principales para asegurar que se carguen
             // correctamente incluso si no se están aplicando desde el FXML
             if (tablaProductos != null) {
                 tablaProductos.getStyleClass().add("productos-table");
             }
+            
+            // Configurar acción para el botón Cancelar Venta
+            if (btnCancelarVenta != null) {
+                btnCancelarVenta.setOnAction(event -> cancelarVenta());
+            }
+            
+            // Configurar acción para el botón Procesar Venta
+            if (btnProcesarVenta != null) {
+                btnProcesarVenta.setOnAction(event -> procesarVenta());
+            }
+            
+            // La escena puede no estar disponible en initialize, así que usamos un Platform.runLater
+            // para asegurarnos de que esté inicializada completamente
+            Platform.runLater(() -> {
+                if (txtBusqueda.getScene() != null) {
+                    txtBusqueda.getScene().getWindow().setOnCloseRequest(event -> {
+                        if (!tablaProductos.getItems().isEmpty()) {
+                            event.consume(); // Prevenir que la ventana se cierre automáticamente
+                            confirmarSalida();
+                        }
+                    });
+                }
+            });
             
             // Inicializar el popup de sugerencias
             popupSugerencias = new Popup();
@@ -579,9 +618,100 @@ public class VenderControllerFX implements Initializable {
     }
 
     private void procesarVenta() {
-        // Implementar la lógica para procesar la venta
-        mostrarAlerta("Venta Procesada", "La venta ha sido procesada correctamente.");
-        limpiarVenta();
+        // Verificar si hay productos en el carrito
+        if (tablaProductos.getItems().isEmpty()) {
+            mostrarError("Carrito Vacío", "No hay productos en la venta para procesar.");
+            return;
+        }
+        
+        // Abrir la ventana para procesar la venta
+        boolean ventaRealizada = abrirVentanaProcesarVenta();
+        
+        // Si la venta se confirmó correctamente, limpiar el carrito
+        if (ventaRealizada) {
+            limpiarVenta();
+            mostrarAlerta("Venta Procesada", "La venta ha sido procesada correctamente.");
+        }
+    }
+    
+    /**
+     * Abre la ventana de diálogo para procesar la venta
+     * @return true si la venta fue confirmada, false si fue cancelada
+     */
+    private boolean abrirVentanaProcesarVenta() {
+        try {
+            // Obtener la ventana actual
+            Window ownerWindow = txtBusqueda.getScene().getWindow();
+            
+            // Cargar el FXML del diálogo
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.DIALOG_PROCESAR_VENTA));
+            DialogPane dialogPane = loader.load();
+            
+            // Obtener el controlador
+            ProcesarVentaDialogController controller = loader.getController();
+            
+            // Configurar el diálogo
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Procesar Venta");
+            dialog.initOwner(ownerWindow);
+            
+            // Calcular el total de la venta para mostrar en el diálogo
+            BigDecimal total = BigDecimal.ZERO;
+            for (ProductoFX producto : tablaProductos.getItems()) {
+                BigDecimal subtotal = producto.getPrecioVenta().multiply(new BigDecimal(producto.getStock()));
+                total = total.add(subtotal);
+            }
+            
+            // Aquí se inyectan los servicios necesarios para el controlador del diálogo
+            /* 
+             * AQUÍ SE INYECTAN LOS SERVICIOS NECESARIOS:
+             * Por ejemplo:
+             * - IClienteService clienteService para buscar clientes
+             * - IVentaService ventaService para registrar la venta
+             * - IFacturaService facturaService para generar facturas
+             * controller.setServices(clienteService, ventaService, facturaService);
+             */
+            
+            // Convertir los productos de ProductoFX a ProductoVentaInfo
+            List<ProductoVentaInfo> productosInfo = convertirAProductoVentaInfo(tablaProductos.getItems());
+            
+            // Pasar los datos de la venta al controlador
+            controller.setDatosVenta(productosInfo, total);
+            
+            // Mostrar el diálogo y esperar la respuesta
+            return dialog.showAndWait()
+                    .filter(buttonType -> buttonType.getButtonData() == ButtonBar.ButtonData.OK_DONE)
+                    .isPresent();
+            
+        } catch (Exception e) {
+            mostrarError("Error", "Ha ocurrido un error al abrir la ventana de procesamiento: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Convierte una lista de ProductoFX a una lista de ProductoVentaInfo para ser utilizada en el diálogo de procesar venta
+     * @param productos Lista de productos del carrito
+     * @return Lista de ProductoVentaInfo
+     */
+    private List<ProductoVentaInfo> convertirAProductoVentaInfo(ObservableList<ProductoFX> productos) {
+        List<ProductoVentaInfo> resultado = new ArrayList<>();
+        
+        for (ProductoFX producto : productos) {
+            // Crear una instancia de ProductoVentaInfo usando el constructor
+            ProductoVentaInfo info = new ProductoVentaInfo(
+                producto.getIdProducto(), 
+                producto.getNombre(), 
+                producto.getStock(), // La cantidad en el carrito
+                producto.getPrecioVenta()
+            );
+            
+            resultado.add(info);
+        }
+        
+        return resultado;
     }
 
     private void limpiarVenta() {
@@ -593,5 +723,52 @@ public class VenderControllerFX implements Initializable {
         
         // Limpiar campo de búsqueda
         txtBusqueda.clear();
+    }
+    
+    /**
+     * Cancela la venta actual después de confirmar con el usuario
+     */
+    private void cancelarVenta() {
+        // Verificar si hay productos en el carrito
+        if (tablaProductos.getItems().isEmpty()) {
+            mostrarAlerta("Carrito Vacío", "No hay productos en la venta para cancelar.");
+            return;
+        }
+        
+        // Mostrar diálogo de confirmación
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Cancelar Venta");
+        alert.setHeaderText("¿Está seguro que desea cancelar la venta?");
+        alert.setContentText("Se eliminarán todos los productos del carrito.");
+        
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                limpiarVenta();
+                mostrarAlerta("Venta Cancelada", "La venta ha sido cancelada correctamente.");
+            }
+        });
+    }
+    
+    /**
+     * Muestra un diálogo para confirmar la salida cuando hay productos en el carrito
+     */
+    private void confirmarSalida() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Confirmación");
+        alert.setHeaderText("Hay productos en el carrito");
+        alert.setContentText("¿Está seguro que desea salir? Se perderán los productos agregados.");
+        
+        // Agregar botones personalizados
+        ButtonType btnSalir = new ButtonType("Salir sin guardar");
+        ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        
+        alert.getButtonTypes().setAll(btnSalir, btnCancelar);
+        
+        alert.showAndWait().ifPresent(response -> {
+            if (response == btnSalir) {
+                // Cerrar la ventana
+                txtBusqueda.getScene().getWindow().hide();
+            }
+        });
     }
 }
