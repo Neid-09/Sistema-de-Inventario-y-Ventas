@@ -93,9 +93,9 @@
             </VBox>
             
             <!-- Panel lateral de totales (lado derecho) -->
-            <VBox prefWidth="250" spacing="0" styleClass="side-panel">
+            <VBox prefWidth="300" spacing="0" styleClass="side-panel">
                 <!-- Panel de totales -->
-                <VBox spacing="5" styleClass="totales-box" VBox.vgrow="ALWAYS">
+                <VBox spacing="10" styleClass="totales-box" VBox.vgrow="ALWAYS">
                     <HBox styleClass="total-item">
                         <Label styleClass="total-label" text="Subtotal:" />
                         <Region HBox.hgrow="ALWAYS" />

@@ -30,10 +30,11 @@
 }
 
 .search-buttons-container {
-    -fx-padding: 10px 20px;
+    -fx-padding: 15px 20px;
     -fx-background-color: #FFFFFF;
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: #E0E0E0;
+    -fx-spacing: 15px;
 }
 
 /* Contenedor principal (GridPane) */
@@ -198,6 +199,10 @@
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: #E9ECEF; /* Borde inferior sutil para separar del contenido */
     -fx-alignment: CENTER_LEFT;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 0 5px; /* Espacio a la izquierda del texto del título */
 }
 
 .carrito-title {
@@ -394,11 +399,11 @@
 .button-agregar-resultado {
     -fx-background-color: #28A745;
     -fx-text-fill: white;
-    -fx-font-size: 12px;
+    -fx-font-weight: bold;
     -fx-padding: 6px 12px;
     -fx-background-radius: 4px;
     -fx-cursor: hand;
-    -fx-font-weight: bold;
+    -fx-font-size: 12px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
 }
 
@@ -422,7 +427,10 @@
     -fx-cursor: hand;
     -fx-font-size: 13px;
     -fx-font-weight: normal;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 1, 0, 0, 1);
+    -fx-min-height: 35px;
+    -fx-min-width: 120px;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
 }
 
 .action-button:hover {
@@ -433,6 +441,32 @@
 .action-button:pressed {
     -fx-background-color: #2471A3;
     -fx-effect: none;
+}
+
+.button-procesar-venta {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+}
+
+.button-cancelar-venta {
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #6C757D;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
 }
 
 /* Estilos para la información de la venta */
@@ -463,13 +497,159 @@
 .main-content-container {
     -fx-padding: 20px;
     -fx-background-color: transparent;
+    -fx-spacing: 20px;
+}
+
+/* Estilos para la barra de estado */
+.status-bar {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 10px 20px;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #DEE2E6;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Estilos para el panel lateral */
+.side-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
+}
+
+/* Estilos para el panel de totales */
+.totales-box {
+    -fx-padding: 0;
+    -fx-spacing: 15px;
+}
+
+.total-item {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10px;
+    -fx-padding: 8px 0;
+}
+
+.total-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
+}
+
+.total-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.total-final {
+    -fx-padding: 15px 0 20px 0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #DEE2E6;
+}
+
+.total-label-final {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.total-value-final {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0275d8;
+}
+
+/* Estilos para los botones de procesar y cancelar venta */
+.button-procesar-venta {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+}
+
+.button-procesar-venta:hover {
+    -fx-background-color: #218838;
+}
+
+.button-cancelar-venta {
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #6C757D;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+    -fx-margin-top: 10px;
+}
+
+.button-cancelar-venta:hover {
+    -fx-background-color: #E9ECEF;
+}
+
+/* Estilos para el contenedor de la tabla */
+.table-container {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
 }
 
 /* Estilos para la tabla de productos */
 .productos-table {
     -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Estilos para los encabezados de la tabla */
+.productos-table .column-header-background {
+    -fx-background-color: #F8F9FA;
     -fx-border-color: #DEE2E6;
-    -fx-border-radius: 4px;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.productos-table .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 10px 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-width: 0 1px 0 0;
+    -fx-border-color: transparent #DEE2E6 transparent transparent;
+}
+
+.productos-table .column-header:last-visible {
+    -fx-border-width: 0;
+}
+
+/* Estilos para las celdas de la tabla */
+.productos-table .table-cell {
+    -fx-padding: 10px 15px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-width: 0;
+    -fx-font-size: 12px;
+}
+
+.productos-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #DEE2E6;
 }
 
 /* Hacer que las columnas de la tabla sean responsivas */
@@ -483,6 +663,22 @@
 
 .productos-table .table-row-cell:selected .table-cell {
     -fx-text-fill: #000000;
+}
+
+.productos-table .table-row-cell:hover {
+    -fx-background-color: #F8F9FA;
+}
+
+/* Estilo para el placeholder cuando la tabla está vacía */
+.productos-table .placeholder {
+    -fx-background-color: white;
+    -fx-padding: 20px;
+}
+
+.productos-table .placeholder .label {
+    -fx-text-fill: #6C757D;
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
 }
 
 /* Estilos para el control de cantidad */
@@ -604,20 +800,18 @@
     -fx-background-radius: 4px;
     -fx-cursor: hand;
     -fx-font-size: 12px;
-    -fx-padding: 5px 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
 }
 
 .btn-agregar-sugerencia:hover {
     -fx-background-color: #343A40;
 }
 
-.no-resultados-label {
-    -fx-font-size: 14px;
-    -fx-text-fill: #6C757D;
-    -fx-padding: 15px;
-    -fx-alignment: center;
-    -fx-font-style: italic;
+.btn-agregar-sugerencia:pressed {
+    -fx-background-color: #2471A3;
+    -fx-effect: none;
 }
+
 /* Estilos para el layout horizontal en las sugerencias */
 .producto-sugerido-layout {
     -fx-alignment: center;
