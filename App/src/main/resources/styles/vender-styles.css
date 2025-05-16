@@ -6,7 +6,7 @@
 
 /* Estilo para el root pane de Vender.fxml */
 .root-pane {
-    -fx-background-color: #F5F7FA; /* Fondo general de la aplicación */
+    -fx-background-color: #F5F7FA !important; /* Fondo general de la aplicación */
 }
 
 /* Barra Superior con el título "Módulo de Ventas" */
@@ -38,14 +38,15 @@
 }
 
 /* Contenedor principal (GridPane) */
-.main-content-pane {
+.main-content-pane, .main-content-container {
     -fx-padding: 20px;
-    -fx-background-color: transparent; /* El fondo lo da el root-pane */
+    -fx-background-color: #F5F7FA !important; /* Aseguramos que tenga un fondo explícito */
 }
 
 /* Sección de Productos (Izquierda) */
 .search-bar-container {
     -fx-padding: 0 0 15px 0; /* Espacio debajo de la barra de búsqueda */
+    -fx-background-color: #FFFFFF;
 }
 
 .text-field-busqueda-modern {
@@ -92,9 +93,9 @@
 
 .productos-container-modern {
     -fx-padding: 5px; /* Pequeño padding interno si es necesario */
-    /* -fx-background-color: #FFFFFF; /* Fondo blanco para el área de productos si se desea un contraste */
-    /* -fx-border-radius: 8px; */
-    /* -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.1, 0, 1); */
+    -fx-background-color: #FFFFFF; /* Fondo blanco para el área de productos */
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.1, 0, 1);
 }
 
 /* Estilos para las tarjetas de producto individuales */
@@ -421,7 +422,7 @@
 
 /* Estilos para los botones de acción en la barra superior */
 .action-button {
-    -fx-background-color: #3498DB;
+    -fx-background-color: #3498DB !important;
     -fx-text-fill: white;
     -fx-border-color: transparent;
     -fx-border-radius: 4px;
@@ -616,6 +617,8 @@
 .cantidad-control, .cantidad-control-sugerencia {
     -fx-spacing: 2px;
     -fx-alignment: center;
+    -fx-min-height: 30px;
+    -fx-max-height: 30px;
 }
 
 .cantidad-control Button, .cantidad-control-sugerencia Button {
@@ -624,6 +627,7 @@
     -fx-font-weight: bold;
     -fx-min-width: 30px;
     -fx-min-height: 30px;
+    -fx-max-height: 30px;
     -fx-background-radius: 4px;
     -fx-border-color: transparent;
     -fx-border-radius: 4px;
@@ -635,7 +639,7 @@
 }
 
 .cantidad-control Button:hover, .cantidad-control-sugerencia Button:hover {
-    -fx-background-color: #4B6CD6;
+    -fx-background-color: #4b6cd6;
 }
 
 .cantidad-control TextField, .cantidad-control-sugerencia TextField {
@@ -648,6 +652,7 @@
     -fx-max-width: 50px;
     -fx-min-width: 40px;
     -fx-min-height: 30px;
+    -fx-max-height: 30px;
 }
 
 /* Estilos para el botón eliminar en la tabla */
@@ -667,6 +672,49 @@
 
 .button-eliminar-item:hover {
     -fx-background-color: #E64C64;
+}
+
+/* Estilos para el popup de sugerencias */
+/* Estilos para el popup de sugerencias */
+.popup-background {
+    -fx-background-color: rgba(0,0,0,0.3);
+    -fx-padding: 10px;
+    -fx-background-color: white;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.sugerencias-popup {
+    -fx-background-color: white;
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+}
+
+/* Estilos para las tarjetas de productos en las sugerencias */
+.producto-sugerido {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px 15px;
+    -fx-spacing: 15px;
+    -fx-alignment: center-left;
+}
+
+.producto-sugerido:hover {
+    -fx-background-color: #F8F9FA;
+}
+
+.producto-info-container {
+    -fx-spacing: 2px;
+}
+
+.producto-actions-container {
+    -fx-spacing: 10px;
+    -fx-alignment: center;
 }
 
 /* Estilos para la tabla de productos */

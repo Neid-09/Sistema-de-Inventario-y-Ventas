@@ -81,6 +81,12 @@ public class VenderControllerFX implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
+            // Aplicar estilos explícitamente a elementos principales para asegurar que se carguen
+            // correctamente incluso si no se están aplicando desde el FXML
+            if (tablaProductos != null) {
+                tablaProductos.getStyleClass().add("productos-table");
+            }
+            
             // Inicializar el popup de sugerencias
             popupSugerencias = new Popup();
             popupSugerencias.setAutoHide(true);
@@ -88,11 +94,13 @@ public class VenderControllerFX implements Initializable {
             
             // Crear un panel con fondo para el popup
             StackPane popupBackground = new StackPane();
-            popupBackground.setStyle("-fx-background-color: white; -fx-background-radius: 4px; -fx-border-color: #DEE2E6; -fx-border-radius: 4px;");
+            popupBackground.getStyleClass().add("popup-background");
+            popupBackground.setStyle("-fx-background-color: white; -fx-padding: 10px; -fx-background-radius: 5px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);");
             
             // Contenedor para las sugerencias
             contenedorSugerencias = new VBox(5);
             contenedorSugerencias.getStyleClass().add("sugerencias-popup");
+            contenedorSugerencias.setStyle("-fx-background-color: white; -fx-padding: 8px; -fx-spacing: 5px;");
             contenedorSugerencias.setPadding(new Insets(5));
             contenedorSugerencias.setMaxWidth(600);
             contenedorSugerencias.setMinWidth(500);
@@ -122,6 +130,23 @@ public class VenderControllerFX implements Initializable {
             
             btnProcesarVenta.setOnAction(e -> procesarVenta());
             btnNuevaVenta.setOnAction(e -> limpiarVenta());
+            
+            // Asegurar que los botones tengan estilos aplicados correctamente
+            if (btnProcesarVenta != null) {
+                btnProcesarVenta.setStyle("-fx-background-color: #28A745; -fx-text-fill: white;");
+            }
+            if (btnNuevaVenta != null) {
+                btnNuevaVenta.setStyle("-fx-background-color: #F8F9FA; -fx-text-fill: #6C757D; -fx-border-color: #DEE2E6;");
+            }
+            if (btnProductoComun != null) {
+                btnProductoComun.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+            }
+            if (btnBuscarVenta != null) {
+                btnBuscarVenta.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+            }
+            if (btnNuevaVenta != null) {
+                btnNuevaVenta.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+            }
         } catch (Exception e) {
             mostrarError("Error de inicialización", "No se pudo inicializar el módulo de ventas: " + e.getMessage());
         }
@@ -164,6 +189,9 @@ public class VenderControllerFX implements Initializable {
                     // Crear control de cantidad personalizado
                     HBox cantidadControl = new HBox();
                     cantidadControl.getStyleClass().add("cantidad-control");
+                    cantidadControl.setAlignment(Pos.CENTER);
+                    cantidadControl.setMinHeight(30);
+                    cantidadControl.setMaxHeight(30);
                     
                     Button btnMenos = new Button("-");
                     TextField txtCantidad = new TextField(String.valueOf(producto.getStock()));
@@ -281,11 +309,13 @@ public class VenderControllerFX implements Initializable {
 
         // Si hay resultados, asegurarnos de que el popup tenga un fondo blanco sólido
         if (!productosFiltrados.isEmpty()) {
-            // Asegurarnos de que cada tarjeta tenga el estilo correcto
+            // Asegurarnos de que cada tarjeta tenga la clase de estilo correcta
             for (Node node : contenedorSugerencias.getChildren()) {
                 if (node instanceof HBox) {
                     HBox tarjeta = (HBox) node;
-                    tarjeta.setStyle("-fx-background-color: white; -fx-border-color: #DEE2E6; -fx-border-width: 1px; -fx-border-radius: 4px;");
+                    if (!tarjeta.getStyleClass().contains("producto-sugerido")) {
+                        tarjeta.getStyleClass().add("producto-sugerido");
+                    }
                 }
             }
             
@@ -309,43 +339,55 @@ public class VenderControllerFX implements Initializable {
     private HBox crearTarjetaProducto(ProductoFX producto) {
         // Crear la tarjeta principal como HBox para layout horizontal
         HBox tarjeta = new HBox();
-        tarjeta.getStyleClass().addAll("producto-sugerido", "producto-sugerido-layout");
-        tarjeta.setStyle("-fx-background-color: white; -fx-border-color: #DEE2E6; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-padding: 10px 15px;");
+        tarjeta.getStyleClass().add("producto-sugerido");
+        // Aplicar estilos directamente además de las clases CSS
+        tarjeta.setStyle("-fx-background-color: white; -fx-border-color: #DEE2E6; -fx-border-radius: 4px; -fx-background-radius: 4px; -fx-padding: 10px 15px; -fx-spacing: 10px; -fx-border-width: 1px;");
         
         // Información del producto (lado izquierdo)
         VBox infoProducto = new VBox(2);
         infoProducto.getStyleClass().addAll("producto-info", "producto-info-container");
+        infoProducto.setStyle("-fx-spacing: 2px; -fx-alignment: center-left; -fx-max-width: 400px; -fx-min-width: 300px; -fx-pref-width: 350px;");
         HBox.setHgrow(infoProducto, Priority.ALWAYS);
         
         // Nombre del producto
         Label lblNombre = new Label(producto.getNombre());
         lblNombre.getStyleClass().add("producto-nombre");
+        lblNombre.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #212529;");
         
         // Código y precio
         Label lblCodigo = new Label("Código: " + producto.getCodigo() + " | Precio: " + formatoMoneda.format(producto.getPrecioVenta()) + " | Existencias: " + producto.getStock());
         lblCodigo.getStyleClass().add("producto-codigo");
+        lblCodigo.setStyle("-fx-font-size: 11px; -fx-text-fill: #6C757D; -fx-padding: 1px 0;");
         
         infoProducto.getChildren().addAll(lblNombre, lblCodigo);
         
         // Contenedor para controles de cantidad y botón agregar (lado derecho)
-        HBox accionesContainer = new HBox(10);
+        HBox accionesContainer = new HBox();
         accionesContainer.getStyleClass().add("producto-actions-container");
+        accionesContainer.setStyle("-fx-spacing: 10px; -fx-alignment: center-right; -fx-min-width: 150px;");
+        accionesContainer.setAlignment(Pos.CENTER);
         
         // Control de cantidad
         HBox cantidadControl = new HBox(2);
         cantidadControl.getStyleClass().add("cantidad-control-sugerencia");
+        cantidadControl.setStyle("-fx-spacing: 2px; -fx-alignment: center; -fx-padding: 0;");
         cantidadControl.setAlignment(Pos.CENTER);
+        cantidadControl.setMinHeight(30);
+        cantidadControl.setMaxHeight(30);
         
         // Botón de disminuir
         Button btnMenos = new Button("-");
+        btnMenos.setStyle("-fx-min-width: 28px; -fx-min-height: 28px; -fx-background-color: #F8F9FA; -fx-text-fill: #212529; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-border-color: #DEE2E6; -fx-border-radius: 4px; -fx-cursor: hand; -fx-font-size: 12px; -fx-padding: 0;");
         
         // Campo de texto para la cantidad
         TextField txtCantidad = new TextField("1");
         txtCantidad.setPrefWidth(40);
+        txtCantidad.setStyle("-fx-alignment: center; -fx-max-width: 40px; -fx-min-width: 40px; -fx-pref-width: 40px; -fx-background-color: #FFFFFF; -fx-border-color: #DEE2E6; -fx-border-radius: 4px; -fx-font-size: 12px; -fx-padding: 5px 2px;");
         txtCantidad.setEditable(false);
         
         // Botón de aumentar
         Button btnMas = new Button("+");
+        btnMas.setStyle("-fx-min-width: 28px; -fx-min-height: 28px; -fx-background-color: #F8F9FA; -fx-text-fill: #212529; -fx-font-weight: bold; -fx-background-radius: 4px; -fx-border-color: #DEE2E6; -fx-border-radius: 4px; -fx-cursor: hand; -fx-font-size: 12px; -fx-padding: 0;");
         
         // Contador para la cantidad seleccionada
         final int[] cantidad = {1};
@@ -374,6 +416,9 @@ public class VenderControllerFX implements Initializable {
         // Botón de agregar
         Button btnAgregar = new Button("Agregar");
         btnAgregar.getStyleClass().add("btn-agregar-sugerencia");
+        btnAgregar.setStyle("-fx-background-color: #0275d8; -fx-text-fill: white; -fx-font-weight: bold; -fx-min-width: 80px; -fx-min-height: 28px; -fx-background-radius: 4px; -fx-cursor: hand; -fx-font-size: 12px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);");
+        btnAgregar.setMinHeight(30);
+        btnAgregar.setMaxHeight(30);
         
         // Configurar acción del botón agregar
         btnAgregar.setOnAction(e -> {
@@ -386,7 +431,6 @@ public class VenderControllerFX implements Initializable {
         // Agregar controles al contenedor de acciones
         accionesContainer.getChildren().addAll(cantidadControl, btnAgregar);
         
-        // Agregar todos los elementos a la tarjeta
         tarjeta.getChildren().addAll(infoProducto, accionesContainer);
         
         return tarjeta;
