@@ -396,23 +396,26 @@
     -fx-padding: 2px 0 0 0;
 }
 
-.button-agregar-resultado {
-    -fx-background-color: #28A745;
+/* Estilos para el botón agregar en las sugerencias */
+.button-agregar-resultado, .btn-agregar-sugerencia {
+    -fx-background-color: #5D87FF;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-padding: 6px 12px;
     -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
     -fx-cursor: hand;
     -fx-font-size: 12px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+    -fx-min-height: 30px;
+    -fx-min-width: 80px;
 }
 
-.button-agregar-resultado:hover {
-    -fx-background-color: #218838;
+.button-agregar-resultado:hover, .btn-agregar-sugerencia:hover {
+    -fx-background-color: #4B6CD6;
 }
 
-.button-agregar-resultado:pressed {
-    -fx-background-color: #2471A3;
+.button-agregar-resultado:pressed, .btn-agregar-sugerencia:pressed {
+    -fx-background-color: #3A539B;
     -fx-effect: none;
 }
 
@@ -607,6 +610,63 @@
     -fx-background-radius: 4px;
     -fx-padding: 0;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
+}
+
+/* Estilos para los controles de cantidad */
+.cantidad-control, .cantidad-control-sugerencia {
+    -fx-spacing: 2px;
+    -fx-alignment: center;
+}
+
+.cantidad-control Button, .cantidad-control-sugerencia Button {
+    -fx-background-color: #5D87FF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-content-display: center;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.cantidad-control Button:hover, .cantidad-control-sugerencia Button:hover {
+    -fx-background-color: #4B6CD6;
+}
+
+.cantidad-control TextField, .cantidad-control-sugerencia TextField {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-alignment: center;
+    -fx-font-size: 14px;
+    -fx-max-width: 50px;
+    -fx-min-width: 40px;
+    -fx-min-height: 30px;
+}
+
+/* Estilos para el botón eliminar en la tabla */
+.button-eliminar-item {
+    -fx-background-color: #FF5C75;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-content-display: center;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.button-eliminar-item:hover {
+    -fx-background-color: #E64C64;
 }
 
 /* Estilos para la tabla de productos */
