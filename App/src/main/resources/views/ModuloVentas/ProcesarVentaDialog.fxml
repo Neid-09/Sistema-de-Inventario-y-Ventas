@@ -1,138 +1,162 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ButtonType?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DialogPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 
-<DialogPane fx:id="dialogPane" prefWidth="550.0" prefHeight="-1.0" maxHeight="10000.0" stylesheets="@../../styles/vender-styles.css" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.ProcesarVentaDialogController">
-   <headerText>
-      📋 Procesar Venta
-   </headerText>
-   <content>
-      <ScrollPane fitToWidth="true" fitToHeight="true">
-         <content>
-            <VBox spacing="20.0">
-               <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
-               </padding>
+<DialogPane xmlns="http://javafx.com/javafx/23.0.2"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.ProcesarVentaDialogController"
+            prefWidth="550" prefHeight="650"
+            stylesheets="@../../styles/procesar-venta-dialog-styles.css">
+    <content>
+        <VBox style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 4;">
 
-               <!-- SECCIÓN 1 — Total a Pagar -->
-               <Label text="Monto Total:" style="-fx-font-weight: bold; -fx-font-size: 16px;" />
-               <Label fx:id="lblMontoTotal" text="\$ 0.00" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c78c9;" alignment="CENTER" maxWidth="Infinity" />
-
-               <!-- SECCIÓN 2 — Método de Pago -->
-               <Label text="Método de Pago:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
-               <HBox spacing="15.0" alignment="CENTER_LEFT">
-                  <children>
-                     <RadioButton fx:id="rbEfectivo" text="Efectivo">
-                        <toggleGroup>
-                           <ToggleGroup fx:id="metodoPagoToggleGroup" />
-                        </toggleGroup>
-                     </RadioButton>
-                     <RadioButton fx:id="rbTarjeta" text="Tarjeta" toggleGroup="$metodoPagoToggleGroup" />
-                     <RadioButton fx:id="rbTransferencia" text="Transferencia bancaria" toggleGroup="$metodoPagoToggleGroup" />
-                  </children>
-               </HBox>
-
-               <!-- SECCIÓN 3 — Vuelto (solo si aplica efectivo) -->
-               <VBox fx:id="vueltoBox" spacing="10.0" visible="false" managed="false">
-                  <padding>
-                     <Insets top="5.0" />
-                  </padding>
-                  <Label text="Vuelto:" styleClass="vuelto-seccion-label" />
-                  <GridPane hgap="10.0" vgap="8.0">
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Total recibido:" GridPane.rowIndex="0" />
-                        <TextField fx:id="txtTotalRecibido" promptText="Ingrese monto" styleClass="vuelto-textfield" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
-                        <Label text="Cambio a entregar:" GridPane.rowIndex="1" />
-                        <TextField fx:id="txtCambioEntregar" editable="false" styleClass="vuelto-textfield" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                     </children>
-                  </GridPane>
-               </VBox>
-
-               <!-- SECCIÓN 4 — Tipo de Venta -->
-               <Label text="Tipo de Venta:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
-               <GridPane hgap="10.0" vgap="8.0">
-                 <columnConstraints>
-                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
-                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
-                 </columnConstraints>
-                 <rowConstraints>
-                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                 </rowConstraints>
-                  <children>
-                     <Label text="¿Factura Legal?" GridPane.rowIndex="0" />
-                     <HBox spacing="10.0" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <children>
-                           <RadioButton fx:id="rbFacturaSi" text="Sí">
-                              <toggleGroup>
-                                 <ToggleGroup fx:id="facturaToggleGroup" />
-                              </toggleGroup>
-                           </RadioButton>
-                           <RadioButton fx:id="rbFacturaNo" text="No" selected="true" toggleGroup="$facturaToggleGroup" />
-                        </children>
-                     </HBox>
-                  </children>
-               </GridPane>
-               
-               <!-- SECCIÓN 5 — Cliente (solo si requiere factura legal) -->
-               <VBox fx:id="datosFacturaBox" spacing="10.0" visible="false" managed="false">
-                  <padding>
-                     <Insets top="5.0" />
-                  </padding>
-                  <Label text="Datos del Cliente para Factura:" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
-                  <HBox spacing="10" alignment="CENTER_LEFT">
-                      <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por nombre o ID" HBox.hgrow="ALWAYS" />
-                      <Button fx:id="btnBuscarCliente" text="Buscar" />
-                  </HBox>
-                  <Button fx:id="btnRegistrarNuevoCliente" text="Registrar Nuevo Cliente" maxWidth="Infinity"/>
-                  <GridPane hgap="10.0" vgap="8.0">
-                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
-                     </columnConstraints>
-                     <children>
-                        <Label text="Documento:" GridPane.rowIndex="0" />
-                        <TextField fx:id="txtDocumento" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-
-                        <Label text="Nombre:" GridPane.rowIndex="1" />
-                        <TextField fx:id="txtNombre" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-                        <Label text="Dirección:" GridPane.rowIndex="2" />
-                        <TextField fx:id="txtDireccion" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-
-                        <Label text="Teléfono:" GridPane.rowIndex="3" />
-                        <TextField fx:id="txtTelefono" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-
-                        <Label text="Correo (opcional):" GridPane.rowIndex="4" />
-                        <TextField fx:id="txtCorreo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                     </children>
-                  </GridPane>
-               </VBox>
+            <!-- Header -->
+            <VBox style="-fx-background-color: #00b386; -fx-padding: 15;">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                        <Image url="@../../img/document.png" />
+                    </ImageView>
+                    <Label text="Procesar Venta" textFill="white" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+                </HBox>
+                <Label text="Complete los datos para finalizar la transacción" textFill="white" style="-fx-font-size: 12;"/>
             </VBox>
-         </content>
-      </ScrollPane>
-   </content>
-   <buttonTypes>
-      <ButtonType fx:id="btnConfirmar" text="Confirmar y Finalizar Venta" buttonData="OK_DONE" />
-      <ButtonType fx:id="btnCancelar" text="Cancelar" buttonData="CANCEL_CLOSE" />
-   </buttonTypes>
+            
+            <!-- Content -->
+            <VBox spacing="20" style="-fx-padding: 20;">
+                <!-- Monto Total -->
+                <VBox alignment="CENTER">
+                    <Label text="Monto Total:" style="-fx-font-size: 12;"/>
+                    <Label fx:id="lblMontoTotalDialog" text="0,00" style="-fx-font-size: 24; -fx-text-fill: #00b386; -fx-font-weight: bold;"/>
+                </VBox>
+                
+                <!-- Método de Pago -->
+                <VBox spacing="10">
+                    <Label text="Método de Pago:" style="-fx-font-size: 12;"/>
+                    <HBox spacing="10">
+                        <RadioButton fx:id="rbEfectivo" text="Efectivo" selected="true">
+                            <graphic>
+                                <ImageView fitHeight="16" fitWidth="16">
+                                    <Image url="@../../img/cash.png" />
+                                </ImageView>
+                            </graphic>
+                            <toggleGroup>
+                                <ToggleGroup fx:id="metodoPagoToggleGroup" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbTarjeta" text="Tarjeta" toggleGroup="$metodoPagoToggleGroup">
+                            <graphic>
+                                <ImageView fitHeight="16" fitWidth="16">
+                                    <Image url="@../../img/card.png" />
+                                </ImageView>
+                            </graphic>
+                        </RadioButton>
+                        <RadioButton fx:id="rbTransferencia" text="Transferencia bancaria" toggleGroup="$metodoPagoToggleGroup">
+                            <graphic>
+                                <ImageView fitHeight="16" fitWidth="16">
+                                    <Image url="@../../img/bank.png" />
+                                </ImageView>
+                            </graphic>
+                        </RadioButton>
+                    </HBox>
+                </VBox>
+                
+                <!-- Montos -->
+                <VBox fx:id="vueltoBox" spacing="10" managed="false" visible="false">
+                    <GridPane hgap="20" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50" />
+                            <ColumnConstraints percentWidth="50" />
+                        </columnConstraints>
+                        
+                        <Label text="Total recibido:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                        <HBox alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <Label style="-fx-padding: 5 0 0 0;"/>
+                            <TextField fx:id="txtTotalRecibido" promptText="Ingrese monto" HBox.hgrow="ALWAYS" />
+                        </HBox>
+                        
+                        <Label text="Cambio a entregar:" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                        <HBox alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Label style="-fx-padding: 5 0 0 0;"/>
+                            <TextField fx:id="txtCambioEntregar" text="0,00" editable="false" HBox.hgrow="ALWAYS" />
+                        </HBox>
+                    </GridPane>
+                </VBox>
+                
+                <!-- Tipo de Venta -->
+                <VBox spacing="10">
+                    <Label text="Tipo de Venta:" style="-fx-font-size: 12;"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="¿Factura Legal?" />
+                        <RadioButton fx:id="rbFacturaSi" text="Sí" selected="true">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="facturaToggleGroup" />
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="rbFacturaNo" text="No" toggleGroup="$facturaToggleGroup" />
+                    </HBox>
+                </VBox>
+
+                <!-- Datos del Cliente para Factura -->
+                <VBox fx:id="panelDatosCliente" spacing="15" style="-fx-border-color: #f0f0f0; -fx-border-width: 1; -fx-border-radius: 4; -fx-padding: 15;">
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                        <ImageView fitHeight="16" fitWidth="16">
+                            <Image url="@../../img/person.png" />
+                        </ImageView>
+                        <Label text="Datos del Cliente para Factura:" style="-fx-font-size: 12;"/>
+                    </HBox>
+                    
+                    <!-- Buscar o Nuevo Cliente - Modificado para ocupar todo el ancho -->
+                    <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="client-tabs" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                        <Tab text="Buscar Cliente">
+                            <VBox spacing="10" style="-fx-padding: 10;">
+                                <HBox spacing="5" alignment="CENTER">
+                                    <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por nombre o ID" HBox.hgrow="ALWAYS" />
+                                    <Button text="Buscar" styleClass="search-button" />
+                                </HBox>
+                            </VBox>
+                        </Tab>
+                        <Tab text="Nuevo Cliente">
+                            <GridPane vgap="10" hgap="15" style="-fx-padding: 10;">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50" />
+                                    <ColumnConstraints percentWidth="50" />
+                                </columnConstraints>
+                                
+                                <Label text="Documento:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                                <TextField fx:id="txtDocumento" promptText="Ingrese documento" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                                
+                                <Label text="Nombre:" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                                <TextField fx:id="txtNombre" promptText="Ingrese nombre completo" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+                                
+                                <Label text="Dirección:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                                <TextField fx:id="txtDireccion" promptText="Ingrese dirección" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                                
+                                <Label text="Teléfono:" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+                                <TextField fx:id="txtTelefono" promptText="Ingrese teléfono" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+                                
+                                <Label text="Correo (opcional):" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+                                <TextField fx:id="txtCorreo" promptText="Ingrese correo electrónico" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+                                
+                                <Button text="Registrar Nuevo Cliente" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" 
+                                        styleClass="register-button" maxWidth="Infinity" />
+                            </GridPane>
+                        </Tab>
+                    </TabPane>
+                </VBox>
+            
+                <!-- Footer -->
+                <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 15;">
+                    <Button fx:id="btnCancelar" text="Cancelar" style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 1;" />
+                    <Button fx:id="btnConfirmar" text="Confirmar y Finalizar Venta" 
+                            style="-fx-background-color: #00b386; -fx-text-fill: white;" />
+                </HBox>
+            </VBox> <!-- Cierra el VBox de contenido principal abierto en la línea 22 -->
+        </VBox>
+    </content>
 </DialogPane>

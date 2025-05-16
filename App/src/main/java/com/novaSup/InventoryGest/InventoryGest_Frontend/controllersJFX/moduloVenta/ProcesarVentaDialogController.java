@@ -1,10 +1,15 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
+// Importaciones de servicios (descomentar cuando estén disponibles)
+// import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
+// import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaService;
+// import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
+
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -14,224 +19,197 @@ import java.util.Locale;
 public class ProcesarVentaDialogController {
 
     @FXML
-    private DialogPane dialogPane;
+    private Button btnBuscarCliente;
 
     @FXML
-    private Label lblMontoTotal; // Reemplaza a lblResumenVenta
+    private Button btnCancelar;
 
     @FXML
-    private ToggleGroup metodoPagoToggleGroup;
-    @FXML
-    private RadioButton rbEfectivo;
-    @FXML
-    private RadioButton rbTarjeta;
-    @FXML
-    private RadioButton rbTransferencia;
+    private Button btnConfirmar;
 
-    @FXML
-    private VBox vueltoBox;
-    @FXML
-    private TextField txtTotalRecibido;
-    @FXML
-    private TextField txtCambioEntregar;
-
-    @FXML
-    private RadioButton rbFacturaSi;
-    @FXML
-    private RadioButton rbFacturaNo;
     @FXML
     private ToggleGroup facturaToggleGroup;
 
     @FXML
-    private VBox datosFacturaBox;
+    private ToggleGroup metodoPagoToggleGroup;
+
+    @FXML
+    private VBox panelDatosCliente;
+
+    @FXML
+    private RadioButton rbEfectivo;
+
+    @FXML
+    private RadioButton rbFacturaNo;
+
+    @FXML
+    private RadioButton rbFacturaSi;
+
+    @FXML
+    private RadioButton rbTarjeta;
+
+    @FXML
+    private RadioButton rbTransferencia;
+
     @FXML
     private TextField txtBuscarCliente;
+
     @FXML
-    private Button btnBuscarCliente;
+    private TextField txtCambioEntregar;
+
     @FXML
-    private Button btnRegistrarNuevoCliente;
+    private TextField txtCorreo;
+
+    @FXML
+    private TextField txtDireccion;
 
     @FXML
     private TextField txtDocumento;
+
     @FXML
     private TextField txtNombre;
-    @FXML
-    private TextField txtDireccion;
+
     @FXML
     private TextField txtTelefono;
-    @FXML
-    private TextField txtCorreo;
-    
-    @FXML
-    private ButtonType btnConfirmar;
 
-    private boolean confirmado = false;
-    private BigDecimal totalVentaActual;
-    private final NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
+    @FXML
+    private TextField txtTotalRecibido;
+
+    @FXML
+    private VBox vueltoBox;
+
+    @FXML
+    private Label lblMontoTotalDialog;
+
+    private List<ProductoVentaInfo> productosEnVenta;
+    private BigDecimal montoTotalVenta;
+    private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
+
+    // Instancias de servicios (descomentar cuando estén disponibles)
+    // private IClienteService clienteService;
+    // private IVentaService ventaService;
+    // private IFacturaService facturaService;
 
     @FXML
     public void initialize() {
-        // Configurar selección de método de pago por defecto
-        rbEfectivo.setSelected(true); // Efectivo por defecto
-
-        // Listener para los RadioButton de método de pago
         metodoPagoToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            actualizarVisibilidadVueltoBox();
-            if (newValue != rbEfectivo) {
+            boolean esEfectivo = newValue == rbEfectivo;
+            vueltoBox.setVisible(esEfectivo);
+            vueltoBox.setManaged(esEfectivo);
+            if (!esEfectivo) {
                 txtTotalRecibido.clear();
-                txtCambioEntregar.clear();
+                txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
             }
-            calcularCambio(); // Recalcular cambio si cambia el método de pago
         });
-        actualizarVisibilidadVueltoBox(); // Estado inicial
 
-        // Listener para calcular cambio automáticamente
-        txtTotalRecibido.textProperty().addListener((obs, oldVal, newVal) -> calcularCambio());
-
-        // Listener para los RadioButton de factura
         facturaToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == rbFacturaSi) {
-                datosFacturaBox.setVisible(true);
-                datosFacturaBox.setManaged(true);
-            } else if (newValue == rbFacturaNo) {
-                datosFacturaBox.setVisible(false);
-                datosFacturaBox.setManaged(false);
-            }
+            boolean requiereFactura = newValue == rbFacturaSi;
+            panelDatosCliente.setVisible(requiereFactura);
+            panelDatosCliente.setManaged(requiereFactura);
         });
-        // Estado inicial del VBox de datos de factura
-        if (rbFacturaNo.isSelected()) {
-            datosFacturaBox.setVisible(false);
-            datosFacturaBox.setManaged(false);
-        } else {
-            datosFacturaBox.setVisible(true);
-            datosFacturaBox.setManaged(true);
-        }
-        
-        // Placeholder para acciones de botones de cliente
-        btnBuscarCliente.setOnAction(event -> handleBuscarCliente());
-        btnRegistrarNuevoCliente.setOnAction(event -> handleRegistrarNuevoCliente());
 
-        // Inicializar el campo de cambio como no editable y con estilo
-        txtCambioEntregar.setEditable(false);
-        txtCambioEntregar.setStyle("-fx-background-color: #e0e0e0;");
+        txtTotalRecibido.textProperty().addListener((observable, oldValue, newValue) -> {
+            calcularCambio();
+        });
+
+        rbEfectivo.setSelected(true);
+        rbFacturaSi.setSelected(true);
+        txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
+
+        btnCancelar.setOnAction(event -> cerrarDialogo(false));
+        btnConfirmar.setOnAction(event -> confirmarVenta());
     }
-    
-    private void actualizarVisibilidadVueltoBox() {
-        boolean esEfectivo = rbEfectivo.isSelected();
-        vueltoBox.setVisible(esEfectivo);
-        vueltoBox.setManaged(esEfectivo);
+
+    public void setDatosVenta(List<ProductoVentaInfo> productos, BigDecimal total) {
+        this.productosEnVenta = productos;
+        this.montoTotalVenta = total;
+        if (lblMontoTotalDialog != null) {
+            lblMontoTotalDialog.setText(formatoMoneda.format(this.montoTotalVenta));
+        }
+        calcularCambio();
     }
+
+    /**
+     * Método para la inyección de dependencias (servicios).
+     * Este método se llamará desde VenderControllerFX después de crear una instancia de este controlador.
+     */
+    // public void setServices(IClienteService clienteService, IVentaService ventaService, IFacturaService facturaService) {
+    //     this.clienteService = clienteService;
+    //     this.ventaService = ventaService;
+    //     this.facturaService = facturaService;
+    //     // Aquí podrías inicializar listeners o datos que dependan de los servicios
+    // }
 
     private void calcularCambio() {
-        if (totalVentaActual == null || !rbEfectivo.isSelected()) {
-            txtCambioEntregar.clear();
+        if (montoTotalVenta == null || !rbEfectivo.isSelected()) {
+            txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
             return;
         }
+
+        String totalRecibidoStr = txtTotalRecibido.getText().replace(".", "").replace(",", "."); // Adaptar a formato numérico estándar
+        if (totalRecibidoStr.isEmpty()) {
+            txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
+            return;
+        }
+
         try {
-            // Reemplazar comas por puntos para el parseo y quitar símbolos de moneda si los hubiera
-            String recibidoStr = txtTotalRecibido.getText()
-                                       .replace(formatoMoneda.getCurrency().getSymbol(), "")
-                                       .replace(".", "") // Eliminar separadores de miles (si el formato los usa como punto)
-                                       .replace(",", ".") // Convertir coma decimal a punto
-                                       .trim();
-            
-            if (recibidoStr.isEmpty()) {
-                txtCambioEntregar.clear();
+            BigDecimal totalRecibido = new BigDecimal(totalRecibidoStr);
+            BigDecimal cambio = totalRecibido.subtract(montoTotalVenta);
+            txtCambioEntregar.setText(formatoMoneda.format(cambio.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : cambio));
+        } catch (NumberFormatException e) {
+            txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
+        }
+    }
+
+    private void confirmarVenta() {
+        // Lógica de validación y procesamiento de la venta
+        if (rbFacturaSi.isSelected()) {
+            // Validar campos del cliente
+            if (txtDocumento.getText().isEmpty() || txtNombre.getText().isEmpty() || txtDireccion.getText().isEmpty() || txtTelefono.getText().isEmpty()) {
+                mostrarAlerta("Datos Incompletos", "Para generar factura, todos los datos del cliente son obligatorios (excepto correo).");
                 return;
             }
-            BigDecimal recibido = new BigDecimal(recibidoStr);
-            if (recibido.compareTo(totalVentaActual) >= 0) {
-                BigDecimal cambio = recibido.subtract(totalVentaActual);
-                txtCambioEntregar.setText(formatoMoneda.format(cambio));
-            } else {
-                txtCambioEntregar.setText("Monto insuficiente");
-            }
-        } catch (NumberFormatException e) {
-            txtCambioEntregar.setText("Valor inválido");
         }
-    }
 
-    public void setDatosVenta(List<ProductoVentaInfo> productos, BigDecimal totalVenta) {
-        this.totalVentaActual = totalVenta;
-        if (lblMontoTotal != null) {
-            // Escapar el $ si es necesario para el Label, aunque set_text no lo interpreta como expresión.
-            lblMontoTotal.setText("Monto Total: " + formatoMoneda.format(totalVentaActual));
+        // Aquí iría la lógica para:
+        // 1. Obtener el cliente (buscar o registrar nuevo)
+        // 2. Crear el objeto Venta
+        // 3. Registrar la venta usando ventaService
+        // 4. Generar la factura usando facturaService si es necesario
+        // 5. Actualizar el stock de los productosEnVenta
+
+        System.out.println("Venta confirmada (simulación):");
+        System.out.println("Monto Total: " + formatoMoneda.format(montoTotalVenta));
+        System.out.println("Método de pago: " + ((RadioButton)metodoPagoToggleGroup.getSelectedToggle()).getText());
+        if(rbEfectivo.isSelected()){
+            System.out.println("Total recibido: " + txtTotalRecibido.getText());
+            System.out.println("Cambio: " + txtCambioEntregar.getText());
         }
-        calcularCambio(); // Para actualizar el cambio si ya hay un total recibido
-        configurarValidacionBotonConfirmar();
-    }
-
-    public void configurarValidacionBotonConfirmar() {
-        if (dialogPane == null) {
-            System.err.println("DialogPane no inyectado al llamar a configurarValidacionBotonConfirmar.");
-            return;
+        System.out.println("Factura: " + ((RadioButton)facturaToggleGroup.getSelectedToggle()).getText());
+        if(rbFacturaSi.isSelected()){
+            System.out.println("Cliente: " + txtNombre.getText() + " (ID: "+txtDocumento.getText()+")");
         }
-        Node confirmButtonNode = dialogPane.lookupButton(getBtnConfirmarType()); 
-
-        if (confirmButtonNode instanceof Button) {
-            ((Button) confirmButtonNode).disableProperty().bind(
-                metodoPagoToggleGroup.selectedToggleProperty().isNull()
-                .or(rbFacturaSi.selectedProperty().and(
-                    txtDocumento.textProperty().isEmpty()
-                    .or(txtNombre.textProperty().isEmpty())
-                    .or(txtDireccion.textProperty().isEmpty())
-                    .or(txtTelefono.textProperty().isEmpty())
-                ))
-            );
-        } else {
-            System.err.println("Error: No se pudo encontrar el botón de confirmación (o no es un Button) en el diálogo para la validación.");
+        System.out.println("Productos:");
+        if(productosEnVenta != null){
+            productosEnVenta.forEach(p -> System.out.println("- " + p.getNombre() + " x" + p.getCantidad() + " @ " + formatoMoneda.format(p.getPrecioVentaUnitario()))); // Corregido aquí
         }
-    }
-    
-    @FXML
-    private void handleBuscarCliente() {
-        String criterio = txtBuscarCliente.getText();
-        System.out.println("Intentando buscar cliente con criterio: " + criterio);
-        // Aquí iría la lógica para buscar un cliente existente.
-        // Por ejemplo, mostrar un diálogo de búsqueda y, si se selecciona un cliente,
-        // rellenar los campos txtDocumento, txtNombre, etc.
-        // showAlert("Información", "Funcionalidad no implementada", "La búsqueda de clientes aún no está implementada.");
+
+
+        cerrarDialogo(true);
     }
 
-    @FXML
-    private void handleRegistrarNuevoCliente() {
-        System.out.println("Intentando registrar nuevo cliente.");
-        // Aquí iría la lógica para abrir un formulario o diálogo de registro de nuevo cliente.
-        // Después del registro, se podrían rellenar automáticamente los campos.
-        // showAlert("Información", "Funcionalidad no implementada", "El registro de nuevos clientes aún no está implementado.");
+    private void cerrarDialogo(boolean ventaConfirmada) {
+        Stage stage = (Stage) btnCancelar.getScene().getWindow();
+        // El Dialog en VenderControllerFX espera un ButtonType.OK_DONE para confirmar.
+        // Si los botones tienen el ButtonData correcto, el Dialog lo manejará.
+        stage.close();
     }
 
-    public boolean isConfirmado() {
-        return confirmado;
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
-
-    public String getFormaDePago() {
-        if (rbEfectivo.isSelected()) return "Efectivo";
-        if (rbTarjeta.isSelected()) return "Tarjeta";
-        if (rbTransferencia.isSelected()) return "Transferencia";
-        return null;
-    }
-    
-    public String getTotalRecibido() {
-        return txtTotalRecibido.getText();
-    }
-
-    // Getters para datos de factura (ya existentes y siguen siendo válidos)
-    public boolean isRequiereFactura() { return rbFacturaSi.isSelected(); }
-    public String getDocumentoCliente() { return txtDocumento.getText(); }
-    public String getNombreCliente() { return txtNombre.getText(); }
-    public String getDireccionCliente() { return txtDireccion.getText(); }
-    public String getTelefonoCliente() { return txtTelefono.getText(); }
-    public String getCorreoCliente() { return txtCorreo.getText(); }
-
-    public void setConfirmado(boolean confirmado) {
-        this.confirmado = confirmado;
-    }
-
-    public ButtonType getBtnConfirmarType() {
-        return btnConfirmar;
-    }
-
-    // El método setDialogStage puede eliminarse o adaptarse si ya no se usa Stage directamente.
-    // public void setDialogStage(Stage stage) { ... }
 }
