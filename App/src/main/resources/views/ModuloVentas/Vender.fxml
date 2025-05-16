@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-pane" stylesheets="@../../styles/vender-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.VenderControllerFX">
@@ -47,12 +48,7 @@
                 <Region HBox.hgrow="ALWAYS" />
             </HBox>
             
-            <!-- Panel de resultados de búsqueda (visible solo cuando se busca) -->
-            <VBox fx:id="panelResultadosBusqueda" managed="false" styleClass="search-results-panel" visible="false">
-                <ScrollPane fitToWidth="true" maxHeight="300" styleClass="search-results-scroll">
-                    <VBox fx:id="contenedorResultados" spacing="5" styleClass="search-results-container" />
-                </ScrollPane>
-            </VBox>
+            <!-- Las sugerencias de búsqueda ahora se muestran como tarjetas en un popup -->
             
             <!-- Información de la venta actual -->
             <HBox spacing="20" styleClass="venta-info-container">

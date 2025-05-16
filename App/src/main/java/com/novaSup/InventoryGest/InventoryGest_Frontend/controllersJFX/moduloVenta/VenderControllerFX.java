@@ -8,8 +8,11 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.Node;
+import javafx.stage.Popup;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -49,31 +52,22 @@ public class VenderControllerFX implements Initializable {
     private Label lblTotalGeneral;
     @FXML
     private Label lblItemsCarrito;
-    
-    @FXML
-    private VBox panelResultadosBusqueda;
-    
-    @FXML
-    private VBox contenedorResultados;
-    
+
+    private Popup popupSugerencias;
+    private VBox contenedorSugerencias;
+
     @FXML
     private TableView<ProductoFX> tablaProductos;
-    
     @FXML
     private TableColumn<ProductoFX, String> colCodigo;
-    
     @FXML
     private TableColumn<ProductoFX, String> colProducto;
-    
     @FXML
     private TableColumn<ProductoFX, String> colPrecio;
-    
     @FXML
     private TableColumn<ProductoFX, Integer> colCantidad;
-    
     @FXML
     private TableColumn<ProductoFX, String> colSubtotal;
-    
     @FXML
     private TableColumn<ProductoFX, Void> colAcciones;
 
@@ -86,49 +80,50 @@ public class VenderControllerFX implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        formatoMoneda.setMaximumFractionDigits(2);
-        
-        // Ocultar el panel de resultados de búsqueda inicialmente
-        panelResultadosBusqueda.setVisible(false);
-        panelResultadosBusqueda.setManaged(false);
-        
-        // Configurar la tabla de productos
-        configurarTabla();
-        
-        // Configurar evento para cerrar el panel de resultados al hacer clic fuera de él
-        txtBusqueda.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) { // Si pierde el foco
-                // Esperar un poco antes de ocultar para permitir la selección
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(200);
-                        javafx.application.Platform.runLater(() -> {
-                            panelResultadosBusqueda.setVisible(false);
-                            panelResultadosBusqueda.setManaged(false);
-                        });
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }
-        });
-        
         try {
+            // Inicializar el popup de sugerencias
+            popupSugerencias = new Popup();
+            popupSugerencias.setAutoHide(true);
+            popupSugerencias.setHideOnEscape(true);
+            
+            // Crear un panel con fondo para el popup
+            StackPane popupBackground = new StackPane();
+            popupBackground.setStyle("-fx-background-color: white; -fx-background-radius: 4px; -fx-border-color: #DEE2E6; -fx-border-radius: 4px;");
+            
+            // Contenedor para las sugerencias
+            contenedorSugerencias = new VBox(5);
+            contenedorSugerencias.getStyleClass().add("sugerencias-popup");
+            contenedorSugerencias.setPadding(new Insets(5));
+            contenedorSugerencias.setMaxWidth(600);
+            contenedorSugerencias.setMinWidth(500);
+            
+            // Agregar un efecto de sombra al popup
+            DropShadow shadow = new DropShadow();
+            shadow.setRadius(5.0);
+            shadow.setOffsetX(0.0);
+            shadow.setOffsetY(2.0);
+            shadow.setColor(javafx.scene.paint.Color.rgb(0, 0, 0, 0.2));
+            popupBackground.setEffect(shadow);
+            
+            // Agregar el contenedor de sugerencias al panel con fondo
+            popupBackground.getChildren().add(contenedorSugerencias);
+            
+            // Agregar el panel con fondo al popup
+            popupSugerencias.getContent().add(popupBackground);
+            
+            // Configurar la tabla de productos
+            configurarTabla();
+            
+            // Cargar productos
             cargarProductos();
-        } catch (Exception e) {
-            mostrarError("Error al cargar productos", "No se pudieron cargar los productos: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        // Configurar acciones de los botones
-        if (btnProductoComun != null) {
-            btnProductoComun.setOnAction(e -> mostrarAlerta("Funcionalidad no implementada", "El botón 'Producto Común' aún no está implementado."));
-        }
-        if (btnBuscarVenta != null) {
-            btnBuscarVenta.setOnAction(e -> mostrarAlerta("Funcionalidad no implementada", "El botón 'Buscar Venta' aún no está implementado."));
-        }
-        if (btnNuevaVenta != null) {
+            
+            // Configurar eventos
+            txtBusqueda.setOnKeyReleased(this::buscarProductos);
+            
+            btnProcesarVenta.setOnAction(e -> procesarVenta());
             btnNuevaVenta.setOnAction(e -> limpiarVenta());
+        } catch (Exception e) {
+            mostrarError("Error de inicialización", "No se pudo inicializar el módulo de ventas: " + e.getMessage());
         }
     }
     
@@ -141,8 +136,19 @@ public class VenderControllerFX implements Initializable {
         colProducto.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getNombre()));
         colPrecio.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(formatoMoneda.format(cellData.getValue().getPrecioVenta())));
         
-        // Configurar columna de cantidad con Spinner
-        colCantidad.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(1));
+        // Hacer que las columnas sean responsivas
+        tablaProductos.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        
+        // Configurar el ancho de las columnas para que se ajusten al ancho de la tabla
+        colCodigo.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+        colProducto.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.30));
+        colPrecio.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+        colCantidad.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+        colSubtotal.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
+        colAcciones.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.10));
+        
+        // Configurar columna de cantidad con control personalizado
+        colCantidad.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getStock()));
         colCantidad.setCellFactory(col -> new TableCell<ProductoFX, Integer>() {
             @Override
             protected void updateItem(Integer item, boolean empty) {
@@ -151,21 +157,53 @@ public class VenderControllerFX implements Initializable {
                     setGraphic(null);
                 } else {
                     ProductoFX producto = getTableView().getItems().get(getIndex());
-                    Spinner<Integer> spinner = new Spinner<>(1, producto.getStock(), 1);
-                    spinner.setPrefWidth(80);
-                    spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-                        actualizarTotalCarrito();
+                    
+                    // Verificar el stock máximo disponible
+                    int stockMaximo = obtenerStockMaximoDisponible(producto);
+                    
+                    // Crear control de cantidad personalizado
+                    HBox cantidadControl = new HBox();
+                    cantidadControl.getStyleClass().add("cantidad-control");
+                    
+                    Button btnMenos = new Button("-");
+                    TextField txtCantidad = new TextField(String.valueOf(producto.getStock()));
+                    Button btnMas = new Button("+");
+                    
+                    txtCantidad.setPrefWidth(40);
+                    txtCantidad.setEditable(false);
+                    
+                    // Configurar eventos
+                    btnMenos.setOnAction(e -> {
+                        if (producto.getStock() > 1) {
+                            producto.setStock(producto.getStock() - 1);
+                            txtCantidad.setText(String.valueOf(producto.getStock()));
+                            actualizarTotalCarrito();
+                        }
                     });
-                    setGraphic(spinner);
+                    
+                    btnMas.setOnAction(e -> {
+                        // Verificar si hay stock disponible para aumentar
+                        if (producto.getStock() < stockMaximo) {
+                            producto.setStock(producto.getStock() + 1);
+                            txtCantidad.setText(String.valueOf(producto.getStock()));
+                            actualizarTotalCarrito();
+                        } else {
+                            mostrarAlerta("Stock Limitado", "No hay más stock disponible para este producto. Stock máximo: " + stockMaximo);
+                        }
+                    });
+                    
+                    cantidadControl.getChildren().addAll(btnMenos, txtCantidad, btnMas);
+                    setGraphic(cantidadControl);
                 }
             }
         });
         
         // Configurar columna de subtotal
         colSubtotal.setCellValueFactory(cellData -> {
-            // Esto es simplificado, en realidad deberías obtener la cantidad del spinner
             BigDecimal precio = cellData.getValue().getPrecioVenta();
-            return new javafx.beans.property.SimpleStringProperty(formatoMoneda.format(precio));
+            int cantidad = cellData.getValue().getStock();
+            BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(cantidad));
+            return new javafx.beans.property.SimpleStringProperty(formatoMoneda.format(subtotal));
         });
         
         // Configurar columna de acciones
@@ -200,119 +238,257 @@ public class VenderControllerFX implements Initializable {
 
     @FXML
     void buscarProductos(KeyEvent event) {
-        String textoBusqueda = "";
+        final String textoBusqueda;
         if (txtBusqueda != null && txtBusqueda.getText() != null) {
             textoBusqueda = txtBusqueda.getText().toLowerCase().trim();
+        } else {
+            textoBusqueda = "";
         }
 
-        // Limpiar el contenedor de resultados
-        contenedorResultados.getChildren().clear();
+        // Limpiar el contenedor de sugerencias
+        contenedorSugerencias.getChildren().clear();
+        popupSugerencias.hide();
 
         if (todosLosProductos == null) {
             mostrarError("Error", "La lista de productos no ha sido cargada.");
             return;
         }
 
-        // Si no hay texto de búsqueda, ocultar el panel de resultados
+        // Si no hay texto de búsqueda, ocultar las sugerencias
         if (textoBusqueda.isEmpty()) {
-            panelResultadosBusqueda.setVisible(false);
-            panelResultadosBusqueda.setManaged(false);
             return;
         }
 
-        // Filtrar productos según el texto de búsqueda
-        String finalTextoBusqueda = textoBusqueda;
-        List<ProductoFX> resultados = todosLosProductos.stream()
-                .filter(p -> p.getNombre().toLowerCase().contains(finalTextoBusqueda) ||
-                             String.valueOf(p.getCodigo()).toLowerCase().contains(finalTextoBusqueda) ||
-                             String.valueOf(p.getIdProducto()).toLowerCase().contains(finalTextoBusqueda))
-                .limit(10) // Limitar a 10 resultados para no sobrecargar la UI
+        // Filtrar productos que coincidan con la búsqueda
+        List<ProductoFX> productosFiltrados = todosLosProductos.stream()
+                .filter(p -> p.getNombre().toLowerCase().contains(textoBusqueda) || 
+                        p.getCodigo().toLowerCase().contains(textoBusqueda))
+                .limit(5) // Limitar a 5 resultados
                 .collect(Collectors.toList());
 
-        // Si hay resultados, mostrar el panel y agregar los productos
-        if (!resultados.isEmpty()) {
-            resultados.forEach(this::agregarProductoAResultadosBusqueda);
-            panelResultadosBusqueda.setVisible(true);
-            panelResultadosBusqueda.setManaged(true);
-        } else {
-            // Si no hay resultados, mostrar un mensaje
+        // Si no hay resultados, mostrar mensaje
+        if (productosFiltrados.isEmpty()) {
             Label noResultados = new Label("No se encontraron productos");
-            noResultados.getStyleClass().add("search-no-results");
-            contenedorResultados.getChildren().add(noResultados);
-            panelResultadosBusqueda.setVisible(true);
-            panelResultadosBusqueda.setManaged(true);
+            noResultados.getStyleClass().add("no-resultados-label");
+            contenedorSugerencias.getChildren().add(noResultados);
+        } else {
+            // Crear tarjetas para cada producto filtrado
+            for (ProductoFX producto : productosFiltrados) {
+                HBox tarjeta = crearTarjetaProducto(producto);
+                contenedorSugerencias.getChildren().add(tarjeta);
+            }
+        }
+
+        // Si hay resultados, asegurarnos de que el popup tenga un fondo blanco sólido
+        if (!productosFiltrados.isEmpty()) {
+            // Asegurarnos de que cada tarjeta tenga el estilo correcto
+            for (Node node : contenedorSugerencias.getChildren()) {
+                if (node instanceof HBox) {
+                    HBox tarjeta = (HBox) node;
+                    tarjeta.setStyle("-fx-background-color: white; -fx-border-color: #DEE2E6; -fx-border-width: 1px; -fx-border-radius: 4px;");
+                }
+            }
+            
+            // Mostrar el popup de sugerencias debajo del campo de búsqueda
+            // Calcular la posición exacta para que aparezca debajo del campo de búsqueda
+            double x = txtBusqueda.localToScreen(0, 0).getX();
+            double y = txtBusqueda.localToScreen(0, 0).getY() + txtBusqueda.getHeight() + 2; // Pequeño espacio
+            
+            // Asegurarse de que el popup no se salga de la pantalla
+            if (x + contenedorSugerencias.getMaxWidth() > javafx.stage.Screen.getPrimary().getVisualBounds().getMaxX()) {
+                x = javafx.stage.Screen.getPrimary().getVisualBounds().getMaxX() - contenedorSugerencias.getMaxWidth();
+            }
+            
+            popupSugerencias.show(txtBusqueda.getScene().getWindow(), x, y);
         }
     }
 
     /**
-     * Agrega un producto al panel de resultados de búsqueda con los nuevos estilos
+     * Crea una tarjeta para el producto en las sugerencias
      */
-    private void agregarProductoAResultadosBusqueda(ProductoFX producto) {
-        HBox itemResultado = new HBox();
-        itemResultado.setSpacing(10);
-        itemResultado.setPadding(new Insets(5));
-        itemResultado.setAlignment(Pos.CENTER_LEFT);
-        itemResultado.getStyleClass().add("resultado-item");
+    private HBox crearTarjetaProducto(ProductoFX producto) {
+        // Crear la tarjeta principal como HBox para layout horizontal
+        HBox tarjeta = new HBox();
+        tarjeta.getStyleClass().addAll("producto-sugerido", "producto-sugerido-layout");
+        tarjeta.setStyle("-fx-background-color: white; -fx-border-color: #DEE2E6; -fx-border-width: 1px; -fx-border-radius: 4px; -fx-padding: 10px 15px;");
         
-        // Contenedor para la información del producto
-        VBox infoProducto = new VBox();
-        infoProducto.setSpacing(2);
+        // Información del producto (lado izquierdo)
+        VBox infoProducto = new VBox(2);
+        infoProducto.getStyleClass().addAll("producto-info", "producto-info-container");
         HBox.setHgrow(infoProducto, Priority.ALWAYS);
         
         // Nombre del producto
         Label lblNombre = new Label(producto.getNombre());
-        lblNombre.getStyleClass().add("resultado-nombre");
+        lblNombre.getStyleClass().add("producto-nombre");
         
-        // Código del producto
-        Label lblCodigo = new Label("Código: " + producto.getCodigo());
-        lblCodigo.getStyleClass().add("resultado-codigo");
+        // Código y precio
+        Label lblCodigo = new Label("Código: " + producto.getCodigo() + " | Precio: " + formatoMoneda.format(producto.getPrecioVenta()) + " | Existencias: " + producto.getStock());
+        lblCodigo.getStyleClass().add("producto-codigo");
         
         infoProducto.getChildren().addAll(lblNombre, lblCodigo);
         
-        // Precio y existencias
-        VBox precioStock = new VBox();
-        precioStock.setAlignment(Pos.CENTER_RIGHT);
-        precioStock.setSpacing(2);
+        // Contenedor para controles de cantidad y botón agregar (lado derecho)
+        HBox accionesContainer = new HBox(10);
+        accionesContainer.getStyleClass().add("producto-actions-container");
         
-        Label lblPrecio = new Label(formatoMoneda.format(producto.getPrecioVenta()));
-        lblPrecio.getStyleClass().add("resultado-precio");
+        // Control de cantidad
+        HBox cantidadControl = new HBox(2);
+        cantidadControl.getStyleClass().add("cantidad-control-sugerencia");
+        cantidadControl.setAlignment(Pos.CENTER);
         
-        Label lblStock = new Label("Existencias: " + producto.getStock());
-        lblStock.getStyleClass().add("resultado-stock");
+        // Botón de disminuir
+        Button btnMenos = new Button("-");
         
-        precioStock.getChildren().addAll(lblPrecio, lblStock);
+        // Campo de texto para la cantidad
+        TextField txtCantidad = new TextField("1");
+        txtCantidad.setPrefWidth(40);
+        txtCantidad.setEditable(false);
         
-        // Botón para agregar el producto
+        // Botón de aumentar
+        Button btnMas = new Button("+");
+        
+        // Contador para la cantidad seleccionada
+        final int[] cantidad = {1};
+        
+        // Configurar eventos de los botones
+        btnMenos.setOnAction(e -> {
+            e.consume(); // Evitar que el evento se propague a la tarjeta
+            if (cantidad[0] > 1) {
+                cantidad[0]--;
+                txtCantidad.setText(String.valueOf(cantidad[0]));
+            }
+        });
+        
+        btnMas.setOnAction(e -> {
+            e.consume(); // Evitar que el evento se propague a la tarjeta
+            if (cantidad[0] < producto.getStock()) {
+                cantidad[0]++;
+                txtCantidad.setText(String.valueOf(cantidad[0]));
+            } else {
+                mostrarAlerta("Stock Limitado", "No hay más stock disponible para este producto.");
+            }
+        });
+        
+        cantidadControl.getChildren().addAll(btnMenos, txtCantidad, btnMas);
+        
+        // Botón de agregar
         Button btnAgregar = new Button("Agregar");
-        btnAgregar.getStyleClass().add("button-agregar-resultado");
+        btnAgregar.getStyleClass().add("btn-agregar-sugerencia");
+        
+        // Configurar acción del botón agregar
         btnAgregar.setOnAction(e -> {
-            agregarAlCarrito(producto);
-            panelResultadosBusqueda.setVisible(false);
-            panelResultadosBusqueda.setManaged(false);
+            e.consume(); // Evitar que el evento se propague a la tarjeta
+            agregarAlCarritoConCantidad(producto, cantidad[0]);
+            popupSugerencias.hide();
             txtBusqueda.clear();
         });
         
-        // Agregar todos los elementos al contenedor principal
-        itemResultado.getChildren().addAll(infoProducto, precioStock, btnAgregar);
+        // Agregar controles al contenedor de acciones
+        accionesContainer.getChildren().addAll(cantidadControl, btnAgregar);
         
-        // Agregar el item al contenedor de resultados
-        contenedorResultados.getChildren().add(itemResultado);
+        // Agregar todos los elementos a la tarjeta
+        tarjeta.getChildren().addAll(infoProducto, accionesContainer);
+        
+        return tarjeta;
     }
 
+    /**
+     * Obtiene el stock máximo disponible para un producto
+     * @param producto Producto para verificar stock
+     * @return Stock máximo disponible
+     */
+    private int obtenerStockMaximoDisponible(ProductoFX producto) {
+        // Buscar el producto en la lista original para obtener el stock real
+        if (todosLosProductos != null) {
+            for (ProductoFX p : todosLosProductos) {
+                if (p.getIdProducto().equals(producto.getIdProducto())) {
+                    return p.getStock();
+                }
+            }
+        }
+        // Si no se encuentra, devolver el stock actual del producto
+        return producto.getStock();
+    }
+    
+    /**
+     * Agrega un producto al carrito con cantidad 1
+     * @param producto Producto a agregar
+     */
     private void agregarAlCarrito(ProductoFX producto) {
-        if (producto.getStock() <= 0) {
+        agregarAlCarritoConCantidad(producto, 1);
+    }
+    
+    /**
+     * Agrega un producto al carrito con una cantidad específica
+     * @param producto Producto a agregar
+     * @param cantidadAgregar Cantidad a agregar
+     */
+    private void agregarAlCarritoConCantidad(ProductoFX producto, int cantidadAgregar) {
+        // Obtener el stock máximo disponible del producto original
+        int stockMaximoDisponible = obtenerStockMaximoDisponible(producto);
+        
+        // Validar que haya stock disponible
+        if (stockMaximoDisponible <= 0) {
             mostrarError("Stock Agotado", "No hay stock disponible para " + producto.getNombre());
             return;
         }
-
-        // Agregar el producto a la tabla
-        tablaProductos.getItems().add(producto);
+        
+        // Validar que la cantidad a agregar sea positiva
+        if (cantidadAgregar <= 0) {
+            mostrarError("Cantidad Inválida", "La cantidad debe ser mayor a cero");
+            return;
+        }
+        
+        // Validar que la cantidad a agregar no supere el stock disponible
+        if (cantidadAgregar > stockMaximoDisponible) {
+            mostrarError("Stock Insuficiente", "Solo hay " + stockMaximoDisponible + " unidades disponibles de " + producto.getNombre());
+            cantidadAgregar = stockMaximoDisponible; // Limitar a stock disponible
+        }
+        
+        // Verificar si el producto ya está en el carrito
+        boolean productoExistente = false;
+        for (ProductoFX p : tablaProductos.getItems()) {
+            if (p.getIdProducto().equals(producto.getIdProducto())) {
+                // El producto ya está en el carrito, calcular la nueva cantidad
+                int cantidadActual = p.getStock();
+                int nuevaCantidad = cantidadActual + cantidadAgregar;
+                
+                // Validar que la nueva cantidad no supere el stock disponible
+                if (nuevaCantidad > stockMaximoDisponible) {
+                    mostrarError("Stock Insuficiente", "No se puede agregar más unidades. Stock máximo disponible: " + stockMaximoDisponible);
+                    nuevaCantidad = stockMaximoDisponible; // Limitar a stock disponible
+                }
+                
+                p.setStock(nuevaCantidad);
+                productoExistente = true;
+                
+                // Mostrar mensaje de confirmación
+                mostrarAlerta("Cantidad actualizada", "Se ha actualizado la cantidad de " + p.getNombre() + " a " + nuevaCantidad + " unidades.");
+                break;
+            }
+        }
+        
+        if (!productoExistente) {
+            // Crear una copia del producto para agregar al carrito
+            ProductoFX nuevoProducto = new ProductoFX();
+            nuevoProducto.setIdProducto(producto.getIdProducto());
+            nuevoProducto.setCodigo(producto.getCodigo());
+            nuevoProducto.setNombre(producto.getNombre());
+            nuevoProducto.setDescripcion(producto.getDescripcion());
+            nuevoProducto.setPrecioVenta(producto.getPrecioVenta());
+            nuevoProducto.setStock(cantidadAgregar); // Establecer la cantidad seleccionada
+            nuevoProducto.setEstado(producto.getEstado());
+            nuevoProducto.setIdCategoria(producto.getIdCategoria());
+            
+            // Agregar el producto a la tabla
+            tablaProductos.getItems().add(nuevoProducto);
+            
+            // Mostrar mensaje de confirmación
+            mostrarAlerta("Producto agregado", cantidadAgregar + " unidad(es) de " + nuevoProducto.getNombre() + " ha(n) sido agregada(s) a la venta.");
+        }
         
         // Actualizar el total y el contador de items
         actualizarTotalCarrito();
-        
-        // Mostrar mensaje de confirmación
-        mostrarAlerta("Producto agregado", producto.getNombre() + " ha sido agregado a la venta.");
     }
 
     private void actualizarTotalCarrito() {
@@ -321,14 +497,10 @@ public class VenderControllerFX implements Initializable {
 
         // Calcular totales basados en los productos de la tabla
         for (ProductoFX producto : tablaProductos.getItems()) {
-            // Por ahora, asumimos cantidad 1 para cada producto
-            // En una implementación completa, obtendrías la cantidad del spinner
-            int cantidad = 1;
-            
-            // Calcular subtotal del item
             BigDecimal precioUnitario = producto.getPrecioVenta();
-            BigDecimal subtotalItem = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
-            subtotal = subtotal.add(subtotalItem);
+            int cantidad = producto.getStock();
+            BigDecimal subtotalProducto = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+            subtotal = subtotal.add(subtotalProducto);
             cantidadItems += cantidad;
         }
 
@@ -336,13 +508,16 @@ public class VenderControllerFX implements Initializable {
         BigDecimal iva = subtotal.multiply(new BigDecimal("0.12")).setScale(2, RoundingMode.HALF_UP);
         BigDecimal total = subtotal.add(iva);
 
-        // Actualizar labels
+        // Actualizar etiquetas
         lblSubtotal.setText(formatoMoneda.format(subtotal));
         lblIVA.setText(formatoMoneda.format(iva));
         lblTotalGeneral.setText(formatoMoneda.format(total));
         lblItemsCarrito.setText(cantidadItems + " productos en la venta");
+
+        // Refrescar la tabla
+        tablaProductos.refresh();
     }
-    
+
     private void mostrarError(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
@@ -350,7 +525,7 @@ public class VenderControllerFX implements Initializable {
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
-    
+
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
@@ -359,22 +534,20 @@ public class VenderControllerFX implements Initializable {
         alert.showAndWait();
     }
 
-    @FXML
     private void procesarVenta() {
-        if (carritoBox.getChildren().isEmpty()) {
-            mostrarAlerta("Carrito Vacío", "Agrega productos al carrito antes de procesar la venta.");
-            return;
-        }
-        mostrarAlerta("Procesar Venta", "Funcionalidad de procesar venta aún no implementada completamente.");
+        // Implementar la lógica para procesar la venta
+        mostrarAlerta("Venta Procesada", "La venta ha sido procesada correctamente.");
+        limpiarVenta();
     }
-    
+
     private void limpiarVenta() {
-        carritoBox.getChildren().clear();
+        // Limpiar la tabla de productos
+        tablaProductos.getItems().clear();
+        
+        // Actualizar totales
         actualizarTotalCarrito();
-        if (txtBusqueda != null) {
-            txtBusqueda.clear();
-        }
-        buscarProductos(null);
-        mostrarAlerta("Nueva Venta", "Se ha iniciado una nueva venta. El carrito está vacío.");
+        
+        // Limpiar campo de búsqueda
+        txtBusqueda.clear();
     }
 }

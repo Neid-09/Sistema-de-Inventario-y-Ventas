@@ -469,230 +469,177 @@
 .productos-table {
     -fx-background-color: white;
     -fx-border-color: #DEE2E6;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0.1, 0, 1);
+    -fx-border-radius: 4px;
 }
 
-.productos-table .column-header {
+/* Hacer que las columnas de la tabla sean responsivas */
+.productos-table .table-column {
+    -fx-alignment: CENTER-LEFT;
+}
+
+.productos-table .table-row-cell:selected {
+    -fx-background-color: #E1F5FE;
+}
+
+.productos-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #000000;
+}
+
+/* Estilos para el control de cantidad */
+.cantidad-control {
+    -fx-spacing: 5px;
+    -fx-alignment: CENTER;
     -fx-background-color: #F8F9FA;
-    -fx-border-color: #DEE2E6;
-    -fx-border-width: 0 0 1px 0;
-    -fx-padding: 10px 15px;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px;
 }
 
-.productos-table .column-header-background {
-    -fx-background-color: #F8F9FA;
+/* Control de cantidad en las sugerencias */
+.cantidad-control-sugerencia {
+    -fx-spacing: 5px;
+    -fx-alignment: CENTER;
+    -fx-background-color: #F0F4F8;
+    -fx-border-color: #D0D8E0;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
-.productos-table .column-header .label {
-    -fx-font-weight: bold;
-    -fx-text-fill: #495057;
-}
-
-.productos-table .table-row-cell {
-    -fx-border-color: #DEE2E6;
-    -fx-border-width: 0 0 1px 0;
-}
-
-.productos-table .table-row-cell:odd {
-    -fx-background-color: #F8F9FA;
-}
-
-.productos-table .table-row-cell:even {
-    -fx-background-color: white;
-}
-
-.productos-table .table-row-cell:hover {
-    -fx-background-color: #E9ECEF;
-}
-
-/* Estilos para el panel lateral */
-.side-panel {
+.sugerencias-popup {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #DEE2E6;
-    -fx-border-width: 0 0 0 1px;
-    -fx-padding: 15px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+    -fx-max-width: 600px;
+    -fx-min-width: 500px;
+    -fx-background-insets: 0;
 }
 
-/* Estilos para el panel de totales */
-.totales-box {
-    -fx-padding: 15px;
-    -fx-spacing: 15px;
-}
-
-.total-item {
-    -fx-alignment: CENTER_LEFT;
-    -fx-spacing: 10px;
-}
-
-.total-label {
-    -fx-font-size: 14px;
-    -fx-text-fill: #495057;
-}
-
-.total-value {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #495057;
-    -fx-alignment: CENTER_RIGHT;
-}
-
-.total-final {
-    -fx-padding: 10px 0 0 0;
-    -fx-border-width: 1px 0 0 0;
+/* Tarjeta de producto sugerido */
+.producto-sugerido {
+    -fx-background-color: #FFFFFF;
     -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px 15px;
+    -fx-spacing: 10px;
+    -fx-border-width: 1px;
+    -fx-background-insets: 0;
+    -fx-margin: 0 0 2px 0;
 }
 
-.total-label-final {
-    -fx-font-size: 16px;
+.producto-sugerido:hover {
+    -fx-background-color: #F8F9FA;
+}
+
+/* Información del producto */
+.producto-info {
+    -fx-spacing: 2px;
+}
+
+.producto-nombre {
     -fx-font-weight: bold;
+    -fx-font-size: 14px;
     -fx-text-fill: #212529;
 }
 
-.total-value-final {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0D6EFD;
-    -fx-alignment: CENTER_RIGHT;
-    -fx-border-color: #DEE2E6;
-}
-
-/* Estilos para los botones de acciones */
-.button-procesar-venta {
-    -fx-background-color: #28A745;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-padding: 12px 15px;
-    -fx-background-radius: 4px;
-    -fx-font-size: 14px;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
-}
-
-.button-procesar-venta:hover {
-    -fx-background-color: #218838;
-}
-
-.button-cancelar-venta {
-    -fx-background-color: #F8F9FA;
+.producto-codigo {
+    -fx-font-size: 11px;
     -fx-text-fill: #6C757D;
+    -fx-padding: 1px 0;
+}
+
+.producto-existencias {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6C757D;
+}
+
+/* Control de cantidad */
+.cantidad-control-sugerencia {
+    -fx-spacing: 2px;
+    -fx-alignment: center;
+    -fx-padding: 0;
+}
+
+.cantidad-control-sugerencia .button {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #212529;
     -fx-font-weight: bold;
-    -fx-padding: 12px 15px;
     -fx-background-radius: 4px;
     -fx-border-color: #DEE2E6;
     -fx-border-radius: 4px;
-    -fx-font-size: 14px;
     -fx-cursor: hand;
-}
-
-.button-cancelar-venta:hover {
-    -fx-background-color: #E9ECEF;
-}
-
-/* Estilos para la barra de estado */
-.status-bar {
-    -fx-background-color: #F8F9FA;
-    -fx-padding: 8px 20px;
-    -fx-border-width: 1px 0 0 0;
-    -fx-border-color: #DEE2E6;
-}
-
-.status-text {
     -fx-font-size: 12px;
-    -fx-text-fill: #6C757D;
+    -fx-padding: 0;
 }
 
-.button-procesar-venta-modern {
-    -fx-background-color: #28A745; /* Verde para el botón de procesar */
-    -fx-text-fill: white;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-padding: 12px 15px;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-cursor: hand;
-    -fx-margin-top: 10px; /* Espacio arriba del botón */
+.cantidad-control-sugerencia .button:hover {
+    -fx-background-color: #E0E0E0;
 }
 
-.button-procesar-venta-modern:hover {
-    -fx-background-color: #218838; /* Verde más oscuro al pasar el mouse */
-}
-
-/* Estilos que ya estaban y podrían seguir siendo útiles o necesitar ajustes menores */
-.top-bar {
-    -fx-padding: 10px 15px; /* Ajustado para el nuevo diseño si se reutiliza */
-    -fx-spacing: 10px;
+.cantidad-control-sugerencia .text-field {
+    -fx-alignment: center;
+    -fx-max-width: 40px;
+    -fx-min-width: 40px;
+    -fx-pref-width: 40px;
     -fx-background-color: #FFFFFF;
-    -fx-border-width: 0 0 1px 0;
-    -fx-border-color: #E0E0E0;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 2px;
 }
 
-.top-bar .text-field-busqueda { /* Si se mantiene el original en algún lado */
+/* Botón de agregar */
+.btn-agregar-sugerencia {
+    -fx-background-color: #212529;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 80px;
+    -fx-min-height: 28px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 10px;
+}
+
+.btn-agregar-sugerencia:hover {
+    -fx-background-color: #343A40;
+}
+
+.no-resultados-label {
     -fx-font-size: 14px;
-    -fx-prompt-text-fill: #A0A0A0;
-    -fx-pref-width: 300px; /* Considerar HBox.hgrow="ALWAYS" para el nuevo */
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
+    -fx-text-fill: #6C757D;
+    -fx-padding: 15px;
+    -fx-alignment: center;
+    -fx-font-style: italic;
+}
+/* Estilos para el layout horizontal en las sugerencias */
+.producto-sugerido-layout {
+    -fx-alignment: center;
+    -fx-spacing: 15;
+    -fx-fill-height: true;
 }
 
-.top-bar .button {
-    -fx-font-size: 13px;
-    -fx-background-color: #E9ECEF;
-    -fx-text-fill: #343A40;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-padding: 8px 15px;
+.producto-info-container {
+    -fx-spacing: 2;
+    -fx-alignment: center-left;
+    -fx-max-width: 400px;
+    -fx-min-width: 300px;
+    -fx-pref-width: 350px;
+    -fx-hgrow: always;
 }
 
-.top-bar .button:hover {
-    -fx-background-color: #DEE2E6;
+.producto-actions-container {
+    -fx-spacing: 10;
+    -fx-alignment: center-right;
+    -fx-min-width: 150px;
 }
 
-.split-pane-content { /* Ya no se usa SplitPane directamente en el centro */
-    -fx-padding: 10px;
-    -fx-background-color: transparent;
-}
-
-.scroll-pane {
-    -fx-background-color: transparent;
-}
-
-/* .productos-box ya no se usa, ahora es .productos-container-modern */
-
-/* .carrito-header y .carrito-header .label se reemplazan por .carrito-header-modern y sus hijos */
-
-/* .cantidad-spinner y otros elementos internos del carrito-item se mantienen si la estructura interna del item no cambió */
-
-/* Zona inferior: Total y botones de acción (ya no existe esta barra inferior) */
-.bottom-bar { /* Eliminado del FXML, pero se deja por si hay referencias */
-    /* -fx-padding: 15px 30px; ... */
-}
-
-/* ... (Resto de estilos de dialogs, botones específicos por ID, etc., se mantienen sin cambios) ... */
-
-/* Estilos para el diálogo de procesar venta (manteniendo los existentes) */
-.dialog-pane-procesar-venta .label {}
-
-.dialog-pane-procesar-venta .text-field,
-.dialog-pane-procesar-venta .combo-box {}
-
-.dialog-pane-procesar-venta .radio-button {}
-
-.dialog-pane-procesar-venta .grid-pane {}
-
-.dialog-pane-procesar-venta .button-bar .button {}
-
-/* Clase para el VBox que contiene los items del carrito, para el scroll */
-.carrito-items-container {}
-
-/* Clase para el VBox que contiene los items de producto, para el scroll */
-.productos-items-container {}
-
-/* Estilos para los botones del DialogPane en ProcesarVentaDialog.fxml */
-.dialog-pane .button-bar .button {}
-
-/* Estilo para el botón Confirmar y Finalizar Venta (verde) */
 .dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta") {}
 
 .dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta"):hover {}
