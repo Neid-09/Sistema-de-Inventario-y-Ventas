@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="709.0" prefWidth="1246.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <VBox BorderPane.alignment="CENTER">
+            <children>
+                <HBox alignment="CENTER" prefHeight="60.0" prefWidth="200.0" style="-fx-background-color: #3498db;">
+                    <children>
+                        <Label text="REPORTE DE VENTAS" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="24.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0" spacing="10.0" style="-fx-padding: 10px;">
+                    <children>
+                  <Label text="Buscar: ">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField prefHeight="26.0" prefWidth="202.0" />
+                        <Label text="Desde:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <DatePicker fx:id="fechaInicio" prefWidth="150.0" />
+                        <Label text="Hasta:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <DatePicker fx:id="fechaFin" prefWidth="150.0" />
+                        <Label text="Categoría:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="comboCategoria" prefWidth="150.0" promptText="Todas" />
+                        <Label text="Vendedor:">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="comboVendedor" prefWidth="150.0" promptText="Todos" />
+                        <Button fx:id="btnFiltrar" mnemonicParsing="false" style="-fx-background-color: #2ecc71;" text="Filtrar" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
+                <Separator prefWidth="200.0" />
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
+                <Tab text="Datos de Ventas">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="576.0" prefWidth="1084.0">
+                            <children>
+                                <TableView fx:id="tablaVentas" layoutX="14.0" layoutY="14.0" prefHeight="500.0" prefWidth="972.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <columns>
+                                        <TableColumn fx:id="colFecha" prefWidth="100.0" text="Fecha" />
+                                        <TableColumn fx:id="colFactura" prefWidth="100.0" text="# Factura" />
+                                        <TableColumn fx:id="colCliente" prefWidth="150.0" text="Cliente" />
+                                        <TableColumn fx:id="colVendedor" prefWidth="150.0" text="Vendedor" />
+                                        <TableColumn fx:id="colProducto" prefWidth="150.0" text="Producto" />
+                                        <TableColumn fx:id="colCategoria" prefWidth="100.0" text="Categoría" />
+                                        <TableColumn fx:id="colCantidad" prefWidth="75.0" text="Cantidad" />
+                                        <TableColumn fx:id="colPrecio" prefWidth="100.0" text="Precio Unit." />
+                                        <TableColumn fx:id="colTotal" prefWidth="100.0" text="Total" />
+                                    </columns>
+                                </TableView>
+                                <HBox alignment="CENTER_RIGHT" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                    <children>
+                              <Label prefHeight="20.0" prefWidth="81.0" text="OTRO">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtTotalVentas2" editable="false" prefHeight="30.0" prefWidth="114.0" style="-fx-background-color: #f0f0f0;">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </TextField>
+                              <Label prefHeight="20.0" prefWidth="81.0" text="TARJETA">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtTotalVentas1111" editable="false" prefHeight="30.0" prefWidth="130.0" style="-fx-background-color: #f0f0f0;">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </TextField>
+                              <Label prefHeight="20.0" prefWidth="70.0" text="EFECTIVO">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtTotalVentas111" editable="false" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #f0f0f0;">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </TextField>
+                              <Label prefHeight="21.0" prefWidth="82.0" text="GANANCIA">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtTotalVentas11" editable="false" prefHeight="30.0" prefWidth="123.0" style="-fx-background-color: #f0f0f0;">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </TextField>
+                              <Label prefHeight="20.0" prefWidth="77.0" text="TOTAL IVA">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtTotalVentas1" editable="false" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #f0f0f0;">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </TextField>
+                                        <Label text="TOTAL VENTA(BASE+IVA)">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField fx:id="txtTotalVentas" editable="false" prefHeight="30.0" prefWidth="114.0" style="-fx-background-color: #f0f0f0;">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </TextField>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Gráficos">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <HBox layoutX="14.0" layoutY="14.0" prefHeight="500.0" prefWidth="972.0" spacing="20.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <VBox prefHeight="500.0" prefWidth="476.0">
+                                            <children>
+                                                <Label text="Ventas por Categoría">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <PieChart fx:id="graficoPie" prefHeight="500.0" prefWidth="476.0" />
+                                            </children>
+                                        </VBox>
+                                        <VBox prefHeight="500.0" prefWidth="476.0">
+                                            <children>
+                                                <Label text="Ventas por Mes">
+                                                    <font>
+                                                        <Font name="System Bold" size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <BarChart fx:id="graficoBar" prefHeight="500.0" prefWidth="476.0">
+                                                    <xAxis>
+                                                        <CategoryAxis side="BOTTOM" />
+                                                    </xAxis>
+                                                    <yAxis>
+                                                        <NumberAxis side="LEFT" />
+                                                    </yAxis>
+                                                </BarChart>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                    <children>
+                                        <Button fx:id="btnExportarGraficos" mnemonicParsing="false" style="-fx-background-color: #3498db;" text="Exportar Gráficos" textFill="WHITE">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="Resumen">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="14.0" layoutY="14.0" prefHeight="500.0" prefWidth="972.0" spacing="20.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                                    <children>
+                                        <HBox prefHeight="100.0" prefWidth="972.0" spacing="20.0">
+                                            <children>
+                                                <AnchorPane prefHeight="92.0" prefWidth="154.0" style="-fx-background-color: #3498db; -fx-background-radius: 5;">
+                                                    <children>
+                                                        <Label layoutX="14.0" layoutY="14.0" text="Total Ventas" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTotalVentas" layoutX="14.0" layoutY="48.0" text="0.00" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                </AnchorPane>
+                                                <AnchorPane prefHeight="92.0" prefWidth="167.0" style="-fx-background-color: #2ecc22; -fx-background-radius: 5;">
+                                                    <children>
+                                                        <Label layoutX="14.0" layoutY="14.0" text="Total Productos" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTotalProductos" layoutX="14.0" layoutY="48.0" text="0" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                </AnchorPane>
+                                                <AnchorPane prefHeight="92.0" prefWidth="178.0" style="-fx-background-color: #e74c3c; -fx-background-radius: 5;">
+                                                    <children>
+                                                        <Label layoutX="14.0" layoutY="14.0" text="Total Tarjeta" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblTotalClientes" layoutX="14.0" layoutY="48.0" text="0" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                </AnchorPane>
+                                                <AnchorPane prefHeight="92.0" prefWidth="164.0" style="-fx-background-color: #f39c12; -fx-background-radius: 5;">
+                                                    <children>
+                                                        <Label layoutX="14.0" layoutY="14.0" text="Total Efectivo" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="18.0" />
+                                                            </font>
+                                                        </Label>
+                                                        <Label fx:id="lblPromedioVenta" layoutX="14.0" layoutY="48.0" text="0.00" textFill="WHITE">
+                                                            <font>
+                                                                <Font name="System Bold" size="24.0" />
+                                                            </font>
+                                                        </Label>
+                                                    </children>
+                                                </AnchorPane>
+                                    <AnchorPane prefHeight="92.0" prefWidth="220.0" style="-fx-background-color: #10B981; -fx-background-radius: 5;">
+                                       <children>
+                                          <Label layoutX="14.0" layoutY="14.0" text="Total Transferencias" textFill="WHITE">
+                                             <font>
+                                                <Font name="System Bold" size="18.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="lblPromedioVenta1" layoutX="14.0" layoutY="48.0" text="0.00" textFill="WHITE">
+                                             <font>
+                                                <Font name="System Bold" size="24.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </AnchorPane>
+                                            </children>
+                                        </HBox>
+                                        <TableView fx:id="tablaResumen" prefHeight="380.0" prefWidth="972.0">
+                                            <columns>
+                                                <TableColumn fx:id="colResumenCategoria" prefWidth="200.0" text="Categoría" />
+                                                <TableColumn fx:id="colResumenCantidad" prefWidth="150.0" text="Cantidad Vendida" />
+                                                <TableColumn fx:id="colResumenTotal" prefWidth="150.0" text="Total Ventas" />
+                                                <TableColumn fx:id="colResumenPorcentaje" prefWidth="150.0" text="del Total" />
+                                                <TableColumn fx:id="colResumenPromedio" prefWidth="150.0" text="Promedio" />
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+                                <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+                                    <children>
+                                        <Button fx:id="btnExportarResumen" mnemonicParsing="false" style="-fx-background-color: #3498db;" text="Exportar Resumen" textFill="WHITE">
+                                            <font>
+                                                <Font name="System Bold" size="12.0" />
+                                            </font>
+                                        </Button>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>
