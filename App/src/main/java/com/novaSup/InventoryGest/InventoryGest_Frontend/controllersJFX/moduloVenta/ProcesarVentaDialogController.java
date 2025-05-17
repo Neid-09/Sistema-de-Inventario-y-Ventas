@@ -3,6 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVe
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaCreateRequestFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
 import javafx.fxml.FXML;
@@ -86,7 +87,7 @@ public class ProcesarVentaDialogController {
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
 
     // Instancias de servicios (descomentar cuando estén disponibles)
-    //private IClienteService clienteService;
+    private IClienteService clienteService;
     private IVentaSerivice ventaService;
     // private IFacturaService facturaService;
 
@@ -144,7 +145,8 @@ public class ProcesarVentaDialogController {
      * Método para la inyección de dependencias (servicios).
      * Este método se llamará desde VenderControllerFX después de crear una instancia de este controlador.
      */
-    public void setServices(IVentaSerivice ventaService) {
+    public void setServices(IVentaSerivice ventaService, IClienteService clienteService) {
+        this.clienteService = clienteService;
         this.ventaService = ventaService;
         // Aquí podrías inicializar listeners o datos que dependan de los servicios
     }
