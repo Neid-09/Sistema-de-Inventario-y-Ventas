@@ -115,7 +115,7 @@
                         </VBox>
 
                         <!-- Datos del Cliente para Factura -->
-                        <VBox fx:id="panelDatosCliente" spacing="15" style="-fx-border-color: #f0f0f0; -fx-border-width: 1; -fx-border-radius: 4; -fx-padding: 15;">
+                        <VBox fx:id="panelDatosCliente" spacing="15" style="-fx-border-color: #f0f0f0; -fx-border-width: 1; -fx-border-radius: 4; -fx-padding: 15; -fx-max-height: 350px;">
                             <HBox alignment="CENTER_LEFT" spacing="5">
                                 <ImageView fitHeight="16" fitWidth="16">
                                     <Image url="@../../img/person.png" />
@@ -123,20 +123,26 @@
                                 <Label style="-fx-font-size: 12;" text="Datos del Cliente para Factura:" />
                             </HBox>
                     
-                            <!-- Buscar o Nuevo Cliente - Modificado para ocupar todo el ancho -->
-                            <TabPane maxWidth="Infinity" styleClass="client-tabs" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
+                            <!-- Buscar o Nuevo Cliente con altura fija y scroll -->
+                            <TabPane maxWidth="Infinity" styleClass="client-tabs" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
                                 <Tab text="Buscar Cliente">
                                     <VBox spacing="10" style="-fx-padding: 10;">
-                                        <!-- Eliminado el HBox que contenía el botón de búsqueda -->
                                         <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por nombre o ID" HBox.hgrow="ALWAYS" />
+                                        <!-- Área para mostrar datos del cliente seleccionado -->
+                                        <VBox fx:id="clienteSeleccionadoInfo" spacing="5" style="-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 0 0; -fx-border-radius: 3;">
+                                            <Label text="Cliente seleccionado:" style="-fx-font-weight: bold;" />
+                                            <!-- Los datos del cliente se mostrarán aquí dinámicamente -->
+                                        </VBox>
                                     </VBox>
                                 </Tab>
                                 <Tab text="Nuevo Cliente">
-                                    <content>
-                                        <StackPane alignment="TOP_CENTER">
-                                            <fx:include source="../ModuloClientes/AddEditClienteDialog.fxml" />
-                                        </StackPane>
-                                    </content>
+                                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                        <content>
+                                            <StackPane alignment="TOP_CENTER">
+                                                <fx:include source="../ModuloClientes/AddEditClienteDialog.fxml" />
+                                            </StackPane>
+                                        </content>
+                                    </ScrollPane>
                                 </Tab>
                             </TabPane>
                         </VBox>

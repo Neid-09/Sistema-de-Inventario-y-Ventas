@@ -77,7 +77,7 @@
       </GridPane>
       <HBox styleClass="action-buttons-hbox">
          <children>
-            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleGuardar" styleClass="button-primary" text="Guardar Cambios" />
+            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleGuardar" styleClass="button-primary" text="Guardar Cliente" />
             <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancelar" styleClass="button-secondary-dialog" text="Cancelar" />
          </children>
          <VBox.margin>

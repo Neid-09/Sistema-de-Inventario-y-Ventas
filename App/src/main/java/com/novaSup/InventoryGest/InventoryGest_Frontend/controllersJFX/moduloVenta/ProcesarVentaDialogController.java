@@ -21,6 +21,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -47,6 +48,9 @@ public class ProcesarVentaDialogController {
 
     @FXML
     private VBox panelDatosCliente;
+    
+    @FXML
+    private VBox clienteSeleccionadoInfo;
 
     @FXML
     private RadioButton rbEfectivo;
@@ -103,6 +107,10 @@ public class ProcesarVentaDialogController {
     
     @FXML
     public void initialize() {
+        // Inicializar el popup para sugerencias de clientes
+        clienteSugerenciaPopup = new Popup();
+        listViewClientes = new ListView<>(clientesSugeridos);
+        
         // Configurar las pestañas de cliente
         try {
             // Obtener la referencia a las pestañas
@@ -147,6 +155,17 @@ public class ProcesarVentaDialogController {
             boolean requiereFactura = newValue == rbFacturaSi;
             panelDatosCliente.setVisible(requiereFactura);
             panelDatosCliente.setManaged(requiereFactura);
+            
+            // Ajustar la altura del diálogo según si se muestra o no el panel de datos del cliente
+            Stage stage = (Stage) panelDatosCliente.getScene().getWindow();
+            if (stage != null) {
+                if (requiereFactura) {
+                    // Si se requiere factura, asegurarse de que el diálogo tenga suficiente altura
+                    if (stage.getHeight() < 650) {
+                        stage.setHeight(650);
+                    }
+                }
+            }
         });
 
         txtTotalRecibido.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -169,6 +188,21 @@ public class ProcesarVentaDialogController {
         boolean requiereFacturaInicial = rbFacturaSi.isSelected();
         panelDatosCliente.setVisible(requiereFacturaInicial);
         panelDatosCliente.setManaged(requiereFacturaInicial);
+        
+        // Inicializar el contenedor de información del cliente seleccionado
+        if (clienteSeleccionadoInfo != null) {
+            // Limpiar el contenedor
+            clienteSeleccionadoInfo.getChildren().clear();
+            
+            // Agregar solo la etiqueta de título
+            Label titleLabel = new Label("Cliente seleccionado:");
+            titleLabel.setStyle("-fx-font-weight: bold;");
+            
+            Label infoLabel = new Label("No hay cliente seleccionado");
+            infoLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #888888;");
+            
+            clienteSeleccionadoInfo.getChildren().addAll(titleLabel, infoLabel);
+        }
 
         txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
 
@@ -210,42 +244,38 @@ public class ProcesarVentaDialogController {
      */
     private void inicializarControladorCliente() {
         try {
-            // Si ya tenemos una referencia al controlador, solo necesitamos inyectar el servicio
-            if (clienteDialogController != null) {
-                // Crear un nuevo cliente para evitar NullPointerException
-                ClienteFX nuevoCliente = new ClienteFX();
-                nuevoCliente.setActivo(true);
-                nuevoCliente.setRequiereFacturaDefault(false);
-                nuevoCliente.setLimiteCredito(BigDecimal.ZERO);
-                
-                // Configurar el controlador con el nuevo cliente
-                clienteDialogController.setClienteParaOperacion(nuevoCliente, clienteService);
-                return;
-            }
-            
-            // Si no tenemos referencia, intentamos obtenerla
+            // Buscar el contenedor del formulario de cliente
             TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
             if (tabPane != null && tabPane.getTabs().size() > 1) {
                 Tab nuevoClienteTab = tabPane.getTabs().get(1); // Tab "Nuevo Cliente"
-                if (nuevoClienteTab != null && nuevoClienteTab.getContent() instanceof StackPane) {
-                    StackPane clienteDialogContainer = (StackPane) nuevoClienteTab.getContent();
-                    
-                    // Obtener el controlador directamente del nodo incluido
-                    if (clienteDialogContainer.getChildren().size() > 0) {
+                if (nuevoClienteTab != null) {
+                    // Obtener el ScrollPane que contiene el StackPane
+                    ScrollPane scrollPane = (ScrollPane) nuevoClienteTab.getContent();
+                    if (scrollPane != null && scrollPane.getContent() instanceof StackPane) {
+                        StackPane clienteDialogContainer = (StackPane) scrollPane.getContent();
+                        
+                        // Obtener el controlador a través del FXML Loader
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloClientes/AddEditClienteDialog.fxml"));
                         try {
-                            // Cargar manualmente el FXML para obtener el controlador
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloClientes/AddEditClienteDialog.fxml"));
+                            // Cargar el FXML
                             Parent root = loader.load();
+                            
+                            // Obtener el controlador
                             clienteDialogController = loader.getController();
                             
-                            // Reemplazar el contenido existente con el recién cargado
+                            // Reemplazar el contenido existente con el nuevo
                             clienteDialogContainer.getChildren().clear();
                             clienteDialogContainer.getChildren().add(root);
                             
-                            // Configurar el controlador
-                            if (clienteDialogController != null) {
-                                // Crear un nuevo cliente y configurar el servicio
+                            // Inicializar el controlador con un nuevo cliente
+                            if (clienteDialogController != null && clienteService != null) {
+                                // Crear un nuevo cliente para evitar NullPointerException
                                 ClienteFX nuevoCliente = new ClienteFX();
+                                nuevoCliente.setNombre("");
+                                nuevoCliente.setDocumentoIdentidad("");
+                                nuevoCliente.setCorreo("");
+                                nuevoCliente.setCelular("");
+                                nuevoCliente.setDireccion("");
                                 nuevoCliente.setActivo(true);
                                 nuevoCliente.setRequiereFacturaDefault(false);
                                 nuevoCliente.setLimiteCredito(BigDecimal.ZERO);
@@ -253,38 +283,32 @@ public class ProcesarVentaDialogController {
                                 // Configurar el controlador con el nuevo cliente
                                 clienteDialogController.setClienteParaOperacion(nuevoCliente, clienteService);
                                 
-                                // Configurar el stage del diálogo
-                                // Obtener la ventana actual desde cualquier componente visible
+                                // Configurar el stage del diálogo si es necesario
                                 if (btnConfirmar.getScene() != null && btnConfirmar.getScene().getWindow() != null) {
-                                    // Intentar obtener el diálogo desde userData de la ventana
-                                    Object userData = btnConfirmar.getScene().getWindow().getUserData();
-                                    if (userData instanceof Dialog) {
-                                        Dialog<?> dialog = (Dialog<?>) userData;
-                                        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-                                        clienteDialogController.setDialogStage(stage);
-                                    } else {
-                                        // Si no está en userData, usar la ventana actual como stage
-                                        Stage stage = (Stage) btnConfirmar.getScene().getWindow();
-                                        clienteDialogController.setDialogStage(stage);
-                                    }
+                                    clienteDialogController.setDialogStage((Stage) btnConfirmar.getScene().getWindow());
                                 }
                                 
                                 System.out.println("Controlador de cliente inicializado correctamente");
+                            } else {
+                                System.err.println("Error: clienteDialogController o clienteService es null");
+                                if (clienteDialogController == null) System.err.println("clienteDialogController es null");
+                                if (clienteService == null) System.err.println("clienteService es null");
                             }
-                        } catch (java.io.IOException e) {
-                            System.err.println("Error al cargar el FXML del diálogo de cliente: " + e.getMessage());
+                        } catch (Exception e) {
+                            System.err.println("Error al cargar el FXML del cliente: " + e.getMessage());
                             e.printStackTrace();
                         }
+                    } else {
+                        System.err.println("Error: No se encontró el StackPane dentro del ScrollPane");
                     }
-                    
-                    // Si finalmente no tenemos el controlador, registrar el error
-                    if (clienteDialogController == null) {
-                        System.err.println("No se pudo obtener el controlador del diálogo de cliente");
-                    }
+                } else {
+                    System.err.println("Error: No se encontró la pestaña 'Nuevo Cliente'");
                 }
+            } else {
+                System.err.println("Error: No se encontró el TabPane o no tiene suficientes pestañas");
             }
         } catch (Exception e) {
-            System.err.println("Error al inicializar el controlador del diálogo de cliente: " + e.getMessage());
+            System.err.println("Error general al inicializar el controlador de cliente: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -560,8 +584,41 @@ public class ProcesarVentaDialogController {
         // Activar la pestaña "Requiere Factura" para mostrar los datos del cliente
         rbFacturaSi.setSelected(true);
         
-        // Buscar los campos en el panel de datos del cliente
-        // Nota: Estos campos podrían no estar disponibles directamente, por lo que usamos lookup
+        // Actualizar la información en el contenedor de cliente seleccionado
+        if (clienteSeleccionadoInfo != null) {
+            // Limpiar el contenedor antes de agregar nueva información
+            clienteSeleccionadoInfo.getChildren().clear();
+            
+            // Agregar los datos del cliente en formato legible
+            Label nombreLabel = new Label("Nombre: " + cliente.getNombre());
+            nombreLabel.setStyle("-fx-font-weight: normal;");
+            
+            Label documentoLabel = new Label("Documento: " + cliente.getDocumentoIdentidad());
+            documentoLabel.setStyle("-fx-font-weight: normal;");
+            
+            Label correoLabel = new Label("Correo: " + (cliente.getCorreo() != null ? cliente.getCorreo() : "No disponible"));
+            correoLabel.setStyle("-fx-font-weight: normal;");
+            
+            Label telefonoLabel = new Label("Teléfono: " + (cliente.getCelular() != null ? cliente.getCelular() : "No disponible"));
+            telefonoLabel.setStyle("-fx-font-weight: normal;");
+            
+            Label direccionLabel = new Label("Dirección: " + (cliente.getDireccion() != null ? cliente.getDireccion() : "No disponible"));
+            direccionLabel.setStyle("-fx-font-weight: normal;");
+            
+            // Agregar etiqueta de cliente seleccionado
+            Label titleLabel = new Label("Cliente seleccionado:");
+            titleLabel.setStyle("-fx-font-weight: bold;");
+            
+            // Agregar todos los elementos al contenedor
+            clienteSeleccionadoInfo.getChildren().addAll(
+                titleLabel, nombreLabel, documentoLabel, correoLabel, telefonoLabel, direccionLabel
+            );
+            
+            // Establecer estilo para que se vea como una tarjeta
+            clienteSeleccionadoInfo.setStyle("-fx-padding: 10; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-color: #f9f9f9;");
+        }
+        
+        // Buscar los campos en el panel de datos del cliente (para compatibilidad con código existente)
         try {
             // Buscar los campos de texto dentro del panel de datos del cliente
             TextField nombreField = (TextField) panelDatosCliente.lookup("#txtNombre");
@@ -576,26 +633,38 @@ public class ProcesarVentaDialogController {
             if (correoField != null) correoField.setText(cliente.getCorreo());
             if (telefonoField != null) telefonoField.setText(cliente.getCelular());
             if (direccionField != null) direccionField.setText(cliente.getDireccion());
-            
-            // Si no se encontraron los campos, almacenar los datos en variables temporales
-            // para usar al confirmar la venta
-            if (nombreField == null) {
-                // Mostrar un mensaje informativo
-                System.out.println("No se encontraron campos para mostrar los datos del cliente");
-                System.out.println("Se usará el cliente seleccionado para la venta: " + cliente.getNombre());
-            }
         } catch (Exception e) {
-            System.err.println("Error al intentar mostrar datos del cliente: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error al intentar mostrar datos del cliente en campos antiguos: " + e.getMessage());
+            // No es crítico si falla, ya que tenemos la nueva visualización
         }
         
-        // Mostrar un mensaje de éxito
-        Alert info = new Alert(Alert.AlertType.INFORMATION);
-        info.setTitle("Cliente encontrado");
-        info.setHeaderText(null);
-        info.setContentText("Se ha seleccionado el cliente: " + cliente.getNombre() + 
-                          "\nSe utilizará este cliente para la venta.");
-        info.showAndWait();
+        // Mostrar un mensaje de éxito más discreto (toast o notificación)
+        javafx.application.Platform.runLater(() -> {
+            // Crear un popup tipo toast para mostrar confirmación
+            Label toastLabel = new Label("Cliente seleccionado: " + cliente.getNombre());
+            toastLabel.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-padding: 10 15; -fx-background-radius: 5;");
+            
+            Popup toast = new Popup();
+            toast.getContent().add(toastLabel);
+            toast.setAutoHide(true);
+            toast.setHideOnEscape(true);
+            
+            // Mostrar el toast en la parte inferior de la ventana
+            Window window = panelDatosCliente.getScene().getWindow();
+            toast.show(window, 
+                    window.getX() + (window.getWidth() - toastLabel.getWidth()) / 2, 
+                    window.getY() + window.getHeight() - 100);
+            
+            // Ocultar después de 2 segundos
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    javafx.application.Platform.runLater(() -> toast.hide());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        });
         
         // Cerrar el popup de sugerencias si está abierto
         if (clienteSugerenciaPopup != null && clienteSugerenciaPopup.isShowing()) {
