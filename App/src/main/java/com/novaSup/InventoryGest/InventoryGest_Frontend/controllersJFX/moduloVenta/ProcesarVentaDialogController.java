@@ -6,14 +6,18 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.AddEditClienteDialogController;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
@@ -94,8 +98,41 @@ public class ProcesarVentaDialogController {
     private ListView<ClienteFX> listViewClientes;
     private ObservableList<ClienteFX> clientesSugeridos = FXCollections.observableArrayList();
     
+    // Controlador para el diálogo de añadir/editar cliente
+    private AddEditClienteDialogController clienteDialogController;
+    
     @FXML
     public void initialize() {
+        // Configurar las pestañas de cliente
+        try {
+            // Obtener la referencia a las pestañas
+            TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
+            if (tabPane != null && tabPane.getTabs().size() > 1) {
+                // Configurar la pestaña de nuevo cliente para guardar el cliente cuando se cambia de pestaña
+                tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+                    // Si estamos cambiando desde la pestaña de nuevo cliente a la de buscar cliente
+                    if (oldTab != null && oldTab.getText().equals("Nuevo Cliente") && 
+                        newTab != null && newTab.getText().equals("Buscar Cliente")) {
+                        // Verificar si se ha creado un cliente nuevo
+                        if (clienteDialogController != null && clienteDialogController.isGuardadoExitosamente()) {
+                            // Obtener el cliente recién creado
+                            ClienteFX nuevoCliente = clienteDialogController.getClienteOperado();
+                            if (nuevoCliente != null) {
+                                // Establecer el cliente recién creado como el seleccionado
+                                clienteSeleccionado = nuevoCliente;
+                                // Mostrar los datos del cliente
+                                mostrarDatosCliente(nuevoCliente);
+                                // Limpiar el campo de búsqueda
+                                txtBuscarCliente.clear();
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Error al configurar las pestañas de cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
         metodoPagoToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
             boolean esEfectivo = newValue == rbEfectivo;
             vueltoBox.setVisible(esEfectivo);
@@ -161,8 +198,95 @@ public class ProcesarVentaDialogController {
         this.clienteService = clienteService;
         // Inicializar otros servicios cuando estén disponibles
         
+        // Inicializar el controlador de cliente si está disponible
+        inicializarControladorCliente();
+        
         // Ahora que tenemos los servicios inyectados, configuramos la búsqueda de cliente
         configurarBusquedaCliente();
+    }
+    
+    /**
+     * Inicializa el controlador de cliente si está disponible en el FXML
+     */
+    private void inicializarControladorCliente() {
+        try {
+            // Si ya tenemos una referencia al controlador, solo necesitamos inyectar el servicio
+            if (clienteDialogController != null) {
+                // Crear un nuevo cliente para evitar NullPointerException
+                ClienteFX nuevoCliente = new ClienteFX();
+                nuevoCliente.setActivo(true);
+                nuevoCliente.setRequiereFacturaDefault(false);
+                nuevoCliente.setLimiteCredito(BigDecimal.ZERO);
+                
+                // Configurar el controlador con el nuevo cliente
+                clienteDialogController.setClienteParaOperacion(nuevoCliente, clienteService);
+                return;
+            }
+            
+            // Si no tenemos referencia, intentamos obtenerla
+            TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
+            if (tabPane != null && tabPane.getTabs().size() > 1) {
+                Tab nuevoClienteTab = tabPane.getTabs().get(1); // Tab "Nuevo Cliente"
+                if (nuevoClienteTab != null && nuevoClienteTab.getContent() instanceof StackPane) {
+                    StackPane clienteDialogContainer = (StackPane) nuevoClienteTab.getContent();
+                    
+                    // Obtener el controlador directamente del nodo incluido
+                    if (clienteDialogContainer.getChildren().size() > 0) {
+                        try {
+                            // Cargar manualmente el FXML para obtener el controlador
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloClientes/AddEditClienteDialog.fxml"));
+                            Parent root = loader.load();
+                            clienteDialogController = loader.getController();
+                            
+                            // Reemplazar el contenido existente con el recién cargado
+                            clienteDialogContainer.getChildren().clear();
+                            clienteDialogContainer.getChildren().add(root);
+                            
+                            // Configurar el controlador
+                            if (clienteDialogController != null) {
+                                // Crear un nuevo cliente y configurar el servicio
+                                ClienteFX nuevoCliente = new ClienteFX();
+                                nuevoCliente.setActivo(true);
+                                nuevoCliente.setRequiereFacturaDefault(false);
+                                nuevoCliente.setLimiteCredito(BigDecimal.ZERO);
+                                
+                                // Configurar el controlador con el nuevo cliente
+                                clienteDialogController.setClienteParaOperacion(nuevoCliente, clienteService);
+                                
+                                // Configurar el stage del diálogo
+                                // Obtener la ventana actual desde cualquier componente visible
+                                if (btnConfirmar.getScene() != null && btnConfirmar.getScene().getWindow() != null) {
+                                    // Intentar obtener el diálogo desde userData de la ventana
+                                    Object userData = btnConfirmar.getScene().getWindow().getUserData();
+                                    if (userData instanceof Dialog) {
+                                        Dialog<?> dialog = (Dialog<?>) userData;
+                                        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                                        clienteDialogController.setDialogStage(stage);
+                                    } else {
+                                        // Si no está en userData, usar la ventana actual como stage
+                                        Stage stage = (Stage) btnConfirmar.getScene().getWindow();
+                                        clienteDialogController.setDialogStage(stage);
+                                    }
+                                }
+                                
+                                System.out.println("Controlador de cliente inicializado correctamente");
+                            }
+                        } catch (java.io.IOException e) {
+                            System.err.println("Error al cargar el FXML del diálogo de cliente: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                    
+                    // Si finalmente no tenemos el controlador, registrar el error
+                    if (clienteDialogController == null) {
+                        System.err.println("No se pudo obtener el controlador del diálogo de cliente");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error al inicializar el controlador del diálogo de cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void calcularCambio() {
@@ -201,26 +325,30 @@ public class ProcesarVentaDialogController {
             if (rbFacturaSi.isSelected()) {
                 // Verificar si hay un cliente seleccionado
                 if (clienteSeleccionado == null) {
-                    // Buscar los campos en el panel de datos del cliente incluido
+                    // Verificar si estamos en la pestaña de nuevo cliente
                     TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
-                    if (tabPane != null && tabPane.getTabs().size() > 1) {
-                        Tab nuevoClienteTab = tabPane.getTabs().get(1); // Tab "Nuevo Cliente"
-                        if (nuevoClienteTab != null) {
-                            TextField nombreField = (TextField) nuevoClienteTab.getContent().lookup("#nombreField");
-                            TextField documentoField = (TextField) nuevoClienteTab.getContent().lookup("#documentoIdentidadField");
+                    if (tabPane != null && tabPane.getSelectionModel().getSelectedIndex() == 1) {
+                        // Estamos en la pestaña de nuevo cliente, intentar guardar el cliente
+                        if (clienteDialogController != null) {
+                            // Llamar al método de guardar del controlador de cliente
+                            boolean guardadoExitoso = clienteDialogController.guardarCliente();
                             
-                            // Validar que se hayan ingresado los datos mínimos del cliente
-                            if (nombreField == null || documentoField == null || 
-                                nombreField.getText().trim().isEmpty() || documentoField.getText().trim().isEmpty()) {
-                                mostrarAlerta("Datos Incompletos", "Debe ingresar al menos el nombre y documento del cliente para generar factura.");
+                            // Verificar si se guardó correctamente
+                            if (guardadoExitoso && clienteDialogController.isGuardadoExitosamente()) {
+                                // Obtener el cliente recién creado
+                                clienteSeleccionado = clienteDialogController.getClienteOperado();
+                            } else {
+                                // No se pudo guardar el cliente
+                                mostrarAlerta("Error al Guardar Cliente", "No se pudo guardar el cliente. Por favor, verifique los datos ingresados.");
                                 return;
                             }
                         } else {
-                            mostrarAlerta("Datos Incompletos", "Debe seleccionar o crear un cliente para generar factura.");
+                            mostrarAlerta("Error", "No se pudo acceder al formulario de cliente. Por favor, intente nuevamente.");
                             return;
                         }
                     } else {
-                        mostrarAlerta("Datos Incompletos", "Debe seleccionar un cliente para generar factura.");
+                        // Estamos en la pestaña de buscar cliente pero no hay cliente seleccionado
+                        mostrarAlerta("Datos Incompletos", "Debe seleccionar un cliente para generar factura o crear uno nuevo.");
                         return;
                     }
                 }

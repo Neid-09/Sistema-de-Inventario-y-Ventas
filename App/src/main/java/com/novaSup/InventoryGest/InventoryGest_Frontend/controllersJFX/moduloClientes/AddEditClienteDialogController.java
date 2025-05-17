@@ -102,10 +102,22 @@ public class AddEditClienteDialogController {
         return clienteOperado;
     }
 
+    /**
+     * Guarda el cliente actual. Este método puede ser llamado desde otros controladores.
+     * @return true si el guardado fue exitoso, false en caso contrario
+     */
+    public boolean guardarCliente() {
+        return handleGuardar();
+    }
+    
+    /**
+     * Maneja el evento de guardar cliente desde la interfaz de usuario.
+     * @return true si el guardado fue exitoso, false en caso contrario
+     */
     @FXML
-    private void handleGuardar() {
+    public boolean handleGuardar() {
         if (!validarCampos()) {
-            return;
+            return false;
         }
 
         try {
@@ -120,7 +132,7 @@ public class AddEditClienteDialogController {
                 clienteOperado.setLimiteCredito(new BigDecimal(limiteCreditoStr.isEmpty() ? "0" : limiteCreditoStr));
             } catch (NumberFormatException e) {
                 mostrarAlertaError("Entrada Inválida", "Límite de Crédito Inválido", "Por favor, ingrese un número válido para el límite de crédito (ej: 1500.50).");
-                return;
+                return false;
             }
 
             if (identificacionFiscalField != null) clienteOperado.setIdentificacionFiscal(identificacionFiscalField.getText());
@@ -136,11 +148,13 @@ public class AddEditClienteDialogController {
             this.clienteOperado = clienteGuardado;
             guardadoExitosamente = true;
             if (dialogStage != null) dialogStage.close();
+            return true;
 
         } catch (Exception e) {
             logger.error("Error al guardar cliente: {}", e.getMessage(), e);
             mostrarAlertaError("Error al Guardar", "No se pudo guardar el cliente.", "Detalles: " + e.getMessage());
             guardadoExitosamente = false;
+            return false;
         }
     }
 
