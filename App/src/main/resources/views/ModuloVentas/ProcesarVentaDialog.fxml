@@ -127,10 +127,8 @@
                             <TabPane maxWidth="Infinity" styleClass="client-tabs" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
                                 <Tab text="Buscar Cliente">
                                     <VBox spacing="10" style="-fx-padding: 10;">
-                                        <HBox alignment="CENTER" spacing="5">
-                                            <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por nombre o ID" HBox.hgrow="ALWAYS" />
-                                            <Button styleClass="search-button" text="Buscar" />
-                                        </HBox>
+                                        <!-- Eliminado el HBox que contenía el botón de búsqueda -->
+                                        <TextField fx:id="txtBuscarCliente" promptText="Buscar cliente por nombre o ID" HBox.hgrow="ALWAYS" />
                                     </VBox>
                                 </Tab>
                                 <Tab text="Nuevo Cliente">

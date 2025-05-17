@@ -1,5 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaCreateRequestFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX;
@@ -16,6 +17,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 public class ProcesarVentaDialogController {
 
@@ -86,10 +88,13 @@ public class ProcesarVentaDialogController {
     private BigDecimal montoTotalVenta;
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
 
-    // Instancias de servicios (descomentar cuando estén disponibles)
+    // Instancias de servicios
     private IClienteService clienteService;
     private IVentaSerivice ventaService;
     // private IFacturaService facturaService;
+    
+    // Cliente seleccionado para la venta
+    private ClienteFX clienteSeleccionado;
 
     @FXML
     public void initialize() {
@@ -130,6 +135,16 @@ public class ProcesarVentaDialogController {
 
         btnCancelar.setOnAction(event -> cerrarDialogo(false));
         btnConfirmar.setOnAction(event -> confirmarVenta());
+        
+        // Configurar el botón de búsqueda de cliente (verificando que no sea null)
+        if (btnBuscarCliente != null) {
+            btnBuscarCliente.setOnAction(event -> buscarCliente());
+        }
+        
+        // Configurar la búsqueda de cliente al presionar Enter en el campo de texto
+        if (txtBuscarCliente != null) {
+            txtBuscarCliente.setOnAction(event -> buscarCliente());
+        }
     }
 
     public void setDatosVenta(List<ProductoVentaInfo> productos, BigDecimal total) {
@@ -146,9 +161,9 @@ public class ProcesarVentaDialogController {
      * Este método se llamará desde VenderControllerFX después de crear una instancia de este controlador.
      */
     public void setServices(IVentaSerivice ventaService, IClienteService clienteService) {
-        this.clienteService = clienteService;
         this.ventaService = ventaService;
-        // Aquí podrías inicializar listeners o datos que dependan de los servicios
+        this.clienteService = clienteService;
+        // Inicializar otros servicios cuando estén disponibles
     }
 
     private void calcularCambio() {
@@ -173,34 +188,63 @@ public class ProcesarVentaDialogController {
     }
 
     private void confirmarVenta() {
-        // Validación básica
-        if (productosEnVenta == null || productosEnVenta.isEmpty()) {
-            mostrarAlerta("Error", "No hay productos para vender");
-            return;
-        }
-        
-        if (rbEfectivo.isSelected() && txtTotalRecibido.getText().isEmpty()) {
-            mostrarAlerta("Campos Incompletos", "Debe ingresar el monto recibido para ventas en efectivo.");
-            return;
-        }
-        
-        if (rbFacturaSi.isSelected()) {
-            // Validar campos del cliente
-            if (txtNombre.getText().isEmpty() || txtDocumento.getText().isEmpty()) {
-                mostrarAlerta("Campos Incompletos", "Para generar factura, el nombre y documento del cliente son obligatorios.");
+        try {
+            // Validar que se haya ingresado un monto si el pago es en efectivo
+            if (rbEfectivo.isSelected() && (txtTotalRecibido.getText() == null || txtTotalRecibido.getText().trim().isEmpty())) {
+                mostrarAlerta("Datos Incompletos", "Debe ingresar el monto recibido para pagos en efectivo.");
                 return;
             }
-        }
-
-        try {
+            
             // Crear el objeto de solicitud de venta
             VentaCreateRequestFX ventaRequest = new VentaCreateRequestFX();
             
-            // Según las especificaciones:
-            ventaRequest.setIdCliente(null); // Cliente null (venta general)
-            ventaRequest.setIdVendedor(1); // Vendedor predeterminado (id 1)
-            ventaRequest.setRequiereFactura(false); // No generar factura
-            ventaRequest.setAplicarImpuestos(false); // No aplicar impuestos
+            // Si se requiere factura, validar y agregar datos del cliente
+            if (rbFacturaSi.isSelected()) {
+                // Verificar si hay un cliente seleccionado
+                if (clienteSeleccionado == null) {
+                    // Buscar los campos en el panel de datos del cliente incluido
+                    TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
+                    if (tabPane != null && tabPane.getTabs().size() > 1) {
+                        Tab nuevoClienteTab = tabPane.getTabs().get(1); // Tab "Nuevo Cliente"
+                        if (nuevoClienteTab != null) {
+                            TextField nombreField = (TextField) nuevoClienteTab.getContent().lookup("#nombreField");
+                            TextField documentoField = (TextField) nuevoClienteTab.getContent().lookup("#documentoIdentidadField");
+                            
+                            // Validar que se hayan ingresado los datos mínimos del cliente
+                            if (nombreField == null || documentoField == null || 
+                                nombreField.getText().trim().isEmpty() || documentoField.getText().trim().isEmpty()) {
+                                mostrarAlerta("Datos Incompletos", "Debe ingresar al menos el nombre y documento del cliente para generar factura.");
+                                return;
+                            }
+                        } else {
+                            mostrarAlerta("Datos Incompletos", "Debe seleccionar o crear un cliente para generar factura.");
+                            return;
+                        }
+                    } else {
+                        mostrarAlerta("Datos Incompletos", "Debe seleccionar un cliente para generar factura.");
+                        return;
+                    }
+                }
+                
+                // Solo establecer que requiere factura y el ID del cliente si está disponible
+                ventaRequest.setRequiereFactura(true);
+                
+                // Si hay un cliente seleccionado, agregar su ID
+                if (clienteSeleccionado != null && clienteSeleccionado.getIdCliente() > 0) {
+                    ventaRequest.setIdCliente(clienteSeleccionado.getIdCliente());
+                }
+                
+                // Establecer el ID del vendedor (por defecto 1)
+                ventaRequest.setIdVendedor(1);
+                
+                // Establecer que se apliquen impuestos para facturas
+                ventaRequest.setAplicarImpuestos(true);
+            } else {
+                // Si no requiere factura, establecer como venta sin factura
+                ventaRequest.setRequiereFactura(false);
+                ventaRequest.setIdVendedor(1); // Vendedor por defecto
+                ventaRequest.setAplicarImpuestos(false); // Sin impuestos para ventas sin factura
+            }
             
             // Obtener el tipo de pago seleccionado
             String tipoPago = "EFECTIVO"; // Valor predeterminado
@@ -290,5 +334,124 @@ public class ProcesarVentaDialogController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+    
+    /**
+     * Método para buscar un cliente por nombre o documento de identidad
+     */
+    private void buscarCliente() {
+        String busqueda = txtBuscarCliente.getText().trim();
+        
+        if (busqueda.isEmpty()) {
+            mostrarAlerta("Búsqueda vacía", "Ingrese un nombre o documento para buscar un cliente.");
+            return;
+        }
+        
+        try {
+            // Intentar buscar por documento primero (cédula o identificación fiscal)
+            Optional<ClienteFX> clientePorDocumento = clienteService.obtenerClientePorCedula(busqueda);
+            
+            if (!clientePorDocumento.isPresent()) {
+                // Si no se encuentra por cédula, intentar por identificación fiscal
+                clientePorDocumento = clienteService.obtenerClientePorIdentificacionFiscal(busqueda);
+            }
+            
+            if (clientePorDocumento.isPresent()) {
+                // Cliente encontrado por documento, mostrar sus datos
+                mostrarDatosCliente(clientePorDocumento.get());
+                return;
+            }
+            
+            // Si no se encuentra por documento, buscar por nombre
+            Optional<ClienteFX> clientePorNombre = clienteService.obtenerClientePorNombre(busqueda);
+            
+            if (clientePorNombre.isPresent()) {
+                // Cliente encontrado por nombre, mostrar sus datos
+                mostrarDatosCliente(clientePorNombre.get());
+                return;
+            }
+            
+            // Si no se encuentra el cliente, preguntar si desea crearlo
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmacion.setTitle("Cliente no encontrado");
+            confirmacion.setHeaderText(null);
+            confirmacion.setContentText("No se encontró ningún cliente con ese nombre o documento. ¿Desea crear un nuevo cliente?");
+            
+            Optional<ButtonType> resultado = confirmacion.showAndWait();
+            if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+                // El usuario quiere crear un nuevo cliente, cambiar a la pestaña de nuevo cliente
+                TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
+                if (tabPane != null && tabPane.getTabs().size() > 1) {
+                    tabPane.getSelectionModel().select(1); // Seleccionar la pestaña "Nuevo Cliente"
+                    
+                    // Prellenar el campo de documento si parece ser un número de documento
+                    if (busqueda.matches("\\d+")) {
+                        TextField txtDocumentoNuevo = (TextField) tabPane.lookup("#txtDocumento");
+                        if (txtDocumentoNuevo != null) {
+                            txtDocumentoNuevo.setText(busqueda);
+                        }
+                    } else {
+                        // Si parece ser un nombre, prellenar el campo de nombre
+                        TextField txtNombreNuevo = (TextField) tabPane.lookup("#txtNombre");
+                        if (txtNombreNuevo != null) {
+                            txtNombreNuevo.setText(busqueda);
+                        }
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            mostrarAlerta("Error al buscar cliente", "Ocurrió un error al buscar el cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Método para mostrar los datos de un cliente en el formulario
+     * @param cliente El cliente cuyos datos se mostrarán
+     */
+    private void mostrarDatosCliente(ClienteFX cliente) {
+        // Guardar el cliente seleccionado
+        this.clienteSeleccionado = cliente;
+        
+        // Activar la pestaña "Requiere Factura" para mostrar los datos del cliente
+        rbFacturaSi.setSelected(true);
+        
+        // Buscar los campos en el panel de datos del cliente
+        // Nota: Estos campos podrían no estar disponibles directamente, por lo que usamos lookup
+        try {
+            // Buscar los campos de texto dentro del panel de datos del cliente
+            TextField nombreField = (TextField) panelDatosCliente.lookup("#txtNombre");
+            TextField documentoField = (TextField) panelDatosCliente.lookup("#txtDocumento");
+            TextField correoField = (TextField) panelDatosCliente.lookup("#txtCorreo");
+            TextField telefonoField = (TextField) panelDatosCliente.lookup("#txtTelefono");
+            TextField direccionField = (TextField) panelDatosCliente.lookup("#txtDireccion");
+            
+            // Establecer los valores si los campos existen
+            if (nombreField != null) nombreField.setText(cliente.getNombre());
+            if (documentoField != null) documentoField.setText(cliente.getDocumentoIdentidad());
+            if (correoField != null) correoField.setText(cliente.getCorreo());
+            if (telefonoField != null) telefonoField.setText(cliente.getCelular());
+            if (direccionField != null) direccionField.setText(cliente.getDireccion());
+            
+            // Si no se encontraron los campos, almacenar los datos en variables temporales
+            // para usar al confirmar la venta
+            if (nombreField == null) {
+                // Mostrar un mensaje informativo
+                System.out.println("No se encontraron campos para mostrar los datos del cliente");
+                System.out.println("Se usará el cliente seleccionado para la venta: " + cliente.getNombre());
+            }
+        } catch (Exception e) {
+            System.err.println("Error al intentar mostrar datos del cliente: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        // Mostrar un mensaje de éxito
+        Alert info = new Alert(Alert.AlertType.INFORMATION);
+        info.setTitle("Cliente encontrado");
+        info.setHeaderText(null);
+        info.setContentText("Se ha seleccionado el cliente: " + cliente.getNombre() + 
+                          "\nSe utilizará este cliente para la venta.");
+        info.showAndWait();
     }
 }
