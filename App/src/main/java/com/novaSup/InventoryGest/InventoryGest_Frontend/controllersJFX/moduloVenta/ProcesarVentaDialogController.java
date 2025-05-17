@@ -7,9 +7,15 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequ
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 
 import java.math.BigDecimal;
@@ -18,11 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import javafx.beans.value.ObservableValue;
 
 public class ProcesarVentaDialogController {
-
-    @FXML
-    private Button btnBuscarCliente;
 
     @FXML
     private Button btnCancelar;
@@ -60,20 +65,8 @@ public class ProcesarVentaDialogController {
     @FXML
     private TextField txtCambioEntregar;
 
-    @FXML
-    private TextField txtCorreo;
-
-    @FXML
-    private TextField txtDireccion;
-
-    @FXML
-    private TextField txtDocumento;
-
-    @FXML
-    private TextField txtNombre;
-
-    @FXML
-    private TextField txtTelefono;
+    // Estos campos están en el formulario incluido mediante fx:include
+    // Se accederán mediante lookup en tiempo de ejecución
 
     @FXML
     private TextField txtTotalRecibido;
@@ -96,6 +89,11 @@ public class ProcesarVentaDialogController {
     // Cliente seleccionado para la venta
     private ClienteFX clienteSeleccionado;
 
+    // Popup para mostrar sugerencias de clientes
+    private Popup clienteSugerenciaPopup;
+    private ListView<ClienteFX> listViewClientes;
+    private ObservableList<ClienteFX> clientesSugeridos = FXCollections.observableArrayList();
+    
     @FXML
     public void initialize() {
         metodoPagoToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
@@ -117,6 +115,10 @@ public class ProcesarVentaDialogController {
         txtTotalRecibido.textProperty().addListener((observable, oldValue, newValue) -> {
             calcularCambio();
         });
+        
+        // Inicializar el popup (pero la configuración completa se hará en setServices)
+        clienteSugerenciaPopup = new Popup();
+        listViewClientes = new ListView<>(clientesSugeridos);
 
         // Establecer estado inicial
         rbEfectivo.setSelected(true); // Por defecto efectivo
@@ -135,12 +137,6 @@ public class ProcesarVentaDialogController {
 
         btnCancelar.setOnAction(event -> cerrarDialogo(false));
         btnConfirmar.setOnAction(event -> confirmarVenta());
-        
-        // Configurar el botón de búsqueda de cliente (verificando que no sea null)
-        if (btnBuscarCliente != null) {
-            btnBuscarCliente.setOnAction(event -> buscarCliente());
-        }
-        
         // Configurar la búsqueda de cliente al presionar Enter en el campo de texto
         if (txtBuscarCliente != null) {
             txtBuscarCliente.setOnAction(event -> buscarCliente());
@@ -164,6 +160,9 @@ public class ProcesarVentaDialogController {
         this.ventaService = ventaService;
         this.clienteService = clienteService;
         // Inicializar otros servicios cuando estén disponibles
+        
+        // Ahora que tenemos los servicios inyectados, configuramos la búsqueda de cliente
+        configurarBusquedaCliente();
     }
 
     private void calcularCambio() {
@@ -340,6 +339,11 @@ public class ProcesarVentaDialogController {
      * Método para buscar un cliente por nombre o documento de identidad
      */
     private void buscarCliente() {
+        // Cerrar el popup de sugerencias si está abierto
+        if (clienteSugerenciaPopup != null && clienteSugerenciaPopup.isShowing()) {
+            clienteSugerenciaPopup.hide();
+        }
+        
         String busqueda = txtBuscarCliente.getText().trim();
         
         if (busqueda.isEmpty()) {
@@ -348,27 +352,38 @@ public class ProcesarVentaDialogController {
         }
         
         try {
-            // Intentar buscar por documento primero (cédula o identificación fiscal)
-            Optional<ClienteFX> clientePorDocumento = clienteService.obtenerClientePorCedula(busqueda);
-            
-            if (!clientePorDocumento.isPresent()) {
-                // Si no se encuentra por cédula, intentar por identificación fiscal
-                clientePorDocumento = clienteService.obtenerClientePorIdentificacionFiscal(busqueda);
-            }
-            
-            if (clientePorDocumento.isPresent()) {
-                // Cliente encontrado por documento, mostrar sus datos
-                mostrarDatosCliente(clientePorDocumento.get());
-                return;
-            }
-            
-            // Si no se encuentra por documento, buscar por nombre
-            Optional<ClienteFX> clientePorNombre = clienteService.obtenerClientePorNombre(busqueda);
-            
-            if (clientePorNombre.isPresent()) {
-                // Cliente encontrado por nombre, mostrar sus datos
-                mostrarDatosCliente(clientePorNombre.get());
-                return;
+            // Si parece ser un documento de identidad (solo números) y tiene longitud suficiente
+            // Buscar por documento exacto (cédula o identificación fiscal)
+            if (busqueda.matches("\\d+")) {
+                // Buscar por documento solo si parece ser un documento completo
+                // (asumiendo que un documento de identidad tiene al menos 6 dígitos)
+                if (busqueda.length() >= 6) {
+                    Optional<ClienteFX> clientePorDocumento = clienteService.obtenerClientePorCedula(busqueda);
+                    
+                    if (!clientePorDocumento.isPresent()) {
+                        // Si no se encuentra por cédula, intentar por identificación fiscal
+                        clientePorDocumento = clienteService.obtenerClientePorIdentificacionFiscal(busqueda);
+                    }
+                    
+                    if (clientePorDocumento.isPresent()) {
+                        // Cliente encontrado por documento, mostrar sus datos
+                        mostrarDatosCliente(clientePorDocumento.get());
+                        return;
+                    }
+                } else {
+                    // Si el documento no está completo, mostrar mensaje
+                    mostrarAlerta("Documento incompleto", "Para buscar por documento de identidad, ingrese el documento completo.");
+                    return;
+                }
+            } else {
+                // Si no es un documento numérico, buscar por nombre exacto
+                Optional<ClienteFX> clientePorNombre = clienteService.obtenerClientePorNombre(busqueda);
+                
+                if (clientePorNombre.isPresent()) {
+                    // Cliente encontrado por nombre exacto, mostrar sus datos
+                    mostrarDatosCliente(clientePorNombre.get());
+                    return;
+                }
             }
             
             // Si no se encuentra el cliente, preguntar si desea crearlo
@@ -453,5 +468,179 @@ public class ProcesarVentaDialogController {
         info.setContentText("Se ha seleccionado el cliente: " + cliente.getNombre() + 
                           "\nSe utilizará este cliente para la venta.");
         info.showAndWait();
+        
+        // Cerrar el popup de sugerencias si está abierto
+        if (clienteSugerenciaPopup != null && clienteSugerenciaPopup.isShowing()) {
+            clienteSugerenciaPopup.hide();
+        }
+        
+        // Actualizar el campo de búsqueda con el nombre del cliente seleccionado
+        txtBuscarCliente.setText(cliente.getNombre());
+    }
+    
+    /**
+     * Configura el campo de búsqueda de cliente para mostrar sugerencias
+     */
+    private void configurarBusquedaCliente() {
+        // Los componentes ya se inicializaron en initialize(), aquí solo configuramos
+        if (clienteService == null) {
+            System.err.println("Error: configurarBusquedaCliente llamado antes de inicializar servicios");
+            return; // Salir si el servicio no está disponible aún
+        }
+        
+        // Limpiar contenido previo para prevenir duplicaciones
+        if (!clienteSugerenciaPopup.getContent().isEmpty()) {
+            clienteSugerenciaPopup.getContent().clear();
+        }
+        
+        // Configurar el estilo de la lista
+        listViewClientes.setPrefWidth(300);
+        listViewClientes.setPrefHeight(200);
+        // Aplicamos estilos inline en lugar de confiar solo en la clase CSS
+        listViewClientes.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-width: 1px;");
+        listViewClientes.getStyleClass().add("cliente-sugerencia-lista");
+        
+        // Configurar cómo se muestran los clientes en la lista
+        listViewClientes.setCellFactory(lv -> new ListCell<ClienteFX>() {
+            @Override
+            protected void updateItem(ClienteFX cliente, boolean empty) {
+                super.updateItem(cliente, empty);
+                if (empty || cliente == null) {
+                    setText(null);
+                } else {
+                    setText(cliente.getNombre() + " - " + cliente.getDocumentoIdentidad());
+                    setStyle("-fx-padding: 5px;");
+                }
+            }
+        });
+        
+        // Manejar la selección de un cliente de la lista
+        listViewClientes.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY) {
+                ClienteFX clienteSeleccionado = listViewClientes.getSelectionModel().getSelectedItem();
+                if (clienteSeleccionado != null) {
+                    // Asignar cliente seleccionado a la variable de clase
+                    this.clienteSeleccionado = clienteSeleccionado;
+                    // Actualizar campo de texto con el nombre del cliente
+                    txtBuscarCliente.setText(clienteSeleccionado.getNombre());
+                    // Mostrar datos del cliente
+                    mostrarDatosCliente(clienteSeleccionado);
+                    // Ocultar popup
+                    clienteSugerenciaPopup.hide();
+                }
+            }
+        });
+        
+        // Agregar la lista al popup
+        clienteSugerenciaPopup.getContent().add(listViewClientes);
+        
+        // Configurar el campo de texto para mostrar sugerencias mientras se escribe
+        txtBuscarCliente.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && !newValue.trim().isEmpty() && newValue.length() >= 2) {
+                buscarClientesSugeridos(newValue);
+            } else {
+                if (clienteSugerenciaPopup.isShowing()) {
+                    clienteSugerenciaPopup.hide();
+                }
+            }
+        });
+        
+        // Configurar teclas para navegar por la lista de sugerencias
+        txtBuscarCliente.setOnKeyPressed(event -> {
+            if (clienteSugerenciaPopup.isShowing()) {
+                if (event.getCode() == KeyCode.DOWN) {
+                    listViewClientes.requestFocus();
+                    listViewClientes.getSelectionModel().selectFirst();
+                } else if (event.getCode() == KeyCode.ESCAPE) {
+                    clienteSugerenciaPopup.hide();
+                } else if (event.getCode() == KeyCode.ENTER) {
+                    // Si hay un elemento seleccionado en la lista, seleccionarlo
+                    ClienteFX selectedClient = listViewClientes.getSelectionModel().getSelectedItem();
+                    if (selectedClient != null) {
+                        this.clienteSeleccionado = selectedClient;
+                        txtBuscarCliente.setText(selectedClient.getNombre());
+                        mostrarDatosCliente(selectedClient);
+                        clienteSugerenciaPopup.hide();
+                        event.consume(); // Prevenir que se propague el evento
+                    } else {
+                        // Si no hay selección, realizar búsqueda normal
+                        buscarCliente();
+                        clienteSugerenciaPopup.hide();
+                    }
+                }
+            }
+        });
+        
+        // Configurar pérdida de foco para cerrar popup
+        txtBuscarCliente.focusedProperty().addListener((ObservableValue<? extends Boolean> obs, Boolean wasFocused, Boolean isNowFocused) -> {
+            if (!isNowFocused && clienteSugerenciaPopup.isShowing()) {
+                // Usar Platform.runLater para evitar conflictos con otros eventos de UI
+                javafx.application.Platform.runLater(() -> {
+                    if (!listViewClientes.isFocused()) {
+                        clienteSugerenciaPopup.hide();
+                    }
+                });
+            }
+        });
+    }
+
+
+    
+    /**
+     * Busca clientes que coincidan con el texto ingresado y muestra sugerencias
+     * @param texto El texto de búsqueda
+     */
+    private void buscarClientesSugeridos(String texto) {
+        if (clienteService == null) {
+            System.err.println("Error: clienteService no está inicializado");
+            return;
+        }
+        
+        try {
+            // Obtener todos los clientes y filtrar por el texto de búsqueda
+            List<ClienteFX> todosLosClientes = clienteService.obtenerTodosLosClientes();
+            if (todosLosClientes == null) {
+                System.err.println("Error: No se pudo obtener la lista de clientes");
+                return;
+            }
+            
+            List<ClienteFX> clientesFiltrados = todosLosClientes.stream()
+                .filter(cliente -> 
+                    (cliente.getNombre() != null && cliente.getNombre().toLowerCase().contains(texto.toLowerCase())) ||
+                    (cliente.getDocumentoIdentidad() != null && 
+                     cliente.getDocumentoIdentidad().contains(texto)))
+                .limit(10) // Limitar a 10 resultados para no sobrecargar la UI
+                .collect(Collectors.toList());
+            
+            // Actualizar la lista de sugerencias en el hilo de la UI
+            javafx.application.Platform.runLater(() -> {
+                clientesSugeridos.clear();
+                clientesSugeridos.addAll(clientesFiltrados);
+                
+                // Mostrar u ocultar el popup según los resultados
+                if (!clientesFiltrados.isEmpty()) {
+                    if (!clienteSugerenciaPopup.isShowing()) {
+                        try {
+                            Bounds bounds = txtBuscarCliente.localToScreen(txtBuscarCliente.getBoundsInLocal());
+                            // Asegurar que el popup se muestra en la posición correcta
+                            double offsetX = 0; // Ajustar si es necesario
+                            double offsetY = 2; // Pequeño offset para que no se solape exactamente
+                            clienteSugerenciaPopup.show(txtBuscarCliente, 
+                                                      bounds.getMinX() + offsetX, 
+                                                      bounds.getMaxY() + offsetY);
+                        } catch (Exception e) {
+                            System.err.println("Error al mostrar popup: " + e.getMessage());
+                        }
+                    }
+                } else {
+                    if (clienteSugerenciaPopup.isShowing()) {
+                        clienteSugerenciaPopup.hide();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("Error al buscar sugerencias de clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

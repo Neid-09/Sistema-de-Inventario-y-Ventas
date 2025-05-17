@@ -110,3 +110,34 @@
 .register-button:hover {
     -fx-background-color: #f5f5f5;
 }
+
+/* Estilos para el popup de sugerencias de clientes */
+.cliente-sugerencia-lista {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 5);
+}
+
+.cliente-sugerencia-lista .list-cell {
+    -fx-padding: 8px 10px;
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.cliente-sugerencia-lista .list-cell:hover {
+    -fx-background-color: #f5f5f5;
+    -fx-cursor: hand;
+}
+
+.cliente-sugerencia-lista .list-cell:selected {
+    -fx-background-color: #e0f2f1;
+    -fx-text-fill: #00796b;
+}
+
+.cliente-sugerencia-lista .list-view {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
