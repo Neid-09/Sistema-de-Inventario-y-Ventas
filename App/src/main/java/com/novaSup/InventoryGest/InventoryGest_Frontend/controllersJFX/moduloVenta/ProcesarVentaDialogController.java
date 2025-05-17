@@ -267,28 +267,42 @@ public class ProcesarVentaDialogController {
                             clienteDialogContainer.getChildren().clear();
                             clienteDialogContainer.getChildren().add(root);
                             
-                            // Inicializar el controlador con un nuevo cliente
+                            // Configurar el controlador con los servicios necesarios
                             if (clienteDialogController != null && clienteService != null) {
-                                // Crear un nuevo cliente para evitar NullPointerException
-                                ClienteFX nuevoCliente = new ClienteFX();
-                                nuevoCliente.setNombre("");
-                                nuevoCliente.setDocumentoIdentidad("");
-                                nuevoCliente.setCorreo("");
-                                nuevoCliente.setCelular("");
-                                nuevoCliente.setDireccion("");
-                                nuevoCliente.setActivo(true);
-                                nuevoCliente.setRequiereFacturaDefault(false);
-                                nuevoCliente.setLimiteCredito(BigDecimal.ZERO);
-                                
-                                // Configurar el controlador con el nuevo cliente
-                                clienteDialogController.setClienteParaOperacion(nuevoCliente, clienteService);
+                                // Inicializar el controlador con un nuevo cliente
+                                clienteDialogController.setClienteParaOperacion(null, clienteService);
                                 
                                 // Configurar el stage del diálogo si es necesario
                                 if (btnConfirmar.getScene() != null && btnConfirmar.getScene().getWindow() != null) {
                                     clienteDialogController.setDialogStage((Stage) btnConfirmar.getScene().getWindow());
                                 }
                                 
-                                System.out.println("Controlador de cliente inicializado correctamente");
+                                // Configurar botones del formulario de cliente
+                                Button saveButton = (Button) root.lookup("#saveButton");
+                                if (saveButton != null) {
+                                    // Reemplazar la acción original del botón guardar
+                                    saveButton.setOnAction(event -> {
+                                        boolean guardadoExitoso = clienteDialogController.handleGuardar();
+                                        if (guardadoExitoso) {
+                                            // Obtener el cliente recién guardado
+                                            ClienteFX clienteGuardado = clienteDialogController.getClienteOperado();
+                                            if (clienteGuardado != null) {
+                                                // Seleccionar automáticamente el cliente para la venta
+                                                clienteSeleccionado = clienteGuardado;
+                                                
+                                                // Cambiar a la pestaña de búsqueda (índice 0)
+                                                tabPane.getSelectionModel().select(0);
+                                                
+                                                // Actualizar el campo de búsqueda y mostrar los datos del cliente
+                                                txtBuscarCliente.setText(clienteGuardado.getNombre());
+                                                mostrarDatosCliente(clienteGuardado);
+                                                
+                                                // Notificar al usuario que el cliente ha sido creado y seleccionado
+                                                mostrarAlerta("Cliente Guardado", "El cliente ha sido creado exitosamente y seleccionado para esta venta.");
+                                            }
+                                        }
+                                    });
+                                }
                             } else {
                                 System.err.println("Error: clienteDialogController o clienteService es null");
                                 if (clienteDialogController == null) System.err.println("clienteDialogController es null");
@@ -312,7 +326,7 @@ public class ProcesarVentaDialogController {
             e.printStackTrace();
         }
     }
-
+    
     private void calcularCambio() {
         if (montoTotalVenta == null || !rbEfectivo.isSelected()) {
             txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
