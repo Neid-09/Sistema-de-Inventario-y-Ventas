@@ -502,9 +502,9 @@ public class VenderControllerFX implements Initializable {
      * Agrega un producto al carrito con cantidad 1
      * @param producto Producto a agregar
      */
-    private void agregarAlCarrito(ProductoFX producto) {
+    /* private void agregarAlCarrito(ProductoFX producto) {
         agregarAlCarritoConCantidad(producto, 1);
-    }
+    } */
     
     /**
      * Agrega un producto al carrito con una cantidad específica
