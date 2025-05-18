@@ -1,5 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX;
 
+import com.fasterxml.jackson.annotation.JsonFormat; // Importar JsonFormat
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,6 +12,8 @@ import java.util.List; // Asegúrate de que esta importación es necesaria y est
 
 public class VentaFX {
     private final IntegerProperty idVenta = new SimpleIntegerProperty();
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX") // Especificar el formato de fecha y hora
     private final ObjectProperty<LocalDateTime> fecha = new SimpleObjectProperty<>();
     private final IntegerProperty idCliente = new SimpleIntegerProperty();
     private final StringProperty nombreCliente = new SimpleStringProperty();
@@ -32,7 +35,11 @@ public class VentaFX {
                    boolean requiereFactura, String numeroVenta, boolean aplicarImpuestos, 
                    String tipoPago, List<DetalleVentaFX> detalles) {
         this.idVenta.set(idVenta);
-        setFecha(fecha); // Usa el setter para la conversión
+        if (fecha != null) { // Convertir Timestamp a LocalDateTime directamente
+            this.fecha.set(fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        } else {
+            this.fecha.set(null);
+        }
         this.idCliente.set(idCliente);
         this.nombreCliente.set(nombreCliente);
         this.idVendedor.set(idVendedor);
@@ -50,14 +57,6 @@ public class VentaFX {
     public void setIdVenta(Integer idVenta) { this.idVenta.set(idVenta); }
 
     public LocalDateTime getFecha() { return fecha.get(); }
-    public void setFecha(Timestamp timestamp) { // Jackson podría necesitar un deserializador custom para Timestamp a LocalDateTime
-        if (timestamp != null) {
-            this.fecha.set(timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-        } else {
-            this.fecha.set(null);
-        }
-    }
-    // Sobrecarga para aceptar LocalDateTime directamente si el deserializador ya lo maneja así.
     public void setFecha(LocalDateTime localDateTime) { this.fecha.set(localDateTime); }
 
     public Integer getIdCliente() { return idCliente.get(); }
@@ -104,4 +103,4 @@ public class VentaFX {
     public BooleanProperty aplicarImpuestosProperty() { return aplicarImpuestos; }
     public StringProperty tipoPagoProperty() { return tipoPago; }
     public ListProperty<DetalleVentaFX> detallesProperty() { return detalles; }
-} 
+}

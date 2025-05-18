@@ -8,50 +8,29 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" 
-            xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.ReportVentasCtrlFX">
     <children>
         <TableView fx:id="tablaVentas" layoutX="14.0" layoutY="14.0" prefHeight="500.0" prefWidth="972.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
             <columns>
-                <TableColumn fx:id="colFactura" prefWidth="100.0" text="# Venta" />
+                <TableColumn fx:id="colNumFactura" prefWidth="100.0" text="# Venta" />
                 <TableColumn fx:id="colCliente" prefWidth="150.0" text="Cliente" />
                 <TableColumn fx:id="colVendedor" prefWidth="150.0" text="Vendedor" />
-            <TableColumn fx:id="colCliente1" prefWidth="150.0" text="Tipo de pago" />
-                <TableColumn fx:id="colProducto" prefWidth="150.0" text="Sub-total" />
-                <TableColumn fx:id="colCategoria" prefWidth="100.0" text="Total Impuestos" />
+            <TableColumn fx:id="colTipoPago" prefWidth="150.0" text="Tipo de pago" />
+                <TableColumn fx:id="colSubtotal" prefWidth="150.0" text="Sub-total" />
+                <TableColumn fx:id="colImpuestos" prefWidth="100.0" text="Total Impuestos" />
                 <TableColumn fx:id="colTotal" prefWidth="100.0" text="Total" />
                 <TableColumn fx:id="colCantidad" prefWidth="75.0" text="Cantidad" />
                 <TableColumn fx:id="colFecha" prefWidth="100.0" text="Fecha" />
             </columns>
         </TableView>
-        <HBox alignment="CENTER_RIGHT" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+        <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
             <children>
-                <Label prefHeight="20.0" prefWidth="81.0" text="OTRO">
+                <Label prefHeight="20.0" prefWidth="77.0" text="Total (Sin impuestos)">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Label>
-                <TextField fx:id="txtTotalVentas2" editable="false" prefHeight="30.0" prefWidth="114.0" style="-fx-background-color: #f0f0f0;">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </TextField>
-                <Label prefHeight="20.0" prefWidth="81.0" text="TARJETA">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </Label>
-                <TextField fx:id="txtTotalVentas1111" editable="false" prefHeight="30.0" prefWidth="130.0" style="-fx-background-color: #f0f0f0;">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </TextField>
-                <Label prefHeight="20.0" prefWidth="70.0" text="EFECTIVO">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </Label>
-                <TextField fx:id="txtTotalVentas111" editable="false" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #f0f0f0;">
+                <TextField fx:id="txtSubtotal" editable="false" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #f0f0f0;">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
@@ -61,27 +40,27 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Label>
-                <TextField fx:id="txtTotalVentas11" editable="false" prefHeight="30.0" prefWidth="123.0" style="-fx-background-color: #f0f0f0;">
+                <TextField fx:id="txtGanancia" editable="false" prefHeight="30.0" prefWidth="123.0" style="-fx-background-color: #f0f0f0;">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </TextField>
-                <Label prefHeight="20.0" prefWidth="77.0" text="TOTAL IVA">
+            <Label text="Impuestos">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <TextField fx:id="txtImpuestos" editable="false" prefHeight="30.0" prefWidth="123.0" style="-fx-background-color: #f0f0f0;">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </TextField>
+                <Label text="Total (Con impuestos)">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </Label>
-                <TextField fx:id="txtTotalVentas1" editable="false" prefHeight="30.0" prefWidth="122.0" style="-fx-background-color: #f0f0f0;">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </TextField>
-                <Label text="TOTAL VENTA(BASE+IVA)">
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </Label>
-                <TextField fx:id="txtTotalVentas" editable="false" prefHeight="30.0" prefWidth="114.0" style="-fx-background-color: #f0f0f0;">
+                <TextField fx:id="txtTotal" editable="false" prefHeight="30.0" prefWidth="114.0" style="-fx-background-color: #f0f0f0;">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>

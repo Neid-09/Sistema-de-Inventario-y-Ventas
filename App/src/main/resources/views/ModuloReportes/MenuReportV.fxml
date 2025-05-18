@@ -17,7 +17,7 @@
             xmlns:fx="http://javafx.com/fxml/1"
             prefHeight="709.0"
             prefWidth="1246.0"
-            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.ReportVentasCtrlFX">
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.MenuReportsVCtrlFX">
     <top>
         <VBox BorderPane.alignment="CENTER">
             <children>
@@ -78,17 +78,17 @@
             <tabs>
                 <Tab text="Datos de Ventas">
                     <content>
-                        <fx:include source="ReportesVentas.fxml" />
+                        <fx:include fx:id="reportesVentasTabContent" source="ReportesVentas.fxml" />
                     </content>
                 </Tab>
                 <Tab text="Gráficos">
                     <content>
-                        <fx:include source="Graficos.fxml" />
+                        <fx:include fx:id="graficosTabContent" source="Graficos.fxml" />
                     </content>
                 </Tab>
                 <Tab text="Resumen">
                     <content>
-                        <fx:include source="Resumen.fxml" />
+                        <fx:include fx:id="resumenTabContent" source="Resumen.fxml" />
                     </content>
                 </Tab>
             </tabs>

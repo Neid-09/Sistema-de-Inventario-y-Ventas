@@ -1,25 +1,138 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class ReportVentasCtrlFX {
 
     @FXML
-    private Button btnFiltrar;
+    private TableColumn<VentaFX, Integer> colCantidad; // Asumiendo que VentaFX tendrá una propiedad para cantidad total o se adaptará
 
     @FXML
-    private ComboBox<?> comboCategoria;
+    private TableColumn<VentaFX, String> colCliente;
 
     @FXML
-    private ComboBox<?> comboVendedor;
+    private TableColumn<VentaFX, LocalDateTime> colFecha;
 
     @FXML
-    private DatePicker fechaFin;
+    private TableColumn<VentaFX, BigDecimal> colImpuestos; // Se adaptará para mostrar un valor representativo
 
     @FXML
-    private DatePicker fechaInicio;
+    private TableColumn<VentaFX, String> colNumFactura;
+
+    @FXML
+    private TableColumn<VentaFX, BigDecimal> colSubtotal; // Asumiendo que VentaFX tendrá esta propiedad o se usará 'total'
+
+    @FXML
+    private TableColumn<VentaFX, String> colTipoPago;
+
+    @FXML
+    private TableColumn<VentaFX, BigDecimal> colTotal;
+
+    @FXML
+    private TableColumn<VentaFX, String> colVendedor;
+
+    @FXML
+    private TableView<VentaFX> tablaVentas;
+
+    @FXML
+    private TextField txtGanancia;
+
+    @FXML
+    private TextField txtImpuestos;
+
+    @FXML
+    private TextField txtSubtotal;
+
+    @FXML
+    private TextField txtTotal;
+
+    private IVentaSerivice ventaService;
+    private ObservableList<VentaFX> ventasData = FXCollections.observableArrayList();
+
+    public void setService(IVentaSerivice ventaService) {
+        this.ventaService = ventaService;
+        cargarVentas(); // Cargar ventas cuando el servicio esté disponible
+    }
+
+    @FXML
+    private void initialize() {
+        configurarColumnas();
+        // No llamamos a cargarVentas() aquí directamente si depende de que setService sea llamado primero.
+        // Si el servicio puede ser nulo inicialmente y luego establecido, cargarVentas() en setService es mejor.
+    }
+
+    private void configurarColumnas() {
+        colNumFactura.setCellValueFactory(new PropertyValueFactory<>("numeroVenta"));
+        colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
+        colCliente.setCellValueFactory(new PropertyValueFactory<>("nombreCliente"));
+        colVendedor.setCellValueFactory(new PropertyValueFactory<>("nombreVendedor"));
+        colTipoPago.setCellValueFactory(new PropertyValueFactory<>("tipoPago"));
+        // Para colSubtotal, colImpuestos y colCantidad, se necesitaría que VentaFX tenga estas propiedades.
+        // Provisionalmente, usaré 'total' para colTotal. Las otras requerirán ajustes en VentaFX o lógica adicional.
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
+        
+        // Ejemplo para colImpuestos si VentaFX tuviera una propiedad booleana 'aplicarImpuestos'
+        // TableColumn<VentaFX, String> colImpuestosText = new TableColumn<>("Impuestos Aplicados");
+        // colImpuestosText.setCellValueFactory(cellData -> {
+        //     boolean aplica = cellData.getValue().isAplicarImpuestos();
+        //     return new SimpleStringProperty(aplica ? "Sí" : "No");
+        // });
+        // Adaptar colImpuestos, colSubtotal, colCantidad según las propiedades reales de VentaFX
+        // Por ahora, las dejaré vinculadas a propiedades que podrían no existir o necesitar formato.
+        colSubtotal.setCellValueFactory(new PropertyValueFactory<>("total")); // Placeholder, idealmente VentaFX.subtotal
+        colImpuestos.setCellValueFactory(new PropertyValueFactory<>("total")); // Placeholder, idealmente VentaFX.impuestosCalculados
+        // colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidadItems")); // Placeholder
+
+        tablaVentas.setItems(ventasData);
+    }
+
+    private void cargarVentas() {
+        if (ventaService != null) {
+            try {
+                List<VentaFX> ventas = ventaService.listarVentas();
+                ventasData.setAll(ventas);
+                // Aquí podrías calcular y mostrar los totales en los TextField si es necesario
+                // calcularTotalesGenerales(ventas);
+            } catch (Exception e) {
+                // Manejar la excepción, por ejemplo, mostrar un diálogo de error
+                e.printStackTrace(); // Reemplazar con un manejo de errores adecuado para el usuario
+                ventasData.clear();
+            }
+        }
+    }
+    
+    // Método de ejemplo para calcular totales, necesitaría implementarse según la lógica de negocio
+    /*
+    private void calcularTotalesGenerales(List<VentaFX> ventas) {
+        BigDecimal subtotalGeneral = BigDecimal.ZERO;
+        BigDecimal impuestosGeneral = BigDecimal.ZERO;
+        BigDecimal totalGeneral = BigDecimal.ZERO;
+        // BigDecimal gananciaGeneral = BigDecimal.ZERO; // Si se calcula
+
+        for (VentaFX venta : ventas) {
+            // Asumiendo que VentaFX tiene estos campos o se pueden derivar
+            // subtotalGeneral = subtotalGeneral.add(venta.getSubtotal()); // Necesita VentaFX.getSubtotal()
+            // impuestosGeneral = impuestosGeneral.add(venta.getImpuestos()); // Necesita VentaFX.getImpuestos()
+            totalGeneral = totalGeneral.add(venta.getTotal());
+        }
+
+        txtSubtotal.setText(subtotalGeneral.toString());
+        txtImpuestos.setText(impuestosGeneral.toString());
+        txtTotal.setText(totalGeneral.toString());
+        // txtGanancia.setText(gananciaGeneral.toString());
+    }
+    */
 
 }

@@ -102,6 +102,7 @@ public class VentaController {
         dto.setRequiereFactura(venta.getRequiereFactura());
         dto.setNumeroVenta(venta.getNumeroVenta());
         dto.setAplicarImpuestos(venta.getAplicarImpuestos());
+        dto.setTipoPago(venta.getTipoPago()); // Añadir mapeo para tipoPago
 
         if (venta.getDetallesVenta() != null && !venta.getDetallesVenta().isEmpty()) {
             dto.setDetalles(venta.getDetallesVenta().stream()

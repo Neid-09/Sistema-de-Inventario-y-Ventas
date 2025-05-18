@@ -18,6 +18,7 @@ public class VentaResponseDTO {
     private String nombreCliente; // Nuevo campo para el nombre del cliente
     private Integer idVendedor;
     private String nombreVendedor; // Campo adicional para el nombre
+    private String tipoPago; // Nuevo campo para el tipo de pago
     private BigDecimal total;
     private Boolean requiereFactura;
     private String numeroVenta;
