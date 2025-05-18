@@ -148,7 +148,7 @@
                 </Button>
 
                 <!-- REPORTE VENTAS -->
-                <Button fx:id="btnReporteVentas" maxWidth="Infinity" styleClass="module-button">
+                <Button fx:id="btnReporteVentas" maxWidth="Infinity" onAction="#irReporteVentas" styleClass="module-button">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <children>

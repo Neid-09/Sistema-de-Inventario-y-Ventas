@@ -46,35 +46,17 @@ import javafx.scene.shape.Rectangle; // Import para Rectangle
 
 public class MenuPrincipalControllerFX implements Initializable {
 
-    @FXML
-    private HBox topBar;
+    @FXML private HBox topBar;
 
-    @FXML
-    private Label lblUsuario;
+    @FXML private Label lblUsuario;
 
-    @FXML
-    private Button btnCerrarSesion;
+    @FXML private Button btnCerrarSesion;
 
-    @FXML
-    private Button btnVender;
+    @FXML private Button btnNotificaciones;
 
-    @FXML
-    private Button btnInventario;
+    @FXML private StackPane modulosDinamicos;
 
-    @FXML
-    private Button btnNotificaciones;
-
-    @FXML
-    private Button btnEntradasSalidas;
-
-    @FXML
-    private Button btnConfiguracion;
-
-    @FXML
-    private StackPane modulosDinamicos;
-
-    @FXML
-    private Label lblRol;
+    @FXML private Label lblRol;
 
     private Popup notificacionesPopup;
     private Label contadorNotificaciones;
@@ -108,11 +90,17 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     @FXML private Button btnToggleSidebar; // Added toggle button
     @FXML private ImageView toggleIcon; // Added icon for toggle button
+
+    //buttons for modules
+    @FXML private Button btnVender;
     @FXML private Button btnReporteVentas;
+    @FXML private Button btnInventario;
     @FXML private Button btnConsulta;
     @FXML private Button btnCreditoClientes;
     @FXML private Button btnMasVendido;
+    @FXML private Button btnEntradasSalidas;
     @FXML private Button btnGarantiasServicios;
+    @FXML private Button btnConfiguracion;
 
     private Timeline expandTimeline;
     private Timeline collapseTimeline;
@@ -867,6 +855,7 @@ public class MenuPrincipalControllerFX implements Initializable {
             case PathsFXML.MOD_CLIENTES_MENU: return btnCreditoClientes; // Assuming this is the correct FXML for the button
             case PathsFXML.CONTROLSTOCK_FXML: return btnEntradasSalidas; // Assuming this is the correct FXML for the button
             case PathsFXML.CONFIGURACION_FXML: return btnConfiguracion;
+            case PathsFXML.MODULO_REPORTES: return btnReporteVentas; // Assuming this is the correct FXML for the button
             // Add cases for other buttons/FXMLs:
             // case PathsFXML.REPORTE_VENTAS_FXML: return btnReporteVentas;
             // case PathsFXML.CONSULTA_FXML: return btnConsulta;
@@ -1011,6 +1000,18 @@ public class MenuPrincipalControllerFX implements Initializable {
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el módulo de ventas: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void irReporteVentas() {
+        try {
+            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_reporte_ventas")) { //TODO: VERIFICAR PERMISO
+                cargarModuloEnPanel(PathsFXML.MODULO_REPORTES);
+            }
+        } catch (IOException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                    "No se pudo cargar el módulo de reporte de ventas: " + e.getMessage());
         }
     }
 

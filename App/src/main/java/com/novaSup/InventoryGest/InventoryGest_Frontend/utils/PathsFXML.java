@@ -43,4 +43,12 @@ public class PathsFXML {
     /* MODULO VENTAS */
     public static final String DIALOG_PROCESAR_VENTA = "/views/ModuloVentas/ProcesarVentaDialog.fxml";
 
+    /* MODULO REPORTES */
+    public static final String MODULO_REPORTES = "/views/ModuloReportes/MenuReportV.fxml";
+    public static final String REPORTES_VENTAS = "/views/ModuloReportes/ReportesVentas.fxml";
+    public static final String DETALLES_VENTAS = "/views/ModuloReportes/DetallesVentas.fxml";
+    public static final String RESUMEN_VENTAS = "/views/ModuloReportes/Resumen.fxml";
+    public static final String GRAFICOS_VENTAS = "/views/ModuloReportes/Graficos.fxml";
+
+
 }

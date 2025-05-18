@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600" 
+            prefWidth="500" 
+            style="-fx-background-color: white; 
+            -fx-border-color: #e0e0e0; 
+            -fx-border-width: 1;" 
+            xmlns="http://javafx.com/javafx/23.0.2" 
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.ReportVentasCtrlFX">
+   <VBox spacing="15" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" AnchorPane.bottomAnchor="20.0">
+
+      <Label text="Detalles de la Venta #[id_venta]" style="-fx-font-weight: bold; -fx-font-size: 18px;" />
+      <Label text="Venta realizada el [dia] de [mes] de [año]" style="-fx-text-fill: #757575; -fx-font-size: 14px;" />
+      
+      <GridPane hgap="20" vgap="15">
+         <columnConstraints>
+            <ColumnConstraints percentWidth="50" />
+            <ColumnConstraints percentWidth="50" />
+         </columnConstraints>
+         
+         <Label text="Cliente" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+         <Label text="Estado" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+         
+         <Label text="[nombre]" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+         <HBox alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label text="[estado]" style="-fx-background-color: #e6f7e6; -fx-text-fill: #2e7d32; -fx-padding: 3 8; -fx-background-radius: 3;" />
+         </HBox>
+         
+         <Label text="Método de pago" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+         <Label text="Total" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+         
+         <Label text="[tipo]" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+         <Label text="[dinero]" style="-fx-font-weight: bold; -fx-font-size: 18px;" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+      </GridPane>
+      
+      <VBox spacing="10">
+         <Label text="Productos (2)" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
+         
+         <GridPane style="-fx-background-color: #f9f9f9; -fx-padding: 10;">
+            <columnConstraints>
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+            </columnConstraints>
+            
+            <Label text="Producto" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <Label text="Precio unitario" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+            <Label text="Cantidad" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+            <Label text="Subtotal" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="3" />
+            <Label text="Total con impuestos" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="4" />
+
+         </GridPane>
+         
+         <Separator />
+         
+         <GridPane vgap="15">
+            <columnConstraints>
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+               <ColumnConstraints percentWidth="20" />
+            </columnConstraints>
+            
+            <Label text="[productos]" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <Label text="[precio_unitario]" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+            <Label text="[cantidad]" GridPane.rowIndex="0" GridPane.columnIndex="2" />
+            <Label text="[subtotal]" GridPane.rowIndex="0" GridPane.columnIndex="3" />
+            <Label text="[total_con_impuestos]" GridPane.rowIndex="0" GridPane.columnIndex="4" />
+
+            <Separator GridPane.rowIndex="1" GridPane.columnSpan="5" />
+            
+            <Label text="Total" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="3" />
+            <Label text="[Total sumado]" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="4" />
+         </GridPane>
+      </VBox>
+      
+      <HBox spacing="10" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0">
+         <Button text="Cerrar" style="-fx-background-color: #e0e0e0; -fx-text-fill: #757575;" />
+         <Button text="Modificar detalles de venta" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+         <Button text="Imprimir factura" style="-fx-background-color: #2196F3; -fx-text-fill: white;" /><!-- O imprimir el comprobante de venta -->
+      </HBox>
+   </VBox>
+</AnchorPane>
