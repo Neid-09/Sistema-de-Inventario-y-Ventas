@@ -15,12 +15,13 @@
                 <TableColumn fx:id="colNumFactura" prefWidth="100.0" text="# Venta" />
                 <TableColumn fx:id="colCliente" prefWidth="150.0" text="Cliente" />
                 <TableColumn fx:id="colVendedor" prefWidth="150.0" text="Vendedor" />
-            <TableColumn fx:id="colTipoPago" prefWidth="150.0" text="Tipo de pago" />
+                <TableColumn fx:id="colTipoPago" prefWidth="150.0" text="Tipo de pago" />
                 <TableColumn fx:id="colSubtotal" prefWidth="150.0" text="Sub-total" />
                 <TableColumn fx:id="colImpuestos" prefWidth="100.0" text="Total Impuestos" />
                 <TableColumn fx:id="colTotal" prefWidth="100.0" text="Total" />
                 <TableColumn fx:id="colCantidad" prefWidth="75.0" text="Cantidad" />
                 <TableColumn fx:id="colFecha" prefWidth="100.0" text="Fecha" />
+                <TableColumn fx:id="colAcciones" prefWidth="100.0" text="Acciones" />
             </columns>
         </TableView>
         <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
@@ -45,16 +46,16 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </TextField>
-            <Label text="Impuestos">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="txtImpuestos" editable="false" prefHeight="30.0" prefWidth="123.0" style="-fx-background-color: #f0f0f0;">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </TextField>
+                <Label text="Impuestos">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+                <TextField fx:id="txtImpuestos" editable="false" prefHeight="30.0" prefWidth="123.0" style="-fx-background-color: #f0f0f0;">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </TextField>
                 <Label text="Total (Con impuestos)">
                     <font>
                         <Font name="System Bold" size="14.0" />

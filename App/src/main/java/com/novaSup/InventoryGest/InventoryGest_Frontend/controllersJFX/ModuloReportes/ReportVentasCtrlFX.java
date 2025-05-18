@@ -9,6 +9,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableCell;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,6 +44,9 @@ public class ReportVentasCtrlFX {
 
     @FXML
     private TableColumn<VentaFX, String> colVendedor;
+
+    @FXML
+    private TableColumn<VentaFX, Void> colAcciones;
 
     @FXML
     private TableView<VentaFX> tablaVentas;
@@ -82,7 +87,29 @@ public class ReportVentasCtrlFX {
         // Para colSubtotal, colImpuestos y colCantidad, se necesitaría que VentaFX tenga estas propiedades.
         // Provisionalmente, usaré 'total' para colTotal. Las otras requerirán ajustes en VentaFX o lógica adicional.
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
-        
+        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidadTotalProductos")); // Usar la nueva propiedad
+
+        colAcciones.setCellFactory(param -> new TableCell<>() {
+            private final Button btnDetalles = new Button("Detalles");
+
+            {
+                btnDetalles.setOnAction(event -> {
+                    VentaFX venta = getTableView().getItems().get(getIndex());
+                    mostrarDetallesVenta(venta);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnDetalles);
+                }
+            }
+        });
+
         // Ejemplo para colImpuestos si VentaFX tuviera una propiedad booleana 'aplicarImpuestos'
         // TableColumn<VentaFX, String> colImpuestosText = new TableColumn<>("Impuestos Aplicados");
         // colImpuestosText.setCellValueFactory(cellData -> {
@@ -91,8 +118,8 @@ public class ReportVentasCtrlFX {
         // });
         // Adaptar colImpuestos, colSubtotal, colCantidad según las propiedades reales de VentaFX
         // Por ahora, las dejaré vinculadas a propiedades que podrían no existir o necesitar formato.
-        colSubtotal.setCellValueFactory(new PropertyValueFactory<>("total")); // Placeholder, idealmente VentaFX.subtotal
-        colImpuestos.setCellValueFactory(new PropertyValueFactory<>("total")); // Placeholder, idealmente VentaFX.impuestosCalculados
+        colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal")); 
+        colImpuestos.setCellValueFactory(new PropertyValueFactory<>("totalImpuestos")); 
         // colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidadItems")); // Placeholder
 
         tablaVentas.setItems(ventasData);
@@ -113,6 +140,14 @@ public class ReportVentasCtrlFX {
         }
     }
     
+    private void mostrarDetallesVenta(VentaFX venta) {
+        // Lógica para mostrar los detalles de la venta
+        // Esto podría implicar abrir una nueva ventana o un diálogo
+        System.out.println("Mostrando detalles para la venta: " + venta.getNumeroVenta());
+        // Aquí puedes implementar la navegación a una vista de detalles de venta
+        // o mostrar un diálogo con más información.
+    }
+
     // Método de ejemplo para calcular totales, necesitaría implementarse según la lógica de negocio
     /*
     private void calcularTotalesGenerales(List<VentaFX> ventas) {

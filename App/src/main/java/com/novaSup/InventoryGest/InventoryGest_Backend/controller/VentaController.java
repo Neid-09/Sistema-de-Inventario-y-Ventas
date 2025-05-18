@@ -102,11 +102,13 @@ public class VentaController {
         dto.setRequiereFactura(venta.getRequiereFactura());
         dto.setNumeroVenta(venta.getNumeroVenta());
         dto.setAplicarImpuestos(venta.getAplicarImpuestos());
-        dto.setTipoPago(venta.getTipoPago()); // Añadir mapeo para tipoPago
+        dto.setTipoPago(venta.getTipoPago());
+        dto.setTotalImpuestos(venta.getTotalImpuestos());
+        dto.setSubtotal(venta.getSubtotal()); // Añadir mapeo para subtotal
 
         if (venta.getDetallesVenta() != null && !venta.getDetallesVenta().isEmpty()) {
             dto.setDetalles(venta.getDetallesVenta().stream()
-                .map(this::convertToDetalleDto)
+                .map(this::convertToDetalleDto) // Corregido: Llamar a convertToDetalleDto
                 .collect(Collectors.toList()));
         } else {
             dto.setDetalles(new ArrayList<>());
