@@ -11,6 +11,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import java.io.IOException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -141,6 +147,29 @@ public class ReportVentasCtrlFX {
     }
     
     private void mostrarDetallesVenta(VentaFX venta) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloReportes/DetalleVentas.fxml"));
+            Parent root = loader.load();
+
+            // Obtener el controlador de la vista de detalles
+            DetalleVentasCtrlFX controller = loader.getController();
+            // Pasar el objeto VentaFX al controlador de detalles
+            controller.initData(venta); 
+            
+            // Si el controlador de DetalleVentas.fxml necesita el servicio, también se lo puedes pasar:
+            // controller.setService(this.ventaService);
+
+            Stage stage = new Stage();
+            stage.setTitle("Detalles de Venta: " + venta.getNumeroVenta());
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea otras ventanas hasta que esta se cierre
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Manejar la excepción, por ejemplo, mostrar un diálogo de error al usuario
+            System.err.println("Error al cargar la vista de detalles de venta: " + e.getMessage());
+        }
         // Lógica para mostrar los detalles de la venta
         // Esto podría implicar abrir una nueva ventana o un diálogo
         System.out.println("Mostrando detalles para la venta: " + venta.getNumeroVenta());
