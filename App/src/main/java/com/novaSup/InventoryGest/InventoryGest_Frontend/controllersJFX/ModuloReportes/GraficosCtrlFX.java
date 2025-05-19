@@ -91,9 +91,9 @@ public class GraficosCtrlFX {
     private void cargarOpcionesAnalisis() {
         ObservableList<String> opciones = FXCollections.observableArrayList(
                 "Análisis de Ventas Generales",
-                "Análisis por Producto"
+                "Análisis por Producto",
+                "Análisis por Vendedor"
                 // Añadir más tipos de análisis aquí en el futuro
-                // "Análisis por Vendedor",
                 // "Análisis por Cliente"
         );
         cmbTipoGrafico.setItems(opciones);
@@ -175,6 +175,16 @@ public class GraficosCtrlFX {
                 lblTituloGrafico2.setText("Contribución de Productos a Ingresos");
                 PieChart contribucionProductos = crearGraficoContribucionProductosIngresos(todasLasVentas);
                 agregarGraficoAContenedor(contribucionProductos, contenedorGrafico2);
+                break;
+
+            case "Análisis por Vendedor":
+                lblTituloGrafico1.setText("Rendimiento de Vendedores (Top 5)"); // Asumiendo Top 5 por defecto
+                BarChart<String, Number> rendimientoVendedores = crearGraficoRendimientoVendedores(todasLasVentas, 5);
+                agregarGraficoAContenedor(rendimientoVendedores, contenedorGrafico1);
+
+                lblTituloGrafico2.setText("Tendencia de Ventas por Vendedor");
+                LineChart<String, Number> tendenciaVentasVendedor = crearGraficoTendenciaVentasPorVendedor(todasLasVentas);
+                agregarGraficoAContenedor(tendenciaVentasVendedor, contenedorGrafico2);
                 break;
             // Puedes añadir más casos aquí si expandes las opciones del ComboBox
             default:
@@ -319,6 +329,89 @@ public class GraficosCtrlFX {
         // Considerar ocultar etiquetas de sectores si son demasiados y se superponen
         // pieChart.setLabelsVisible(false); 
         return pieChart;
+    }
+
+    // --- Métodos para Análisis por Vendedor ---
+
+    private BarChart<String, Number> crearGraficoRendimientoVendedores(List<VentaFX> ventas, int topN) {
+        Map<String, BigDecimal> ventasPorVendedor = ventas.stream()
+                .filter(venta -> venta.getNombreVendedor() != null && !venta.getNombreVendedor().isEmpty() && venta.getTotal() != null)
+                .collect(Collectors.groupingBy(
+                        VentaFX::getNombreVendedor,
+                        Collectors.reducing(BigDecimal.ZERO, VentaFX::getTotal, BigDecimal::add)
+                ));
+
+        // Ordenar por ventas descendentes y tomar topN
+        Map<String, BigDecimal> topVendedores = ventasPorVendedor.entrySet().stream()
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .limit(topN)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Vendedor");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Total Ventas");
+
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Ventas por Vendedor");
+
+        topVendedores.forEach((nombreVendedor, totalVentas) -> {
+            series.getData().add(new XYChart.Data<>(nombreVendedor, totalVentas));
+        });
+
+        barChart.getData().add(series);
+        barChart.setLegendVisible(false);
+        return barChart;
+    }
+
+    private LineChart<String, Number> crearGraficoTendenciaVentasPorVendedor(List<VentaFX> ventas) {
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Mes");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Ingresos Totales");
+
+        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setLegendVisible(true);
+
+        // Agrupar ventas por vendedor y luego por mes
+        Map<String, Map<Month, BigDecimal>> ventasPorVendedorYMes = ventas.stream()
+            .filter(venta -> venta.getNombreVendedor() != null && !venta.getNombreVendedor().isEmpty() &&
+                             venta.getFecha() != null && venta.getTotal() != null)
+            .collect(Collectors.groupingBy(
+                VentaFX::getNombreVendedor,
+                Collectors.groupingBy(
+                    venta -> venta.getFecha().getMonth(),
+                    Collectors.reducing(BigDecimal.ZERO, VentaFX::getTotal, BigDecimal::add)
+                )
+            ));
+
+        // Crear una serie por cada vendedor
+        ventasPorVendedorYMes.forEach((nombreVendedor, ventasMes) -> {
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName(nombreVendedor);
+
+            java.util.Arrays.stream(Month.values()).forEach(month -> {
+                BigDecimal totalMes = ventasMes.getOrDefault(month, BigDecimal.ZERO);
+                series.getData().add(new XYChart.Data<>(month.getDisplayName(TextStyle.SHORT, Locale.getDefault()), totalMes));
+            });
+            lineChart.getData().add(series);
+        });
+        
+        // Asegurar que todos los meses estén presentes en el eje X, incluso si no hay datos para algunos
+        ObservableList<String> meses = FXCollections.observableArrayList();
+        java.util.Arrays.stream(Month.values()).forEach(month -> {
+            meses.add(month.getDisplayName(TextStyle.SHORT, Locale.getDefault()));
+        });
+        xAxis.setCategories(meses);
+
+
+        return lineChart;
     }
 
 
