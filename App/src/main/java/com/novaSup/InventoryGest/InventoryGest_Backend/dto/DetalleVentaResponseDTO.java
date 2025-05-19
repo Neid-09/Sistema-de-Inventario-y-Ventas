@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class DetalleVentaResponseDTO {
     private Integer idDetalleVenta;
-    private Integer idProducto;
+    private String codProducto;
     private String nombreProducto;
     private Integer cantidad;
     private BigDecimal precioUnitarioOriginal;

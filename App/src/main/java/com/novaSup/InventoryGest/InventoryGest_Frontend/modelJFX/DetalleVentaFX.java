@@ -8,7 +8,7 @@ import java.util.List; // Asegúrate de que esta importación es necesaria y est
 
 public class DetalleVentaFX {
     private final IntegerProperty idDetalleVenta = new SimpleIntegerProperty();
-    private final IntegerProperty idProducto = new SimpleIntegerProperty();
+    private final StringProperty codProducto = new SimpleStringProperty();
     private final StringProperty nombreProducto = new SimpleStringProperty();
     private final IntegerProperty cantidad = new SimpleIntegerProperty();
     private final ObjectProperty<BigDecimal> precioUnitarioOriginal = new SimpleObjectProperty<>();
@@ -18,9 +18,9 @@ public class DetalleVentaFX {
     private final ListProperty<DetalleVentaLoteUsoFX> lotesUsados = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // Constructor completo (ejemplo)
-    public DetalleVentaFX(Integer idDetalleVenta, Integer idProducto, String nombreProducto, Integer cantidad, BigDecimal precioUnitarioOriginal, Integer idPromocionAplicada, BigDecimal precioUnitarioFinal, BigDecimal subtotal, List<DetalleVentaLoteUsoFX> lotesUsados) {
+    public DetalleVentaFX(Integer idDetalleVenta, String codProducto, String nombreProducto, Integer cantidad, BigDecimal precioUnitarioOriginal, Integer idPromocionAplicada, BigDecimal precioUnitarioFinal, BigDecimal subtotal, List<DetalleVentaLoteUsoFX> lotesUsados) {
         this.idDetalleVenta.set(idDetalleVenta);
-        this.idProducto.set(idProducto);
+        this.codProducto.set(codProducto);
         this.nombreProducto.set(nombreProducto);
         this.cantidad.set(cantidad);
         this.precioUnitarioOriginal.set(precioUnitarioOriginal);
@@ -37,8 +37,8 @@ public class DetalleVentaFX {
     public Integer getIdDetalleVenta() { return idDetalleVenta.get(); }
     public void setIdDetalleVenta(Integer idDetalleVenta) { this.idDetalleVenta.set(idDetalleVenta); }
 
-    public Integer getIdProducto() { return idProducto.get(); }
-    public void setIdProducto(Integer idProducto) { this.idProducto.set(idProducto); }
+    public String getCodProducto() { return codProducto.get(); }
+    public void setCodProducto(String codProducto) { this.codProducto.set(codProducto); }
 
     public String getNombreProducto() { return nombreProducto.get(); }
     public void setNombreProducto(String nombreProducto) { this.nombreProducto.set(nombreProducto); }
@@ -69,7 +69,7 @@ public class DetalleVentaFX {
 
     // Getters para propiedades JavaFX (para binding)
     public IntegerProperty idDetalleVentaProperty() { return idDetalleVenta; }
-    public IntegerProperty idProductoProperty() { return idProducto; }
+    public StringProperty codProductoProperty() { return codProducto; }
     public StringProperty nombreProductoProperty() { return nombreProducto; }
     public IntegerProperty cantidadProperty() { return cantidad; }
     public ObjectProperty<BigDecimal> precioUnitarioOriginalProperty() { return precioUnitarioOriginal; }

@@ -53,7 +53,7 @@ public class VentaController {
         
         Producto producto = detalleVenta.getProducto();
         if (producto != null) {
-            dto.setIdProducto(producto.getIdProducto());
+            dto.setCodProducto(producto.getCodigo());
             dto.setNombreProducto(producto.getNombre());
         }
         

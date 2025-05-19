@@ -7,7 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.layout.AnchorPane; // Añadido para concordancia con ConfigImptsCtrlFX
-
+//TODO: Optimizar la carga en las pestañas, ya que al iniciar la aplicación se cargan todas las pestañas y no solo la activa.
 public class MenuReportsVCtrlFX {
 
     @FXML
@@ -32,8 +32,8 @@ public class MenuReportsVCtrlFX {
     @FXML private AnchorPane graficosTabContent;
     @FXML private GraficosCtrlFX graficosTabContentController; // Asumiendo que existe GraficosCtrlFX
 
-    //@FXML private AnchorPane resumenTabContent;
-    //@FXML private ResumenCtrlFX resumenTabContentController; // Asumiendo que existe ResumenCtrlFX
+    @FXML private AnchorPane resumenTabContent;
+    @FXML private ResumenCtrlFX resumenTabContentController; // Asumiendo que existe ResumenCtrlFX
 
     private final IVentaSerivice ventaService; 
     
@@ -67,9 +67,9 @@ public class MenuReportsVCtrlFX {
         if (graficosTabContentController != null) {
             graficosTabContentController.setService(ventaService);
         }
-        // if (resumenTabContentController != null) {
-        //     // resumenTabContentController.setServicio(...); 
-        // }
+        if (resumenTabContentController != null) {
+            resumenTabContentController.setService(ventaService);
+        }
 
         // Aquí puedes configurar la comunicación entre pestañas si es necesario
         // setupTabCommunication();
