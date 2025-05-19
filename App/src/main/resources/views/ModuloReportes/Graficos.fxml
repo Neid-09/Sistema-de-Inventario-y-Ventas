@@ -1,43 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.PieChart?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" 
-            xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.GraficosCtrlFX"> <!-- AJUSTA ESTO A TU CONTROLADOR REAL -->
     <children>
-        <HBox layoutX="14.0" layoutY="14.0" prefHeight="500.0" prefWidth="972.0" spacing="20.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+        <VBox spacing="10" AnchorPane.topAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.bottomAnchor="60.0">
             <children>
-                <VBox prefHeight="500.0" prefWidth="476.0">
+                <HBox spacing="10" alignment="CENTER_LEFT" prefHeight="40.0">
                     <children>
-                        <!-- Aquí puedes agregar los gráficos de barras o pie que necesites -->
-                        <!-- Ejemplo de BarChart -->
-                        <BarChart fx:id="barChartVentas" title="Ventas por Mes">
-                          <xAxis>
-                            <CategoryAxis label="Mes" />
-                          </xAxis>
-                          <yAxis>
-                            <NumberAxis label="Monto" />
-                          </yAxis>
-                        </BarChart>
+                        <Label text="Seleccionar Reporte:" />
+                        <ComboBox fx:id="cmbTipoGrafico" promptText="Elija un tipo de gráfico" prefWidth="250.0"/>
                     </children>
-                </VBox>
-                <VBox prefHeight="500.0" prefWidth="476.0">
+                </HBox>
+
+                <HBox prefHeight="500.0" prefWidth="972.0" spacing="20.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <!-- Ejemplo de PieChart -->
-                        <PieChart fx:id="pieChartCategorias" title="Ventas por Categoría" />
+                        <VBox prefHeight="500.0" prefWidth="476.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label fx:id="lblTituloGrafico1" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                                <Pane fx:id="contenedorGrafico1" VBox.vgrow="ALWAYS" style="-fx-border-color: lightgray; -fx-border-width: 1;"/>
+                            </children>
+                        </VBox>
+                        <VBox prefHeight="500.0" prefWidth="476.0" spacing="5.0" HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label fx:id="lblTituloGrafico2" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                                <Pane fx:id="contenedorGrafico2" VBox.vgrow="ALWAYS" style="-fx-border-color: lightgray; -fx-border-width: 1;"/>
+                            </children>
+                        </VBox>
                     </children>
-                </VBox>
+                </HBox>
             </children>
-        </HBox>
-        <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+        </VBox>
+
+        <HBox alignment="CENTER" prefHeight="40.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
             <children>
                 <Button fx:id="btnExportarGraficos" mnemonicParsing="false" style="-fx-background-color: #3498db;" text="Exportar Gráficos" textFill="WHITE">
                     <font>

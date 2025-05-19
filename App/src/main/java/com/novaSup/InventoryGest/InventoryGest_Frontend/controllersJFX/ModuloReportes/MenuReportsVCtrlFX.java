@@ -29,8 +29,8 @@ public class MenuReportsVCtrlFX {
     @FXML private AnchorPane reportesVentasTabContent;
     @FXML private ReportVentasCtrlFX reportesVentasTabContentController; // Asumiendo que existe ReportesVentasCtrlFX
 
-    //@FXML private AnchorPane graficosTabContent;
-    //@FXML private GraficosCtrlFX graficosTabContentController; // Asumiendo que existe GraficosCtrlFX
+    @FXML private AnchorPane graficosTabContent;
+    @FXML private GraficosCtrlFX graficosTabContentController; // Asumiendo que existe GraficosCtrlFX
 
     //@FXML private AnchorPane resumenTabContent;
     //@FXML private ResumenCtrlFX resumenTabContentController; // Asumiendo que existe ResumenCtrlFX
@@ -64,9 +64,9 @@ public class MenuReportsVCtrlFX {
         if (reportesVentasTabContentController != null) {
              reportesVentasTabContentController.setService(ventaService); 
         }
-        // if (graficosTabContentController != null) {
-        //     // graficosTabContentController.setServicio(...); 
-        // }
+        if (graficosTabContentController != null) {
+            graficosTabContentController.setService(ventaService);
+        }
         // if (resumenTabContentController != null) {
         //     // resumenTabContentController.setServicio(...); 
         // }
