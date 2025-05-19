@@ -2,10 +2,12 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloRe
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaFX; // Asegurarse de que esta importación exista
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart; // Importar BarChart
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -21,6 +23,7 @@ import javafx.scene.Node;
 import java.math.BigDecimal;
 import java.time.Month;
 import java.time.format.TextStyle;
+import java.util.LinkedHashMap; // Para mantener el orden de inserción después de ordenar
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -55,37 +58,41 @@ public class GraficosCtrlFX {
             cargarOpcionesAnalisis();
         }
         // Seleccionar el primer item por defecto y cargar gráficos
-        if (!cmbTipoGrafico.getItems().isEmpty()) {
+        if (!cmbTipoGrafico.getItems().isEmpty() && cmbTipoGrafico.getSelectionModel().getSelectedItem() == null) {
             cmbTipoGrafico.getSelectionModel().selectFirst();
-            actualizarGraficos(); 
+            // actualizarGraficos(); // El listener se encargará de esto si la selección cambia
+        } else if (cmbTipoGrafico.getSelectionModel().getSelectedItem() != null) {
+            actualizarGraficos(); // Si ya hay algo seleccionado (ej. por FXML o persistencia)
         }
     }
 
     @FXML
     public void initialize() {
         // Este método se llama después de que los campos @FXML han sido inyectados.
-        // Es mejor poblar el ComboBox aquí o cuando el servicio es seteado.
-        // Si el servicio se setea después, la carga inicial de datos se hará en setService.
         if (cmbTipoGrafico.getItems().isEmpty()) {
             cargarOpcionesAnalisis();
         }
 
         cmbTipoGrafico.setOnAction(event -> actualizarGraficos());
 
-        // Carga inicial de gráficos si hay una opción seleccionada (podría ser la primera por defecto)
-        if (cmbTipoGrafico.getSelectionModel().getSelectedItem() != null) {
-            actualizarGraficos();
-        } else if (!cmbTipoGrafico.getItems().isEmpty()) {
-            cmbTipoGrafico.getSelectionModel().selectFirst(); // Asegura que algo esté seleccionado si hay items
-            // El listener de setOnAction se encargará de llamar a actualizarGraficos
+        // No llamar a actualizarGraficos() aquí directamente si setService() lo va a hacer
+        // o si queremos esperar a que el servicio esté disponible.
+        // La lógica en setService y el listener de setOnAction deberían cubrir la carga inicial.
+        if (cmbTipoGrafico.getItems().isEmpty()) { // Asegurar que las opciones se carguen si el servicio no se setea inmediatamente
+            cargarOpcionesAnalisis();
         }
+         // Si hay items y nada seleccionado, seleccionar el primero. El listener se activará.
+        if (!cmbTipoGrafico.getItems().isEmpty() && cmbTipoGrafico.getSelectionModel().getSelectedItem() == null) {
+            cmbTipoGrafico.getSelectionModel().selectFirst();
+        }
+
     }
 
     private void cargarOpcionesAnalisis() {
         ObservableList<String> opciones = FXCollections.observableArrayList(
-                "Análisis de Ventas Generales"
+                "Análisis de Ventas Generales",
+                "Análisis por Producto"
                 // Añadir más tipos de análisis aquí en el futuro
-                // "Análisis por Producto",
                 // "Análisis por Vendedor",
                 // "Análisis por Cliente"
         );
@@ -136,6 +143,15 @@ public class GraficosCtrlFX {
                 PieChart distribucionPagoChart = crearGraficoDistribucionTipoPago(todasLasVentas);
                 agregarGraficoAContenedor(distribucionPagoChart, contenedorGrafico2);
                 break;
+            case "Análisis por Producto":
+                lblTituloGrafico1.setText("Top 10 Productos por Ingresos");
+                BarChart<String, Number> topProductosChart = crearGraficoProductosMasVendidos(todasLasVentas, 10);
+                agregarGraficoAContenedor(topProductosChart, contenedorGrafico1);
+
+                lblTituloGrafico2.setText("Contribución de Productos a Ingresos");
+                PieChart contribucionProductosChart = crearGraficoContribucionProductosIngresos(todasLasVentas);
+                agregarGraficoAContenedor(contribucionProductosChart, contenedorGrafico2);
+                break;
             // Otros casos para diferentes análisis
         }
     }
@@ -178,10 +194,12 @@ public class GraficosCtrlFX {
         // Ordenar por mes para el gráfico
         java.util.Arrays.stream(Month.values()).forEach(month -> {
             BigDecimal totalMes = ventasPorMes.getOrDefault(month, BigDecimal.ZERO);
-            series.getData().add(new XYChart.Data<>(month.getDisplayName(TextStyle.SHORT, Locale.getDefault()), totalMes));
+            // Usar el nombre completo del mes para mayor claridad si el espacio lo permite
+            series.getData().add(new XYChart.Data<>(month.getDisplayName(TextStyle.FULL, Locale.of("es", "ES")), totalMes));
         });
         
         lineChart.getData().add(series);
+        lineChart.setLegendVisible(true);
         return lineChart;
     }
 
@@ -204,6 +222,75 @@ public class GraficosCtrlFX {
         return pieChart;
     }
     
+    // --- Métodos para Análisis por Producto ---
+
+    private BarChart<String, Number> crearGraficoProductosMasVendidos(List<VentaFX> ventas, int topN) {
+        Map<String, BigDecimal> ingresosPorProducto = ventas.stream()
+                .flatMap(venta -> venta.getDetalles().stream()) // Aplanar la lista de detalles de todas las ventas
+                .filter(detalle -> detalle.getNombreProducto() != null && detalle.getSubtotal() != null)
+                .collect(Collectors.groupingBy(
+                        DetalleVentaFX::getNombreProducto,
+                        Collectors.reducing(BigDecimal.ZERO, DetalleVentaFX::getSubtotal, BigDecimal::add)
+                ));
+
+        // Ordenar por ingresos descendentes y tomar topN
+        Map<String, BigDecimal> topProductos = ingresosPorProducto.entrySet().stream()
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .limit(topN)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1, // En caso de colisión de claves (no debería pasar aquí)
+                        LinkedHashMap::new // Para mantener el orden de inserción (ordenado)
+                ));
+
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Producto");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Ingresos");
+
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        // barChart.setTitle("Top " + topN + " Productos por Ingresos"); // El título se maneja con Label
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Ingresos por Producto");
+
+        topProductos.forEach((nombreProducto, ingresoTotal) -> {
+            series.getData().add(new XYChart.Data<>(nombreProducto, ingresoTotal));
+        });
+
+        barChart.getData().add(series);
+        barChart.setLegendVisible(false); // La serie ya tiene nombre, la leyenda puede ser redundante para un solo BarChart
+        return barChart;
+    }
+
+    private PieChart crearGraficoContribucionProductosIngresos(List<VentaFX> ventas) {
+        Map<String, BigDecimal> ingresosPorProducto = ventas.stream()
+                .flatMap(venta -> venta.getDetalles().stream())
+                .filter(detalle -> detalle.getNombreProducto() != null && detalle.getSubtotal() != null)
+                .collect(Collectors.groupingBy(
+                        DetalleVentaFX::getNombreProducto,
+                        Collectors.reducing(BigDecimal.ZERO, DetalleVentaFX::getSubtotal, BigDecimal::add)
+                ));
+
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+        ingresosPorProducto.forEach((nombreProducto, ingresoTotal) -> {
+            // Solo añadir si el ingreso es mayor que cero para evitar sectores vacíos
+            if (ingresoTotal.compareTo(BigDecimal.ZERO) > 0) {
+                 // Mostrar nombre y valor en la etiqueta del PieChart para mejor lectura
+                pieChartData.add(new PieChart.Data(nombreProducto + " (" + ingresoTotal.toString() + ")", ingresoTotal.doubleValue()));
+            }
+        });
+        
+        PieChart pieChart = new PieChart(pieChartData);
+        // pieChart.setTitle("Contribución de Productos a Ingresos"); // El título se maneja con Label
+        pieChart.setLegendVisible(true); // Puede ser útil si hay muchos productos
+        // Considerar ocultar etiquetas de sectores si son demasiados y se superponen
+        // pieChart.setLabelsVisible(false); 
+        return pieChart;
+    }
+
+
     // Método para el botón de exportar (a implementar)
     @FXML
     private void handleExportarGraficos() {
