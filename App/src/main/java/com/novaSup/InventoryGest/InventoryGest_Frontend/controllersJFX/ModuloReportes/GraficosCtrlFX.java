@@ -92,9 +92,9 @@ public class GraficosCtrlFX {
         ObservableList<String> opciones = FXCollections.observableArrayList(
                 "Análisis de Ventas Generales",
                 "Análisis por Producto",
-                "Análisis por Vendedor"
+                "Análisis por Vendedor",
+                "Análisis por Cliente" // Nueva opción
                 // Añadir más tipos de análisis aquí en el futuro
-                // "Análisis por Cliente"
         );
         cmbTipoGrafico.setItems(opciones);
     }
@@ -185,6 +185,15 @@ public class GraficosCtrlFX {
                 lblTituloGrafico2.setText("Tendencia de Ventas por Vendedor");
                 LineChart<String, Number> tendenciaVentasVendedor = crearGraficoTendenciaVentasPorVendedor(todasLasVentas);
                 agregarGraficoAContenedor(tendenciaVentasVendedor, contenedorGrafico2);
+                break;
+            
+            case "Análisis por Cliente": // Nuevo caso
+                lblTituloGrafico1.setText("Clientes Principales (Top 5)");
+                BarChart<String, Number> clientesPrincipales = crearGraficoClientesPrincipales(todasLasVentas, 5);
+                agregarGraficoAContenedor(clientesPrincipales, contenedorGrafico1);
+
+                lblTituloGrafico2.setText(""); // Limpiar el título del segundo gráfico
+                limpiarContenedor(contenedorGrafico2); // Limpiar el segundo contenedor si no se usa
                 break;
             // Puedes añadir más casos aquí si expandes las opciones del ComboBox
             default:
@@ -412,6 +421,44 @@ public class GraficosCtrlFX {
 
 
         return lineChart;
+    }
+
+    // --- Métodos para Análisis por Cliente ---
+    private BarChart<String, Number> crearGraficoClientesPrincipales(List<VentaFX> ventas, int topN) {
+        Map<String, BigDecimal> ventasPorCliente = ventas.stream()
+                .filter(venta -> venta.getNombreCliente() != null && !venta.getNombreCliente().isEmpty() && venta.getTotal() != null)
+                .collect(Collectors.groupingBy(
+                        VentaFX::getNombreCliente,
+                        Collectors.reducing(BigDecimal.ZERO, VentaFX::getTotal, BigDecimal::add)
+                ));
+
+        // Ordenar por ventas descendentes y tomar topN
+        Map<String, BigDecimal> topClientes = ventasPorCliente.entrySet().stream()
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .limit(topN)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1, // En caso de colisión de claves (no debería pasar aquí)
+                        LinkedHashMap::new // Para mantener el orden de inserción (ordenado)
+                ));
+
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Cliente");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Total Compras");
+
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Compras por Cliente");
+
+        topClientes.forEach((nombreCliente, totalCompras) -> {
+            series.getData().add(new XYChart.Data<>(nombreCliente, totalCompras));
+        });
+
+        barChart.getData().add(series);
+        barChart.setLegendVisible(false); // La leyenda puede ser redundante para un solo BarChart
+        return barChart;
     }
 
 
