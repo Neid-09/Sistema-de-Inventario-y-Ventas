@@ -102,57 +102,84 @@ public class GraficosCtrlFX {
     private void actualizarGraficos() {
         String seleccion = cmbTipoGrafico.getValue();
 
-        // Limpiar contenedores y títulos
         limpiarContenedor(contenedorGrafico1);
         lblTituloGrafico1.setText("");
         limpiarContenedor(contenedorGrafico2);
         lblTituloGrafico2.setText("");
 
         if (ventaService == null) {
-            lblTituloGrafico1.setText("Servicio de ventas no disponible.");
+            System.err.println("VentaService no está inicializado.");
+            lblTituloGrafico1.setText("Error: Servicio no disponible.");
             return;
         }
 
         if (seleccion == null) {
-            lblTituloGrafico1.setText("Seleccione un tipo de análisis.");
+            lblTituloGrafico1.setText("Por favor, seleccione un tipo de análisis.");
             return;
         }
         
         List<VentaFX> todasLasVentas;
         try {
-            todasLasVentas = ventaService.listarVentas();
+            // Asumiendo que tienes un método para obtener todas las ventas.
+            // Si necesitas detalles para todos los análisis, asegúrate que el método los cargue.
+            // Por ejemplo: ventaService.obtenerTodasLasVentasConDetalles();
+            // Si `obtenerTodasLasVentasConDetalles()` no existe, usa el método disponible,
+            // y asegúrate que los detalles se carguen si son necesarios para los gráficos de productos.
+            todasLasVentas = ventaService.listarVentas(); // O el método que tengas disponible
+            if (todasLasVentas.isEmpty() && ("Análisis por Producto".equals(seleccion) || "Análisis de Ventas Generales".equals(seleccion) )) {
+                 // Si se requiere análisis de productos, y las ventas no traen detalles, se podrían cargar aquí explícitamente si es necesario y posible.
+                 // Esto es solo un ejemplo, la lógica exacta dependerá de tu servicio.
+                 // todasLasVentas = ventaService.obtenerTodasLasVentasConDetalles();
+            }
+
         } catch (Exception e) {
+            System.err.println("Error al obtener ventas: " + e.getMessage());
+            e.printStackTrace();
             lblTituloGrafico1.setText("Error al cargar datos de ventas.");
-            // Log the exception e.g., e.printStackTrace(); or use a logger
             return;
         }
         
         if (todasLasVentas == null || todasLasVentas.isEmpty()) {
-            lblTituloGrafico1.setText("No hay datos de ventas para mostrar.");
+            lblTituloGrafico1.setText("No hay datos de ventas disponibles para mostrar.");
             return;
         }
 
-
         switch (seleccion) {
             case "Análisis de Ventas Generales":
-                lblTituloGrafico1.setText("Tendencia de Ingresos Mensuales");
-                LineChart<String, Number> tendenciaChart = crearGraficoTendenciaVentasTiempo(todasLasVentas);
-                agregarGraficoAContenedor(tendenciaChart, contenedorGrafico1);
+                lblTituloGrafico1.setText("Tendencia de Ventas en el Tiempo");
+                LineChart<String, Number> tendenciaVentas = crearGraficoTendenciaVentasTiempo(todasLasVentas);
+                agregarGraficoAContenedor(tendenciaVentas, contenedorGrafico1);
 
-                lblTituloGrafico2.setText("Distribución de Ventas por Método de Pago");
-                PieChart distribucionPagoChart = crearGraficoDistribucionTipoPago(todasLasVentas);
-                agregarGraficoAContenedor(distribucionPagoChart, contenedorGrafico2);
+                lblTituloGrafico2.setText("Distribución por Tipo de Pago");
+                PieChart distribucionPago = crearGraficoDistribucionTipoPago(todasLasVentas);
+                agregarGraficoAContenedor(distribucionPago, contenedorGrafico2);
                 break;
+
             case "Análisis por Producto":
-                lblTituloGrafico1.setText("Top 10 Productos por Ingresos");
-                BarChart<String, Number> topProductosChart = crearGraficoProductosMasVendidos(todasLasVentas, 10);
-                agregarGraficoAContenedor(topProductosChart, contenedorGrafico1);
+                // Asegurarse de que los detalles de la venta estén cargados para este análisis
+                // Si `todasLasVentas` no incluye detalles, necesitarías obtenerlos.
+                // Esta es una simplificación; idealmente, `ventaService.obtenerTodasLasVentas()`
+                // ya debería traer los detalles si son comúnmente necesarios, o tener un método específico.
+                boolean requiereDetalles = todasLasVentas.stream().anyMatch(v -> v.getDetalles() == null || v.getDetalles().isEmpty());
+                if(requiereDetalles){
+                    // Aquí podrías intentar cargar los detalles para todasLasVentas si tu servicio lo permite
+                    // o mostrar un mensaje indicando que los detalles no están disponibles.
+                    // Por ahora, asumimos que los detalles están presentes o los métodos de gráficos los manejan.
+                    System.out.println("Advertencia: Algunas ventas podrían no tener detalles cargados para el análisis de productos.");
+                }
+
+                lblTituloGrafico1.setText("Top 5 Productos Más Vendidos por Ingresos");
+                BarChart<String, Number> productosMasVendidos = crearGraficoProductosMasVendidos(todasLasVentas, 5);
+                agregarGraficoAContenedor(productosMasVendidos, contenedorGrafico1);
 
                 lblTituloGrafico2.setText("Contribución de Productos a Ingresos");
-                PieChart contribucionProductosChart = crearGraficoContribucionProductosIngresos(todasLasVentas);
-                agregarGraficoAContenedor(contribucionProductosChart, contenedorGrafico2);
+                PieChart contribucionProductos = crearGraficoContribucionProductosIngresos(todasLasVentas);
+                agregarGraficoAContenedor(contribucionProductos, contenedorGrafico2);
                 break;
-            // Otros casos para diferentes análisis
+            // Puedes añadir más casos aquí si expandes las opciones del ComboBox
+            default:
+                lblTituloGrafico1.setText("Tipo de análisis no reconocido.");
+                break;
         }
     }
     
@@ -163,10 +190,14 @@ public class GraficosCtrlFX {
     private void agregarGraficoAContenedor(Node grafico, Pane contenedor) {
         if (grafico != null && contenedor != null) {
             contenedor.getChildren().add(grafico);
-            // Ajustar tamaño del gráfico al contenedor
+            // Opcional: Hacer que el gráfico se ajuste al tamaño del contenedor.
+            // Esto funciona bien para Charts, pero puede necesitar ajustes para otros Nodes.
             if (grafico instanceof javafx.scene.chart.Chart) {
                 ((javafx.scene.chart.Chart) grafico).prefWidthProperty().bind(contenedor.widthProperty());
                 ((javafx.scene.chart.Chart) grafico).prefHeightProperty().bind(contenedor.heightProperty());
+            } else if (grafico instanceof Pane) { // Si el gráfico en sí es un Pane que contiene el Chart
+                 ((Pane) grafico).prefWidthProperty().bind(contenedor.widthProperty());
+                 ((Pane) grafico).prefHeightProperty().bind(contenedor.heightProperty());
             }
         }
     }
