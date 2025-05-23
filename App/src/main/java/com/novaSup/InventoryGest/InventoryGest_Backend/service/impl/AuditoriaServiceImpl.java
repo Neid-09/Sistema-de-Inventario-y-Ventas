@@ -3,7 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Auditoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.AuditoriaRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.AuditoriaService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.service.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

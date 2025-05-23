@@ -4,10 +4,10 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.LoteRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService; // Import ProductoService
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.LoteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RegistMovimientService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService; // Import ProductoService
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.LoteReducidoInfoDTO; // Importar DTO
 import java.util.ArrayList; // Importar ArrayList
 import org.springframework.stereotype.Service;

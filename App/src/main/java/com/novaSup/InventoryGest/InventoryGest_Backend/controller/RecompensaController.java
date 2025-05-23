@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Recompensa;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RecompensaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RecompensaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

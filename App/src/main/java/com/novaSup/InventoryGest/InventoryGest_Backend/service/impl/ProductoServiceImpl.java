@@ -4,9 +4,9 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.CategoriaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RegistMovimientService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.PromocionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

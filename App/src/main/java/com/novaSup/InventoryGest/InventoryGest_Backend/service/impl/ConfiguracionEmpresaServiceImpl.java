@@ -3,7 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DatosFiscalesEmisorDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.ConfiguracionEmpresa;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ConfiguracionEmpresaRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionEmpresaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ConfiguracionEmpresaService;
 import org.springframework.stereotype.Service;
 
 @Service

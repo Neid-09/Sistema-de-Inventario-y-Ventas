@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.CategoriaRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.CategoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.CategoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

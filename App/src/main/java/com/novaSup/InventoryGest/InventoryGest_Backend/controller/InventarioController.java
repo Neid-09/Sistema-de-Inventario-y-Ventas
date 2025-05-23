@@ -5,9 +5,9 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.InventarioService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.InventarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProveedorService;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

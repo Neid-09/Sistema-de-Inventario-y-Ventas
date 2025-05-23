@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Notificacion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.NotificacionRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Configuracion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ConfiguracionRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ConfiguracionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

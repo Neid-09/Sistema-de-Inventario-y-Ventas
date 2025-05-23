@@ -10,7 +10,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVentaLoteUso
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Vendedor;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.VentaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.VentaService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

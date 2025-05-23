@@ -10,13 +10,13 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.DetalleImpuestoFacturaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.FacturaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.TipoImpuestoRepository; // Asumiendo que existe este repositorio
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionEmpresaService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.CalculoImpuestoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.VendedorService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ConfiguracionEmpresaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.FacturaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.CalculoImpuestoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.VendedorService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.PromocionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.FacturaPreviewDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaPreviewInfoDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ClientePreviewInfoDTO;
@@ -27,12 +27,12 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoFactur
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.TipoImpuestoPreviewInfoDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaRequestDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoCalculoImpuestosDTO;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaPdfGenerator;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaPdfData;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.DatosFiscalesEmisorPdfDTO;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.DatosFiscalesReceptorPdfDTO;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.DetalleProductoPdfDTO;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.DetalleImpuestoPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.util.FacturaPdfGenerator;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.util.FacturaPdfData;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DatosFiscalesEmisorPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DatosFiscalesReceptorPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleProductoPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoPdfDTO;
 
 import jakarta.persistence.EntityNotFoundException;
 

@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.TasaImpuesto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.TasaImpuestoRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.TasaImpuestoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.TasaImpuestoService;
 // import org.springframework.beans.factory.annotation.Autowired; // Opcional con un solo constructor
 import org.springframework.stereotype.Service;
 import java.util.List;

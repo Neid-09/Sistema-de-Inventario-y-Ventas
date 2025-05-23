@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.ImpuestoAplicable;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.TasaImpuesto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.ImpuestoAplicable;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ImpuestoAplicableRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ImpuestoAplicableService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ImpuestoAplicableService;
 import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;

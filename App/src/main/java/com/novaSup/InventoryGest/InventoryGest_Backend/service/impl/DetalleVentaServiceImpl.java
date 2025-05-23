@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVenta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.DetalleVentaRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.DetalleVentaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.DetalleVentaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

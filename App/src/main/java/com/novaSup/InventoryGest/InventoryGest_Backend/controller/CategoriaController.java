@@ -2,9 +2,9 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.CategoriaService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.AuditoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.CategoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

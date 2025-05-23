@@ -2,9 +2,9 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.AuditoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.LoteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

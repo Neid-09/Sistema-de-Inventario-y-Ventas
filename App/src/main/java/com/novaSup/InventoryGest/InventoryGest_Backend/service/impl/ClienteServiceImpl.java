@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Cliente;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ClienteRepository; // Asegúrate que el nombre del repositorio coincida
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ClienteService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Cliente;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Recompensa;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ClienteRepository; // Asegúrate que el nombre coincida
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RecompensaRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RecompensaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RecompensaService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

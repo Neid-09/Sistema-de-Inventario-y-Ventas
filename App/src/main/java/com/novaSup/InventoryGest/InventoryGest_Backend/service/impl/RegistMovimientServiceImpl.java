@@ -6,7 +6,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RegistMovimientRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RegistMovimientService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

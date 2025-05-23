@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Cliente;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ClienteService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Promocion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PromocionRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.PromocionService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

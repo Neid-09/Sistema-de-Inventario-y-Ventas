@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Configuracion;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ConfiguracionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

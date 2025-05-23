@@ -2,7 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.TipoImpuesto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.TipoImpuestoRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.TipoImpuestoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.TipoImpuestoService;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;

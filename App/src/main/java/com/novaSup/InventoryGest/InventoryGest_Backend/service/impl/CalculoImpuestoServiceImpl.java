@@ -6,8 +6,8 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.DetalleVenta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.ImpuestoAplicable;
 // Asumiendo que DetalleVenta tiene getProducto() y Producto tiene getIdProducto()
 // Asumiendo que Producto tiene getCategoria() y Categoria tiene getIdCategoria()
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.CalculoImpuestoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ImpuestoAplicableService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.CalculoImpuestoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ImpuestoAplicableService;
 
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;

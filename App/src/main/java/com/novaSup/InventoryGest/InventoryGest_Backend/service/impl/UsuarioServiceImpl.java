@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RolRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.UsuarioService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Importar Transactional

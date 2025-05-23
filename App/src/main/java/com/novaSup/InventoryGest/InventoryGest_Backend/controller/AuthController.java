@@ -6,7 +6,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RolRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.jwt.JwtTokenProvider;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.service.CustomUserDetailsService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.UsuarioService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,8 +1,8 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.TipoImpuesto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.TipoImpuestoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.AuditoriaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.TipoImpuestoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

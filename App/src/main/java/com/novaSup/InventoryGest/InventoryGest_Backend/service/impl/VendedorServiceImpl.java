@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario; // Asegúr
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Vendedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository; // Asegúrate que la ruta sea correcta
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.VendedorRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.VendedorService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.VendedorService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

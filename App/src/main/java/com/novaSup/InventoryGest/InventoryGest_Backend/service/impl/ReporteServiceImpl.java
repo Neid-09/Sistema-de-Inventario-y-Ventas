@@ -5,9 +5,9 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Cliente;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Venta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Vendedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ClienteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ReporteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.VentaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ReporteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.VentaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

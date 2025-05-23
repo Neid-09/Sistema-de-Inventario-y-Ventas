@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.UsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.impl.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

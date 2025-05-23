@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Promocion;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.PromocionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

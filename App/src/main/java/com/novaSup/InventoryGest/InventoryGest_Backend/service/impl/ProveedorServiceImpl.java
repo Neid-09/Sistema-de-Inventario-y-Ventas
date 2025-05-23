@@ -3,7 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Proveedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProveedorService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
