@@ -31,4 +31,20 @@ public interface FacturaService {
      * @return La entidad FacturaPreviewDTO generada.
      */
     FacturaPreviewDTO previewFactura(VentaRequestDTO ventaRequest) throws Exception;
+
+    /**
+     * Genera el contenido PDF para una factura existente.
+     * @param idFactura El ID de la factura a generar el PDF.
+     * @return Un array de bytes representando el contenido del archivo PDF.
+     * @throws Exception Si ocurre un error durante la generación del PDF.
+     */
+    byte[] generarPdfFactura(int idFactura) throws Exception;
+
+    /**
+     * Genera el contenido PDF para una previsualización de factura.
+     * @param ventaRequest DTO con la información de la venta propuesta.
+     * @return Un array de bytes representando el contenido del archivo PDF de previsualización.
+     * @throws Exception Si ocurre un error durante la generación del PDF.
+     */
+    byte[] generarPdfPreview(VentaRequestDTO ventaRequest) throws Exception;
 } 

@@ -27,6 +27,12 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoFactur
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.TipoImpuestoPreviewInfoDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaRequestDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoCalculoImpuestosDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaPdfGenerator;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaPdfData;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.DatosFiscalesEmisorPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.DatosFiscalesReceptorPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.DetalleProductoPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.DetalleImpuestoPdfDTO;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -54,6 +60,7 @@ public class FacturaServiceImpl implements FacturaService {
     private final CalculoImpuestoService calculoImpuestoService;
     private final VendedorService vendedorService;
     private final PromocionService promocionService;
+    private final FacturaPdfGenerator facturaPdfGenerator;
 
     public FacturaServiceImpl(FacturaRepository facturaRepository,
                               DetalleImpuestoFacturaRepository detalleImpuestoFacturaRepository,
@@ -64,7 +71,8 @@ public class FacturaServiceImpl implements FacturaService {
                               ClienteService clienteService,
                               CalculoImpuestoService calculoImpuestoService,
                               VendedorService vendedorService,
-                              PromocionService promocionService) {
+                              PromocionService promocionService,
+                              FacturaPdfGenerator facturaPdfGenerator) {
         this.facturaRepository = facturaRepository;
         this.detalleImpuestoFacturaRepository = detalleImpuestoFacturaRepository;
         this.configuracionEmpresaService = configuracionEmpresaService;
@@ -75,6 +83,7 @@ public class FacturaServiceImpl implements FacturaService {
         this.calculoImpuestoService = calculoImpuestoService;
         this.vendedorService = vendedorService;
         this.promocionService = promocionService;
+        this.facturaPdfGenerator = facturaPdfGenerator;
     }
 
     @Override
@@ -532,5 +541,160 @@ public class FacturaServiceImpl implements FacturaService {
         facturaPreviewDTO.setDetallesImpuesto(detallesImpuestoPreview); // Setear los detalles de impuesto construidos
 
         return facturaPreviewDTO;
+    }
+
+    @Override
+    @Transactional(readOnly = true) // La generación de PDF no modifica el estado
+    public byte[] generarPdfFactura(int idFactura) throws Exception {
+        // 1. Obtener el DTO de previsualización utilizando el método existente
+        FacturaPreviewDTO facturaPreview = obtenerFacturaPorId(idFactura);
+
+        // Lanzar excepción si la factura no se encontró (obtenerFacturaPorId devuelve null si no encuentra)
+        if (facturaPreview == null) {
+             throw new EntityNotFoundException("Factura no encontrada con ID: " + idFactura);
+        }
+
+        // 2. Mapear FacturaPreviewDTO a FacturaPdfData DTO
+        FacturaPdfData datosPdf = new FacturaPdfData();
+        datosPdf.setNumeroFactura(facturaPreview.getNumeroFactura()); // Usar el número de factura real
+        datosPdf.setFechaEmision(facturaPreview.getFechaEmision()); // Usar la fecha de la factura
+        datosPdf.setSubtotal(facturaPreview.getSubtotal());
+        datosPdf.setTotalImpuestos(facturaPreview.getTotalImpuestos());
+        datosPdf.setTotalConImpuestos(facturaPreview.getTotalConImpuestos()); // Total final del DTO de preview
+
+        // Mapear Datos Fiscales (ya están en el DTO de preview)
+        if (facturaPreview.getDatosFiscales() != null) {
+             // Mapear Emisor (desde el DTO de preview)
+             if (facturaPreview.getDatosFiscales().getEmisor() != null) {
+                 datosPdf.setEmisor(new DatosFiscalesEmisorPdfDTO(
+                      facturaPreview.getDatosFiscales().getEmisor().getRazonSocial(),
+                      facturaPreview.getDatosFiscales().getEmisor().getIdentificacionFiscal(),
+                      facturaPreview.getDatosFiscales().getEmisor().getDireccionFacturacion()
+                 ));
+             }
+             // Mapear Receptor (desde el DTO de preview)
+              if (facturaPreview.getDatosFiscales().getReceptor() != null) {
+                 datosPdf.setReceptor(new DatosFiscalesReceptorPdfDTO(
+                      facturaPreview.getDatosFiscales().getReceptor().getRazonSocial(),
+                      facturaPreview.getDatosFiscales().getReceptor().getIdentificacionFiscal(),
+                      facturaPreview.getDatosFiscales().getReceptor().getDireccionFacturacion(),
+                      facturaPreview.getDatosFiscales().getReceptor().getTipoFactura()
+                 ));
+              }
+        }
+
+        // Mapear Detalles de Producto (desde el DTO de preview)
+        List<DetalleProductoPdfDTO> detallesProductoPdf = new ArrayList<>();
+        if (facturaPreview.getVentaInfo() != null && facturaPreview.getVentaInfo().getDetallesVenta() != null) { // Usar getDetalles() del DTO de preview
+            for (DetalleVentaPreviewDTO detalle : facturaPreview.getVentaInfo().getDetallesVenta()) { // Iterar sobre los detalles del DTO de preview
+                 // Asegurarse de que el producto en el detalle no sea nulo antes de acceder a sus propiedades
+                 if (detalle.getProducto() != null) {
+                     detallesProductoPdf.add(new DetalleProductoPdfDTO(
+                         detalle.getProducto().getCodigo(), // Usar getCodProducto()
+                         detalle.getProducto().getNombre(), // Usar getNombreProducto()
+                         detalle.getCantidad(),
+                         detalle.getPrecioUnitario(), // Usar el precio final del preview DTO
+                         detalle.getSubtotal()
+                     ));
+                 }
+             }
+        }
+        datosPdf.setDetallesProducto(detallesProductoPdf);
+
+        // Mapear Detalles de Impuesto (desde el DTO de preview)
+        List<DetalleImpuestoPdfDTO> detallesImpuestoPdf = new ArrayList<>();
+        if (facturaPreview.getDetallesImpuesto() != null) {
+            for (DetalleImpuestoFacturaPreviewDTO detalleImpuesto : facturaPreview.getDetallesImpuesto()) {
+                 detallesImpuestoPdf.add(new DetalleImpuestoPdfDTO(
+                     detalleImpuesto.getTipoImpuesto() != null ? detalleImpuesto.getTipoImpuesto().getNombre() : "Impuesto Desconocido",
+                     detalleImpuesto.getBaseImponible(),
+                     detalleImpuesto.getTasaAplicada(),
+                     detalleImpuesto.getMontoImpuesto()
+                 ));
+             }
+        }
+        datosPdf.setDetallesImpuesto(detallesImpuestoPdf);
+
+        // 3. Llamar al generador de PDF
+        try {
+            return facturaPdfGenerator.generarPdfBytes(datosPdf);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar el PDF de la factura " + idFactura, e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true) // La generación de PDF no modifica el estado
+    public byte[] generarPdfPreview(VentaRequestDTO ventaRequest) throws Exception {
+        // 1. Obtener el DTO de previsualización utilizando el método existente
+        FacturaPreviewDTO facturaPreview = previewFactura(ventaRequest);
+
+        // 2. Mapear FacturaPreviewDTO a FacturaPdfData DTO
+        FacturaPdfData datosPdf = new FacturaPdfData();
+        datosPdf.setNumeroFactura("PREVISUALIZACIÓN"); // Indicar que es una previsualización
+        datosPdf.setFechaEmision(LocalDateTime.now()); // Usar la fecha actual de generación del PDF
+        datosPdf.setSubtotal(facturaPreview.getSubtotal());
+        datosPdf.setTotalImpuestos(facturaPreview.getTotalImpuestos());
+        datosPdf.setTotalConImpuestos(facturaPreview.getTotalConImpuestos()); // Total final del DTO de preview
+
+        // Mapear Datos Fiscales (ya están en el DTO de preview)
+        if (facturaPreview.getDatosFiscales() != null) {
+             // Mapear Emisor (desde el DTO de preview)
+             if (facturaPreview.getDatosFiscales().getEmisor() != null) {
+                 datosPdf.setEmisor(new DatosFiscalesEmisorPdfDTO(
+                      facturaPreview.getDatosFiscales().getEmisor().getRazonSocial(),
+                      facturaPreview.getDatosFiscales().getEmisor().getIdentificacionFiscal(),
+                      facturaPreview.getDatosFiscales().getEmisor().getDireccionFacturacion()
+                 ));
+             }
+             // Mapear Receptor (desde el DTO de preview)
+              if (facturaPreview.getDatosFiscales().getReceptor() != null) {
+                 datosPdf.setReceptor(new DatosFiscalesReceptorPdfDTO(
+                      facturaPreview.getDatosFiscales().getReceptor().getRazonSocial(),
+                      facturaPreview.getDatosFiscales().getReceptor().getIdentificacionFiscal(),
+                      facturaPreview.getDatosFiscales().getReceptor().getDireccionFacturacion(),
+                      facturaPreview.getDatosFiscales().getReceptor().getTipoFactura()
+                 ));
+              }
+        }
+
+        // Mapear Detalles de Producto (desde el DTO de preview)
+        List<DetalleProductoPdfDTO> detallesProductoPdf = new ArrayList<>();
+        if (facturaPreview.getVentaInfo() != null && facturaPreview.getVentaInfo().getDetallesVenta() != null) { // Usar getDetalles() del DTO de preview
+            for (DetalleVentaPreviewDTO detalle : facturaPreview.getVentaInfo().getDetallesVenta()) { // Iterar sobre los detalles del DTO de preview
+                 // Asegurarse de que el producto en el detalle no sea nulo antes de acceder a sus propiedades
+                 if (detalle.getProducto() != null) {
+                      detallesProductoPdf.add(new DetalleProductoPdfDTO(
+                         detalle.getProducto().getCodigo(), // Usar getCodProducto()
+                         detalle.getProducto().getNombre(), // Usar getNombreProducto()
+                         detalle.getCantidad(),
+                         detalle.getPrecioUnitario(), // Usar el precio final del preview DTO
+                         detalle.getSubtotal()
+                     ));
+                 }
+             }
+        }
+        datosPdf.setDetallesProducto(detallesProductoPdf);
+
+        // Mapear Detalles de Impuesto (desde el DTO de preview)
+        List<DetalleImpuestoPdfDTO> detallesImpuestoPdf = new ArrayList<>();
+        if (facturaPreview.getDetallesImpuesto() != null) {
+            for (DetalleImpuestoFacturaPreviewDTO detalleImpuesto : facturaPreview.getDetallesImpuesto()) {
+                 detallesImpuestoPdf.add(new DetalleImpuestoPdfDTO(
+                     detalleImpuesto.getTipoImpuesto() != null ? detalleImpuesto.getTipoImpuesto().getNombre() : "Impuesto Desconocido",
+                     detalleImpuesto.getBaseImponible(),
+                     detalleImpuesto.getTasaAplicada(),
+                     detalleImpuesto.getMontoImpuesto()
+                 ));
+             }
+        }
+        datosPdf.setDetallesImpuesto(detallesImpuestoPdf);
+
+        // 3. Llamar al generador de PDF
+        try {
+            return facturaPdfGenerator.generarPdfBytes(datosPdf);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar el PDF de previsualización", e);
+        }
     }
 } 
