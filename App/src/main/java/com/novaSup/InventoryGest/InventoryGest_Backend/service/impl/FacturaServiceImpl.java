@@ -12,6 +12,14 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.FacturaReposit
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.TipoImpuestoRepository; // Asumiendo que existe este repositorio
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionEmpresaService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.FacturaService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.FacturaPreviewDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaPreviewInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ClientePreviewInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VendedorPreviewInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleVentaPreviewDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ProductoPreviewInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoFacturaPreviewDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.TipoImpuestoPreviewInfoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +50,146 @@ public class FacturaServiceImpl implements FacturaService {
     }
 
     @Override
+    @Transactional(readOnly = true) // Marcar como solo lectura ya que es una consulta
+    public FacturaPreviewDTO obtenerFacturaPorId(int idFactura) {
+        // Usar findById simple ahora que mapeamos a DTO
+        Factura factura = facturaRepository.findById(idFactura).orElse(null);
+
+        if (factura == null) {
+            return null; // O lanzar una excepción específica de no encontrado
+        }
+
+        // Inicializar manualmente las relaciones lazy necesarias antes de mapear a DTO
+        // Acceder a los getters fuerza la carga si la entidad está aún en contexto persistencia
+        factura.getVenta();
+        if (factura.getVenta() != null) {
+            factura.getVenta().getCliente();
+            factura.getVenta().getVendedor();
+            factura.getVenta().getDetallesVenta().size(); // Forzar carga de la colección
+            if (factura.getVenta().getDetallesVenta() != null) {
+                 for (DetalleVenta dv : factura.getVenta().getDetallesVenta()) {
+                     dv.getProducto(); // Forzar carga del Producto en cada detalle
+                 }
+            }
+        }
+        factura.getDetallesImpuesto().size(); // Forzar carga de la colección
+        if (factura.getDetallesImpuesto() != null) {
+            for (DetalleImpuestoFactura dif : factura.getDetallesImpuesto()) {
+                dif.getTipoImpuesto(); // Forzar carga del TipoImpuesto en cada detalle
+            }
+        }
+
+        // Mapear entidad Factura a FacturaPreviewDTO
+        FacturaPreviewDTO facturaDTO = new FacturaPreviewDTO();
+        facturaDTO.setIdFactura(factura.getIdFactura());
+        facturaDTO.setNumeroFactura(factura.getNumeroFactura());
+        facturaDTO.setFechaEmision(factura.getFechaEmision());
+        facturaDTO.setSubtotal(factura.getSubtotal());
+        facturaDTO.setTotalImpuestos(factura.getTotalImpuestos());
+        facturaDTO.setTotalConImpuestos(factura.getTotalConImpuestos());
+        // Asumiendo que DatosFiscalesFacturaDTO se puede construir del JSON o ya es el tipo correcto
+        try {
+             facturaDTO.setDatosFiscales(objectMapper.readValue(factura.getDatosFiscales(), DatosFiscalesFacturaDTO.class));
+        } catch (JsonProcessingException e) {
+            // Manejar error de serialización/deserialización si DatosFiscales no es válido
+            // Podrías loggearlo o lanzar una excepción personalizada
+            e.printStackTrace(); // O log más apropiado
+            // Dependiendo del requerimiento, podrías establecer datosFiscales a null en el DTO
+             facturaDTO.setDatosFiscales(null); // O manejar de otra forma
+        }
+        facturaDTO.setEstado(factura.getEstado());
+
+        // Mapear Venta a VentaPreviewInfoDTO
+        if (factura.getVenta() != null) {
+            Venta venta = factura.getVenta();
+            VentaPreviewInfoDTO ventaDTO = new VentaPreviewInfoDTO();
+            ventaDTO.setIdVenta(venta.getIdVenta());
+
+            // Mapear Cliente a ClientePreviewInfoDTO
+            if (venta.getCliente() != null) {
+                Cliente cliente = venta.getCliente();
+                ventaDTO.setCliente(new ClientePreviewInfoDTO(
+                        cliente.getIdCliente(),
+                        cliente.getNombre(),
+                        cliente.getRazonSocial(),
+                        cliente.getIdentificacionFiscal(),
+                        cliente.getDireccion(),
+                        cliente.getDireccionFacturacion()
+                        // Mapear otros campos necesarios del cliente
+                ));
+            }
+
+            // Mapear Vendedor a VendedorPreviewInfoDTO
+            if (venta.getVendedor() != null) {
+                Vendedor vendedor = venta.getVendedor();
+                ventaDTO.setVendedor(new VendedorPreviewInfoDTO(
+                        vendedor.getIdVendedor(),
+                        vendedor.getUsuario().getNombre() // O el campo nombre del vendedor
+                        // Mapear otros campos necesarios del vendedor
+                ));
+            }
+
+            // Mapear DetallesVenta a List<DetalleVentaPreviewDTO>
+            if (venta.getDetallesVenta() != null) {
+                List<DetalleVentaPreviewDTO> detallesVentaDTO = new ArrayList<>();
+                for (DetalleVenta detalleVenta : venta.getDetallesVenta()) {
+                    ProductoPreviewInfoDTO productoDTO = null;
+                    if (detalleVenta.getProducto() != null) {
+                        Producto producto = detalleVenta.getProducto();
+                        productoDTO = new ProductoPreviewInfoDTO(
+                                producto.getIdProducto(),
+                                producto.getNombre(),
+                                producto.getCodigo(),
+                                producto.getPrecioVenta()
+                                // Mapear otros campos necesarios del producto
+                        );
+                    }
+                    // Mapear DetalleVenta a DetalleVentaPreviewDTO
+                    detallesVentaDTO.add(new DetalleVentaPreviewDTO(
+                            detalleVenta.getIdDetalle(), // Integer (según entidad y DTO)
+                            productoDTO,
+                            detalleVenta.getCantidad(), // Integer (según entidad y DTO)
+                            detalleVenta.getPrecioUnitarioFinal(), // BigDecimal (según entidad y DTO)
+                            detalleVenta.getSubtotal() // BigDecimal (según entidad y DTO)
+                            // Mapear otros campos necesarios del detalle de venta
+                    ));
+                }
+                ventaDTO.setDetallesVenta(detallesVentaDTO);
+            }
+
+            facturaDTO.setVentaInfo(ventaDTO);
+        }
+
+        // Mapear DetallesImpuesto a List<DetalleImpuestoFacturaPreviewDTO>
+        if (factura.getDetallesImpuesto() != null) {
+            List<DetalleImpuestoFacturaPreviewDTO> detallesImpuestoDTO = new ArrayList<>();
+            for (DetalleImpuestoFactura detalleImpuesto : factura.getDetallesImpuesto()) {
+                 TipoImpuestoPreviewInfoDTO tipoImpuestoDTO = null;
+                 if (detalleImpuesto.getTipoImpuesto() != null) {
+                     TipoImpuesto tipoImpuesto = detalleImpuesto.getTipoImpuesto();
+                     tipoImpuestoDTO = new TipoImpuestoPreviewInfoDTO(
+                         tipoImpuesto.getIdTipoImpuesto(), // int (según entidad y DTO)
+                         tipoImpuesto.getNombre() // String (según entidad y DTO)
+                         // Mapear otros campos necesarios del tipo de impuesto
+                     );
+                 }
+                 // Mapear DetalleImpuestoFactura a DetalleImpuestoFacturaPreviewDTO
+                detallesImpuestoDTO.add(new DetalleImpuestoFacturaPreviewDTO(
+                        detalleImpuesto.getIdDetalle(), // Long (según entidad y DTO)
+                        tipoImpuestoDTO,
+                        detalleImpuesto.getBaseImponible(), // BigDecimal (según entidad y DTO)
+                        detalleImpuesto.getTasaAplicada(), // BigDecimal (según entidad y DTO)
+                        detalleImpuesto.getMontoImpuesto() // BigDecimal (según entidad y DTO)
+                        // Mapear otros campos necesarios del detalle de impuesto
+                ));
+            }
+            facturaDTO.setDetallesImpuesto(detallesImpuestoDTO);
+        }
+
+        return facturaDTO;
+    }
+
+    @Override
     @Transactional
     public Factura generarFactura(Venta ventaGuardada, List<DetalleImpuestoFacturaTemporalDTO> desgloseImpuestos) {
         Factura nuevaFactura = new Factura();
@@ -62,7 +210,7 @@ public class FacturaServiceImpl implements FacturaService {
         DatosFiscalesEmisorDTO emisorDTO = configuracionEmpresaService.obtenerDatosFiscalesEmisor();
         DatosFiscalesReceptorDTO receptorDTO;
         Cliente cliente = ventaGuardada.getCliente();
-
+        //TODO: EL_ID_FISCAL_PUBLICO_GENERAL DEBE SER MODIFICABLE EN LA CONFIGURACION DE LA EMPRESA
         // Definir el identificador para "Público en General" o "Consumidor Final"
         // Este valor podría ser específico para Colombia (ej. "222222222222")
         // o un estándar si tu sistema debe ser más genérico.

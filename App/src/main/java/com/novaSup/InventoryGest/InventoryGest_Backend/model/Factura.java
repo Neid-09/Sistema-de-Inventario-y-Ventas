@@ -12,7 +12,7 @@ public class Factura {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_factura")
-    private Long idFactura;
+    private int idFactura;
 
     // Asumiendo que la entidad Venta tiene una PK Long idVenta y existe en el mismo paquete o se importa
     @OneToOne(fetch = FetchType.LAZY)
@@ -46,11 +46,11 @@ public class Factura {
 
     // Getters y Setters
 
-    public Long getIdFactura() {
+    public int getIdFactura() {
         return idFactura;
     }
 
-    public void setIdFactura(Long idFactura) {
+    public void setIdFactura(int idFactura) {
         this.idFactura = idFactura;
     }
 
