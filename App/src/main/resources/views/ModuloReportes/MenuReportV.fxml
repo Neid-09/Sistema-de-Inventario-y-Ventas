@@ -21,7 +21,7 @@
     <top>
         <VBox BorderPane.alignment="CENTER">
             <children>
-                <HBox alignment="CENTER" prefHeight="60.0" prefWidth="200.0" style="-fx-background-color: #3498db;">
+                <HBox alignment="CENTER" prefHeight="60.0" prefWidth="200.0" style="-fx-background-color: #083671;">
                     <children>
                         <Label text="REPORTE DE VENTAS" textFill="WHITE">
                             <font>
