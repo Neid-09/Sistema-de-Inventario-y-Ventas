@@ -115,3 +115,156 @@
     -fx-padding: 5px 10px;
     -fx-font-size: 11px;
 }
+
+/* Nuevos estilos para la barra inferior */
+
+/* Estilo para el label del Rol */
+.rol-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #555555; /* Color de texto gris oscuro */
+}
+
+/* Estilo para el botón de Abrir/Cerrar Caja */
+.caja-button {
+    -fx-background-color: #4CAF50; /* Verde */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 15px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.caja-button:hover {
+    -fx-background-color: #45a049;
+}
+
+.caja-button:pressed {
+    -fx-background-color: #397d39;
+}
+
+/* Estilos para los labels de información de ventas */
+.info-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333; /* Color de texto oscuro */
+    -fx-font-weight: bold;
+}
+
+.info-value-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #0066cc; /* Color azul para los valores */
+}
+
+/* Estilos para la barra superior (perfil y notificaciones) */
+
+/* Estilo para el StackPane contenedor del icono y el contador - Si se usa en FXML, mantener */
+.notification-stack-pane {
+    -fx-alignment: center; /* Centrar el contenido del stack (icono y contador) */
+    -fx-padding: 0; /* Eliminar padding por defecto */
+}
+
+/* Estilo para el Label del contador de notificaciones (aplicado en Java) */
+.notification-count-label {
+    -fx-background-color: red;
+    -fx-background-radius: 10px; /* Hacerlo circular */
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 1px 5px; /* Ajustar padding para tamaño del círculo */
+    -fx-min-width: 18px; /* Asegurar tamaño mínimo */
+    -fx-alignment: center; /* Centrar el número */
+    -fx-translate-x: 9px; /* Mover a la derecha del icono */
+    -fx-translate-y: -9px; /* Mover hacia arriba del icono */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 1); /* Sombra sutil */
+}
+
+/* Estilo para el botón de Notificaciones */
+.alert-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent; /* Asegurar borde transparente por defecto */
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.alert-button:hover {
+    -fx-background-color: transparent; /* Asegurar fondo transparente al pasar el mouse */
+    -fx-border-color: transparent; /* Asegurar borde transparente al pasar el mouse */
+}
+
+.alert-button:pressed {
+    -fx-background-color: transparent; /* Asegurar fondo transparente al presionar */
+    -fx-border-color: transparent; /* Asegurar borde transparente al presionar */
+}
+
+/* Asegurar que el borde de foco sea transparente */
+.alert-button:focused {
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent; /* Opcional: puede ayudar dependiendo del tema */
+    -fx-background-color: transparent; /* Asegurar que no aparezca un fondo al enfocar */
+}
+
+.alert-button:focused:hover {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
+
+/* Estilo para el nombre de usuario */
+.user-name-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333; /* Color similar al del sistema de ventas */
+}
+
+/* Estilo para el label del Rol */
+.rol-label {
+    -fx-font-size: 10px; /* Reducir un poco el tamaño */
+    -fx-text-fill: #555555; /* Un gris un poco más oscuro */
+}
+
+/* Estilo para el botón Cerrar Sesión */
+.logout-button {
+    -fx-background-color: #f0f0f0; /* Gris muy claro */
+    -fx-text-fill: #555555; /* Texto gris oscuro */
+    -fx-font-size: 12px;
+    -fx-padding: 4px 8px; /* Ajustar padding */
+    -fx-background-radius: 4px;
+    -fx-border-color: #d0d0d0; /* Borde gris */
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1); /* Sombra más sutil */
+}
+
+.logout-button:hover {
+    -fx-background-color: #ff6666; /* Rojo claro */
+    -fx-text-fill: white; /* Texto blanco para contraste */
+    -fx-border-color: #ff4444; /* Borde rojo */
+}
+
+.logout-button:pressed {
+    -fx-background-color: #ff4444;
+    -fx-border-color: #ff2222;
+}
+
+/* Ajustar el espaciado en el HBox principal de la barra superior si es necesario */
+#topBar {
+    -fx-spacing: 20px; /* Ajustar espacio */
+    -fx-alignment: center_left; /* Mantener alineación a la izquierda para logo/título */
+}
+
+/* Ajustar alineación y espaciado del HBox contenedor de los elementos de la derecha */
+#topBar > HBox {
+     -fx-alignment: center_right;
+     -fx-spacing: 15px; /* Espacio entre notificaciones, perfil y cerrar sesión */
+}
+
+/* Ajustar alineación del HBox contenedor del perfil (icono, nombre, rol) */
+#topBar > HBox > HBox {
+    -fx-alignment: center_left;
+    -fx-spacing: 5px; /* Espacio entre icono y texto */
+}
+
+/* Ajustar alineación y espaciado del VBox contenedor del nombre y rol */
+#topBar > HBox > HBox > VBox {
+     -fx-alignment: center_left;
+     -fx-spacing: 0px; /* Espacio entre nombre y rol */
+}

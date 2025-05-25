@@ -36,7 +36,6 @@
                     </image>
                 </ImageView>
 
-
                 <!-- Nombre del sistema centrado con expansión -->
                 <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Sistema de Ventas D2">
                     <HBox.margin>
@@ -44,33 +43,54 @@
                     </HBox.margin>
                 </Label>
 
-                <!-- Relleno flexible para empujar el perfil a la derecha -->
+                <!-- Relleno flexible para empujar los elementos de la derecha -->
                 <Pane HBox.hgrow="ALWAYS" />
 
+                <!-- Elementos de la derecha: Notificaciones, Perfil y Cerrar Sesión -->
+                <HBox alignment="CENTER_RIGHT" spacing="15">
+                    <!-- Botón Notificaciones -->
+                    <Button fx:id="btnNotificaciones" onAction="#irNotificaciones" styleClass="alert-button">
+                        <graphic>
+                            <!-- StackPane para el icono de notificación y el contador -->
+                            <StackPane styleClass="notification-stack-pane">
+                                <children>
+                                    <ImageView fitHeight="24.0" fitWidth="24.0">
+                                        <image>
+                                            <Image url="@../img/menuPrincipal/notificaciones.png" />
+                                        </image>
+                                    </ImageView>
+                                    <!-- Label para el contador de notificaciones -->
+                                    <!-- REMOVED: <Label fx:id="lblNotificacionCount" text="1" visible="true" styleClass="notification-count-label"/> -->
+                                </children>
+                            </StackPane>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip text="Alertas de inventario" />
+                        </tooltip>
+                        <cursor>
+                            <Cursor fx:constant="HAND" />
+                        </cursor>
+                    </Button>
 
-                <Button fx:id="btnNotificaciones" onAction="#irNotificaciones" style="-fx-background-color: transparent;" styleClass="alert-button" textFill="TRANSPARENT">
-                    <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0">
-                            <Image url="@../img/menuPrincipal/notificaciones.png" />
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Alertas de inventario" />
-                    </tooltip>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-                </Button>
+                    <!-- Contenedor para Icono de Usuario, Nombre y Rol -->
+                    <HBox alignment="CENTER_LEFT" spacing="5">
+                         <children>
+                            <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
+                                <image>
+                                    <Image url="@../img/menuPrincipal/user.png" />
+                                </image>
+                            </ImageView>
+                             <VBox alignment="CENTER_LEFT" spacing="0">
+                                 <children>
+                                     <Label fx:id="lblUsuario" text="[INSERTAR NOMBRE]" styleClass="user-name-label"/>
+                                     <Label fx:id="lblRol" text="ROL: []" styleClass="rol-label" />
+                                 </children>
+                             </VBox>
+                         </children>
+                    </HBox>
 
-                <!-- Perfil de usuario (puede ser imagen + nombre + botón cerrar sesión) -->
-                <HBox alignment="CENTER_RIGHT" spacing="10">
-                    <ImageView fitHeight="30" fitWidth="30" preserveRatio="true">
-                        <image>
-                            <Image url="@../img/menuPrincipal/user.png" />
-                        </image>
-                    </ImageView>
-                    <Label fx:id="lblUsuario" style="-fx-font-weight: bold;" text="[INSERTAR NOMBRE]" />
-                    <Button fx:id="btnCerrarSesion" onAction="#cerrarSesion" text="Cerrar sesión" />
+                     <!-- Botón Cerrar Sesión -->
+                    <Button fx:id="btnCerrarSesion" onAction="#cerrarSesion" text="Cerrar sesión" styleClass="logout-button"/>
                 </HBox>
 
             </children>
@@ -319,10 +339,25 @@
 
     <!-- FOOTER (BOTTOM) -->
     <bottom>
-        <HBox alignment="CENTER" prefHeight="50.0" spacing="20" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
+        <HBox fx:id="bottomBar" alignment="CENTER" prefHeight="50.0" spacing="20" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
             <children>
 
-                <Label fx:id="lblRol" text="ROL: []" />
+                <!-- Botón Abrir/Cerrar Caja -->
+                <Button fx:id="btnCaja" styleClass="caja-button" text="Abrir Caja" />
+
+                <!-- Información de Ventas -->
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <children>
+                        <Label styleClass="info-label" text="Total Vendido:" />
+                        <Label fx:id="lblTotalVendido" styleClass="info-value-label" text="0.00" />
+
+                        <Label styleClass="info-label" text="En Caja:" />
+                        <Label fx:id="lblEnCaja" styleClass="info-value-label" text="0.00" />
+
+                        <Label styleClass="info-label" text="Productos Vendidos:" />
+                        <Label fx:id="lblProductosVendidos" styleClass="info-value-label" text="0" />
+                    </children>
+                </HBox>
 
             </children>
         </HBox>

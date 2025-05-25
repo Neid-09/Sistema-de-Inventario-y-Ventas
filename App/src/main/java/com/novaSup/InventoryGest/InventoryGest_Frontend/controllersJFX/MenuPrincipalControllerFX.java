@@ -591,8 +591,7 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     private void inicializarContadorNotificaciones() {
         contadorNotificaciones = new Label("0");
-        contadorNotificaciones.setStyle("-fx-background-color: red; -fx-text-fill: white; " +
-                "-fx-background-radius: 10; -fx-padding: 2 6 2 6; -fx-font-size: 10px;");
+        contadorNotificaciones.getStyleClass().add("notification-count-label");
         contadorNotificaciones.setVisible(false);
 
         // Añadir el contador al botón de notificaciones
