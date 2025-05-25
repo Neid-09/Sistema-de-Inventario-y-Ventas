@@ -18,11 +18,11 @@ public interface FacturaService {
     Factura generarFactura(Venta ventaGuardada, List<DetalleImpuestoFacturaTemporalDTO> desgloseImpuestos);
 
     /**
-     * Obtiene una factura por su identificador único y la mapea a un DTO para previsualización.
-     * @param idFactura El ID de la factura a obtener.
+     * Obtiene una factura asociada a una venta por el identificador de la venta y la mapea a un DTO para previsualización.
+     * @param idVenta El ID de la venta asociada a la factura a obtener.
      * @return La FacturaPreviewDTO encontrada, o null si no existe.
      */
-    FacturaPreviewDTO obtenerFacturaPorId(int idFactura);
+    FacturaPreviewDTO obtenerFacturaPorIdVenta(int idVenta);
 
     /**
      * Genera una previsualización de una factura basada en los datos de venta propuestos.
@@ -34,11 +34,12 @@ public interface FacturaService {
 
     /**
      * Genera el contenido PDF para una factura existente.
-     * @param idFactura El ID de la factura a generar el PDF.
+     * Genera el contenido PDF para una factura asociada a una venta.
+     * @param idVenta El ID de la venta asociada a la factura a generar el PDF.
      * @return Un array de bytes representando el contenido del archivo PDF.
      * @throws Exception Si ocurre un error durante la generación del PDF.
      */
-    byte[] generarPdfFactura(int idFactura) throws Exception;
+    byte[] generarPdfFacturaPorIdVenta(int idVenta) throws Exception;
 
     /**
      * Genera el contenido PDF para una previsualización de factura.

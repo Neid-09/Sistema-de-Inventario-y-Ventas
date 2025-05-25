@@ -88,12 +88,12 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Override
     @Transactional(readOnly = true) // Marcar como solo lectura ya que es una consulta
-    public FacturaPreviewDTO obtenerFacturaPorId(int idFactura) {
+    public FacturaPreviewDTO obtenerFacturaPorIdVenta(int idVenta) {
         // Usar findById simple ahora que mapeamos a DTO
-        Factura factura = facturaRepository.findById(idFactura).orElse(null);
+        Factura factura = facturaRepository.findByVenta_IdVenta(idVenta).orElse(null);
 
         if (factura == null) {
-            return null; // O lanzar una excepción específica de no encontrado
+            throw new EntityNotFoundException("No se encontró factura para la venta con ID " + idVenta + ". Posiblemente no se emitió porque la venta o el cliente no lo requería.");
         }
 
         // Inicializar manualmente las relaciones lazy necesarias antes de mapear a DTO
@@ -545,13 +545,13 @@ public class FacturaServiceImpl implements FacturaService {
 
     @Override
     @Transactional(readOnly = true) // La generación de PDF no modifica el estado
-    public byte[] generarPdfFactura(int idFactura) throws Exception {
+    public byte[] generarPdfFacturaPorIdVenta(int idVenta) throws Exception {
         // 1. Obtener el DTO de previsualización utilizando el método existente
-        FacturaPreviewDTO facturaPreview = obtenerFacturaPorId(idFactura);
+        FacturaPreviewDTO facturaPreview = obtenerFacturaPorIdVenta(idVenta);
 
         // Lanzar excepción si la factura no se encontró (obtenerFacturaPorId devuelve null si no encuentra)
         if (facturaPreview == null) {
-             throw new EntityNotFoundException("Factura no encontrada con ID: " + idFactura);
+             throw new EntityNotFoundException("Factura no encontrada para la Venta con ID: " + idVenta);
         }
 
         // 2. Mapear FacturaPreviewDTO a FacturaPdfData DTO
@@ -619,7 +619,7 @@ public class FacturaServiceImpl implements FacturaService {
         try {
             return facturaPdfGenerator.generarPdfBytes(datosPdf);
         } catch (Exception e) {
-            throw new RuntimeException("Error al generar el PDF de la factura " + idFactura, e);
+            throw new RuntimeException("Error al generar el PDF de la factura " + idVenta, e);
         }
     }
 

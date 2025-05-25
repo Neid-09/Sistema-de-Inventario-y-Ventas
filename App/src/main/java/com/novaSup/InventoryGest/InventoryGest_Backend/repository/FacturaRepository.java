@@ -16,4 +16,7 @@ public interface FacturaRepository extends JpaRepository<Factura, Integer> {
     // Método para obtener una Factura por ID y cargar eager las relaciones Venta, Cliente, Vendedor, Usuario y DetallesVenta
     @Query("SELECT f FROM Factura f JOIN FETCH f.venta v JOIN FETCH v.cliente c JOIN FETCH v.vendedor vend JOIN FETCH vend.usuario u JOIN FETCH v.detallesVenta dv WHERE f.id = :idFactura")
     Optional<Factura> findByIdWithVenta(@Param("idFactura") int idFactura);
+
+    // Método para obtener una Factura por el ID de la Venta asociada
+    Optional<Factura> findByVenta_IdVenta(int idVenta);
 } 

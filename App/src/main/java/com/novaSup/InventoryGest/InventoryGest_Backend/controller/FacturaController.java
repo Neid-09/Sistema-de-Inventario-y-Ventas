@@ -19,9 +19,9 @@ public class FacturaController {
         this.facturaService = facturaService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<FacturaPreviewDTO> getFacturaById(@PathVariable int id) {
-        FacturaPreviewDTO facturaDTO = facturaService.obtenerFacturaPorId(id);
+    @GetMapping("/{idVenta}")
+    public ResponseEntity<FacturaPreviewDTO> getFacturaByIdVenta(@PathVariable int idVenta) {
+        FacturaPreviewDTO facturaDTO = facturaService.obtenerFacturaPorIdVenta(idVenta);
         if (facturaDTO != null) {
             return ResponseEntity.ok(facturaDTO);
         } else {
@@ -54,17 +54,17 @@ public class FacturaController {
 
     /**
      * Endpoint para generar el PDF de una factura existente por su ID.
-     * @param id ID de la factura a generar en PDF.
+     * @param idVenta ID de la venta asociada a la factura a generar en PDF.
      * @return ResponseEntity con los bytes del PDF y el Content-Type adecuado, o un estado de error.
      */
-    @GetMapping("/{id}/pdf")
-    public ResponseEntity<byte[]> generarPdfFacturaExistente(@PathVariable int id) {
+    @GetMapping("/{idVenta}/pdf")
+    public ResponseEntity<byte[]> generarPdfFacturaExistente(@PathVariable int idVenta) {
         try {
-            byte[] pdfBytes = facturaService.generarPdfFactura(id);
+            byte[] pdfBytes = facturaService.generarPdfFacturaPorIdVenta(idVenta);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             // Opcional: Sugerir un nombre de archivo para la descarga
-            headers.setContentDispositionFormData("attachment", "factura_" + id + ".pdf");
+            headers.setContentDispositionFormData("attachment", "factura_" + idVenta + ".pdf");
             headers.setContentLength(pdfBytes.length);
 
             return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
