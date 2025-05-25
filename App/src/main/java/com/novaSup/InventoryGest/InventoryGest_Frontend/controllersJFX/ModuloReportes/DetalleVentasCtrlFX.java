@@ -2,6 +2,8 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloRe
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,6 +19,12 @@ import java.text.NumberFormat;
 // import java.time.LocalDateTime; // Eliminada importación no utilizada
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.awt.Desktop;
+import javafx.scene.Cursor;
+import javafx.concurrent.Task;
 
 public class DetalleVentasCtrlFX {
 
@@ -74,6 +82,7 @@ public class DetalleVentasCtrlFX {
     @FXML
     private Label totalVentaSuperiorLabel;
 
+    private IFacturaService facturaService;
     private VentaFX ventaActual;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
@@ -94,10 +103,14 @@ public class DetalleVentasCtrlFX {
         return BIG_DECIMAL_FORMATTER.format(value);
     }
 
+    public void setService(IFacturaService facturaService) {
+        this.facturaService = facturaService;
+    }
+
     @FXML
     public void initialize() {
         btnCerrar.setOnAction(event -> cerrarVentana());
-        btnImprimirFactura.setOnAction(event -> imprimirFactura());
+        btnImprimirFactura.setOnAction(event -> handleVerDocumentoVenta());
         btnModificarVenta.setOnAction(event -> modificarVenta());
         configurarColumnasTabla();
     }
@@ -122,19 +135,25 @@ public class DetalleVentasCtrlFX {
         
         // TODO: Reemplazar "Completada" con ventaActual.getEstadoVenta() o similar cuando esté disponible en VentaFX.
         // Ejemplo: estadoVentaLabel.setText(ventaActual.getEstadoVentaString());
-        estadoVentaLabel.setText("Completada"); 
+        estadoVentaLabel.setText("Completada");
 
         tipoPagoLabel.setText(ventaActual.getTipoPago() != null ? ventaActual.getTipoPago() : "N/A");
         totalVentaSuperiorLabel.setText(formatBigDecimal(ventaActual.getTotal())); // Corregido: getTotal() en lugar de getTotalVenta()
         
-         if (ventaActual.getCantidadTotalProductos() != null) { // Corregido: getCantidadTotalProductos() en lugar de getCantidadTotalItems()
+        // Lógica para cambiar el texto del botón Ver factura/comprobante (Corregido)
+        if (ventaActual.getNombreCliente() != null && ventaActual.getNombreCliente().equalsIgnoreCase("Venta General")) {
+            btnImprimirFactura.setText("Ver comprobante de pago"); // Para ventas generales
+        } else {
+            btnImprimirFactura.setText("Ver factura"); // Para clientes específicos (factura real)
+        }
+
+        if (ventaActual.getCantidadTotalProductos() != null) { // Corregido: getCantidadTotalProductos() en lugar de getCantidadTotalItems()
             cantidadTotalProductosLabel.setText("Productos (" + ventaActual.getCantidadTotalProductos() + ")");
         } else if (ventaActual.getDetalles() != null) {
             cantidadTotalProductosLabel.setText("Productos (" + ventaActual.getDetalles().size() + ")");
         } else {
             cantidadTotalProductosLabel.setText("Productos (0)");
         }
-
 
         subtotalGeneralLabel.setText(formatBigDecimal(ventaActual.getSubtotal()));
         totalImpuestosLabel.setText(formatBigDecimal(ventaActual.getTotalImpuestos()));
@@ -185,12 +204,89 @@ public class DetalleVentasCtrlFX {
     }
 
     @FXML
-    private void imprimirFactura() {
+    private void handleVerDocumentoVenta() {
         if (ventaActual != null) {
-            System.out.println("Placeholder: Imprimir factura para venta #" + ventaActual.getNumeroVenta());
-            // Aquí iría la lógica para generar e imprimir la factura.
+            int idVenta = ventaActual.getIdVenta();
+            if (idVenta <= 0) {
+                System.err.println("Error: ID de venta no válido.");
+                // Opcional: Mostrar una alerta al usuario
+                return;
+            }
+
+            // Validar si el cliente NO es "Venta General" para intentar obtener la factura (funcionalidad implementada).
+            // Si es "Venta General", mostrar mensaje de funcionalidad no implementada para comprobante.
+            if (ventaActual.getNombreCliente() != null && !ventaActual.getNombreCliente().equalsIgnoreCase("Venta General")) {
+                // Deshabilitar botones y mostrar indicador de carga (opcional)
+                setControlesDeshabilitados(true);
+
+                // Crear una tarea en segundo plano para llamar al servicio y manejar la respuesta
+                Task<byte[]> getDocumentTask = new Task<>() {
+                    @Override
+                    protected byte[] call() throws Exception {
+                        // Llamar al servicio para obtener el PDF de la factura
+                        return facturaService.getFacturaPdfByIdVenta(idVenta);
+                    }
+
+                    @Override
+                    protected void succeeded() {
+                        super.succeeded();
+                        // Re-habilitar controles y ocultar indicador de carga
+                        setControlesDeshabilitados(false);
+
+                        byte[] pdfBytes = getValue();
+                        if (pdfBytes != null && pdfBytes.length > 0) {
+                            // Guardar y abrir el PDF
+                            try {
+                                // Usar el idVenta para el nombre del archivo temporal
+                                File tempFile = File.createTempFile("factura_venta_" + idVenta + "_", ".pdf");
+                                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                                    fos.write(pdfBytes);
+                                }
+
+                                // Abrir el archivo con la aplicación predeterminada del sistema
+                                if (Desktop.isDesktopSupported()) {
+                                    Desktop.getDesktop().open(tempFile);
+                                } else {
+                                    System.err.println("Error: La apertura automática de archivos no es compatible con su sistema.");
+                                    // Opcional: Mostrar una alerta al usuario
+                                }
+
+                                // Opcional: eliminar el archivo temporal al cerrar la aplicación
+                                tempFile.deleteOnExit();
+
+                            } catch (IOException e) {
+                                System.err.println("Error al abrir PDF: " + e.getMessage());
+                                // Opcional: Mostrar una alerta al usuario
+                                e.printStackTrace();
+                            }
+                        } else {
+                            System.err.println("Error al obtener PDF: No se recibieron datos de PDF válidos.");
+                            // Opcional: Mostrar una alerta al usuario
+                        }
+                    }
+
+                    @Override
+                    protected void failed() {
+                        super.failed();
+                        // Re-habilitar controles y ocultar indicador de carga
+                        setControlesDeshabilitados(false);
+                        Throwable cause = getException();
+                        System.err.println("Error en el servicio al obtener factura: " + cause.getMessage());
+                        // Opcional: Mostrar una alerta al usuario
+                        cause.printStackTrace();
+                    }
+                };
+
+                // Ejecutar la tarea en un hilo separado
+                new Thread(getDocumentTask).start();
+            } else {
+                // Si es "Venta General", la visualización de comprobante no está implementada
+                System.out.println("Visualización de comprobante de pago no implementada para ventas con cliente General.");
+                // Opcional: Mostrar una alerta al usuario (mensaje más amigable)
+            }
         } else {
-            System.out.println("Placeholder: Imprimir factura - Venta no cargada.");
+            System.err.println("Error: Venta no cargada al intentar ver documento.");
+            // Opcional: Mostrar una alerta al usuario
         }
     }
 
@@ -201,6 +297,22 @@ public class DetalleVentasCtrlFX {
             // Aquí iría la lógica para abrir una ventana de modificación o permitir edición.
         } else {
             System.out.println("Placeholder: Modificar venta - Venta no cargada.");
+        }
+    }
+
+    /**
+     * Habilita o deshabilita los controles principales del diálogo mientras se procesa una operación.
+     * @param disabled true para deshabilitar, false para habilitar.
+     */
+    private void setControlesDeshabilitados(boolean disabled) {
+        btnCerrar.setDisable(disabled);
+        btnModificarVenta.setDisable(disabled);
+        btnImprimirFactura.setDisable(disabled);
+        // Puedes agregar otros controles aquí si es necesario deshabilitarlos también
+
+        // Cambiar el cursor para indicar que algo está sucediendo
+        if (btnCerrar.getScene() != null) {
+            btnCerrar.getScene().setCursor(disabled ? Cursor.WAIT : Cursor.DEFAULT);
         }
     }
 }

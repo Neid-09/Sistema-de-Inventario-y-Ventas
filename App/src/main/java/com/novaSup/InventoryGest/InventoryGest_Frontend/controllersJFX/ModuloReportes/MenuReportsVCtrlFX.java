@@ -1,5 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes;
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
 import javafx.fxml.FXML;
@@ -36,9 +37,11 @@ public class MenuReportsVCtrlFX {
     @FXML private ResumenCtrlFX resumenTabContentController; // Asumiendo que existe ResumenCtrlFX
 
     private final IVentaSerivice ventaService; 
+    private final IFacturaService facturaService;
     
-    public MenuReportsVCtrlFX(IVentaSerivice ventaService) {
+    public MenuReportsVCtrlFX(IVentaSerivice ventaService, IFacturaService facturaService) {
         this.ventaService = ventaService;
+        this.facturaService = facturaService;
     }
 
     @FXML
@@ -62,7 +65,7 @@ public class MenuReportsVCtrlFX {
         // Aquí puedes inyectar servicios a los sub-controladores si es necesario
         // Ejemplo: (Asegúrate de que los métodos setServicio existan en los respectivos controladores)
         if (reportesVentasTabContentController != null) {
-             reportesVentasTabContentController.setService(ventaService); 
+             reportesVentasTabContentController.setService(ventaService, facturaService); 
         }
         if (graficosTabContentController != null) {
             graficosTabContentController.setService(ventaService);

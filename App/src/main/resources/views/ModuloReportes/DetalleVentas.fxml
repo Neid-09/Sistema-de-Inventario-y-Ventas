@@ -73,7 +73,7 @@
       <HBox spacing="10" alignment="CENTER_RIGHT" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0"> <!-- Alineado a la derecha -->
          <Button fx:id="btnCerrar" text="Cerrar" style="-fx-background-color: #e0e0e0; -fx-text-fill: #757575;" />
          <Button fx:id="btnModificarVenta" text="Modificar detalles de venta" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
-         <Button fx:id="btnImprimirFactura" text="Imprimir factura" style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
+         <Button fx:id="btnImprimirFactura" text="Ver factura" style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
       </HBox>
    </VBox>
 </AnchorPane>

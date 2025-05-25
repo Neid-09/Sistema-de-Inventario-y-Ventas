@@ -1,7 +1,10 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -70,10 +73,12 @@ public class ReportVentasCtrlFX {
     private TextField txtTotal;
 
     private IVentaSerivice ventaService;
+    private IFacturaService facturaService;
     private ObservableList<VentaFX> ventasData = FXCollections.observableArrayList();
 
-    public void setService(IVentaSerivice ventaService) {
+    public void setService(IVentaSerivice ventaService, IFacturaService facturaService) {
         this.ventaService = ventaService;
+        this.facturaService = facturaService;
         cargarVentas(); // Cargar ventas cuando el servicio esté disponible
     }
 
@@ -148,13 +153,14 @@ public class ReportVentasCtrlFX {
     
     private void mostrarDetallesVenta(VentaFX venta) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ModuloReportes/DetalleVentas.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.DETALLES_VENTAS));
             Parent root = loader.load();
 
             // Obtener el controlador de la vista de detalles
             DetalleVentasCtrlFX controller = loader.getController();
             // Pasar el objeto VentaFX al controlador de detalles
             controller.initData(venta); 
+            controller.setService(facturaService);
             
             // Si el controlador de DetalleVentas.fxml necesita el servicio, también se lo puedes pasar:
             // controller.setService(this.ventaService);
