@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -103,8 +104,54 @@ public class VentaServiceImpl implements VentaService {
         venta.setFecha(Timestamp.from(Instant.now()));
         venta.setRequiereFactura(ventaRequest.getRequiereFactura());
         venta.setAplicarImpuestos(ventaRequest.getAplicarImpuestos());
-        venta.setNumeroVenta(ventaRequest.getNumeroVenta());
         venta.setTipoPago(ventaRequest.getTipoPago());
+
+        // ****** INICIO: Lógica para generar el número de venta en el backend ******
+        // Obtener el último número de venta registrado
+        String ultimoNumeroVenta = ventaRepository.findMaxNumeroVenta();
+        String nuevoNumeroVenta;
+        final String PREFIJO = "VTA-";
+        final int LONGITUD_NUMERICA = 8; // Longitud deseada para la parte numérica
+
+        BigInteger ultimoNumeroBigInt = BigInteger.ZERO;
+
+        if (ultimoNumeroVenta != null && ultimoNumeroVenta.startsWith(PREFIJO)) {
+            try {
+                // Extraer la parte numérica después del prefijo
+                String parteNumericaStr = ultimoNumeroVenta.substring(PREFIJO.length());
+                // Intentar parsear la parte numérica como BigInteger
+                ultimoNumeroBigInt = new BigInteger(parteNumericaStr);
+            } catch (NumberFormatException e) {
+                // Si la parte después de VTA- no es un número válido, loguear y continuar
+                // con ultimoNumeroBigInt en 0 para empezar desde 1.
+                System.err.println("Advertencia: El formato numérico del último número de venta registrado (" + ultimoNumeroVenta + ") no es válido. Reiniciando la secuencia numérica.");
+                // No lanzar excepción aquí para permitir que la venta se registre, pero empezará desde VTA-00000001
+            }
+        }
+
+        // Incrementar el último número encontrado o empezar desde 0 si no se encontró uno válido
+        BigInteger nuevoNumeroBigInt = ultimoNumeroBigInt.add(BigInteger.ONE);
+
+        // Formatear el nuevo número con ceros iniciales y el prefijo
+        // Usamos un bucle para asegurar el padding si String.format no es suficiente para BigInteger con %0Nd
+        String numeroStr = nuevoNumeroBigInt.toString();
+        String parteNumericaFormateada;
+        if (numeroStr.length() >= LONGITUD_NUMERICA) {
+            parteNumericaFormateada = numeroStr; // No necesita padding si ya es lo suficientemente largo o más
+        } else {
+            int paddingLength = LONGITUD_NUMERICA - numeroStr.length();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < paddingLength; i++) {
+                sb.append('0');
+            }
+            sb.append(numeroStr);
+            parteNumericaFormateada = sb.toString();
+        }
+
+        nuevoNumeroVenta = PREFIJO + parteNumericaFormateada;
+
+        venta.setNumeroVenta(nuevoNumeroVenta); // Asignar el número generado
+        // ****** FIN: Lógica para generar el número de venta en el backend ******
 
         // 3. Procesar detalles y calcular subtotal general
         BigDecimal subtotalGeneralVenta = BigDecimal.ZERO;

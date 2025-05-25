@@ -78,4 +78,11 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
            "WHERE dv.idDetalle IN :detalleVentaIds")
     List<DetalleVenta> findDetalleVentaWithLotesByIdIn(@Param("detalleVentaIds") Set<Integer> detalleVentaIds);
 
+       /**
+     * Busca el número de venta máximo registrado.
+     * Retorna el número de venta como String.
+     */
+    @Query("SELECT MAX(v.numeroVenta) FROM Venta v")
+    String findMaxNumeroVenta();
+
 }
