@@ -54,8 +54,11 @@ public class VentaServiceImpl implements VentaService {
     private final PromocionService promocionService; // Inyectar PromocionService
     private final CalculoImpuestoService calculoImpuestoService;
     private final FacturaService facturaService;
+    private final CajaService cajaService; // Inyectar CajaService
+    private final MovimientoCajaService movimientoCajaService; // Inyectar MovimientoCajaService
 
-    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService, FacturaService facturaService) {
+
+    public VentaServiceImpl(VentaRepository ventaRepository, DetalleVentaService detalleVentaService, ProductoService productoService, ClienteService clienteService, ComisionService comisionService, VendedorService vendedorService, InventarioService inventarioService, PromocionService promocionService, CalculoImpuestoService calculoImpuestoService, FacturaService facturaService, CajaService cajaService, MovimientoCajaService movimientoCajaService) {
         this.ventaRepository = ventaRepository;
         this.detalleVentaService = detalleVentaService;
         this.productoService = productoService;
@@ -66,6 +69,8 @@ public class VentaServiceImpl implements VentaService {
         this.promocionService = promocionService;
         this.calculoImpuestoService = calculoImpuestoService;
         this.facturaService = facturaService;
+        this.cajaService = cajaService;
+        this.movimientoCajaService = movimientoCajaService;
     }
 
     @Override
@@ -236,6 +241,45 @@ public class VentaServiceImpl implements VentaService {
 
         // 7. Calcular y guardar comisión
         comisionService.calcularYGuardarComision(ventaGuardada);
+
+        // ****** INICIO: LÓGICA DE MOVIMIENTO DE CAJA (INTEGRACIÓN) ******
+        if ("EFECTIVO".equalsIgnoreCase(ventaGuardada.getTipoPago())) { // Asumiendo "EFECTIVO" como tipo de pago en efectivo
+            // Obtener el usuario del vendedor asociado a la venta
+            Usuario usuarioVendedor = ventaGuardada.getVendedor() != null ? ventaGuardada.getVendedor().getUsuario() : null;
+
+            if (usuarioVendedor != null) {
+                // Buscar la caja abierta para este usuario
+                Caja cajaAbierta = cajaService.getCajaAbiertaByUsuario(usuarioVendedor);
+
+                if (cajaAbierta != null) {
+                    // Registrar el movimiento de caja tipo VENTA
+                    String descripcionMovimiento = "Venta No. " + ventaGuardada.getNumeroVenta();
+                    BigDecimal montoMovimiento = ventaGuardada.getTotalConImpuestos(); // El total de la venta es el ingreso en efectivo
+
+                    movimientoCajaService.registrarMovimiento(
+                        cajaAbierta,
+                        "VENTA", // Tipo de movimiento
+                        descripcionMovimiento,
+                        montoMovimiento,
+                        usuarioVendedor, // Usuario que realiza el movimiento (el vendedor)
+                        ventaGuardada // Asociar a la entidad Venta
+                    );
+                } else {
+                    // Manejar el caso donde no hay una caja abierta para el usuario/vendedor
+                    // En un sistema real, esto podría indicar un problema grave o un flujo de trabajo incorrecto
+                    // donde un vendedor intenta vender en efectivo sin una caja abierta.
+                    // Lanzamos una excepción para detener la operación y notificar el problema.
+                    throw new IllegalStateException("No se encontró caja abierta para el usuario: " + usuarioVendedor.getNombre() + ". No se puede registrar el movimiento de efectivo para la venta " + ventaGuardada.getIdVenta());
+                }
+            } else {
+                 // Manejar el caso donde la venta no tiene un vendedor asociado con usuario
+                 // Esto podría suceder si la venta se crea sin un vendedor o si el vendedor no tiene un usuario asociado.
+                 // Dependiendo de las reglas de negocio, esto podría ser un error fatal para ventas en efectivo.
+                 throw new IllegalStateException("La venta " + ventaGuardada.getIdVenta() + " no tiene un vendedor válido asociado para registrar el movimiento de caja.");
+            }
+        }
+        // ****** FIN: LÓGICA DE MOVIMIENTO DE CAJA (INTEGRACIÓN) ******
+
 
         // 8. Devolver la venta completa RECARGADA
         Optional<Venta> ventaRecargadaOpt = ventaRepository.findVentaWithPrimaryDetailsById(ventaGuardada.getIdVenta());
