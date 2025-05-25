@@ -18,13 +18,13 @@ public class FacturaServiceImplFX implements IFacturaService {
     }
 
     @Override
-    public byte[] getFacturaPdfById(int facturaId) throws IOException, InterruptedException {
+    public byte[] getFacturaPdfByIdVenta(int idVenta) throws IOException, InterruptedException {
         try {
-            String url = ApiConfig.getBaseUrl() + API_PATH + "/" + facturaId + "/pdf";
+            String url = ApiConfig.getBaseUrl() + API_PATH + "/" + idVenta + "/pdf";
             return HttpClient.getBytes(url);
         } catch (Exception e) {
             // Aquí puedes añadir logging más detallado si lo necesitas
-            System.err.println("Error al obtener el PDF de la factura por ID: " + facturaId + ". Error: " + e.getMessage());
+            System.err.println("Error al obtener el PDF de la factura por ID: " + idVenta + ". Error: " + e.getMessage());
             throw new IOException("Error al obtener el PDF de la factura.", e); // Re-lanzar como IOException o una excepción personalizada
         }
     }

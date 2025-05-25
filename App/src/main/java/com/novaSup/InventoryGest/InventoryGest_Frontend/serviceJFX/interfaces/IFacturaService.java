@@ -8,12 +8,12 @@ public interface IFacturaService {
 
     /**
      * Obtiene el PDF de una factura existente por su ID.
-     * @param facturaId El ID de la factura.
+     * @param idVenta El ID de la venta.
      * @return Los bytes del PDF.
      * @throws IOException Si ocurre un error de E/S.
      * @throws InterruptedException Si la operación es interrumpida.
      */
-    byte[] getFacturaPdfById(int facturaId) throws IOException, InterruptedException;
+    byte[] getFacturaPdfByIdVenta(int idVenta) throws IOException, InterruptedException;
 
     /**
      * Obtiene el PDF de previsualización de una factura.
