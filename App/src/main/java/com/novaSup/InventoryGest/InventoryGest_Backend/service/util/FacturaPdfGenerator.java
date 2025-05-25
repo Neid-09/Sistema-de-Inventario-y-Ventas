@@ -10,6 +10,8 @@ import java.awt.Color; // Importar Color de AWT
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DatosFiscalesEmisorPdfDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleImpuestoPdfDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DetalleProductoPdfDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.DatosFiscalesReceptorPdfDTO;
+import com.lowagie.text.Phrase;
 import org.springframework.stereotype.Service;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils; // Para copiar el stream del logo
@@ -25,7 +27,7 @@ import java.util.List; // Importar java.util.List explícitamente
 @Service
 public class FacturaPdfGenerator {
 
-    private static final String LOGO_PATH = "img/menuPrincipal/logoProvicional.jpg"; // Path al logo en resources
+    private static final String LOGO_PATH = "img/menuPrincipal/logo.png"; // Path al logo en resources
     private static final Font FONT_TITLE = new Font(Font.HELVETICA, 18, Font.BOLD);
     private static final Font FONT_NORMAL = new Font(Font.HELVETICA, 10, Font.NORMAL);
     private static final Font FONT_BOLD = new Font(Font.HELVETICA, 10, Font.BOLD);
@@ -39,14 +41,14 @@ public class FacturaPdfGenerator {
             PdfWriter.getInstance(document, baos);
             document.open();
 
-            // 1. Encabezado (Nombre del negocio y Logo)
-            addHeader(document, datosFactura.getEmisor());
+            // 1. Encabezado (Título, datos del emisor, logo, fecha y número de factura)
+            addHeaderSection(document, datosFactura.getEmisor(), datosFactura.getFechaEmision() != null ? datosFactura.getFechaEmision().toString() : "N/A", datosFactura.getNumeroFactura() != null ? datosFactura.getNumeroFactura() : "N/A (Previsualización)");
 
             // Espacio
             document.add(new Paragraph(" "));
 
-            // 2. Información de Factura, Cliente y Fecha
-            addFacturaInfo(document, datosFactura);
+            // 2. Información del Cliente
+            addClientInfo(document, datosFactura.getReceptor());
 
             // Espacio
             document.add(new Paragraph(" "));
@@ -72,120 +74,150 @@ public class FacturaPdfGenerator {
         return baos.toByteArray();
     }
 
-    private void addHeader(Document document, DatosFiscalesEmisorPdfDTO emisor) throws DocumentException, IOException {
-        PdfPTable headerTable = new PdfPTable(2); // 2 columnas: Logo y datos del emisor
-        headerTable.setWidthPercentage(100);
-        headerTable.setWidths(new float[]{1, 3}); // Proporción de ancho: 1 para logo, 3 para datos
-        headerTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+    private void addHeaderSection(Document document, DatosFiscalesEmisorPdfDTO emisor, String fechaEmision, String numeroFactura) throws DocumentException, IOException {
+        // Título principal "FACTURA DE VENTA"
+        Paragraph title = new Paragraph("FACTURA DE VENTA", FONT_TITLE);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
 
-        // Columna 1: Logo
+        // Espacio
+        document.add(new Paragraph(" "));
+
+        // Tabla para organizar logo, datos del emisor, fecha y número de factura
+        PdfPTable headerDetailsTable = new PdfPTable(2); // 2 columnas
+        headerDetailsTable.setWidthPercentage(100);
+        headerDetailsTable.setWidths(new float[]{3, 2}); // Proporción de ancho: datos emisor/logo, fecha/numero
+        headerDetailsTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        // Celda izquierda: Logo y Datos del Emisor
+        PdfPTable emisorLogoTable = new PdfPTable(2); // Tabla anidada para logo y datos emisor
+        emisorLogoTable.setWidthPercentage(100);
+        emisorLogoTable.setWidths(new float[]{1, 3}); // Proporción: logo, datos
+        emisorLogoTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        // Logo (columna 1 de emisorLogoTable)
         try {
             ClassPathResource resource = new ClassPathResource(LOGO_PATH);
             Image logo = Image.getInstance(StreamUtils.copyToByteArray(resource.getInputStream()));
-            logo.scaleToFit(100, 100); // Escalar logo
+            logo.scaleToFit(80, 80); // Escalar logo un poco más pequeño
             PdfPCell logoCell = new PdfPCell(logo);
             logoCell.setBorder(Rectangle.NO_BORDER);
-            logoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-            logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            headerTable.addCell(logoCell);
+            logoCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            logoCell.setVerticalAlignment(Element.ALIGN_TOP);
+            emisorLogoTable.addCell(logoCell);
         } catch (IOException | BadElementException e) {
-            // Si el logo no se encuentra o es inválido, añadir una celda vacía o un mensaje
             PdfPCell emptyCell = new PdfPCell(new Phrase("Logo no disponible", FONT_NORMAL));
             emptyCell.setBorder(Rectangle.NO_BORDER);
-             emptyCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-             emptyCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            headerTable.addCell(emptyCell);
-             System.err.println("Error al cargar el logo: " + e.getMessage()); // Log para depuración
+            emptyCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            emptyCell.setVerticalAlignment(Element.ALIGN_TOP); // Alinear arriba
+            emisorLogoTable.addCell(emptyCell);
+            System.err.println("Error al cargar el logo: " + e.getMessage());
         }
 
-        // Columna 2: Datos del Emisor
-        Chunk businessName = new Chunk(emisor.getNombre() != null ? emisor.getNombre() : "", FONT_TITLE);
-        Chunk businessId = new Chunk("\nIdentificación: " + (emisor.getIdentificacion() != null ? emisor.getIdentificacion() : ""), FONT_NORMAL);
-        Chunk businessAddress = new Chunk("\nDirección: " + (emisor.getDireccion() != null ? emisor.getDireccion() : ""), FONT_NORMAL);
-
+        // Datos del Emisor (columna 2 de emisorLogoTable)
         Paragraph emisorInfo = new Paragraph();
+        emisorInfo.setSpacingAfter(5f); // Espacio después del párrafo
+
+        Chunk businessName = new Chunk(emisor.getNombre() != null ? emisor.getNombre() : "", FONT_BOLD); // Nombre en negrita
         emisorInfo.add(businessName);
-        emisorInfo.add(businessId);
-        emisorInfo.add(businessAddress);
+
+        if (emisor.getDireccion() != null && !emisor.getDireccion().isEmpty()) {
+             emisorInfo.add(new Phrase("\nDirección: " + emisor.getDireccion(), FONT_NORMAL));
+        }
+         if (emisor.getIdentificacion() != null && !emisor.getIdentificacion().isEmpty()) {
+             emisorInfo.add(new Phrase("\nNIT: " + emisor.getIdentificacion(), FONT_NORMAL));
+        }
 
         PdfPCell emisorCell = new PdfPCell(emisorInfo);
         emisorCell.setBorder(Rectangle.NO_BORDER);
-        emisorCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        emisorCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        headerTable.addCell(emisorCell);
+        emisorCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        emisorCell.setVerticalAlignment(Element.ALIGN_TOP); // Alinear arriba
+        emisorLogoTable.addCell(emisorCell);
 
-        document.add(headerTable);
-    }
+        // Añadir la tabla anidada a la celda izquierda de headerDetailsTable
+        PdfPCell leftCell = new PdfPCell(emisorLogoTable);
+        leftCell.setBorder(Rectangle.NO_BORDER);
+        leftCell.setVerticalAlignment(Element.ALIGN_TOP);
+        headerDetailsTable.addCell(leftCell);
 
-    private void addFacturaInfo(Document document, FacturaPdfData datosFactura) throws DocumentException {
-        // Tabla para organizar la info de factura, cliente y fecha
-        PdfPTable infoTable = new PdfPTable(2); // Dos columnas
-        infoTable.setWidthPercentage(100);
-        infoTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-
-        // Columna 1: Número de Factura y Fecha
+        // Celda derecha: Fecha y Número de Factura
         Paragraph facturaDetails = new Paragraph();
-        Chunk numFacturaLabel = new Chunk("Factura No: ", FONT_BOLD);
-        Chunk numFacturaValue = new Chunk(datosFactura.getNumeroFactura() != null ? datosFactura.getNumeroFactura() : "N/A (Previsualización)", FONT_NORMAL);
-        facturaDetails.add(numFacturaLabel);
-        facturaDetails.add(numFacturaValue);
-
-        facturaDetails.add(new Paragraph(" ", FONT_NORMAL)); // Espacio
+        facturaDetails.setSpacingAfter(5f); // Espacio después del párrafo
 
         Chunk fechaLabel = new Chunk("Fecha: ", FONT_BOLD);
-        Chunk fechaValue = new Chunk(datosFactura.getFechaEmision() != null ? datosFactura.getFechaEmision().toString() : "N/A", FONT_NORMAL);
+        Chunk fechaValue = new Chunk(fechaEmision, FONT_NORMAL);
         facturaDetails.add(fechaLabel);
         facturaDetails.add(fechaValue);
 
+        facturaDetails.add(new Phrase("\n")); // Salto de línea
+
+        Chunk numFacturaLabel = new Chunk("Factura No: ", FONT_BOLD);
+        Chunk numFacturaValue = new Chunk(numeroFactura, FONT_NORMAL);
+        facturaDetails.add(numFacturaLabel);
+        facturaDetails.add(numFacturaValue);
+
         PdfPCell facturaCell = new PdfPCell(facturaDetails);
         facturaCell.setBorder(Rectangle.NO_BORDER);
-        facturaCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-        infoTable.addCell(facturaCell);
+        facturaCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        facturaCell.setVerticalAlignment(Element.ALIGN_TOP); // Alinear arriba
+        headerDetailsTable.addCell(facturaCell);
 
-        // Columna 2: Información del Cliente
-        Paragraph clienteDetails = new Paragraph();
-        clienteDetails.add(new Chunk("Información del Cliente:", FONT_BOLD));
-        clienteDetails.add(new Paragraph(" ", FONT_NORMAL)); // Espacio
+        document.add(headerDetailsTable);
+    }
 
-        if (datosFactura.getReceptor() != null) {
+    // Renombrado y modificado para ser solo la información del cliente
+    private void addClientInfo(Document document, DatosFiscalesReceptorPdfDTO receptor) throws DocumentException {
+        // Sección de Información del Cliente
+        Paragraph clientTitle = new Paragraph("CLIENTE", FONT_BOLD);
+        clientTitle.setSpacingAfter(5f); // Espacio después del título
+
+        PdfPTable clientTable = new PdfPTable(1); // Una sola columna para los detalles
+        clientTable.setWidthPercentage(100);
+        clientTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        Paragraph clientDetails = new Paragraph();
+        clientDetails.setSpacingAfter(5f); // Espacio después del párrafo
+
+        if (receptor != null) {
             Chunk nombreLabel = new Chunk("Nombre/Razón Social: ", FONT_BOLD);
-            Chunk nombreValue = new Chunk(datosFactura.getReceptor().getNombreRazonSocial() != null ? datosFactura.getReceptor().getNombreRazonSocial() : "N/A", FONT_NORMAL);
-            clienteDetails.add(nombreLabel);
-            clienteDetails.add(nombreValue);
+            Chunk nombreValue = new Chunk(receptor.getNombreRazonSocial() != null ? receptor.getNombreRazonSocial() : "N/A", FONT_NORMAL);
+            clientDetails.add(nombreLabel);
+            clientDetails.add(nombreValue);
 
-             clienteDetails.add(new Paragraph(" ", FONT_NORMAL)); // Espacio
+             clientDetails.add(new Phrase("\n")); // Salto de línea
 
-            Chunk idLabel = new Chunk("Identificación Fiscal: ", FONT_BOLD);
-            Chunk idValue = new Chunk(datosFactura.getReceptor().getIdentificacion() != null ? datosFactura.getReceptor().getIdentificacion() : "N/A", FONT_NORMAL);
-             clienteDetails.add(idLabel);
-             clienteDetails.add(idValue);
+            Chunk idLabel = new Chunk("NIT/Identificación: ", FONT_BOLD); // Etiqueta actualizada
+            Chunk idValue = new Chunk(receptor.getIdentificacion() != null ? receptor.getIdentificacion() : "N/A", FONT_NORMAL);
+             clientDetails.add(idLabel);
+             clientDetails.add(idValue);
 
-            clienteDetails.add(new Paragraph(" ", FONT_NORMAL)); // Espacio
+            clientDetails.add(new Phrase("\n")); // Salto de línea
 
             Chunk dirLabel = new Chunk("Dirección: ", FONT_BOLD);
-            Chunk dirValue = new Chunk(datosFactura.getReceptor().getDireccion() != null ? datosFactura.getReceptor().getDireccion() : "N/A", FONT_NORMAL);
-             clienteDetails.add(dirLabel);
-             clienteDetails.add(dirValue);
+            Chunk dirValue = new Chunk(receptor.getDireccion() != null ? receptor.getDireccion() : "N/A", FONT_NORMAL);
+             clientDetails.add(dirLabel);
+             clientDetails.add(dirValue);
 
-             // Opcional: Uso fiscal si se quiere incluir
-             if (datosFactura.getReceptor().getUsoFiscal() != null && !datosFactura.getReceptor().getUsoFiscal().isEmpty()) {
-                  clienteDetails.add(new Paragraph(" ", FONT_NORMAL)); // Espacio
+             // Uso fiscal si se quiere incluir
+             if (receptor.getUsoFiscal() != null && !receptor.getUsoFiscal().isEmpty()) {
+                  clientDetails.add(new Phrase("\n")); // Salto de línea
                   Chunk usoLabel = new Chunk("Uso Fiscal: ", FONT_BOLD);
-                  Chunk usoValue = new Chunk(datosFactura.getReceptor().getUsoFiscal(), FONT_NORMAL);
-                  clienteDetails.add(usoLabel);
-                  clienteDetails.add(usoValue);
+                  Chunk usoValue = new Chunk(receptor.getUsoFiscal(), FONT_NORMAL);
+                  clientDetails.add(usoLabel);
+                  clientDetails.add(usoValue);
              }
 
         } else {
-            clienteDetails.add(new Phrase("Información del cliente no disponible.", FONT_NORMAL));
+            clientDetails.add(new Phrase("Información del cliente no disponible.", FONT_NORMAL));
         }
 
-        PdfPCell clienteCell = new PdfPCell(clienteDetails);
-        clienteCell.setBorder(Rectangle.NO_BORDER);
-        clienteCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        infoTable.addCell(clienteCell);
+        PdfPCell clientCell = new PdfPCell(clientDetails);
+        clientCell.setBorder(Rectangle.NO_BORDER);
+        clientCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        clientTable.addCell(clientCell);
 
-        document.add(infoTable);
+        document.add(clientTitle);
+        document.add(clientTable);
     }
 
     private void addDetallesProductoTable(Document document, List<DetalleProductoPdfDTO> detallesProducto) throws DocumentException {
@@ -237,25 +269,39 @@ public class FacturaPdfGenerator {
         DecimalFormat priceFormat = new DecimalFormat("#,##0.00", symbols);
 
         // Subtotal
-        addTableCell(totalsTable, "Subtotal:", FONT_BOLD, Element.ALIGN_RIGHT, null);
+        addTableCell(totalsTable, "Subtotal:", FONT_NORMAL, Element.ALIGN_RIGHT, null); // Etiqueta Subtotal con FONT_NORMAL
         addTableCell(totalsTable, priceFormat.format(datosFactura.getSubtotal()), FONT_NORMAL, Element.ALIGN_RIGHT, null);
 
         // Impuestos
         if (datosFactura.getDetallesImpuesto() != null && !datosFactura.getDetallesImpuesto().isEmpty()) {
              for (DetalleImpuestoPdfDTO detalleImpuesto : datosFactura.getDetallesImpuesto()) {
-                 addTableCell(totalsTable, detalleImpuesto.getNombreTipoImpuesto() + ":", FONT_BOLD, Element.ALIGN_RIGHT, null);
+                 // Opcional: Podrías ajustar el formato si quieres que los impuestos se vean diferentes,
+                 // pero por ahora los mantenemos similar al subtotal.
+                 addTableCell(totalsTable, detalleImpuesto.getNombreTipoImpuesto() + ":", FONT_NORMAL, Element.ALIGN_RIGHT, null);
                  addTableCell(totalsTable, priceFormat.format(detalleImpuesto.getMontoImpuesto()), FONT_NORMAL, Element.ALIGN_RIGHT, null);
              }
              // Total de impuestos si se muestra por separado
               if (datosFactura.getTotalImpuestos() != null && BigDecimal.ZERO.compareTo(datosFactura.getTotalImpuestos()) != 0) { // Mostrar solo si no es cero
-                 addTableCell(totalsTable, "Total Impuestos:", FONT_BOLD, Element.ALIGN_RIGHT, null);
+                 addTableCell(totalsTable, "Total Impuestos:", FONT_NORMAL, Element.ALIGN_RIGHT, null);
                  addTableCell(totalsTable, priceFormat.format(datosFactura.getTotalImpuestos()), FONT_NORMAL, Element.ALIGN_RIGHT, null);
               }
         }
 
-        // Total Final
-        addTableCell(totalsTable, "Total:", FONT_BOLD, Element.ALIGN_RIGHT, null);
-        addTableCell(totalsTable, priceFormat.format(datosFactura.getTotalConImpuestos()), FONT_BOLD, Element.ALIGN_RIGHT, null);
+        // Total Final - Destacado como en la imagen
+        // Añadir una línea de separación antes del total si hay impuestos
+        if ((datosFactura.getDetallesImpuesto() != null && !datosFactura.getDetallesImpuesto().isEmpty()) ||
+            (datosFactura.getTotalImpuestos() != null && BigDecimal.ZERO.compareTo(datosFactura.getTotalImpuestos()) != 0)) {
+             PdfPCell separatorCell = new PdfPCell(new Phrase(""));
+             separatorCell.setColspan(2);
+             separatorCell.setBorder(Rectangle.TOP); // Borde superior como separador
+             separatorCell.setBorderColor(Color.BLACK);
+             separatorCell.setPadding(2f);
+             totalsTable.addCell(separatorCell);
+        }
+
+
+        addTableCell(totalsTable, "Total:", FONT_BOLD, Element.ALIGN_RIGHT, null); // Etiqueta Total en negrita
+        addTableCell(totalsTable, priceFormat.format(datosFactura.getTotalConImpuestos()), FONT_BOLD, Element.ALIGN_RIGHT, null); // Valor Total en negrita
 
         document.add(totalsTable);
     }
@@ -263,6 +309,8 @@ public class FacturaPdfGenerator {
     private void addFooter(Document document) throws DocumentException {
         Paragraph footer = new Paragraph("Gracias por su compra!", FONT_NORMAL);
         footer.setAlignment(Element.ALIGN_CENTER);
+        // Añadir un espacio antes del pie de página para separarlo de los totales
+        footer.setSpacingBefore(20f);
         document.add(footer);
     }
 
@@ -272,6 +320,7 @@ public class FacturaPdfGenerator {
         cell.setHorizontalAlignment(alignment);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         cell.setPadding(5f);
+        cell.setBorder(Rectangle.NO_BORDER); // Eliminar bordes de las celdas por defecto para un look más limpio
         if (backgroundColor != null) {
             cell.setBackgroundColor(backgroundColor);
         }

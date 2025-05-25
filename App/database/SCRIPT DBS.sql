@@ -20,8 +20,13 @@ select * from tipos_impuestos;
 select * from promociones;
 select * from configuracion_empresa;
 
+select * from caja;
+select * from movimiento_caja;
+
 SELECT * FROM ventas;
 
 -- SET FOREIGN_KEY_CHECKS = 0;
 -- SET FOREIGN_KEY_CHECKS = 1;
--- DROP TABLE IF EXISTS clientes;
+-- DROP TABLE IF EXISTS caja;
+
+
