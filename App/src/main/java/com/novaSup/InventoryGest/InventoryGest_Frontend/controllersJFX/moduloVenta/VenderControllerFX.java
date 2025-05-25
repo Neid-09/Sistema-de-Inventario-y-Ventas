@@ -3,6 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVe
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 
@@ -40,6 +41,7 @@ public class VenderControllerFX implements Initializable {
     private final IProductoService productoService;
     private final IVentaSerivice ventaService;
     private final IClienteService clienteService;
+    private final IFacturaService facturaService;
 
     @FXML
     private Button btnProcesarVenta;
@@ -91,10 +93,11 @@ public class VenderControllerFX implements Initializable {
     private List<ProductoFX> todosLosProductos;
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
 
-    public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService, IClienteService clienteService) {
+    public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService, IClienteService clienteService, IFacturaService facturaService) {
         this.clienteService = clienteService;
         this.productoService = productoService;
         this.ventaService = ventaService;
+        this.facturaService = facturaService;
     }
 
     @Override
@@ -692,7 +695,7 @@ public class VenderControllerFX implements Initializable {
              * - IFacturaService facturaService para generar facturas
              * controller.setServices(clienteService, ventaService, facturaService);
              */
-            controller.setServices(ventaService, clienteService);
+            controller.setServices(ventaService, clienteService, facturaService);
             
             // Convertir los productos de ProductoFX a ProductoVentaInfo
             List<ProductoVentaInfo> productosInfo = convertirAProductoVentaInfo(tablaProductos.getItems());

@@ -149,6 +149,7 @@
             
                         <!-- Footer -->
                         <HBox alignment="CENTER_RIGHT" spacing="10" style="-fx-padding: 15;">
+                            <Button fx:id="btnPrevisualizarFactura" styleClass="button-previsualizar" text="Previsualizar Factura" />
                             <Button fx:id="btnCancelar" style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 1;" text="Cancelar" />
                             <Button fx:id="btnConfirmar" style="-fx-background-color: #00b386; -fx-text-fill: white;" text="Confirmar y Finalizar Venta" />
                         </HBox>

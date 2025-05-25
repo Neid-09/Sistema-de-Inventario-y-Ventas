@@ -5,6 +5,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaCre
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.AddEditClienteDialogController;
 
@@ -22,7 +23,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-
+import javafx.concurrent.Task;
+import javafx.scene.Cursor;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -31,6 +36,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.beans.value.ObservableValue;
+import java.awt.Desktop;
 
 public class ProcesarVentaDialogController {
 
@@ -39,6 +45,9 @@ public class ProcesarVentaDialogController {
 
     @FXML
     private Button btnConfirmar;
+    
+    @FXML
+    private Button btnPrevisualizarFactura;
 
     @FXML
     private ToggleGroup facturaToggleGroup;
@@ -92,6 +101,7 @@ public class ProcesarVentaDialogController {
     // Instancias de servicios
     private IClienteService clienteService;
     private IVentaSerivice ventaService;
+    private IFacturaService facturaService;
     // private IFacturaService facturaService;
     
     // Cliente seleccionado para la venta
@@ -148,6 +158,9 @@ public class ProcesarVentaDialogController {
             if (!esEfectivo) {
                 txtTotalRecibido.clear();
                 txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
+            } else {
+                 // Si cambia a efectivo, recalcular el cambio
+                 calcularCambio();
             }
         });
 
@@ -164,7 +177,16 @@ public class ProcesarVentaDialogController {
                     if (stage.getHeight() < 650) {
                         stage.setHeight(650);
                     }
+                } else {
+                    // Si no se requiere factura, restablecer la altura original (o una altura adecuada)
+                     if (stage.getHeight() > 400) { // Altura aproximada sin el panel de cliente
+                         stage.setHeight(400); // Ajusta este valor según el diseño de tu diálogo
+                     }
                 }
+            }
+            // Deshabilitar el botón de previsualizar si no se requiere factura
+            if (btnPrevisualizarFactura != null) {
+                 btnPrevisualizarFactura.setDisable(!requiereFactura);
             }
         });
 
@@ -208,6 +230,14 @@ public class ProcesarVentaDialogController {
 
         btnCancelar.setOnAction(event -> cerrarDialogo(false));
         btnConfirmar.setOnAction(event -> confirmarVenta());
+        
+        // Configurar la acción del botón Previsualizar Factura
+        if (btnPrevisualizarFactura != null) {
+            btnPrevisualizarFactura.setOnAction(event -> handlePrevisualizarFactura());
+             // Deshabilitar inicialmente si no se requiere factura
+            btnPrevisualizarFactura.setDisable(!requiereFacturaInicial);
+        }
+        
         // Configurar la búsqueda de cliente al presionar Enter en el campo de texto
         if (txtBuscarCliente != null) {
             txtBuscarCliente.setOnAction(event -> buscarCliente());
@@ -227,9 +257,10 @@ public class ProcesarVentaDialogController {
      * Método para la inyección de dependencias (servicios).
      * Este método se llamará desde VenderControllerFX después de crear una instancia de este controlador.
      */
-    public void setServices(IVentaSerivice ventaService, IClienteService clienteService) {
+    public void setServices(IVentaSerivice ventaService, IClienteService clienteService, IFacturaService facturaService) {
         this.ventaService = ventaService;
         this.clienteService = clienteService;
+        this.facturaService = facturaService;
         // Inicializar otros servicios cuando estén disponibles
         
         // Inicializar el controlador de cliente si está disponible
@@ -318,8 +349,6 @@ public class ProcesarVentaDialogController {
                 } else {
                     System.err.println("Error: No se encontró la pestaña 'Nuevo Cliente'");
                 }
-            } else {
-                System.err.println("Error: No se encontró el TabPane o no tiene suficientes pestañas");
             }
         } catch (Exception e) {
             System.err.println("Error general al inicializar el controlador de cliente: " + e.getMessage());
@@ -345,6 +374,133 @@ public class ProcesarVentaDialogController {
             txtCambioEntregar.setText(formatoMoneda.format(cambio.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : cambio));
         } catch (NumberFormatException e) {
             txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
+        }
+    }
+    
+    /**
+     * Maneja la acción de previsualizar la factura.
+     */
+    private void handlePrevisualizarFactura() {
+        // Validar si se requiere factura y si hay un cliente seleccionado
+        if (!rbFacturaSi.isSelected()) {
+            mostrarAlerta("Previsualización no disponible", "Debe seleccionar 'Sí' en 'Factura Legal' para previsualizar la factura.");
+            return;
+        }
+        
+        if (clienteSeleccionado == null) {
+             mostrarAlerta("Cliente no seleccionado", "Debe seleccionar un cliente para previsualizar la factura.");
+             return;
+        }
+        
+        if (productosEnVenta == null || productosEnVenta.isEmpty()) {
+            mostrarAlerta("Carrito Vacío", "No hay productos en la venta para previsualizar la factura.");
+            return;
+        }
+
+        // Deshabilitar botones y mostrar indicador de carga (opcional)
+        setControlesDeshabilitados(true);
+
+        // Crear el VentaCreateRequestFX
+        VentaCreateRequestFX ventaRequest = new VentaCreateRequestFX();
+        ventaRequest.setIdCliente(clienteSeleccionado.getIdCliente());
+        // Asumiendo un ID de vendedor por defecto (puedes ajustar esto según tu lógica real)
+        ventaRequest.setIdVendedor(1);
+        ventaRequest.setRequiereFactura(true);
+        ventaRequest.setAplicarImpuestos(true);
+        // El número de venta y tipo de pago no son estrictamente necesarios para la previsualización según tu JSON de ejemplo, los omitimos.
+        // ventaRequest.setNumeroVenta("PREVIEW-" + System.currentTimeMillis()); // Opcional, para referencia
+        // ventaRequest.setTipoPago(obtenerTipoPagoSeleccionado()); // Opcional
+
+        
+        List<DetalleVentaCreateRequestFX> detalles = new ArrayList<>();
+        for (ProductoVentaInfo producto : productosEnVenta) {
+            DetalleVentaCreateRequestFX detalle = new DetalleVentaCreateRequestFX();
+            detalle.setIdProducto(producto.getIdProducto());
+            detalle.setCantidad(producto.getCantidad());
+            detalles.add(detalle);
+        }
+        ventaRequest.setDetalles(detalles);
+
+        // Crear una tarea en segundo plano para llamar al servicio y manejar la respuesta
+        Task<byte[]> previsualizarTask = new Task<>() {
+            @Override
+            protected byte[] call() throws Exception {
+                // Llamar al servicio para obtener el PDF de previsualización
+                return facturaService.getPreviewFacturaPdf(ventaRequest);
+            }
+
+            @Override
+            protected void succeeded() {
+                super.succeeded();
+                // Re-habilitar controles y ocultar indicador de carga
+                setControlesDeshabilitados(false);
+
+                byte[] pdfBytes = getValue();
+                if (pdfBytes != null && pdfBytes.length > 0) {
+                    // Guardar y abrir el PDF
+                    try {
+                        File tempFile = File.createTempFile("preview_factura_", ".pdf");
+                        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                            fos.write(pdfBytes);
+                        }
+                        
+                        // Abrir el archivo con la aplicación predeterminada del sistema
+                        if (Desktop.isDesktopSupported()) {
+                            Desktop.getDesktop().open(tempFile);
+                        } else {
+                            mostrarAlerta("Error", "La apertura automática de archivos no es compatible con su sistema.");
+                        }
+                        
+                        // Opcional: eliminar el archivo temporal al cerrar la aplicación
+                        tempFile.deleteOnExit();
+
+                    } catch (IOException e) {
+                        mostrarAlerta("Error al abrir PDF", "No se pudo guardar o abrir el archivo PDF de previsualización: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    mostrarAlerta("Error al obtener PDF", "No se recibieron datos de PDF válidos.");
+                }
+            }
+
+            @Override
+            protected void failed() {
+                super.failed();
+                // Re-habilitar controles y ocultar indicador de carga
+                setControlesDeshabilitados(false);
+                Throwable cause = getException();
+                 mostrarAlerta("Error en el servicio", "Ocurrió un error al previsualizar la factura: " + cause.getMessage());
+                 cause.printStackTrace();
+            }
+        };
+
+        // Ejecutar la tarea en un hilo separado
+        new Thread(previsualizarTask).start();
+    }
+    
+    /**
+     * Habilita o deshabilita los controles principales del diálogo mientras se procesa una operación.
+     * @param disabled true para deshabilitar, false para habilitar.
+     */
+    private void setControlesDeshabilitados(boolean disabled) {
+        btnConfirmar.setDisable(disabled);
+        btnCancelar.setDisable(disabled);
+        btnPrevisualizarFactura.setDisable(disabled || !rbFacturaSi.isSelected()); // Mantener deshabilitado si no se requiere factura
+        txtTotalRecibido.setDisable(disabled);
+        txtBuscarCliente.setDisable(disabled);
+        rbEfectivo.setDisable(disabled);
+        rbTarjeta.setDisable(disabled);
+        rbTransferencia.setDisable(disabled);
+        rbFacturaSi.setDisable(disabled);
+        rbFacturaNo.setDisable(disabled);
+        // También puedes deshabilitar las pestañas si lo consideras necesario
+         TabPane tabPane = (TabPane) panelDatosCliente.lookup(".client-tabs");
+         if (tabPane != null) {
+             tabPane.setDisable(disabled);
+         }
+        // Cambiar el cursor para indicar que algo está sucediendo
+        if (btnConfirmar.getScene() != null) {
+            btnConfirmar.getScene().setCursor(disabled ? Cursor.WAIT : Cursor.DEFAULT);
         }
     }
 
@@ -380,9 +536,6 @@ public class ProcesarVentaDialogController {
                                 mostrarAlerta("Error al Guardar Cliente", "No se pudo guardar el cliente. Por favor, verifique los datos ingresados.");
                                 return;
                             }
-                        } else {
-                            mostrarAlerta("Error", "No se pudo acceder al formulario de cliente. Por favor, intente nuevamente.");
-                            return;
                         }
                     } else {
                         // Estamos en la pestaña de buscar cliente pero no hay cliente seleccionado
@@ -487,6 +640,8 @@ public class ProcesarVentaDialogController {
                 }
             } catch (ClassCastException e) {
                 System.err.println("Error al convertir el userData a Dialog<ButtonType>: " + e.getMessage());
+            } catch (Exception e) { // Captura cualquier otra excepción aquí
+                 System.err.println("Error inesperado al cerrar diálogo: " + e.getMessage());
             }
         }
         
