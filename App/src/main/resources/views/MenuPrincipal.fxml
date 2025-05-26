@@ -348,12 +348,19 @@
                 <!-- Información de Ventas -->
                 <HBox alignment="CENTER_LEFT" spacing="15">
                     <children>
-                        <Label styleClass="info-label" text="Total Vendido:" />
-                        <Label fx:id="lblTotalVendido" styleClass="info-value-label" text="0.00" />
+                        <!-- Dinero Inicial -->
+                        <Label styleClass="info-label" text="Dinero Inicial:" />
+                        <Label fx:id="lblDineroInicial" styleClass="info-value-label" text="0.00" />
 
-                        <Label styleClass="info-label" text="En Caja:" />
-                        <Label fx:id="lblEnCaja" styleClass="info-value-label" text="0.00" />
+                        <!-- Total Esperado Caja -->
+                        <Label styleClass="info-label" text="Total Esperado Caja:" />
+                        <Label fx:id="lblTotalEsperadoCaja" styleClass="info-value-label" text="0.00" />
 
+                        <!-- Total Ventas -->
+                        <Label styleClass="info-label" text="Total Ventas:" />
+                        <Label fx:id="lblTotalVentas" styleClass="info-value-label" text="0.00" />
+
+                        <!-- Total Productos Vendidos -->
                         <Label styleClass="info-label" text="Productos Vendidos:" />
                         <Label fx:id="lblProductosVendidos" styleClass="info-value-label" text="0" />
                     </children>

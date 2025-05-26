@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.NotificacionFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICajaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.INotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
@@ -44,6 +45,15 @@ import java.net.URL;
 import java.util.*;
 import javafx.scene.shape.Rectangle; // Import para Rectangle
 
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CajaResponseFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CajaReporteConsolidadoFX;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.Optional;
+
+// Importar VenderControllerFX
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.VenderControllerFX;
+
 public class MenuPrincipalControllerFX implements Initializable {
 
     @FXML private HBox topBar;
@@ -63,6 +73,7 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     // Declare services as final fields, injected via constructor
     private final INotificacionService notificacionService;
+    private final ICajaService cajaService; // Inyectar el servicio de caja
     private final Callback<Class<?>, Object> controllerFactory; // To load nested FXMLs
 
     private Timer timerNotificaciones;
@@ -117,9 +128,33 @@ public class MenuPrincipalControllerFX implements Initializable {
     private final String styleClassModuleActive = "module-button-active";
     private final String styleClassInicioActive = "inicio-button-active";
 
+    // FXML fields para la información de la caja en el footer
+    @FXML private Label lblDineroInicial;
+    @FXML private Label lblTotalEsperadoCaja;
+    @FXML private Label lblTotalVentas;
+    @FXML private Label lblProductosVendidos;
+    @FXML private Button btnCaja;
+
+    private CajaResponseFX cajaAbiertaActual = null; // Para guardar la referencia de la caja abierta
+
+    // Formato para mostrar valores monetarios
+    private static final DecimalFormat currencyFormat = new DecimalFormat("#,##0.00");
+
+    // Dentro de MenuPrincipalControllerFX.java, fuera de cualquier método, pero dentro de la clase:
+    private static class ModuleLoadResult {
+        Parent root;
+        Object controller;
+
+        ModuleLoadResult(Parent root, Object controller) {
+            this.root = root;
+            this.controller = controller;
+        }
+    }
+
     // Constructor for dependency injection
-    public MenuPrincipalControllerFX(INotificacionService notificacionService, Callback<Class<?>, Object> controllerFactory) {
+    public MenuPrincipalControllerFX(INotificacionService notificacionService, ICajaService cajaService, Callback<Class<?>, Object> controllerFactory) {
         this.notificacionService = notificacionService;
+        this.cajaService = cajaService;
         this.controllerFactory = controllerFactory;
     }
 
@@ -156,6 +191,10 @@ public class MenuPrincipalControllerFX implements Initializable {
             mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "Servicio de notificaciones no disponible. Algunas funciones pueden fallar.");
             // No retornar aquí necesariamente, pero algunas funcionalidades pueden estar degradadas.
         }
+        if (this.cajaService == null) {
+             System.err.println("Error crítico: ICajaService no fue inyectado.");
+            mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "Servicio de caja no disponible. Algunas funciones pueden fallar.");
+        }
 
         inicializarContadorNotificaciones();
         programarActualizacionNotificaciones(); // Las llamadas internas son asíncronas
@@ -163,6 +202,11 @@ public class MenuPrincipalControllerFX implements Initializable {
         setupAnimations();
         setSidebarState(false, false);
         setActiveButton(btnInicio); // Marcar el botón de inicio como activo por defecto
+
+        // --- Cargar información inicial de la caja ---
+        cargarInformacionCajaAbierta();
+        // --- Configurar acción del botón de caja ---
+        btnCaja.setOnAction(event -> handleBotonCaja());
 
         System.out.println("MenuPrincipalControllerFX.initialize() completado (sin configuración de stage ni carga de módulo inicial aquí).");
     }
@@ -768,23 +812,48 @@ public class MenuPrincipalControllerFX implements Initializable {
 
         // Función para cargar y mostrar el nuevo módulo con animación de deslizamiento y fundido
         Runnable cargarNuevoModuloAnimado = () -> {
-            Task<Parent> loadModuleTask = new Task<>() {
+            Task<ModuleLoadResult> loadModuleTask = new Task<>() {
                 @Override
-                protected Parent call() throws Exception {
+                protected ModuleLoadResult call() throws Exception {
+                    if (controllerFactory == null) {
+                        throw new IllegalStateException("ControllerFactory no fue inyectada en MenuPrincipalControllerFX");
+                    }
                     FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
                     loader.setControllerFactory(controllerFactory);
-                    return loader.load();
+                    Parent root = loader.load();
+                    Object controller = loader.getController(); // Obtener el controlador aquí
+                    return new ModuleLoadResult(root, controller); // Devolver un objeto que contenga ambos
                 }
             };
 
             loadModuleTask.setOnSucceeded(event -> {
-                Parent nuevoRoot = loadModuleTask.getValue();
+                ModuleLoadResult result = loadModuleTask.getValue();
+                Parent nuevoRoot = result.root; // Obtener el root del resultado
+                Object controller = result.controller; // Obtener el controller del resultado
 
                 // Configuración inicial para la animación de entrada
                 nuevoRoot.setOpacity(0.0);
                 nuevoRoot.setTranslateX(-slideInDistance); // Posicionar a la izquierda, fuera de la vista
 
                 modulosDinamicos.getChildren().setAll(nuevoRoot); // Añadir el nuevo módulo al contenedor
+
+                // --- Configurar callback si es el controlador de Ventas ---
+                if (rutaFXML.equals(PathsFXML.VENDER_FXML)) {
+                    if (controller instanceof VenderControllerFX) {
+                        VenderControllerFX venderController = (VenderControllerFX) controller;
+                        // --- Usar el nuevo método setOnVentaExitosa para pasar el callback ---
+                        // El callback es una referencia al método cargarInformacionCajaAbierta
+                        // de esta instancia de MenuPrincipalControllerFX.
+                        // Esta llamada setOnVentaExitosa NO modifica UI, así que no necesita Platform.runLater.
+                        // El callback *mismo* (cargarInformacionCajaAbierta) sí debe manejar su asincronía interna
+                        // si llama a servicios o modifica UI.
+                        venderController.setOnVentaExitosa(this::cargarInformacionCajaAbierta);
+                        System.out.println("Callback de venta exitosa configurado para VenderControllerFX.");
+                    } else {
+                         System.err.println("El controlador cargado para " + rutaFXML + " no es una instancia de VenderControllerFX. Es: " + (controller != null ? controller.getClass().getName() : "null"));
+                    }
+                }
+                // ----------------------------------------------------------
 
                 // Crear las animaciones
                 FadeTransition fadeIn = new FadeTransition(Duration.millis(200), nuevoRoot);
@@ -1063,6 +1132,187 @@ public class MenuPrincipalControllerFX implements Initializable {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el módulo de configuración: " + e.getMessage());
         }
+    }
+
+    // --- Lógica para la Caja ---
+
+    /**
+     * Carga la información de la caja abierta para el usuario actual y actualiza los labels en el footer.
+     * También actualiza el texto del botón de caja (Abrir/Cerrar).
+     */
+    private void cargarInformacionCajaAbierta() {
+        // TODO: Implementar obtención correcta del ID de usuario desde LoginServiceImplFX
+        Integer idUsuario = 31; // Temporalmente hardcodeado para compilación/prueba
+        Task<Optional<CajaResponseFX>> getCajaTask = new Task<>() {
+            @Override
+            protected Optional<CajaResponseFX> call() throws Exception {
+                if (cajaService == null) {
+                     throw new IllegalStateException("Servicio de caja no disponible.");
+                }
+                return cajaService.getCajaAbiertaPorUsuario(idUsuario);
+            }
+        };
+
+        getCajaTask.setOnSucceeded(event -> {
+            Optional<CajaResponseFX> cajaOpt = getCajaTask.getValue();
+            if (cajaOpt.isPresent()) {
+                cajaAbiertaActual = cajaOpt.get();
+                System.out.println("Caja abierta encontrada con ID: " + cajaAbiertaActual.getIdCaja());
+                // Si hay caja abierta, obtener reporte consolidado
+                cargarReporteConsolidado(cajaAbiertaActual.getIdCaja());
+                 Platform.runLater(() -> btnCaja.setText("Cerrar Caja"));
+            } else {
+                System.out.println("No hay caja abierta para el usuario.");
+                cajaAbiertaActual = null;
+                actualizarLabelsCaja(null, null); // Limpiar labels
+                 Platform.runLater(() -> btnCaja.setText("Abrir Caja"));
+            }
+        });
+
+        getCajaTask.setOnFailed(event -> {
+            Throwable ex = getCajaTask.getException();
+            System.err.println("Error al obtener caja abierta: " + ex.getMessage());
+            ex.printStackTrace();
+            actualizarLabelsCaja(null, null); // Limpiar labels en caso de error
+            Platform.runLater(() -> {
+                 mostrarAlerta(Alert.AlertType.ERROR, "Error de Caja", "No se pudo verificar el estado de la caja: " + ex.getMessage());
+                 btnCaja.setText("Abrir Caja (Error)"); // Indicar error en el botón si es posible
+            });
+        });
+
+        Thread thread = new Thread(getCajaTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+     /**
+     * Obtiene el reporte consolidado para una caja específica y actualiza los labels.
+     * @param idCaja ID de la caja para la que obtener el reporte.
+     */
+    private void cargarReporteConsolidado(Integer idCaja) {
+         if (idCaja == null || cajaService == null) {
+             actualizarLabelsCaja(null, null); // Limpiar si no hay ID o servicio
+             return;
+         }
+        Task<Optional<CajaReporteConsolidadoFX>> getReporteTask = new Task<>() {
+            @Override
+            protected Optional<CajaReporteConsolidadoFX> call() throws Exception {
+                 return cajaService.getReporteConsolidadoByCajaId(idCaja);
+            }
+        };
+
+        getReporteTask.setOnSucceeded(event -> {
+            Optional<CajaReporteConsolidadoFX> reporteOpt = getReporteTask.getValue();
+            Platform.runLater(() -> {
+                if (reporteOpt.isPresent()) {
+                    CajaReporteConsolidadoFX reporte = reporteOpt.get();
+                    System.out.println("Reporte consolidado obtenido.");
+                    actualizarLabelsCaja(reporte, cajaAbiertaActual);
+                } else {
+                    System.out.println("No se encontró reporte consolidado para la caja ID: " + idCaja);
+                    actualizarLabelsCaja(null, cajaAbiertaActual); // Mantener info de caja si se tiene, limpiar reporte
+                }
+            });
+        });
+
+        getReporteTask.setOnFailed(event -> {
+            Throwable ex = getReporteTask.getException();
+            System.err.println("Error al obtener reporte consolidado: " + ex.getMessage());
+            ex.printStackTrace();
+            Platform.runLater(() -> {
+                actualizarLabelsCaja(null, cajaAbiertaActual); // Limpiar labels de reporte en caso de error
+                 mostrarAlerta(Alert.AlertType.ERROR, "Error de Reporte", "No se pudo obtener el reporte consolidado: " + ex.getMessage());
+            });
+        });
+
+        Thread thread = new Thread(getReporteTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    /**
+     * Actualiza los labels en el footer con la información de la caja y su reporte.
+     * @param reporte Reporte consolidado (puede ser null).
+     * @param caja Caja abierta (puede ser null).
+     */
+    private void actualizarLabelsCaja(CajaReporteConsolidadoFX reporte, CajaResponseFX caja) {
+        // Asegurarse de que los labels existen antes de actualizar
+        if (lblDineroInicial == null || lblTotalEsperadoCaja == null || lblTotalVentas == null || lblProductosVendidos == null) {
+            System.err.println("Error: Labels del footer no inicializados en FXML.");
+            return;
+        }
+
+        if (reporte != null) {
+            // Usar los campos del reporte consolidado
+            BigDecimal dineroInicial = (reporte.getDineroInicial() != null) ? reporte.getDineroInicial() : BigDecimal.ZERO;
+            BigDecimal totalEsperadoCaja = reporte.getTotalEsperadoCaja() != null ? reporte.getTotalEsperadoCaja() : BigDecimal.ZERO;
+            BigDecimal totalVentas = reporte.getTotalGeneralVentas() != null ? reporte.getTotalGeneralVentas() : BigDecimal.ZERO;
+            int totalProductosVendidos = reporte.getTotalUnidadesVendidas(); // getTotalUnidadesVendidas() devuelve int primitivo, no puede ser null
+
+            lblDineroInicial.setText(formatCurrency(dineroInicial));
+            lblTotalEsperadoCaja.setText(formatCurrency(totalEsperadoCaja));
+            lblTotalVentas.setText(formatCurrency(totalVentas));
+            lblProductosVendidos.setText(String.valueOf(totalProductosVendidos));
+
+        } else if (caja != null) {
+            // Si no hay reporte consolidado pero sí información básica de la caja
+            BigDecimal dineroInicial = (caja.getDineroInicial() != null) ? caja.getDineroInicial() : BigDecimal.ZERO;
+
+            lblDineroInicial.setText(formatCurrency(dineroInicial));
+            // En este caso, mostramos 0.00 para esperado, ventas y productos ya que el reporte no está disponible
+            lblTotalEsperadoCaja.setText(formatCurrency(BigDecimal.ZERO));
+            lblTotalVentas.setText(formatCurrency(BigDecimal.ZERO));
+            lblProductosVendidos.setText("0");
+
+        } else {
+            // Si no hay ninguna información de caja disponible
+            lblDineroInicial.setText(formatCurrency(BigDecimal.ZERO));
+            lblTotalEsperadoCaja.setText(formatCurrency(BigDecimal.ZERO));
+            lblTotalVentas.setText(formatCurrency(BigDecimal.ZERO));
+            lblProductosVendidos.setText("0");
+        }
+    }
+
+    /**
+     * Formatea un BigDecimal como moneda.
+     * @param value El valor a formatear.
+     * @return String formateado.
+     */
+    private String formatCurrency(BigDecimal value) {
+        if (value == null) {
+            value = BigDecimal.ZERO;
+        }
+        return currencyFormat.format(value);
+    }
+
+     /**
+     * Maneja la acción del botón Abrir/Cerrar Caja.
+     * Dependiendo del estado actual (cajaAbiertaActual), intenta abrir o cerrar la caja.
+     */
+    private void handleBotonCaja() {
+         if (cajaService == null) {
+             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de caja no disponible.");
+             return;
+         }
+
+         if (cajaAbiertaActual == null) {
+             // Lógica para ABRIR caja
+             System.out.println("Intentando abrir caja...");
+             // Necesitarás un diálogo o forma de obtener dineroInicial y si hereda saldo anterior
+             // Por ahora, mostramos una alerta simple. La implementación real requerirá más UI.
+             mostrarAlerta(Alert.AlertType.INFORMATION, "Abrir Caja", "Implementar lógica para abrir caja (solicitar dinero inicial, etc.).");
+             // TODO: Implementar UI para abrir caja y llamar a cajaService.abrirCaja()
+         } else {
+             // Lógica para CERRAR caja
+             System.out.println("Intentando cerrar caja con ID: " + cajaAbiertaActual.getIdCaja());
+              // Necesitarás un diálogo o forma de obtener el dineroReal
+             // Por ahora, mostramos una alerta simple. La implementación real requerirá más UI.
+             mostrarAlerta(Alert.AlertType.INFORMATION, "Cerrar Caja", "Implementar lógica para cerrar caja (solicitar dinero real).");
+             // TODO: Implementar UI para cerrar caja y llamar a cajaService.cerrarCaja()
+         }
+         // Después de abrir o cerrar exitosamente, deberías llamar a cargarInformacionCajaAbierta() de nuevo
+         // para actualizar el estado y los labels.
+         // Ejemplo (dentro de los callbacks de éxito de abrir/cerrar): cargarInformacionCajaAbierta();
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {

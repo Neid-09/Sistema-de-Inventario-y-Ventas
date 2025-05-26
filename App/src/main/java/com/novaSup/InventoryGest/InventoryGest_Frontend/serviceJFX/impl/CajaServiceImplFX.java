@@ -94,12 +94,19 @@ public class CajaServiceImplFX implements ICajaService {
     public Optional<CajaReporteConsolidadoFX> getReporteConsolidadoByCajaId(Integer idCaja) throws Exception {
         String url = BASE_URL + "/movimientos-caja/caja/" + idCaja + "/reporte-consolidado";
          try {
+            // System.out.println("CajaServiceImplFX: Llamando a GET: " + url); // Log URL
             String responseBody = HttpClient.get(url);
+            // System.out.println("CajaServiceImplFX: Respuesta recibida para " + url + ":\n" + responseBody); // Log response body
+
              if (responseBody == null || responseBody.trim().isEmpty()) {
+                // System.out.println("CajaServiceImplFX: Respuesta vacía o nula para reporte consolidado."); // Log empty response
                  return Optional.empty();
             }
+            // System.out.println("CajaServiceImplFX: Intentando deserializar respuesta JSON."); // Log before deserialization
             return Optional.of(objectMapper.readValue(responseBody, CajaReporteConsolidadoFX.class));
         } catch (Exception e) {
+            // System.err.println("CajaServiceImplFX: Excepción al obtener o procesar reporte consolidado para caja " + idCaja + ": " + e.getMessage()); // Log exception
+            // e.printStackTrace(); // Print stack trace for more details
              return Optional.empty();
         }
     }

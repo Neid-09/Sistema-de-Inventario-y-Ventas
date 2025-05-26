@@ -43,6 +43,8 @@ public class VenderControllerFX implements Initializable {
     private final IClienteService clienteService;
     private final IFacturaService facturaService;
 
+    private Runnable onVentaExitosaCallback;
+
     @FXML
     private Button btnProcesarVenta;
     @FXML
@@ -646,6 +648,13 @@ public class VenderControllerFX implements Initializable {
                 
                 // Mostrar mensaje de éxito
                 mostrarAlerta("Venta Procesada", "La venta ha sido procesada correctamente.");
+
+                // --- Llamar al callback si está establecido ---
+                if (this.onVentaExitosaCallback != null) {
+                    this.onVentaExitosaCallback.run(); // Ejecutar el callback establecido
+                }
+                // ----------------------------------------------
+
             } catch (Exception e) {
                 mostrarError("Error al Actualizar", "La venta se procesó correctamente, pero hubo un error al actualizar los productos: " + e.getMessage());
                 e.printStackTrace();
@@ -794,5 +803,9 @@ public class VenderControllerFX implements Initializable {
                 txtBusqueda.getScene().getWindow().hide();
             }
         });
+    }
+
+    public void setOnVentaExitosa(Runnable callback) {
+        this.onVentaExitosaCallback = callback;
     }
 }
