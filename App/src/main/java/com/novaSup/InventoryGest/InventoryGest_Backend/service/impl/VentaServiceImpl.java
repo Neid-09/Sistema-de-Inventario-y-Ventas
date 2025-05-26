@@ -17,6 +17,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -407,6 +408,22 @@ public class VentaServiceImpl implements VentaService {
             completarDetallesVentaConLotes(todosLosDetallesVenta);
         }
         return ventas;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Venta> obtenerVentasPorRangoFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
+        // Convertir LocalDateTime a Timestamp para usar el método del repositorio
+        Timestamp tsInicio = (fechaInicio != null) ? Timestamp.valueOf(fechaInicio) : null;
+        Timestamp tsFin = (fechaFin != null) ? Timestamp.valueOf(fechaFin) : null;
+
+        // Si fechaFin es null, asumimos hasta el momento actual
+        if (tsFin == null) {
+             tsFin = Timestamp.from(Instant.now());
+        }
+
+        // Usar el nuevo método del repositorio para buscar por rango de fechas
+        return ventaRepository.findVentasByFechaBetweenWithPrimaryDetails(tsInicio, tsFin);
     }
 
     /**

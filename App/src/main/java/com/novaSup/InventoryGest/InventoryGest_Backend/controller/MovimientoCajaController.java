@@ -10,6 +10,8 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.dto.CajaResponseDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.MovimientoCajaResponseDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.UsuarioSimplifiedDTO;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.RegistrarMovimientoManualRequestDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.CajaReporteConsolidadoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.CajaReporteService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +29,13 @@ public class MovimientoCajaController {
     private final MovimientoCajaService movimientoCajaService;
     private final CajaService cajaService;
     private final UsuarioService usuarioService;
+    private final CajaReporteService cajaReporteService;
 
-    public MovimientoCajaController(MovimientoCajaService movimientoCajaService, CajaService cajaService, UsuarioService usuarioService) {
+    public MovimientoCajaController(MovimientoCajaService movimientoCajaService, CajaService cajaService, UsuarioService usuarioService, CajaReporteService cajaReporteService) {
         this.movimientoCajaService = movimientoCajaService;
         this.cajaService = cajaService;
         this.usuarioService = usuarioService;
+        this.cajaReporteService = cajaReporteService;
     }
 
     // Helper method to map MovimientoCaja to MovimientoCajaResponseDTO
@@ -129,6 +133,19 @@ public class MovimientoCajaController {
         } catch (RuntimeException e) {
             e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    // Nuevo endpoint para el reporte consolidado de caja
+    @GetMapping("/caja/{idCaja}/reporte-consolidado")
+    public ResponseEntity<CajaReporteConsolidadoDTO> getCajaReporteConsolidado(@PathVariable Integer idCaja) {
+        try {
+            CajaReporteConsolidadoDTO reporte = cajaReporteService.generarReporteConsolidado(idCaja);
+            return new ResponseEntity<>(reporte, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            // Puedes manejar diferentes tipos de excepciones y retornar códigos de estado apropiados
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -63,6 +64,20 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
            "WHERE ven.idVendedor = :idVendedor")
     List<Venta> findVentasByVendedorWithPrimaryDetails(@Param("idVendedor") Integer idVendedor);
 
+    /**
+     * Busca Ventas dentro de un rango de fechas.
+     * Carga EAGER: Vendedor (con Usuario), Cliente, DetallesVenta (con Producto).
+     * @param fechaInicio Fecha y hora de inicio del rango (inclusive).
+     * @param fechaFin Fecha y hora de fin del rango (inclusive).
+     * @return Lista de ventas dentro del rango de fechas.
+     */
+    @Query("SELECT DISTINCT v FROM Venta v " +
+           "LEFT JOIN FETCH v.vendedor ven LEFT JOIN FETCH ven.usuario " +
+           "LEFT JOIN FETCH v.cliente c " +
+           "LEFT JOIN FETCH v.detallesVenta dv " +
+           "LEFT JOIN FETCH dv.producto p " +
+           "WHERE v.fecha BETWEEN :fechaInicio AND :fechaFin")
+    List<Venta> findVentasByFechaBetweenWithPrimaryDetails(@Param("fechaInicio") Timestamp fechaInicio, @Param("fechaFin") Timestamp fechaFin);
 
     // --- Consulta Secundaria para cargar DetalleVentaLoteUso ---
 

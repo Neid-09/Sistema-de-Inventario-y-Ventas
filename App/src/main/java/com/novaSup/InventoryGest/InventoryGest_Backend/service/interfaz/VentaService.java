@@ -3,6 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Venta;
 import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaRequestDTO; // Asumiendo que crearás este DTO
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,14 @@ public interface VentaService {
      * @return Lista de todas las ventas.
      */
     List<Venta> listarVentas();
+
+    /**
+     * Obtiene ventas dentro de un rango de fechas.
+     * @param fechaInicio Fecha y hora de inicio del rango (inclusive).
+     * @param fechaFin Fecha y hora de fin del rango (inclusive). Puede ser null si se busca hasta la fecha actual.
+     * @return Lista de ventas dentro del rango de fechas.
+     */
+    List<Venta> obtenerVentasPorRangoFechas(LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
     // --- Métodos específicos (pueden moverse a servicios dedicados si crecen) ---
 
