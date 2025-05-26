@@ -23,10 +23,13 @@
                 <TableColumn fx:id="colFecha" prefWidth="100.0" text="Fecha" />
                 <TableColumn fx:id="colAcciones" prefWidth="100.0" text="Acciones" />
             </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
         </TableView>
         <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
             <children>
-                <Label prefHeight="20.0" prefWidth="77.0" text="Total (Sin impuestos)">
+                <Label prefHeight="20.0" prefWidth="73.0" text="Sub-Total">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
@@ -36,7 +39,7 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </TextField>
-                <Label prefHeight="21.0" prefWidth="82.0" text="GANANCIA">
+                <Label prefHeight="21.0" prefWidth="66.0" text="Ganancia">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>
@@ -56,7 +59,7 @@
                         <Font name="System Bold" size="14.0" />
                     </font>
                 </TextField>
-                <Label text="Total (Con impuestos)">
+                <Label text="Total">
                     <font>
                         <Font name="System Bold" size="14.0" />
                     </font>

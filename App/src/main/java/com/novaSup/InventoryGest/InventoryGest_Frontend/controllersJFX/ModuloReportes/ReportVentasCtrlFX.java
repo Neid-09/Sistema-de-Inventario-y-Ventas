@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class ReportVentasCtrlFX {
 
@@ -75,6 +77,9 @@ public class ReportVentasCtrlFX {
     private IVentaSerivice ventaService;
     private IFacturaService facturaService;
     private ObservableList<VentaFX> ventasData = FXCollections.observableArrayList();
+
+    // Formateador para mostrar los valores como moneda
+    private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.of("es", "CO"));
 
     public void setService(IVentaSerivice ventaService, IFacturaService facturaService) {
         this.ventaService = ventaService;
@@ -134,6 +139,43 @@ public class ReportVentasCtrlFX {
         // colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidadItems")); // Placeholder
 
         tablaVentas.setItems(ventasData);
+
+        // Configurar formateo de moneda para columnas relevantes
+        colSubtotal.setCellFactory(tc -> new TableCell<VentaFX, BigDecimal>() {
+            @Override
+            protected void updateItem(BigDecimal price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(currencyFormatter.format(price));
+                }
+            }
+        });
+
+        colImpuestos.setCellFactory(tc -> new TableCell<VentaFX, BigDecimal>() {
+            @Override
+            protected void updateItem(BigDecimal price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(currencyFormatter.format(price));
+                }
+            }
+        });
+
+        colTotal.setCellFactory(tc -> new TableCell<VentaFX, BigDecimal>() {
+            @Override
+            protected void updateItem(BigDecimal price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    setText(currencyFormatter.format(price));
+                }
+            }
+        });
     }
 
     private void cargarVentas() {
@@ -142,7 +184,7 @@ public class ReportVentasCtrlFX {
                 List<VentaFX> ventas = ventaService.listarVentas();
                 ventasData.setAll(ventas);
                 // Aquí podrías calcular y mostrar los totales en los TextField si es necesario
-                // calcularTotalesGenerales(ventas);
+                calcularTotalesGenerales(ventas); // Llamar al método para calcular y mostrar los totales
             } catch (Exception e) {
                 // Manejar la excepción, por ejemplo, mostrar un diálogo de error
                 e.printStackTrace(); // Reemplazar con un manejo de errores adecuado para el usuario
@@ -183,26 +225,30 @@ public class ReportVentasCtrlFX {
         // o mostrar un diálogo con más información.
     }
 
-    // Método de ejemplo para calcular totales, necesitaría implementarse según la lógica de negocio
-    /*
     private void calcularTotalesGenerales(List<VentaFX> ventas) {
         BigDecimal subtotalGeneral = BigDecimal.ZERO;
         BigDecimal impuestosGeneral = BigDecimal.ZERO;
         BigDecimal totalGeneral = BigDecimal.ZERO;
-        // BigDecimal gananciaGeneral = BigDecimal.ZERO; // Si se calcula
+        BigDecimal gananciaGeneral = BigDecimal.ZERO; // Dejar en cero por ahora
 
         for (VentaFX venta : ventas) {
-            // Asumiendo que VentaFX tiene estos campos o se pueden derivar
-            // subtotalGeneral = subtotalGeneral.add(venta.getSubtotal()); // Necesita VentaFX.getSubtotal()
-            // impuestosGeneral = impuestosGeneral.add(venta.getImpuestos()); // Necesita VentaFX.getImpuestos()
-            totalGeneral = totalGeneral.add(venta.getTotal());
+            // Asumiendo que VentaFX tiene estos campos
+            if (venta.getSubtotal() != null) {
+                subtotalGeneral = subtotalGeneral.add(venta.getSubtotal());
+            }
+            if (venta.getTotalImpuestos() != null) {
+                 impuestosGeneral = impuestosGeneral.add(venta.getTotalImpuestos());
+            }
+            if (venta.getTotal() != null) {
+                totalGeneral = totalGeneral.add(venta.getTotal());
+            }
+            // La ganancia se mantiene en cero o se calcula si tienes la lógica
         }
 
-        txtSubtotal.setText(subtotalGeneral.toString());
-        txtImpuestos.setText(impuestosGeneral.toString());
-        txtTotal.setText(totalGeneral.toString());
-        // txtGanancia.setText(gananciaGeneral.toString());
+        txtSubtotal.setText(currencyFormatter.format(subtotalGeneral));
+        txtImpuestos.setText(currencyFormatter.format(impuestosGeneral));
+        txtTotal.setText(currencyFormatter.format(totalGeneral));
+        txtGanancia.setText(currencyFormatter.format(gananciaGeneral)); // Campo de ganancia en cero
     }
-    */
 
 }
