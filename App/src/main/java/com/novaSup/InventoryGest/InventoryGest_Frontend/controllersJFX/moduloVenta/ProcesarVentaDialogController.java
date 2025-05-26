@@ -4,6 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.DetalleVentaCreateRequestFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequestFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
@@ -511,10 +512,10 @@ public class ProcesarVentaDialogController {
                 mostrarAlerta("Datos Incompletos", "Debe ingresar el monto recibido para pagos en efectivo.");
                 return;
             }
-            
+
             // Crear el objeto de solicitud de venta
             VentaCreateRequestFX ventaRequest = new VentaCreateRequestFX();
-            
+
             // Si se requiere factura, validar y agregar datos del cliente
             if (rbFacturaSi.isSelected()) {
                 // Verificar si hay un cliente seleccionado
@@ -526,7 +527,7 @@ public class ProcesarVentaDialogController {
                         if (clienteDialogController != null) {
                             // Llamar al método de guardar del controlador de cliente
                             boolean guardadoExitoso = clienteDialogController.guardarCliente();
-                            
+
                             // Verificar si se guardó correctamente
                             if (guardadoExitoso && clienteDialogController.isGuardadoExitosamente()) {
                                 // Obtener el cliente recién creado
@@ -543,18 +544,18 @@ public class ProcesarVentaDialogController {
                         return;
                     }
                 }
-                
+
                 // Solo establecer que requiere factura y el ID del cliente si está disponible
                 ventaRequest.setRequiereFactura(true);
-                
+
                 // Si hay un cliente seleccionado, agregar su ID
                 if (clienteSeleccionado != null && clienteSeleccionado.getIdCliente() > 0) {
                     ventaRequest.setIdCliente(clienteSeleccionado.getIdCliente());
                 }
-                
+
                 // Establecer el ID del vendedor (por defecto 1)
                 ventaRequest.setIdVendedor(1);
-                
+
                 // Establecer que se apliquen impuestos para facturas
                 ventaRequest.setAplicarImpuestos(true);
             } else {
@@ -563,7 +564,7 @@ public class ProcesarVentaDialogController {
                 ventaRequest.setIdVendedor(1); // Vendedor por defecto
                 ventaRequest.setAplicarImpuestos(false); // Sin impuestos para ventas sin factura
             }
-            
+
             // Obtener el tipo de pago seleccionado
             String tipoPago = "EFECTIVO"; // Valor predeterminado
             if (rbTarjeta.isSelected()) {
@@ -572,7 +573,7 @@ public class ProcesarVentaDialogController {
                 tipoPago = "TRANSFERENCIA";
             }
             ventaRequest.setTipoPago(tipoPago);
-            
+
             // Crear los detalles de venta a partir de los productos seleccionados
             List<DetalleVentaCreateRequestFX> detalles = new ArrayList<>();
             for (ProductoVentaInfo producto : productosEnVenta) {
@@ -582,20 +583,53 @@ public class ProcesarVentaDialogController {
                 detalles.add(detalle);
             }
             ventaRequest.setDetalles(detalles);
-            
+
+            // Registrar la venta usando el servicio y obtener la VentaFX registrada (que contiene el ID)
             try {
-                // Registrar la venta usando el servicio
-                ventaService.registrarVenta(ventaRequest);
-                
-                // Mostrar mensaje de éxito
+                VentaFX ventaRegistrada = ventaService.registrarVenta(ventaRequest);
+                int idVentaRegistrada = ventaRegistrada.getIdVenta(); // Obtener el ID de la venta registrada
+
+                // Mostrar mensaje de éxito general de la venta
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Venta Exitosa");
                 alert.setHeaderText(null);
                 alert.setContentText("Venta registrada correctamente");
-                alert.showAndWait();
-                
-                // Cerrar el diálogo
+                alert.show(); // Mostrar la alerta no modal, para que no bloquee la apertura del PDF
+
+                // Si la venta se registró correctamente (llegamos aquí sin lanzar excepción),
+                // procedemos a generar y mostrar la factura si se requiere
+                // La variable 'idVentaRegistrada' se obtiene directamente del VentaFX retornado.
+                if (rbFacturaSi.isSelected() && idVentaRegistrada > 0) {
+                    try {
+                        // Obtener el PDF oficial de la factura usando el ID de la venta
+                        byte[] pdfBytes = facturaService.getFacturaPdfByIdVenta(idVentaRegistrada);
+
+                        if (pdfBytes != null && pdfBytes.length > 0) {
+                            // Guardar y abrir el PDF
+                            File tempFile = File.createTempFile("factura_", ".pdf");
+                            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                                fos.write(pdfBytes);
+                            }
+
+                            if (Desktop.isDesktopSupported() && tempFile.exists()) {
+                                Desktop.getDesktop().open(tempFile);
+                                // Opcional: eliminar el archivo temporal al cerrar la aplicación
+                                tempFile.deleteOnExit();
+                            } else {
+                                mostrarAlerta("Éxito - PDF Generado", "La factura ha sido generada, pero la apertura automática de archivos no es compatible con su sistema. Busque el archivo temporal.");
+                            }
+                        } else {
+                            mostrarAlerta("Éxito - Sin PDF", "Venta registrada, pero no se recibieron datos de PDF válidos para la factura.");
+                        }
+                    } catch (Exception e) {
+                        mostrarAlerta("Éxito - Error PDF", "Venta registrada, pero ocurrió un error al obtener o mostrar la factura en PDF: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+
+                // Cerrar el diálogo solo si la venta se registró correctamente y se intentó mostrar la factura (o no se requirió)
                 cerrarDialogo(true);
+
             } catch (Exception ex) {
                 // Si hay un error de deserialización pero la venta se realizó correctamente
                 if (ex.getMessage() != null && ex.getMessage().contains("Conflicting setter definitions for property \"fecha\"")) {
@@ -603,20 +637,21 @@ public class ProcesarVentaDialogController {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Venta Exitosa");
                     alert.setHeaderText(null);
-                    alert.setContentText("Venta registrada correctamente");
+                    alert.setContentText("Venta registrada correctamente. Advertencia: Error al procesar respuesta del servidor (el PDF podría no abrirse automáticamente).");
                     alert.showAndWait();
-                    
+
                     // Cerrar el diálogo
                     cerrarDialogo(true);
                 } else {
-                    // Relanzar la excepción para que sea manejada por el catch externo
-                    throw ex;
+                    // Si no fue un error de deserialización conocido, mostrar alerta de error y no cerrar el diálogo (para que el usuario pueda reintentar o revisar)
+                    mostrarAlerta("Error al Registrar Venta", "Ocurrió un error al intentar registrar la venta: " + ex.getMessage());
+                    ex.printStackTrace(); // Imprimir stack trace para depuración
                 }
             }
-            
+
         } catch (Exception e) {
-            // Mostrar mensaje de error
-            mostrarAlerta("Error al Procesar Venta", "Ocurrió un error: " + e.getMessage());
+            // Mostrar mensaje de error general si ocurre algo antes de intentar registrar la venta
+            mostrarAlerta("Error al Procesar Venta", "Ocurrió un error inesperado antes de registrar la venta: " + e.getMessage());
             e.printStackTrace();
         }
     }
