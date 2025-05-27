@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.caja.AbrirCajaDialogControllerFX">
+    <top>
+        <Label text="Ingrese los detalles para abrir la caja del día." style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </Label>
+    </top>
+    
+    <center>
+        <VBox spacing="15.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+            
+            <!-- Campo Dinero Inicial -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="Dinero Inicial:" minWidth="140.0" />
+                <TextField fx:id="dineroInicialField" promptText="0.00" prefWidth="200.0" />
+            </HBox>
+            
+            <!-- Checkbox Heredar Saldo -->
+            <CheckBox fx:id="heredarSaldoCheckbox" text="Heredar saldo del último cierre" />
+            
+            <!-- Campo Justificación -->
+            <VBox spacing="5.0">
+                <Label text="Justificación Manual:" />
+                <TextArea fx:id="justificacionField" prefRowCount="3" maxHeight="80.0" 
+                         promptText="Motivo si no hereda o hay ajuste" wrapText="true" />
+            </VBox>
+        </VBox>
+    </center>
+    
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 1 0 0 0;">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+            </padding>
+            <Button fx:id="cancelarButton" onAction="#handleCancelar" text="Cancelar" />
+            <Button fx:id="abrirCajaButton" onAction="#handleAbrirCaja" text="Abrir Caja" defaultButton="true" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+        </HBox>
+    </bottom>
+</BorderPane>

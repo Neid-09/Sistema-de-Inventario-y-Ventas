@@ -28,6 +28,8 @@ public class CajaServiceImplFX implements ICajaService {
     public CajaResponseFX abrirCaja(AbrirCajaRequestDTO request) throws Exception {
         String url = BASE_URL + "/cajas/abrir";
         String jsonBody = objectMapper.writeValueAsString(request);
+        // Log del JSON que se va a enviar
+        System.out.println("Enviando JSON a /cajas/abrir: " + jsonBody);
         String responseBody = HttpClient.post(url, jsonBody);
         return objectMapper.readValue(responseBody, CajaResponseFX.class);
     }

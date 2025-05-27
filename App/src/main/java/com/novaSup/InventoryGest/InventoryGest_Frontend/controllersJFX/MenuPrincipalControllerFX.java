@@ -24,6 +24,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.Node;
+// Ya estaba, pero para confirmar
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -33,12 +34,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.stage.Modality;
 import javafx.util.Callback;
 import javafx.util.Duration; // Import Duration
 
 // Imports para carga asíncrona y tareas
 import javafx.concurrent.Task;
-import javafx.scene.control.ProgressIndicator; // Ya estaba, pero para confirmar
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,10 +50,13 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CajaResponseFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CajaReporteConsolidadoFX;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.Optional;
 
 // Importar VenderControllerFX
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.VenderControllerFX;
+
+// Agregar estas importaciones al inicio del archivo
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.caja.AbrirCajaDialogControllerFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.caja.CerrarCajaDialogControllerFX;
 
 public class MenuPrincipalControllerFX implements Initializable {
 
@@ -136,6 +140,7 @@ public class MenuPrincipalControllerFX implements Initializable {
     @FXML private Button btnCaja;
 
     private CajaResponseFX cajaAbiertaActual = null; // Para guardar la referencia de la caja abierta
+    private CajaReporteConsolidadoFX reporteCajaActual = null; // Para guardar el reporte consolidado actual
 
     // Formato para mostrar valores monetarios
     private static final DecimalFormat currencyFormat = new DecimalFormat("#,##0.00");
@@ -206,7 +211,7 @@ public class MenuPrincipalControllerFX implements Initializable {
         // --- Cargar información inicial de la caja ---
         cargarInformacionCajaAbierta();
         // --- Configurar acción del botón de caja ---
-        btnCaja.setOnAction(event -> handleBotonCaja());
+        btnCaja.setOnAction(this::handleBotonCaja);
 
         System.out.println("MenuPrincipalControllerFX.initialize() completado (sin configuración de stage ni carga de módulo inicial aquí).");
     }
@@ -1142,7 +1147,7 @@ public class MenuPrincipalControllerFX implements Initializable {
      */
     private void cargarInformacionCajaAbierta() {
         // TODO: Implementar obtención correcta del ID de usuario desde LoginServiceImplFX
-        Integer idUsuario = 31; // Temporalmente hardcodeado para compilación/prueba
+        Integer idUsuario = LoginServiceImplFX.getIdUsuario(); // Temporalmente hardcodeado para compilación/prueba
         Task<Optional<CajaResponseFX>> getCajaTask = new Task<>() {
             @Override
             protected Optional<CajaResponseFX> call() throws Exception {
@@ -1289,30 +1294,94 @@ public class MenuPrincipalControllerFX implements Initializable {
      * Maneja la acción del botón Abrir/Cerrar Caja.
      * Dependiendo del estado actual (cajaAbiertaActual), intenta abrir o cerrar la caja.
      */
-    private void handleBotonCaja() {
-         if (cajaService == null) {
-             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de caja no disponible.");
-             return;
-         }
+    @FXML
+    private void handleBotonCaja(ActionEvent event) {
+        if (cajaService == null) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de caja no disponible.");
+            return;
+        }
 
-         if (cajaAbiertaActual == null) {
-             // Lógica para ABRIR caja
-             System.out.println("Intentando abrir caja...");
-             // Necesitarás un diálogo o forma de obtener dineroInicial y si hereda saldo anterior
-             // Por ahora, mostramos una alerta simple. La implementación real requerirá más UI.
-             mostrarAlerta(Alert.AlertType.INFORMATION, "Abrir Caja", "Implementar lógica para abrir caja (solicitar dinero inicial, etc.).");
-             // TODO: Implementar UI para abrir caja y llamar a cajaService.abrirCaja()
-         } else {
-             // Lógica para CERRAR caja
-             System.out.println("Intentando cerrar caja con ID: " + cajaAbiertaActual.getIdCaja());
-              // Necesitarás un diálogo o forma de obtener el dineroReal
-             // Por ahora, mostramos una alerta simple. La implementación real requerirá más UI.
-             mostrarAlerta(Alert.AlertType.INFORMATION, "Cerrar Caja", "Implementar lógica para cerrar caja (solicitar dinero real).");
-             // TODO: Implementar UI para cerrar caja y llamar a cajaService.cerrarCaja()
-         }
-         // Después de abrir o cerrar exitosamente, deberías llamar a cargarInformacionCajaAbierta() de nuevo
-         // para actualizar el estado y los labels.
-         // Ejemplo (dentro de los callbacks de éxito de abrir/cerrar): cargarInformacionCajaAbierta();
+        if (LoginServiceImplFX.getIdUsuario() == null) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error de Autenticación", "No se pudo obtener el ID del usuario logueado. Por favor, inicie sesión.");
+            return;
+        }
+        int idUsuario = LoginServiceImplFX.getIdUsuario();
+
+        if (cajaAbiertaActual == null) { // No hay caja abierta, proceder a abrir
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.ABRIR_CAJA_DIALOG_FXML));
+                Parent root = loader.load();
+
+                AbrirCajaDialogControllerFX controller = loader.getController();
+                controller.initData(cajaService, idUsuario, () -> {
+                    this.cargarInformacionCajaAbierta(); // Corregido aquí
+                });
+
+                Stage dialogStage = new Stage();
+                dialogStage.setTitle("Abrir Caja");
+                dialogStage.initModality(Modality.APPLICATION_MODAL);
+                if (event != null && event.getSource() instanceof Node) {
+                    dialogStage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                } else if (btnCaja != null && btnCaja.getScene() != null) { 
+                     dialogStage.initOwner(btnCaja.getScene().getWindow());
+                }
+
+                Scene scene = new Scene(root);
+                dialogStage.setScene(scene);
+                dialogStage.showAndWait();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                mostrarAlerta(Alert.AlertType.ERROR, "Error de Carga", "No se pudo cargar el diálogo para abrir caja: " + e.getMessage());
+            } catch (Exception e) { 
+                 e.printStackTrace();
+                 mostrarAlerta(Alert.AlertType.ERROR, "Error en Diálogo", "Ocurrió un error al inicializar el diálogo de abrir caja: " + e.getMessage());
+            }
+        } else { // Hay una caja abierta, proceder a cerrar
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.CERRAR_CAJA_DIALOG_FXML));
+                Parent root = loader.load();
+
+                CerrarCajaDialogControllerFX controller = loader.getController();
+                
+                BigDecimal totalEsperadoEnCaja;
+                if (reporteCajaActual != null && reporteCajaActual.getTotalEsperadoCaja() != null) {
+                    totalEsperadoEnCaja = reporteCajaActual.getTotalEsperadoCaja();
+                } else if (cajaAbiertaActual != null && cajaAbiertaActual.getDineroInicial() != null) { 
+                    // Como fallback, si no hay reporte detallado, usamos el monto inicial.
+                    // Idealmente, cajaAbiertaActual debería tener un campo 'totalEsperadoCalculado'.
+                    totalEsperadoEnCaja = cajaAbiertaActual.getDineroInicial(); 
+                    // Considera mostrar una advertencia si el total esperado es solo el monto inicial.
+                    // mostrarAlerta(Alert.AlertType.INFORMATION, "Información de Cierre", "El total esperado se basa en el monto inicial. Revise las transacciones.");
+                } else {
+                    totalEsperadoEnCaja = BigDecimal.ZERO;
+                }
+
+                controller.initData(cajaService, cajaAbiertaActual.getIdCaja(), totalEsperadoEnCaja, () -> {
+                    this.cargarInformacionCajaAbierta(); // Corregido aquí
+                });
+
+                Stage dialogStage = new Stage();
+                dialogStage.setTitle("Cerrar Caja");
+                dialogStage.initModality(Modality.APPLICATION_MODAL);
+                if (event != null && event.getSource() instanceof Node) {
+                    dialogStage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                } else if (btnCaja != null && btnCaja.getScene() != null) {
+                     dialogStage.initOwner(btnCaja.getScene().getWindow());
+                }
+
+                Scene scene = new Scene(root);
+                dialogStage.setScene(scene);
+                dialogStage.showAndWait();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                mostrarAlerta(Alert.AlertType.ERROR, "Error de Carga", "No se pudo cargar el diálogo para cerrar caja: " + e.getMessage());
+            } catch (Exception e) { 
+                 e.printStackTrace();
+                 mostrarAlerta(Alert.AlertType.ERROR, "Error en Diálogo", "Ocurrió un error al inicializar el diálogo de cerrar caja: " + e.getMessage());
+            }
+        }
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {

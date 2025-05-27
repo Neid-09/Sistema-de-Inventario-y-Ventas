@@ -8,6 +8,10 @@ public class PathsFXML {
     public static final String CONFIGURACION_FXML = "/views/ModuloConfigurar.fxml";
     public static final String VENDER_FXML = "/views/ModuloVentas/Vender.fxml";
 
+    /* CAJA */
+    public static final String ABRIR_CAJA_DIALOG_FXML = "/views/caja/AbrirCajaDialog.fxml";
+    public static final String CERRAR_CAJA_DIALOG_FXML = "/views/caja/CerrarCajaDialog.fxml";
+
     /*MODULO CONFIGURAR*/
     public static final String CONFIGURACIONES_GLOBALES = "/views/ModuloConfigurar/Configuraciones.fxml";
     public static final String CRUD_USERS = "/views/ModuloConfigurar/CRUDUsers.fxml";
