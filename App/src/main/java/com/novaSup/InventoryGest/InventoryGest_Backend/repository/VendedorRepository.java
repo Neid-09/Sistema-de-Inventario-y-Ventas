@@ -23,15 +23,16 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Integer> {
     List<Vendedor> findByUsuarioEstadoTrue();
 
     // Buscar vendedores cuyo Usuario asociado está inactivo
-    List<Vendedor> findByUsuarioEstadoFalse();
-
-    // Nuevo método para buscar por ID cargando el Usuario asociado
+    List<Vendedor> findByUsuarioEstadoFalse();    // Nuevo método para buscar por ID cargando el Usuario asociado
     @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario WHERE v.idVendedor = :id")
     Optional<Vendedor> findByIdWithUsuario(@Param("id") Integer id);
 
-    // Puedes añadir más métodos con JOIN FETCH si necesitas cargar el usuario en otras consultas
-    // Ejemplo: Buscar activos con usuario
-    // @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario u WHERE u.estado = true")
-    // List<Vendedor> findActivosWithUsuario();
+    // Método para obtener todos los vendedores con usuarios cargados
+    @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario")
+    List<Vendedor> findAllWithUsuario();
+
+    // Método para obtener vendedores activos con usuarios cargados
+    @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario u WHERE u.estado = true")
+    List<Vendedor> findActivosWithUsuario();
 
 }

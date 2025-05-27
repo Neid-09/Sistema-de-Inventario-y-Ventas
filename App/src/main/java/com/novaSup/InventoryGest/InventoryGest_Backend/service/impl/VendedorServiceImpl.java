@@ -22,18 +22,14 @@ import java.util.Optional;
 public class VendedorServiceImpl implements VendedorService {
 
     private final VendedorRepository vendedorRepository;
-    private final UsuarioRepository usuarioRepository; // Necesario para validar/actualizar estado usuario
-
-    @Override
+    private final UsuarioRepository usuarioRepository; // Necesario para validar/actualizar estado usuario    @Override
     @Transactional(readOnly = true)
     public List<Vendedor> obtenerTodos() {
-        return vendedorRepository.findAll();
-    }
-
-    @Override
+        return vendedorRepository.findAllWithUsuario();
+    }    @Override
     @Transactional(readOnly = true)
     public Optional<Vendedor> obtenerPorId(Integer id) {
-        return vendedorRepository.findById(id);
+        return vendedorRepository.findByIdWithUsuario(id);
     }
 
     @Override
@@ -114,13 +110,11 @@ public class VendedorServiceImpl implements VendedorService {
     public List<Vendedor> buscarPorNombre(String nombre) {
         // Usa el método del repositorio que busca por el nombre del usuario asociado
         return vendedorRepository.findByUsuarioNombreContainingIgnoreCase(nombre);
-    }
-
-    @Override
+    }    @Override
     @Transactional(readOnly = true)
     public List<Vendedor> obtenerActivos() {
         // Usa el método del repositorio que busca vendedores cuyo usuario asociado está activo
-        return vendedorRepository.findByUsuarioEstadoTrue();
+        return vendedorRepository.findActivosWithUsuario();
     }
 
     @Override
