@@ -1,38 +1,28 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.NotificacionFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICajaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.INotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.Node;
 // Ya estaba, pero para confirmar
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent; // Import MouseEvent
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.Modality;
 import javafx.util.Callback;
@@ -54,6 +44,12 @@ import java.text.DecimalFormat;
 // Importar VenderControllerFX
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.VenderControllerFX;
 
+// Importar controladores de componentes
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.INotificacionCtrl;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.NotificacionController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.ISidebarController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.SidebarController;
+
 // Agregar estas importaciones al inicio del archivo
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.caja.AbrirCajaDialogControllerFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.caja.CerrarCajaDialogControllerFX;
@@ -72,16 +68,13 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     @FXML private Label lblRol;
 
-    private Popup notificacionesPopup;
-    private Label contadorNotificaciones;
-
     // Declare services as final fields, injected via constructor
     private final INotificacionService notificacionService;
     private final ICajaService cajaService; // Inyectar el servicio de caja
     private final Callback<Class<?>, Object> controllerFactory; // To load nested FXMLs
 
-    private Timer timerNotificaciones;
-    private ObservableList<NotificacionFX> listaNotificaciones = FXCollections.observableArrayList();
+    // Controlador de Notificaciones - reemplaza todas las variables relacionadas con notificaciones
+    private INotificacionCtrl notificacionController;
 
     @FXML
     private VBox sidePanelVBox; // Added for the side panel
@@ -117,20 +110,8 @@ public class MenuPrincipalControllerFX implements Initializable {
     @FXML private Button btnGarantiasServicios;
     @FXML private Button btnConfiguracion;
 
-    private Timeline expandTimeline;
-    private Timeline collapseTimeline;
-    private final double collapsedWidth = 60.0;
-    private final double expandedWidth = 200.0;
-    private boolean isSidebarExpanded = false; // Track sidebar state
-    private Button currentActiveButton = null; // Track active button
-
-    // --- Icons for Toggle Button ---
-    // Make sure these paths are correct relative to the resources folder
-    private final Image iconCollapse = new Image(getClass().getResourceAsStream("/img/menuPrincipal/flecha-izquierda.png"));
-    private final Image iconExpand = new Image(getClass().getResourceAsStream("/img/menuPrincipal/flecha-derecha.png"));
-    // --- Active Button Style Classes ---
-    private final String styleClassModuleActive = "module-button-active";
-    private final String styleClassInicioActive = "inicio-button-active";
+    // Controlador del Sidebar - reemplaza todas las variables relacionadas con sidebar
+    private ISidebarController sidebarController;
 
     // FXML fields para la información de la caja en el footer
     @FXML private Label lblDineroInicial;
@@ -201,12 +182,9 @@ public class MenuPrincipalControllerFX implements Initializable {
             mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "Servicio de caja no disponible. Algunas funciones pueden fallar.");
         }
 
-        inicializarContadorNotificaciones();
-        programarActualizacionNotificaciones(); // Las llamadas internas son asíncronas
+        inicializarNotificaciones();
         configurarPermisos();
-        setupAnimations();
-        setSidebarState(false, false);
-        setActiveButton(btnInicio); // Marcar el botón de inicio como activo por defecto
+        inicializarSidebar(); // Inicializar el controlador del sidebar
 
         // --- Cargar información inicial de la caja ---
         cargarInformacionCajaAbierta();
@@ -214,6 +192,34 @@ public class MenuPrincipalControllerFX implements Initializable {
         btnCaja.setOnAction(this::handleBotonCaja);
 
         System.out.println("MenuPrincipalControllerFX.initialize() completado (sin configuración de stage ni carga de módulo inicial aquí).");
+    }
+
+    /**
+     * Inicializa el controlador del sidebar con todas las referencias FXML necesarias.
+     */
+    private void inicializarSidebar() {
+        // Crear el controlador del sidebar con todas las referencias FXML
+        sidebarController = new SidebarController(
+            sidePanelVBox, toggleIcon, btnInicio,
+            lblInicio, lblVender, lblReporteVentas, lblInventario, 
+            lblConsulta, lblCreditoClientes, lblMasVendido, 
+            lblEntradasSalidas, lblGarantiasServicios, lblConfigurar
+        );
+        
+        // Inicializar el controlador
+        sidebarController.initialize();
+    }
+
+    /**
+     * Inicializa el controlador de notificaciones.
+     */
+    private void inicializarNotificaciones() {
+        // Crear el controlador de notificaciones
+        notificacionController = new NotificacionController(
+            notificacionService, 
+            btnNotificaciones, 
+            mensaje -> mostrarAlerta(Alert.AlertType.WARNING, "Notificaciones", mensaje)
+        );
     }
 
     public void postDisplaySetup(Stage stage) {
@@ -256,496 +262,12 @@ public class MenuPrincipalControllerFX implements Initializable {
         }
     }
 
-    private void setupAnimations() {
-        // Animation for expanding the side panel
-        expandTimeline = new Timeline(
-                new KeyFrame(Duration.millis(200),
-                        new KeyValue(sidePanelVBox.prefWidthProperty(), expandedWidth, Interpolator.EASE_BOTH)
-                )
-        );
-        expandTimeline.setOnFinished(event -> {
-            setLabelVisibility(true);
-            isSidebarExpanded = true;
-            updateToggleIcon();
-        });
-
-        // Animation for collapsing the side panel
-        collapseTimeline = new Timeline(
-                new KeyFrame(Duration.millis(200),
-                        new KeyValue(sidePanelVBox.prefWidthProperty(), collapsedWidth, Interpolator.EASE_BOTH)
-                )
-        );
-        collapseTimeline.getKeyFrames().add(0, new KeyFrame(Duration.ZERO, event -> {
-            if (!isSidebarExpanded) { // Only hide labels if collapsing
-                setLabelVisibility(false);
-            }
-        }));
-        collapseTimeline.setOnFinished(event -> {
-            if (!isSidebarExpanded) { // Ensure labels are hidden if state is collapsed
-                setLabelVisibility(false);
-            }
-            updateToggleIcon();
-        });
-    }
-
-    /**
-     * Sets the state of the sidebar (expanded or collapsed).
-     * @param expand True to expand, false to collapse.
-     * @param animate True to animate the transition, false for immediate change.
-     */
-    private void setSidebarState(boolean expand, boolean animate) {
-        isSidebarExpanded = expand; // Update state first
-        updateToggleIcon(); // Update icon based on new state
-
-        if (animate) {
-            if (expand) {
-                collapseTimeline.stop();
-                expandTimeline.playFromStart();
-            } else {
-                expandTimeline.stop();
-                collapseTimeline.playFromStart();
-            }
-        } else {
-            // Set immediately without animation
-            sidePanelVBox.setPrefWidth(expand ? expandedWidth : collapsedWidth);
-            setLabelVisibility(expand);
-        }
-    }
-
-    private void setLabelVisibility(boolean visible) {
-        // Only change visibility if the state requires it
-        if (visible == isSidebarExpanded) {
-            // Show/hide all module labels based on the 'visible' parameter
-            if (lblInicio != null) { lblInicio.setVisible(visible); lblInicio.setManaged(visible); }
-            if (lblVender != null) { lblVender.setVisible(visible); lblVender.setManaged(visible); }
-            if (lblReporteVentas != null) { lblReporteVentas.setVisible(visible); lblReporteVentas.setManaged(visible); }
-            if (lblInventario != null) { lblInventario.setVisible(visible); lblInventario.setManaged(visible); }
-            if (lblConsulta != null) { lblConsulta.setVisible(visible); lblConsulta.setManaged(visible); }
-            if (lblCreditoClientes != null) { lblCreditoClientes.setVisible(visible); lblCreditoClientes.setManaged(visible); }
-            if (lblMasVendido != null) { lblMasVendido.setVisible(visible); lblMasVendido.setManaged(visible); }
-            if (lblEntradasSalidas != null) { lblEntradasSalidas.setVisible(visible); lblEntradasSalidas.setManaged(visible); }
-            if (lblGarantiasServicios != null) { lblGarantiasServicios.setVisible(visible); lblGarantiasServicios.setManaged(visible); }
-            if (lblConfigurar != null) { lblConfigurar.setVisible(visible); lblConfigurar.setManaged(visible); }
-        }
-    }
-
-    private void updateToggleIcon() {
-        if (toggleIcon != null) {
-            toggleIcon.setImage(isSidebarExpanded ? iconCollapse : iconExpand);
-        }
-    }
-
-    /**
-     * Sets the visual style for the active button and removes it from the previous one.
-     * @param button The button to mark as active.
-     */
-    private void setActiveButton(Button button) {
-        if (currentActiveButton != null) {
-            // Remove active class from the previous button
-            currentActiveButton.getStyleClass().remove(styleClassModuleActive);
-            currentActiveButton.getStyleClass().remove(styleClassInicioActive);
-        }
-
-        currentActiveButton = button;
-
-        if (currentActiveButton != null) {
-            // Add the appropriate active class to the new button
-            if (currentActiveButton == btnInicio) {
-                currentActiveButton.getStyleClass().add(styleClassInicioActive);
-            } else {
-                currentActiveButton.getStyleClass().add(styleClassModuleActive);
-            }
-        }
-    }
-
-    @FXML
-    void handleToggleSidebar(ActionEvent event) {
-        setSidebarState(!isSidebarExpanded, true); // Toggle state with animation
-    }
-
-    @FXML
-    void handleSidePanelMouseEnter(MouseEvent event) {
-        // Expand only if not already expanded by the toggle button
-        if (!isSidebarExpanded) {
-            setSidebarState(true, true); // Expand with animation
-        }
-    }
-
-    @FXML
-    void handleSidePanelMouseExit(MouseEvent event) {
-        // Collapse only if it was expanded by hover (not manually by toggle)
-        // This logic might need refinement depending on desired interaction.
-        // For now, let's keep it simple: if mouse leaves, collapse.
-        // A more robust approach might involve checking if the toggle button forced expansion.
-        setSidebarState(false, true); // Collapse with animation
-    }
-
     @FXML
     void irNotificaciones(ActionEvent event) {
-        if (!PermisosUIUtil.verificarPermisoConAlerta("ver_notificaciones")) {
-            return;
-        }
-
-        if (notificacionesPopup == null || !notificacionesPopup.isShowing()) {
-            mostrarPopupNotificaciones();
-        } else {
-            notificacionesPopup.hide();
+        if (notificacionController != null) {
+            notificacionController.irNotificaciones(event);
         }
     }
-
-    private void mostrarPopupNotificaciones() {
-        // Crear el contenido del popup
-        VBox contenido = new VBox(10);
-        contenido.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; " +
-                "-fx-padding: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);");
-        contenido.setPrefWidth(350);
-        // Ajustar altura o hacerla dinámica según el contenido y un máximo.
-        // contenido.setPrefHeight(400); // Comentado para permitir que crezca o usar ScrollPane
-
-        // Crear el título
-        Label titulo = new Label("Notificaciones");
-        titulo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        contenido.getChildren().add(titulo);
-
-        // Placeholder para la lista de notificaciones y el indicador de carga
-        VBox listaItemsContainer = new VBox(5); // Contenedor real de los items
-        ScrollPane scrollPane = new ScrollPane(listaItemsContainer);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: transparent;");
-        scrollPane.setPrefHeight(300); // Altura fija para el área de scroll
-
-        ProgressIndicator popupLoadIndicator = new ProgressIndicator();
-        popupLoadIndicator.setMaxSize(40, 40); // Tamaño moderado
-        StackPane loadingPane = new StackPane(popupLoadIndicator); // Para centrar el indicador
-        loadingPane.setPrefHeight(300); // Que ocupe el espacio del scroll mientras carga
-        // Inicialmente mostrar el indicador de carga en lugar del scrollpane
-        contenido.getChildren().add(loadingPane);
-
-
-        // Botón para ver todas las notificaciones (podría abrir una vista completa)
-        Button btnVerTodas = new Button("Ver todas");
-        btnVerTodas.setStyle("-fx-background-color: #083671; -fx-text-fill: white;");
-        btnVerTodas.setOnAction(e -> {
-            if (notificacionesPopup != null) notificacionesPopup.hide();
-            // Aquí podrías cargar una vista completa de notificaciones
-            // Ejemplo: cargarModuloEnPanel(PathsFXML.TODAS_NOTIFICACIONES_FXML);
-        });
-        contenido.getChildren().add(btnVerTodas);
-
-        // Crear y mostrar el popup (si no existe)
-        if (notificacionesPopup == null) {
-            notificacionesPopup = new Popup();
-            notificacionesPopup.setAutoHide(true); // Importante para que se cierre al hacer clic fuera
-        }
-        notificacionesPopup.getContent().setAll(contenido); // Usar setAll para asegurar que el contenido se actualiza
-
-        // Mostrar el popup
-        notificacionesPopup.show(btnNotificaciones.getScene().getWindow(),
-                btnNotificaciones.localToScene(0, 0).getX() + btnNotificaciones.getScene().getX() + btnNotificaciones.getScene().getWindow().getX(),
-                btnNotificaciones.localToScene(0, 0).getY() + btnNotificaciones.getScene().getY() + btnNotificaciones.getScene().getWindow().getY() + btnNotificaciones.getHeight());
-
-        // Tarea para cargar las notificaciones de forma asíncrona
-        Task<List<NotificacionFX>> cargarDatosPopupTask = new Task<>() {
-            @Override
-            protected List<NotificacionFX> call() throws Exception {
-                if (notificacionService == null) {
-                    throw new IllegalStateException("Servicio de notificaciones no disponible.");
-                }
-                // Simular un pequeño retraso para ver el indicador (opcional, para pruebas)
-                // Thread.sleep(1000);
-                return notificacionService.obtenerNotificaciones();
-            }
-
-            @Override
-            protected void succeeded() {
-                List<NotificacionFX> notificaciones = getValue();
-                Platform.runLater(() -> {
-                    listaNotificaciones.setAll(notificaciones); // Actualizar la lista observable global
-                    listaItemsContainer.getChildren().clear(); // Limpiar items previos del contenedor
-
-                    if (notificaciones.isEmpty()) {
-                        Label sinNotificaciones = new Label("No tienes notificaciones nuevas.");
-                        sinNotificaciones.setStyle("-fx-padding: 20; -fx-text-fill: #888888; -fx-alignment: center;");
-                        listaItemsContainer.getChildren().add(sinNotificaciones);
-                    } else {
-                        for (NotificacionFX notificacion : notificaciones) {
-                            VBox itemNotificacion = crearItemNotificacion(notificacion);
-                            listaItemsContainer.getChildren().add(itemNotificacion);
-                        }
-                    }
-                    // Reemplazar el indicador de carga con el ScrollPane que contiene los ítems
-                    contenido.getChildren().remove(loadingPane);
-                    // Insertar el scrollPane en la posición correcta (antes del botón "Ver todas")
-                    if (contenido.getChildren().contains(btnVerTodas)) {
-                        int indexBtnVerTodas = contenido.getChildren().indexOf(btnVerTodas);
-                        contenido.getChildren().add(indexBtnVerTodas, scrollPane);
-                    } else { // Fallback si el botón no está (no debería pasar)
-                        contenido.getChildren().add(scrollPane);
-                    }
-                });
-            }
-
-            @Override
-            protected void failed() {
-                Throwable ex = getException();
-                Platform.runLater(() -> {
-                    listaItemsContainer.getChildren().clear();
-                    Label errorLabel = new Label("Error: " + ex.getMessage());
-                    errorLabel.setStyle("-fx-text-fill: red; -fx-padding: 10px;");
-                    listaItemsContainer.getChildren().add(errorLabel);
-
-                    // Reemplazar el indicador de carga con el ScrollPane (que ahora muestra el error)
-                    contenido.getChildren().remove(loadingPane);
-                    if (contenido.getChildren().contains(btnVerTodas)) {
-                        int indexBtnVerTodas = contenido.getChildren().indexOf(btnVerTodas);
-                        contenido.getChildren().add(indexBtnVerTodas, scrollPane);
-                    } else {
-                        contenido.getChildren().add(scrollPane);
-                    }
-                    System.err.println("Error al cargar notificaciones para el popup: " + ex.getMessage());
-                    ex.printStackTrace();
-                    mostrarAlerta(Alert.AlertType.WARNING, "Notificaciones", "No se pudieron cargar las notificaciones.");
-                });
-            }
-        };
-        Thread thread = new Thread(cargarDatosPopupTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    private VBox crearItemNotificacion(NotificacionFX notificacion) {
-        VBox item = new VBox(5);
-        item.setStyle("-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 8;");
-        if (!notificacion.getLeida()) {
-            item.setStyle(item.getStyle() + "-fx-background-color: #f0f7ff;");
-        }
-
-        Label lblTitulo = new Label(notificacion.getTitulo());
-        lblTitulo.setStyle("-fx-font-weight: bold;");
-
-        Label lblMensaje = new Label(notificacion.getMensaje());
-        lblMensaje.setWrapText(true);
-
-        HBox acciones = new HBox(10);
-
-        Button btnMarcarLeida = new Button(notificacion.getLeida() ? "Marcar no leída" : "Marcar leída");
-        btnMarcarLeida.setStyle("-fx-background-color: transparent; -fx-text-fill: #083671;");
-        btnMarcarLeida.setOnAction(e -> marcarNotificacion(notificacion));
-
-        Button btnEliminar = new Button("Eliminar");
-        btnEliminar.setStyle("-fx-background-color: transparent; -fx-text-fill: #d32f2f;");
-        btnEliminar.setOnAction(e -> eliminarNotificacion(notificacion));
-
-        acciones.getChildren().addAll(btnMarcarLeida, btnEliminar);
-
-        item.getChildren().addAll(lblTitulo, lblMensaje, acciones);
-        return item;
-    }
-
-    private void marcarNotificacion(NotificacionFX notificacion) {
-        if (this.notificacionService == null) { // Check injected service
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de notificaciones no inicializado.");
-            return;
-        }
-
-        Task<Void> marcarTask = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                if (notificacion.getLeida()) {
-                    notificacionService.marcarComoNoLeida(notificacion.getIdNotificacion());
-                } else {
-                    notificacionService.marcarComoLeida(notificacion.getIdNotificacion());
-                }
-                return null;
-            }
-        };
-
-        marcarTask.setOnSucceeded(e -> {
-            // No es necesario hacer nada aquí si actualizarDespuesDeAccion se encarga
-            // Platform.runLater(this::actualizarDespuesDeAccion);
-            // Sin embargo, es mejor llamar a actualizarDespuesDeAccion desde aquí
-            // para asegurar que se ejecuta después de que la tarea haya tenido éxito.
-            // Y actualizarDespuesDeAccion DEBE estar en Platform.runLater si modifica UI directamente.
-            // Pero actualizarDespuesDeAccion ya llama a otros métodos asíncronos, así que está bien.
-            actualizarDespuesDeAccion();
-        });
-
-        marcarTask.setOnFailed(e -> {
-            Throwable ex = marcarTask.getException();
-            Platform.runLater(() -> mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo actualizar la notificación: " + ex.getMessage()));
-            ex.printStackTrace();
-        });
-        Thread thread = new Thread(marcarTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    private void eliminarNotificacion(NotificacionFX notificacion) {
-        if (this.notificacionService == null) { // Check injected service
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Servicio de notificaciones no inicializado.");
-            return;
-        }
-        Task<Void> eliminarTask = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                notificacionService.eliminarNotificacion(notificacion.getIdNotificacion());
-                return null;
-            }
-        };
-
-        eliminarTask.setOnSucceeded(e -> {
-            // Similar a marcarNotificacion
-            actualizarDespuesDeAccion();
-        });
-
-        eliminarTask.setOnFailed(e -> {
-            Throwable ex = eliminarTask.getException();
-            Platform.runLater(() -> mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo eliminar la notificación: " + ex.getMessage()));
-            ex.printStackTrace();
-        });
-        Thread thread = new Thread(eliminarTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    /**
-     * Método común para actualizar después de una acción (eliminar o marcar)
-     */
-    private void actualizarDespuesDeAccion() {
-        // Estas llamadas son ahora asíncronas y actualizarán los datos en segundo plano.
-        actualizarNotificaciones(); // Para el contador.
-
-        // Si el popup está visible, necesitamos que su contenido se actualice.
-        // La forma más robusta es ocultarlo y volverlo a mostrar,
-        // ya que mostrarPopupNotificaciones ahora maneja la carga asíncrona de su contenido.
-        if (notificacionesPopup != null && notificacionesPopup.isShowing()) {
-            notificacionesPopup.hide(); // Cierra el popup actual
-            mostrarPopupNotificaciones(); // Vuelve a abrirlo, lo que recargará su contenido asíncronamente
-        } else {
-            // Si el popup no está visible, `actualizarNotificaciones` (llamada arriba)
-            // ya inició una tarea para obtener el nuevo conteo.
-            // También actualizamos la lista global de notificaciones para que esté al día
-            // para la próxima vez que se muestre el popup o si otro componente la observa.
-            cargarNotificaciones(); // << LLAMADA AÑADIDA AQUÍ
-        }
-    }
-
-    public void detenerTimers() {
-        if (timerNotificaciones != null) {
-            timerNotificaciones.cancel();
-        }
-    }
-
-    private void inicializarContadorNotificaciones() {
-        contadorNotificaciones = new Label("0");
-        contadorNotificaciones.getStyleClass().add("notification-count-label");
-        contadorNotificaciones.setVisible(false);
-
-        // Añadir el contador al botón de notificaciones
-        StackPane stackPane = new StackPane();
-        stackPane.getChildren().addAll(btnNotificaciones.getGraphic(), contadorNotificaciones);
-        StackPane.setAlignment(contadorNotificaciones, Pos.TOP_RIGHT);
-        btnNotificaciones.setGraphic(stackPane);
-
-        // Cargar las notificaciones iniciales
-        actualizarNotificaciones();
-    }
-
-    private void programarActualizacionNotificaciones() {
-        if (this.notificacionService == null) return; // Check injected service
-        // Actualizar cada 60 segundos (ajustable según necesidades)
-        timerNotificaciones = new Timer(true);
-        timerNotificaciones.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    actualizarNotificaciones(); // Actualiza el contador de la insignia
-                    cargarNotificaciones();   // Actualiza la lista de datos subyacente << LLAMADA AÑADIDA AQUÍ
-                });
-            }
-        }, 0, 60000);
-    }
-
-    private void actualizarNotificaciones() {
-        if (this.notificacionService == null) {
-            System.err.println("Servicio de notificaciones no disponible para actualizar contador.");
-            return;
-        }
-
-        Task<Integer> contarTask = new Task<>() {
-            @Override
-            protected Integer call() throws Exception {
-                return notificacionService.contarNotificacionesNoLeidas();
-            }
-        };
-
-        contarTask.setOnSucceeded(e -> {
-            int cantidad = contarTask.getValue();
-            Platform.runLater(() -> {
-                if (contadorNotificaciones != null) { // Asegurarse que el label existe
-                    contadorNotificaciones.setText(String.valueOf(cantidad));
-                    contadorNotificaciones.setVisible(cantidad > 0);
-                }
-            });
-            // No se llama a cargarNotificaciones aquí directamente. El popup lo hará si se abre.
-            // Si la lista global 'listaNotificaciones' necesitara estar siempre actualizada,
-            // podríamos iniciar aquí otra tarea para 'cargarNotificaciones()'.
-        });
-
-        contarTask.setOnFailed(e -> {
-            Throwable ex = contarTask.getException();
-            System.err.println("Error al actualizar contador de notificaciones: " + ex.getMessage());
-            // Opcional: Mostrar un estado de error en la UI para el contador, ej. "!"
-            // Platform.runLater(() -> {
-            //     if (contadorNotificaciones != null) {
-            //         contadorNotificaciones.setText("!");
-            //         contadorNotificaciones.setVisible(true);
-            //     }
-            // });
-            ex.printStackTrace();
-        });
-
-        Thread thread = new Thread(contarTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    private void cargarNotificaciones() {
-        if (this.notificacionService == null) {
-            System.err.println("Servicio de notificaciones no disponible para cargar lista global.");
-            Platform.runLater(listaNotificaciones::clear);
-            return;
-        }
-        System.out.println("cargarNotificaciones(): Iniciando carga asíncrona para listaNotificaciones global.");
-
-        Task<List<NotificacionFX>> obtenerTask = new Task<>() {
-            @Override
-            protected List<NotificacionFX> call() throws Exception {
-                return notificacionService.obtenerNotificaciones();
-            }
-        };
-
-        obtenerTask.setOnSucceeded(e -> {
-            List<NotificacionFX> notificaciones = obtenerTask.getValue();
-            Platform.runLater(() -> {
-                listaNotificaciones.setAll(notificaciones);
-                System.out.println("cargarNotificaciones(): listaNotificaciones global actualizada con " + notificaciones.size() + " elementos.");
-            });
-        });
-
-        obtenerTask.setOnFailed(e -> {
-            Throwable ex = obtenerTask.getException();
-            System.err.println("Error al cargar notificaciones para lista global: " + ex.getMessage());
-            Platform.runLater(listaNotificaciones::clear); // Limpiar en caso de error
-            ex.printStackTrace();
-        });
-        Thread thread = new Thread(obtenerTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
-
     /**
      * Muestra diálogo de confirmación antes de cerrar la aplicación
      */
@@ -874,7 +396,9 @@ public class MenuPrincipalControllerFX implements Initializable {
                 parallelTransition.setOnFinished(e -> {
                     // Después de que el nuevo módulo aparece y se desliza, actualiza el botón activo
                     Button targetButton = findButtonForFXML(rutaFXML);
-                    setActiveButton(targetButton);
+                    if (sidebarController != null) {
+                        sidebarController.setActiveButton(targetButton);
+                    }
                     nuevoRoot.setTranslateX(0); // Asegurar que la posición final sea exactamente 0
                 });
                 parallelTransition.play();
@@ -941,10 +465,10 @@ public class MenuPrincipalControllerFX implements Initializable {
     @FXML
     void cerrarSesion() {
         try {
-            detenerTimers();
-            // Stop animations if running
-            if (expandTimeline != null) expandTimeline.stop();
-            if (collapseTimeline != null) collapseTimeline.stop();
+            // Limpiar recursos del controlador de notificaciones
+            if (notificacionController != null) notificacionController.cleanup();
+            // Limpiar recursos del sidebar
+            if (sidebarController != null) sidebarController.cleanup();
 
             // Limpiar datos de sesión
             LoginServiceImplFX.cerrarSesion();
@@ -1001,7 +525,9 @@ public class MenuPrincipalControllerFX implements Initializable {
         loadInicioTask.setOnSucceeded(event -> {
             Parent root = loadInicioTask.getValue();
             modulosDinamicos.getChildren().setAll(root); // Reemplazar con el contenido cargado
-            setActiveButton(btnInicio); // Marcar el botón de Inicio como activo
+            if (sidebarController != null) {
+                sidebarController.setActiveButton(btnInicio); // Marcar el botón de Inicio como activo
+            }
             System.out.println("Módulo de inicio (desde botón) cargado y mostrado.");
         });
 
@@ -1044,7 +570,9 @@ public class MenuPrincipalControllerFX implements Initializable {
         loadInicioTask.setOnSucceeded(event -> {
             Parent root = loadInicioTask.getValue();
             modulosDinamicos.getChildren().setAll(root); // Reemplazar con el contenido cargado
-            setActiveButton(btnInicio); // Marcar el botón de Inicio como activo
+            if (sidebarController != null) {
+                sidebarController.setActiveButton(btnInicio); // Marcar el botón de Inicio como activo
+            }
             System.out.println("Módulo de inicio (inicial) cargado y mostrado.");
         });
 
@@ -1381,6 +909,41 @@ public class MenuPrincipalControllerFX implements Initializable {
                  e.printStackTrace();
                  mostrarAlerta(Alert.AlertType.ERROR, "Error en Diálogo", "Ocurrió un error al inicializar el diálogo de cerrar caja: " + e.getMessage());
             }
+        }
+    }
+
+    // Métodos @FXML para delegar al sidebar controller
+    
+    /**
+     * Maneja el evento de toggle (alternar) de la barra lateral.
+     * Delega la operación al controlador del sidebar.
+     */
+    @FXML
+    void handleToggleSidebar(ActionEvent event) {
+        if (sidebarController != null) {
+            sidebarController.handleToggleSidebar(event);
+        }
+    }
+    
+    /**
+     * Maneja el evento cuando el mouse entra en la barra lateral.
+     * Delega la operación al controlador del sidebar.
+     */
+    @FXML
+    void handleSidePanelMouseEnter(MouseEvent event) {
+        if (sidebarController != null) {
+            sidebarController.handleSidePanelMouseEnter(event);
+        }
+    }
+    
+    /**
+     * Maneja el evento cuando el mouse sale de la barra lateral.
+     * Delega la operación al controlador del sidebar.
+     */
+    @FXML
+    void handleSidePanelMouseExit(MouseEvent event) {
+        if (sidebarController != null) {
+            sidebarController.handleSidePanelMouseExit(event);
         }
     }
 
