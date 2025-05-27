@@ -29,10 +29,12 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Integer> {
 
     // Método para obtener todos los vendedores con usuarios cargados
     @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario")
-    List<Vendedor> findAllWithUsuario();
-
-    // Método para obtener vendedores activos con usuarios cargados
+    List<Vendedor> findAllWithUsuario();    // Método para obtener vendedores activos con usuarios cargados
     @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario u WHERE u.estado = true")
     List<Vendedor> findActivosWithUsuario();
+
+    // Método para buscar vendedor por ID de usuario
+    @Query("SELECT v FROM Vendedor v LEFT JOIN FETCH v.usuario WHERE v.usuario.idUsuario = :idUsuario")
+    Optional<Vendedor> findByIdUsuarioWithUsuario(@Param("idUsuario") Integer idUsuario);
 
 }

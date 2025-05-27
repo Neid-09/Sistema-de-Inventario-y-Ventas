@@ -3,9 +3,11 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCo
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VendedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVendedorService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
 
 import javafx.application.Platform;
@@ -18,13 +20,14 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
-public class UserControllerFX {
-
-    // --- Componentes FXML ---
+public class UserControllerFX {    // --- Componentes FXML ---
     @FXML
     private ComboBox<RolFX> cmbRol;
     @FXML
@@ -44,6 +47,8 @@ public class UserControllerFX {
     @FXML
     private TableColumn<UsuarioFX, String> colEstadoTexto;
     @FXML
+    private TableColumn<UsuarioFX, String> colVendedor;
+    @FXML
     private TableView<UsuarioFX> tablaUsuarios;
     @FXML
     private PasswordField txtContraseña;
@@ -58,16 +63,37 @@ public class UserControllerFX {
     @FXML
     private Button btnActualizar;
     @FXML
-    private Button btnCambiarEstado; // Botón unificado
-
-    // --- Servicios ---
+    private Button btnCambiarEstado; // Botón unificado    // --- Componentes de la Sección Vendedor ---
+    @FXML
+    private StackPane seccionVendedor;
+    @FXML
+    private TextField txtObjetivoVentas;
+    @FXML
+    private DatePicker dpFechaContratacion;
+    @FXML
+    private Label lblEstadoVendedor;
+    @FXML
+    private Label lblUsuarioAsociado;
+    @FXML
+    private Label lblIdVendedor;
+    @FXML
+    private Button btnAsignarVendedor;
+    @FXML
+    private Button btnActualizarVendedor;
+    @FXML
+    private Button btnCambiarEstadoVendedor;    // --- Servicios ---
     private final IUsuarioService servicioUsuario;
     private final IRolService servicioRol;
+    private final IVendedorService servicioVendedor;
+
+    // --- Variables para gestión de vendedor ---
+    private VendedorFX vendedorActual;
 
     // --- Constructor ---
-    public UserControllerFX(IUsuarioService servicioUsuario, IRolService servicioRol) {
+    public UserControllerFX(IUsuarioService servicioUsuario, IRolService servicioRol, IVendedorService servicioVendedor) {
         this.servicioUsuario = servicioUsuario;
         this.servicioRol = servicioRol;
+        this.servicioVendedor = servicioVendedor;
     }
 
     // --- Inicialización ---
@@ -82,13 +108,12 @@ public class UserControllerFX {
                             "No tienes permisos para acceder a la gestión de usuarios.");
                     volverAConfiguracion(null); // Intentar volver
                     return; // Detener inicialización si no hay permiso
-                }
-
-                configurarColumnas();
+                }                configurarColumnas();
                 configurarBotonesPorPermisos(); // Configura visibilidad/gestión inicial
                 cargarRoles();
                 cargarUsuarios();
                 configurarListenerSeleccion(); // Configurar listener después de cargar datos iniciales
+                configurarListenerRol(); // Configurar listener para el ComboBox de rol
                 limpiarCampos(); // Asegura estado inicial correcto de botones y campos
 
             } catch (Exception e) {
@@ -136,9 +161,7 @@ public class UserControllerFX {
             boolean estado = cellData.getValue().isEstado();
             // Devuelve "Activo" o "Inactivo" como StringProperty
             return new SimpleStringProperty(estado ? "Activo" : "Inactivo");
-        });
-
-        // Aplicar estilo a la celda basado en el texto ("Activo" o "Inactivo")
+        });        // Aplicar estilo a la celda basado en el texto ("Activo" o "Inactivo")
         colEstadoTexto.setCellFactory(column -> new TableCell<UsuarioFX, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -159,6 +182,44 @@ public class UserControllerFX {
                     }
                 } else {
                     setText(null); // Limpiar texto si la celda está vacía
+                }
+            }
+        });
+
+        // Configurar la columna de Vendedor
+        colVendedor.setCellValueFactory(cellData -> {
+            UsuarioFX usuario = cellData.getValue();
+            // Verificar si el usuario es vendedor basándose en su rol
+            if (usuario.getRol() != null && "Vendedor".equals(usuario.getRol().getNombre())) {
+                return new SimpleStringProperty("Sí");
+            } else {
+                return new SimpleStringProperty("-");
+            }
+        });
+
+        // Aplicar estilo a la columna de vendedor
+        colVendedor.setCellFactory(column -> new TableCell<UsuarioFX, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(item);
+
+                getStyleClass().removeAll("vendedor-si", "vendedor-no");
+                setTextFill(javafx.scene.paint.Color.BLACK);
+
+                if (item != null && !empty) {
+                    if ("Sí".equals(item)) {
+                        getStyleClass().add("vendedor-si");
+                        setTextFill(javafx.scene.paint.Color.BLUE);
+                        setStyle("-fx-font-weight: bold;");
+                    } else {
+                        getStyleClass().add("vendedor-no");
+                        setTextFill(javafx.scene.paint.Color.GRAY);
+                        setStyle("-fx-font-style: italic;");
+                    }
+                } else {
+                    setText(null);
+                    setStyle("");
                 }
             }
         });
@@ -213,9 +274,7 @@ public class UserControllerFX {
         } else {
             btnCambiarEstado.setText("Activar/Desactivar"); // Texto genérico
             btnCambiarEstado.getStyleClass().removeAll("button-success", "button-warning"); // Quitar estilos específicos
-        }
-
-        // --- Actualizar Campos del Formulario ---
+        }        // --- Actualizar Campos del Formulario ---
         if (haySeleccion && usuarioSeleccionado != null) {
             txtNombre.setText(usuarioSeleccionado.getNombre());
             txtCorreo.setText(usuarioSeleccionado.getCorreo());
@@ -223,10 +282,17 @@ public class UserControllerFX {
             txtContraseña.clear(); // Nunca mostrar contraseña existente
             txtContraseña.setPromptText("Dejar vacío para no cambiar"); // Indicar cómo mantener contraseña
             cmbRol.setValue(usuarioSeleccionado.getRol()); // Seleccionar rol actual
+            
+            // Cargar información de vendedor si corresponde
+            cargarInformacionVendedor(usuarioSeleccionado);
         } else {
             // Si no hay selección, los campos se limpian en limpiarCampos()
             txtContraseña.setPromptText(""); // Restablecer texto de ayuda si se deselecciona
+            limpiarSeccionVendedor();
         }
+
+        // Actualizar visibilidad de la sección vendedor basada en el rol seleccionado
+        actualizarVisibilidadSeccionVendedor();
     }
 
     // --- Carga de Datos ---
@@ -493,5 +559,300 @@ public class UserControllerFX {
             alerta.setContentText(mensaje);
             alerta.showAndWait();
         });
+    }
+
+    // --- Métodos de Gestión de Vendedor ---
+
+    /**
+     * Configura el listener para el ComboBox de rol para mostrar/ocultar la sección de vendedor
+     */
+    private void configurarListenerRol() {
+        cmbRol.valueProperty().addListener((obs, oldValue, newValue) -> {
+            actualizarVisibilidadSeccionVendedor();
+        });
+    }
+
+    /**
+     * Actualiza la visibilidad de la sección de vendedor basada en el rol seleccionado
+     */
+    private void actualizarVisibilidadSeccionVendedor() {
+        RolFX rolSeleccionado = cmbRol.getValue();
+        boolean mostrarSeccion = false;
+        
+        if (rolSeleccionado != null) {
+            String nombreRol = rolSeleccionado.getNombre();
+            mostrarSeccion = "Vendedor".equals(nombreRol) || "Administrador".equals(nombreRol);
+        }
+        
+        seccionVendedor.setVisible(mostrarSeccion);
+        seccionVendedor.setManaged(mostrarSeccion);
+        
+        // Configurar botones de vendedor
+        configurarBotonesVendedor(mostrarSeccion);
+        
+        if (!mostrarSeccion) {
+            limpiarSeccionVendedor();
+        }
+    }
+
+    /**
+     * Configura la visibilidad y estado de los botones específicos de vendedor
+     */
+    private void configurarBotonesVendedor(boolean mostrarSeccion) {
+        if (!mostrarSeccion) {
+            // Ocultar todos los botones si no se muestra la sección
+            btnAsignarVendedor.setVisible(false);
+            btnActualizarVendedor.setVisible(false);
+            btnCambiarEstadoVendedor.setVisible(false);
+            return;
+        }
+
+        UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        boolean haySeleccion = usuarioSeleccionado != null;
+        boolean esNuevoUsuario = !haySeleccion;
+        
+        // Verificar si el usuario ya tiene información de vendedor
+        boolean tieneVendedor = vendedorActual != null;
+        
+        // Configurar botón Asignar Vendedor
+        btnAsignarVendedor.setVisible(esNuevoUsuario || (!tieneVendedor && haySeleccion));
+        btnAsignarVendedor.setDisable(esNuevoUsuario); // Solo habilitado si hay usuario seleccionado sin vendedor
+        
+        // Configurar botón Actualizar Vendedor
+        btnActualizarVendedor.setVisible(tieneVendedor && haySeleccion);
+        btnActualizarVendedor.setDisable(!tieneVendedor);
+        
+        // Configurar botón Cambiar Estado Vendedor
+        btnCambiarEstadoVendedor.setVisible(tieneVendedor && haySeleccion);
+        btnCambiarEstadoVendedor.setDisable(!tieneVendedor);        if (tieneVendedor && vendedorActual != null) {
+            // Usar el estado del usuario seleccionado en la tabla en lugar del UsuarioSimplifiedFX
+            UsuarioFX usuarioTabla = tablaUsuarios.getSelectionModel().getSelectedItem();
+            boolean vendedorActivo = usuarioTabla != null ? usuarioTabla.isEstado() : true;
+            btnCambiarEstadoVendedor.setText(vendedorActivo ? "Desactivar Vendedor" : "Activar Vendedor");
+        }
+    }
+
+    /**
+     * Carga la información de vendedor para el usuario seleccionado
+     */
+    private void cargarInformacionVendedor(UsuarioFX usuario) {
+        try {
+            // Intentar obtener vendedor por ID de usuario
+            VendedorFX vendedor = servicioVendedor.obtenerVendedorConUsuario(usuario.getIdUsuario());
+            
+            if (vendedor != null) {
+                vendedorActual = vendedor;
+                
+                // Llenar campos de vendedor
+                if (vendedor.getObjetivoVentas() != null) {
+                    txtObjetivoVentas.setText(vendedor.getObjetivoVentas().toString());
+                }
+                
+                if (vendedor.getFechaContratacion() != null) {
+                    dpFechaContratacion.setValue(vendedor.getFechaContratacion());
+                }
+                
+                // Actualizar labels informativos
+                lblIdVendedor.setText("ID: " + vendedor.getIdVendedor());
+                lblUsuarioAsociado.setText(usuario.getNombre() + " (" + usuario.getCorreo() + ")");
+                  // Actualizar estado del vendedor (usar estado del usuario seleccionado en la tabla)
+                boolean activo = usuario.isEstado(); // Usar el usuario completo de la tabla
+                lblEstadoVendedor.setText(activo ? "Activo" : "Inactivo");
+                lblEstadoVendedor.setStyle(activo ? 
+                    "-fx-background-color: #28a745; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;" :
+                    "-fx-background-color: #dc3545; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;");
+            } else {
+                vendedorActual = null;
+                limpiarCamposVendedor();
+                lblIdVendedor.setText("Se generará automáticamente");
+                lblUsuarioAsociado.setText(usuario.getNombre() + " (Sin información de vendedor)");
+                lblEstadoVendedor.setText("Nuevo");
+                lblEstadoVendedor.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;");
+            }
+            
+        } catch (Exception e) {
+            vendedorActual = null;
+            mostrarAlerta(Alert.AlertType.WARNING, "Información de Vendedor", 
+                "No se pudo cargar la información de vendedor: " + e.getMessage());
+            limpiarCamposVendedor();
+        }
+    }
+
+    /**
+     * Limpia todos los campos de la sección de vendedor
+     */
+    private void limpiarSeccionVendedor() {
+        vendedorActual = null;
+        limpiarCamposVendedor();
+        lblIdVendedor.setText("Se generará automáticamente");
+        lblUsuarioAsociado.setText("Se asignará automáticamente");
+        lblEstadoVendedor.setText("Nuevo");
+        lblEstadoVendedor.setStyle("-fx-background-color: #6c757d; -fx-text-fill: white; -fx-padding: 5 10; -fx-background-radius: 15;");
+    }
+
+    /**
+     * Limpia solo los campos editables de vendedor
+     */
+    private void limpiarCamposVendedor() {
+        txtObjetivoVentas.clear();
+        dpFechaContratacion.setValue(null);
+    }
+
+    // --- Eventos de Botones de Vendedor ---
+
+    @FXML
+    void asignarVendedor(ActionEvent evento) {
+        UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (usuarioSeleccionado == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", 
+                "Por favor selecciona un usuario para asignar como vendedor.");
+            return;
+        }
+
+        // Validar campos de vendedor
+        if (!validarCamposVendedor()) {
+            return;
+        }
+
+        try {
+            BigDecimal objetivoVentas = new BigDecimal(txtObjetivoVentas.getText());
+            LocalDate fechaContratacion = dpFechaContratacion.getValue();
+
+            // Crear nuevo vendedor
+            VendedorFX nuevoVendedor = new VendedorFX();
+            nuevoVendedor.setIdUsuario(usuarioSeleccionado.getIdUsuario());
+            nuevoVendedor.setObjetivoVentas(objetivoVentas);
+            nuevoVendedor.setFechaContratacion(fechaContratacion);
+
+            VendedorFX vendedorCreado = servicioVendedor.crearVendedor(nuevoVendedor);
+            vendedorActual = vendedorCreado;
+
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", 
+                "¡Vendedor asignado correctamente!");
+            
+            // Recargar información
+            cargarInformacionVendedor(usuarioSeleccionado);
+            configurarBotonesVendedor(true);
+            cargarUsuarios(); // Refrescar tabla para mostrar cambios
+
+        } catch (NumberFormatException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error de Formato", 
+                "El objetivo de ventas debe ser un número válido.");
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", 
+                "Error al asignar vendedor: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void actualizarVendedor(ActionEvent evento) {
+        if (vendedorActual == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Error", 
+                "No hay información de vendedor para actualizar.");
+            return;
+        }
+
+        // Validar campos de vendedor
+        if (!validarCamposVendedor()) {
+            return;
+        }
+
+        try {
+            BigDecimal objetivoVentas = new BigDecimal(txtObjetivoVentas.getText());
+            LocalDate fechaContratacion = dpFechaContratacion.getValue();
+
+            // Actualizar vendedor existente
+            vendedorActual.setObjetivoVentas(objetivoVentas);
+            vendedorActual.setFechaContratacion(fechaContratacion);
+
+            servicioVendedor.actualizarVendedor(vendedorActual.getIdVendedor(), vendedorActual);
+
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", 
+                "¡Información de vendedor actualizada correctamente!");
+
+        } catch (NumberFormatException e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error de Formato", 
+                "El objetivo de ventas debe ser un número válido.");
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", 
+                "Error al actualizar vendedor: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void cambiarEstadoVendedor(ActionEvent evento) {
+        if (vendedorActual == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Error", 
+                "No hay información de vendedor para cambiar estado.");
+            return;
+        }        try {
+            // Usar el estado del usuario seleccionado en la tabla
+            UsuarioFX usuarioTabla = tablaUsuarios.getSelectionModel().getSelectedItem();
+            boolean estadoActual = usuarioTabla != null ? usuarioTabla.isEstado() : true;
+            String accion = estadoActual ? "desactivar" : "activar";
+
+            // Confirmar acción
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmacion.setTitle("Confirmar " + accion);
+            confirmacion.setHeaderText("¿Estás seguro?");
+            confirmacion.setContentText("¿Deseas " + accion + " este vendedor?");
+
+            if (confirmacion.showAndWait().filter(respuesta -> respuesta == ButtonType.OK).isPresent()) {
+                if (estadoActual) {
+                    servicioVendedor.desactivarVendedor(vendedorActual.getIdVendedor());
+                } else {
+                    servicioVendedor.activarVendedor(vendedorActual.getIdVendedor());
+                }
+
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", 
+                    "¡Vendedor " + (estadoActual ? "desactivado" : "activado") + " correctamente!");
+
+                // Recargar información
+                UsuarioFX usuarioSeleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+                if (usuarioSeleccionado != null) {
+                    cargarInformacionVendedor(usuarioSeleccionado);
+                }
+                cargarUsuarios(); // Refrescar tabla
+            }
+
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", 
+                "Error al cambiar estado del vendedor: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Valida los campos obligatorios de la sección vendedor
+     */
+    private boolean validarCamposVendedor() {
+        if (txtObjetivoVentas.getText().isEmpty()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", 
+                "Por favor ingresa el objetivo de ventas.");
+            return false;
+        }
+
+        if (dpFechaContratacion.getValue() == null) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", 
+                "Por favor selecciona la fecha de contratación.");
+            return false;
+        }
+
+        try {
+            BigDecimal objetivo = new BigDecimal(txtObjetivoVentas.getText());
+            if (objetivo.compareTo(BigDecimal.ZERO) <= 0) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Valor Inválido", 
+                    "El objetivo de ventas debe ser mayor a cero.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            mostrarAlerta(Alert.AlertType.WARNING, "Formato Inválido", 
+                "El objetivo de ventas debe ser un número válido.");
+            return false;
+        }
+
+        return true;
     }
 }

@@ -38,6 +38,7 @@ public class DependencyManager {
         services.put(IImpuestoAplicableServiceFX.class, new ImpuestoAplicableServiceImplFX()); // ImpuestoAplicableServiceImplFX
         services.put(IFacturaService.class, new FacturaServiceImplFX()); // Factura 
         services.put(ICajaService.class, new CajaServiceImplFX()); // Caja 
+        services.put(IVendedorService.class, new VendedorServiceImplFX()); // VendedorServiceImplFX
         
         // ... Agrega aquí todas las interfaces y sus implementaciones FX correspondientes
     }

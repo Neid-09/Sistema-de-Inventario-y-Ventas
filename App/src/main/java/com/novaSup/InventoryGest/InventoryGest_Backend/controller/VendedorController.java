@@ -165,15 +165,13 @@ public class VendedorController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    /**
-     * Obtener vendedor con información de usuario
+    }    /**
+     * Obtener vendedor con información de usuario por ID de usuario
      */
-    @GetMapping("/{id}/con-usuario")
-    public ResponseEntity<VendedorDTO> obtenerVendedorConUsuario(@PathVariable Integer id) {
+    @GetMapping("/{idUsuario}/con-usuario")
+    public ResponseEntity<VendedorDTO> obtenerVendedorConUsuario(@PathVariable Integer idUsuario) {
         try {
-            Optional<Vendedor> vendedor = vendedorService.obtenerVendedorConUsuario(id);
+            Optional<Vendedor> vendedor = vendedorService.obtenerVendedorPorIdUsuario(idUsuario);
             if (vendedor.isPresent()) {
                 VendedorDTO vendedorDTO = vendedorMapper.toDTO(vendedor.get());
                 return ResponseEntity.ok(vendedorDTO);

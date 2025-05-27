@@ -107,11 +107,6 @@ public class VendedorServiceImpl implements VendedorService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Vendedor> buscarPorNombre(String nombre) {
-        // Usa el método del repositorio que busca por el nombre del usuario asociado
-        return vendedorRepository.findByUsuarioNombreContainingIgnoreCase(nombre);
-    }    @Override
-    @Transactional(readOnly = true)
     public List<Vendedor> obtenerActivos() {
         // Usa el método del repositorio que busca vendedores cuyo usuario asociado está activo
         return vendedorRepository.findActivosWithUsuario();
@@ -147,12 +142,19 @@ public class VendedorServiceImpl implements VendedorService {
                  throw new EntityNotFoundException("No se puede activar el vendedor ID " + id + " porque no tiene un usuario asociado.");
             }
         });
-    }
-
+    }    
+    
     @Override
     @Transactional(readOnly = true) // Es una consulta, readOnly = true
     public Optional<Vendedor> obtenerVendedorConUsuario(Integer id) {
         // Llamar al nuevo método del repositorio que usa JOIN FETCH
         return vendedorRepository.findByIdWithUsuario(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Vendedor> obtenerVendedorPorIdUsuario(Integer idUsuario) {
+        // Llamar al método del repositorio que busca por ID de usuario
+        return vendedorRepository.findByIdUsuarioWithUsuario(idUsuario);
     }
 }

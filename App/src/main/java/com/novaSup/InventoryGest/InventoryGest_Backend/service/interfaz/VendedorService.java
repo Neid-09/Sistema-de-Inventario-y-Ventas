@@ -39,13 +39,6 @@ public interface VendedorService {
     void eliminar(Integer id);
 
     /**
-     * Busca vendedores por nombre.
-     * @param nombre Término de búsqueda para el nombre.
-     * @return Lista de vendedores que coinciden con el nombre.
-     */
-    List<Vendedor> buscarPorNombre(String nombre);
-
-    /**
      * Obtiene todos los vendedores activos.
      * @return Lista de vendedores activos.
      */
@@ -63,12 +56,17 @@ public interface VendedorService {
      * @param id ID del vendedor a activar.
      * @return Optional con el vendedor activado si se encuentra.
      */
-    Optional<Vendedor> activarVendedor(Integer id);
-
-    /**
+    Optional<Vendedor> activarVendedor(Integer id);    /**
      * Obtiene un vendedor por su ID, asegurando que la entidad Usuario asociada esté cargada.
      * @param id ID del vendedor.
      * @return Optional con el vendedor y su usuario si se encuentra, vacío si no.
      */
     Optional<Vendedor> obtenerVendedorConUsuario(Integer id);
+
+    /**
+     * Obtiene un vendedor por el ID de usuario, asegurando que la entidad Usuario asociada esté cargada.
+     * @param idUsuario ID del usuario asociado al vendedor.
+     * @return Optional con el vendedor y su usuario si se encuentra, vacío si no.
+     */
+    Optional<Vendedor> obtenerVendedorPorIdUsuario(Integer idUsuario);
 }
