@@ -5,16 +5,12 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IC
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.INotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
-import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.Node;
 // Ya estaba, pero para confirmar
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -24,18 +20,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.Duration; // Import Duration
-
-// Imports para carga asíncrona y tareas
-import javafx.concurrent.Task;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import javafx.scene.shape.Rectangle; // Import para Rectangle
-
-// Importar VenderControllerFX
-import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.VenderControllerFX;
 
 // Importar controladores de componentes
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.INotificacionCtrl;
@@ -44,6 +33,8 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrinc
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.SidebarController;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.ICajaController;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.CajaController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.INavigationController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.NavigationController;
 
 public class MenuPrincipalControllerFX implements Initializable {
 
@@ -107,6 +98,9 @@ public class MenuPrincipalControllerFX implements Initializable {
     // Controlador de Caja - reemplaza todas las variables y métodos relacionados con caja
     private ICajaController cajaController;
 
+    // Controlador de Navegación - reemplaza todas las funciones de navegación
+    private INavigationController navigationController;
+
     // FXML fields para la información de la caja en el footer
     @FXML private Label lblDineroInicial;
     @FXML private Label lblTotalEsperadoCaja;
@@ -114,16 +108,7 @@ public class MenuPrincipalControllerFX implements Initializable {
     @FXML private Label lblProductosVendidos;
     @FXML private Button btnCaja;
 
-    // Dentro de MenuPrincipalControllerFX.java, fuera de cualquier método, pero dentro de la clase:
-    private static class ModuleLoadResult {
-        Parent root;
-        Object controller;
 
-        ModuleLoadResult(Parent root, Object controller) {
-            this.root = root;
-            this.controller = controller;
-        }
-    }
 
     // Constructor for dependency injection
     public MenuPrincipalControllerFX(INotificacionService notificacionService, ICajaService cajaService, Callback<Class<?>, Object> controllerFactory) {
@@ -174,6 +159,7 @@ public class MenuPrincipalControllerFX implements Initializable {
         configurarPermisos();
         inicializarSidebar(); // Inicializar el controlador del sidebar
         inicializarCaja(); // Inicializar el controlador de caja
+        inicializarNavegacion(); // Inicializar el controlador de navegación
 
         System.out.println("MenuPrincipalControllerFX.initialize() completado (sin configuración de stage ni carga de módulo inicial aquí).");
     }
@@ -231,6 +217,27 @@ public class MenuPrincipalControllerFX implements Initializable {
         btnCaja.setOnAction(cajaController::handleBotonCaja);
     }
 
+    /**
+     * Inicializa el controlador de navegación con el patrón de delegación.
+     */
+    private void inicializarNavegacion() {
+        // Crear el controlador de navegación con todas las referencias necesarias
+        navigationController = new NavigationController(
+            modulosDinamicos,
+            controllerFactory,
+            sidebarController,
+            cajaController,
+            (tipo, mensaje) -> mostrarAlerta(tipo, "Navegación", mensaje), // Callback para mostrar alertas
+            btnInicio,
+            btnVender,
+            btnInventario,
+            btnCreditoClientes,
+            btnEntradasSalidas,
+            btnConfiguracion,
+            btnReporteVentas
+        );
+    }
+
     public void postDisplaySetup(Stage stage) {
         // Este método es llamado por LoginControllerFX DESPUÉS de que el stage se ha mostrado.
         // Se asume que se llama desde el FX Application Thread.
@@ -260,10 +267,15 @@ public class MenuPrincipalControllerFX implements Initializable {
             stage.setUserData(this); // Guardar referencia de este controlador en el stage.
         }
 
-        // Cargar el contenido inicial (volverAlInicio es asíncrono)
+        // Cargar el contenido inicial usando el controlador de navegación delegado
         try {
-            cargarModuloInicioInicial();
-            System.out.println("MenuPrincipalControllerFX.postDisplaySetup: Llamada a cargarModuloInicioInicial() (asíncrono) realizada.");
+            if (navigationController != null) {
+                navigationController.cargarModuloInicioInicial();
+                System.out.println("MenuPrincipalControllerFX.postDisplaySetup: Llamada a navigationController.cargarModuloInicioInicial() realizada.");
+            } else {
+                System.err.println("NavigationController no inicializado, no se puede cargar módulo inicial");
+                mostrarAlerta(Alert.AlertType.ERROR, "Error de Navegación", "No se pudo inicializar el controlador de navegación");
+            }
         } catch (Exception e) {
             System.err.println("MenuPrincipalControllerFX.postDisplaySetup: Error al iniciar la carga del módulo de inicio: " + e.getMessage());
             e.printStackTrace();
@@ -329,146 +341,24 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     /**
-     * Carga un módulo específico en el panel central usando la controller factory
+     * Carga un módulo específico en el panel central usando el NavigationController.
+     * Método público para mantener compatibilidad con otros controladores que necesiten
+     * cargar módulos dinámicamente.
+     * 
      * @param rutaFXML Ruta del archivo FXML a cargar
      * @throws IOException Si hay un error al cargar el módulo
      */
     public void cargarModuloEnPanel(String rutaFXML) throws IOException {
-        if (this.controllerFactory == null) {
-            throw new IllegalStateException("ControllerFactory no fue inyectada en MenuPrincipalControllerFX");
-        }
-
-        Node contenidoActual = modulosDinamicos.getChildren().isEmpty() ? null : modulosDinamicos.getChildren().get(0);
-        double containerWidth = modulosDinamicos.getWidth(); // Ancho del contenedor para el deslizamiento
-        if (containerWidth <= 0) { // Fallback si el ancho no está disponible aún (raro, pero por seguridad)
-            containerWidth = 800; // Un valor por defecto razonable, ajusta si es necesario
-            System.err.println("Advertencia: Ancho de modulosDinamicos no disponible, usando fallback: " + containerWidth);
-        }
-        final double slideInDistance = containerWidth;
-
-        // Función para cargar y mostrar el nuevo módulo con animación de deslizamiento y fundido
-        Runnable cargarNuevoModuloAnimado = () -> {
-            Task<ModuleLoadResult> loadModuleTask = new Task<>() {
-                @Override
-                protected ModuleLoadResult call() throws Exception {
-                    if (controllerFactory == null) {
-                        throw new IllegalStateException("ControllerFactory no fue inyectada en MenuPrincipalControllerFX");
-                    }
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
-                    loader.setControllerFactory(controllerFactory);
-                    Parent root = loader.load();
-                    Object controller = loader.getController(); // Obtener el controlador aquí
-                    return new ModuleLoadResult(root, controller); // Devolver un objeto que contenga ambos
-                }
-            };
-
-            loadModuleTask.setOnSucceeded(event -> {
-                ModuleLoadResult result = loadModuleTask.getValue();
-                Parent nuevoRoot = result.root; // Obtener el root del resultado
-                Object controller = result.controller; // Obtener el controller del resultado
-
-                // Configuración inicial para la animación de entrada
-                nuevoRoot.setOpacity(0.0);
-                nuevoRoot.setTranslateX(-slideInDistance); // Posicionar a la izquierda, fuera de la vista
-
-                modulosDinamicos.getChildren().setAll(nuevoRoot); // Añadir el nuevo módulo al contenedor
-
-                // --- Configurar callback si es el controlador de Ventas ---
-                if (rutaFXML.equals(PathsFXML.VENDER_FXML)) {
-                    if (controller instanceof VenderControllerFX) {
-                        VenderControllerFX venderController = (VenderControllerFX) controller;
-                        // --- Usar el nuevo método setOnVentaExitosa para pasar el callback ---
-                        // El callback usa el controlador delegado de caja para actualizar la información
-                        // Esta llamada setOnVentaExitosa NO modifica UI, así que no necesita Platform.runLater.
-                        // El callback *mismo* (cargarInformacionCajaAbierta) sí debe manejar su asincronía interna
-                        // si llama a servicios o modifica UI.
-                        venderController.setOnVentaExitosa(cajaController::cargarInformacionCajaAbierta);
-                        System.out.println("Callback de venta exitosa configurado para VenderControllerFX.");
-                    } else {
-                         System.err.println("El controlador cargado para " + rutaFXML + " no es una instancia de VenderControllerFX. Es: " + (controller != null ? controller.getClass().getName() : "null"));
-                    }
-                }
-                // ----------------------------------------------------------
-
-                // Crear las animaciones
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), nuevoRoot);
-                fadeIn.setFromValue(0.0);
-                fadeIn.setToValue(1.0);
-
-                TranslateTransition slideIn = new TranslateTransition(Duration.millis(200), nuevoRoot);
-                slideIn.setFromX(-slideInDistance);
-                slideIn.setToX(0);
-
-                // Combinar animaciones para que se ejecuten en paralelo
-                ParallelTransition parallelTransition = new ParallelTransition(nuevoRoot, fadeIn, slideIn);
-                parallelTransition.setOnFinished(e -> {
-                    // Después de que el nuevo módulo aparece y se desliza, actualiza el botón activo
-                    Button targetButton = findButtonForFXML(rutaFXML);
-                    if (sidebarController != null) {
-                        sidebarController.setActiveButton(targetButton);
-                    }
-                    nuevoRoot.setTranslateX(0); // Asegurar que la posición final sea exactamente 0
-                });
-                parallelTransition.play();
-            });
-
-            loadModuleTask.setOnFailed(event -> {
-                Throwable e = loadModuleTask.getException();
-                e.printStackTrace();
-                modulosDinamicos.getChildren().clear();
-                Label errorLabel = new Label("Error al cargar módulo: " + rutaFXML + "\n" + e.getMessage());
-                errorLabel.setWrapText(true);
-                errorLabel.setStyle("-fx-text-fill: red; -fx-padding: 20px;");
-                modulosDinamicos.getChildren().add(errorLabel);
-                mostrarAlerta(Alert.AlertType.ERROR, "Error de Carga",
-                        "No se pudo cargar el módulo " + rutaFXML + ": " + e.getMessage());
-            });
-
-            Thread thread = new Thread(loadModuleTask);
-            thread.setDaemon(true);
-            thread.start();
-        };
-
-        if (contenidoActual != null) {
-            FadeTransition fadeOut = new FadeTransition(Duration.millis(300), contenidoActual);
-            fadeOut.setFromValue(1.0);
-            fadeOut.setToValue(0.0);
-            fadeOut.setOnFinished(event -> {
-                modulosDinamicos.getChildren().clear(); // Limpiar después del fade-out
-                cargarNuevoModuloAnimado.run(); // Cargar el nuevo módulo con la nueva animación
-            });
-            fadeOut.play();
+        if (navigationController != null) {
+            navigationController.cargarModuloEnPanel(rutaFXML);
         } else {
-            modulosDinamicos.getChildren().clear();
-            cargarNuevoModuloAnimado.run();
+            throw new IllegalStateException("NavigationController no está inicializado");
         }
     }
 
-    /**
-     * Helper method to find the button associated with a given FXML path.
-     * This needs to be maintained if FXML paths or button IDs change.
-     * @param rutaFXML The path to the FXML file.
-     * @return The corresponding Button, or null if not found.
-     */
-    private Button findButtonForFXML(String rutaFXML) {
-        if (rutaFXML == null) return null;
 
-        switch (rutaFXML) {
-            case PathsFXML.INICIO_FXML: return btnInicio;
-            case PathsFXML.VENDER_FXML: return btnVender;
-            case PathsFXML.MOD_INVENTARIO: return btnInventario;
-            case PathsFXML.MOD_CLIENTES_MENU: return btnCreditoClientes; // Assuming this is the correct FXML for the button
-            case PathsFXML.CONTROLSTOCK_FXML: return btnEntradasSalidas; // Assuming this is the correct FXML for the button
-            case PathsFXML.CONFIGURACION_FXML: return btnConfiguracion;
-            case PathsFXML.MODULO_REPORTES: return btnReporteVentas; // Assuming this is the correct FXML for the button
-            // Add cases for other buttons/FXMLs:
-            // case PathsFXML.REPORTE_VENTAS_FXML: return btnReporteVentas;
-            // case PathsFXML.CONSULTA_FXML: return btnConsulta;
-            // case PathsFXML.MAS_VENDIDO_FXML: return btnMasVendido;
-            // case PathsFXML.GARANTIAS_SERVICIOS_FXML: return btnGarantiasServicios;
-            default: return null; // Or return btnInicio as a fallback?
-        }
-    }
+
+
 
     @FXML
     void cerrarSesion() {
@@ -477,6 +367,8 @@ public class MenuPrincipalControllerFX implements Initializable {
             if (notificacionController != null) notificacionController.cleanup();
             // Limpiar recursos del sidebar
             if (sidebarController != null) sidebarController.cleanup();
+            // Limpiar recursos del navegador
+            if (navigationController != null) navigationController.cleanup();
 
             // Limpiar datos de sesión
             LoginServiceImplFX.cerrarSesion();
@@ -515,139 +407,38 @@ public class MenuPrincipalControllerFX implements Initializable {
 
     @FXML
     void volverAlInicio() {
-        modulosDinamicos.getChildren().clear(); // Limpiar contenido actual
-        // Ya no se muestra un ProgressIndicator aquí, la carga es asíncrona igualmente.
-
-        Task<Parent> loadInicioTask = new Task<>() {
-            @Override
-            protected Parent call() throws Exception {
-                if (controllerFactory == null) { // Asegurarse que la factory está disponible
-                    throw new IllegalStateException("ControllerFactory no fue inyectada en MenuPrincipalControllerFX o es nula.");
-                }
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.INICIO_FXML));
-                loader.setControllerFactory(controllerFactory); // Usar la factory global
-                return loader.load();
-            }
-        };
-
-        loadInicioTask.setOnSucceeded(event -> {
-            Parent root = loadInicioTask.getValue();
-            modulosDinamicos.getChildren().setAll(root); // Reemplazar con el contenido cargado
-            if (sidebarController != null) {
-                sidebarController.setActiveButton(btnInicio); // Marcar el botón de Inicio como activo
-            }
-            System.out.println("Módulo de inicio (desde botón) cargado y mostrado.");
-        });
-
-        loadInicioTask.setOnFailed(event -> {
-            Throwable e = loadInicioTask.getException();
-            modulosDinamicos.getChildren().clear();
-            Label errorLabel = new Label("Error al cargar la página de inicio: " + e.getMessage());
-            errorLabel.setStyle("-fx-text-fill: red; -fx-padding: 20px;");
-            modulosDinamicos.getChildren().add(errorLabel); // Mostrar mensaje de error
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Carga",
-                    "No se pudo cargar la página de inicio: " + e.getMessage());
-            e.printStackTrace();
-        });
-
-        Thread thread = new Thread(loadInicioTask);
-        thread.setDaemon(true);
-        thread.start();
+        if (navigationController != null) {
+            navigationController.volverAlInicio();
+        }
     }
 
-    /**
-     * Carga el módulo de inicio INICIALMENTE sin mostrar un ProgressIndicator explícito en modulosDinamicos.
-     * La carga del FXML sigue siendo asíncrona.
-     */
-    private void cargarModuloInicioInicial() {
-        modulosDinamicos.getChildren().clear(); // Limpiar contenido actual
-        // No se muestra un ProgressIndicator aquí para la carga inicial.
 
-        Task<Parent> loadInicioTask = new Task<>() {
-            @Override
-            protected Parent call() throws Exception {
-                if (controllerFactory == null) {
-                    throw new IllegalStateException("ControllerFactory no fue inyectada en MenuPrincipalControllerFX o es nula.");
-                }
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.INICIO_FXML));
-                loader.setControllerFactory(controllerFactory);
-                return loader.load();
-            }
-        };
-
-        loadInicioTask.setOnSucceeded(event -> {
-            Parent root = loadInicioTask.getValue();
-            modulosDinamicos.getChildren().setAll(root); // Reemplazar con el contenido cargado
-            if (sidebarController != null) {
-                sidebarController.setActiveButton(btnInicio); // Marcar el botón de Inicio como activo
-            }
-            System.out.println("Módulo de inicio (inicial) cargado y mostrado.");
-        });
-
-        loadInicioTask.setOnFailed(event -> {
-            Throwable e = loadInicioTask.getException();
-            modulosDinamicos.getChildren().clear();
-            Label errorLabel = new Label("Error al cargar la página de inicio: " + e.getMessage());
-            errorLabel.setStyle("-fx-text-fill: red; -fx-padding: 20px;");
-            modulosDinamicos.getChildren().add(errorLabel);
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Carga",
-                    "No se pudo cargar la página de inicio: " + e.getMessage());
-            e.printStackTrace();
-        });
-
-        Thread thread = new Thread(loadInicioTask);
-        thread.setDaemon(true);
-        thread.start();
-    }
 
     @FXML
     void irVender() {
-        try {
-            if (PermisosUIUtil.verificarPermisoConAlerta("crear_venta")) {
-                cargarModuloEnPanel(PathsFXML.VENDER_FXML);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el módulo de ventas: " + e.getMessage());
+        if (navigationController != null) {
+            navigationController.irVender();
         }
     }
 
     @FXML
     void irReporteVentas() {
-        try {
-            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_reporte_ventas")) { //TODO: VERIFICAR PERMISO
-                cargarModuloEnPanel(PathsFXML.MODULO_REPORTES);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el módulo de reporte de ventas: " + e.getMessage());
+        if (navigationController != null) {
+            navigationController.irReporteVentas();
         }
     }
 
     @FXML
     void irModuloInventario() {
-        try {
-            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_inventario")) {
-                cargarModuloEnPanel(PathsFXML.MOD_INVENTARIO);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el módulo de inventario: " + e.getMessage());
+        if (navigationController != null) {
+            navigationController.irModuloInventario();
         }
     }
 
     @FXML
     void irModuloClientes(){
-        try {
-            // Añadir verificación de permisos
-            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_clientes")) { // Asumiendo permiso 'acces_mod_clientes'
-                cargarModuloEnPanel(PathsFXML.MOD_CLIENTES_MENU);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el módulo de clientes: " + e.getMessage());
-            // Imprimir stack trace para más detalles en la consola
-            e.printStackTrace();
+        if (navigationController != null) {
+            navigationController.irModuloClientes();
         }
     }
 
@@ -655,7 +446,9 @@ public class MenuPrincipalControllerFX implements Initializable {
     void irModuloEntradasSalidas() {
         try {
             if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_EntradasSalidas")) {
-                cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
+                if (navigationController != null) {
+                    navigationController.cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
+                }
             }
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
@@ -667,7 +460,9 @@ public class MenuPrincipalControllerFX implements Initializable {
     void irModuloConfiguracion() {
         try {
             if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_configurar")) {
-                cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+                if (navigationController != null) {
+                    navigationController.cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+                }
             }
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
