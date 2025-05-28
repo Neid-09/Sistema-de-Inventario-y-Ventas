@@ -7,7 +7,10 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaCreateRequ
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVendedorService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VendedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.AddEditClienteDialogController;
 
 import javafx.collections.FXCollections;
@@ -103,6 +106,7 @@ public class ProcesarVentaDialogController {
     private IClienteService clienteService;
     private IVentaSerivice ventaService;
     private IFacturaService facturaService;
+    private IVendedorService vendedorService;
     // private IFacturaService facturaService;
     
     // Cliente seleccionado para la venta
@@ -258,10 +262,12 @@ public class ProcesarVentaDialogController {
      * Método para la inyección de dependencias (servicios).
      * Este método se llamará desde VenderControllerFX después de crear una instancia de este controlador.
      */
-    public void setServices(IVentaSerivice ventaService, IClienteService clienteService, IFacturaService facturaService) {
+    public void setServices(IVentaSerivice ventaService, IClienteService clienteService, IFacturaService facturaService, 
+                           IVendedorService vendedorService) {
         this.ventaService = ventaService;
         this.clienteService = clienteService;
         this.facturaService = facturaService;
+        this.vendedorService = vendedorService;
         // Inicializar otros servicios cuando estén disponibles
         
         // Inicializar el controlador de cliente si está disponible
@@ -357,6 +363,37 @@ public class ProcesarVentaDialogController {
         }
     }
     
+    /**
+     * Obtiene el ID del vendedor asociado al usuario que está logueado actualmente.
+     * @return ID del vendedor o -1 si no se encuentra vendedor asociado
+     */
+    private int obtenerIdVendedorLogueado() {
+        try {
+            // Obtener el ID del usuario logueado
+            int idUsuario = LoginServiceImplFX.getIdUsuario();
+            
+            if (idUsuario <= 0) {
+                System.err.println("Error: No hay usuario logueado o ID de usuario inválido");
+                return -1;
+            }
+            
+            // Obtener el vendedor asociado al usuario
+            VendedorFX vendedor = vendedorService.obtenerVendedorConUsuario(idUsuario);
+            
+            if (vendedor != null && vendedor.getIdVendedor() > 0) {
+                return vendedor.getIdVendedor();
+            } else {
+                System.err.println("Error: No se encontró vendedor asociado al usuario ID: " + idUsuario);
+                return -1;
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error al obtener vendedor del usuario logueado: " + e.getMessage());
+            e.printStackTrace();
+            return -1;
+        }
+    }
+    
     private void calcularCambio() {
         if (montoTotalVenta == null || !rbEfectivo.isSelected()) {
             txtCambioEntregar.setText(formatoMoneda.format(BigDecimal.ZERO));
@@ -405,7 +442,7 @@ public class ProcesarVentaDialogController {
         VentaCreateRequestFX ventaRequest = new VentaCreateRequestFX();
         ventaRequest.setIdCliente(clienteSeleccionado.getIdCliente());
         // Asumiendo un ID de vendedor por defecto (puedes ajustar esto según tu lógica real)
-        ventaRequest.setIdVendedor(1);
+        ventaRequest.setIdVendedor(obtenerIdVendedorLogueado()); // ID del vendedor, por ejemplo, 1 para el vendedor por defecto
         ventaRequest.setRequiereFactura(true);
         ventaRequest.setAplicarImpuestos(true);
         // El número de venta y tipo de pago no son estrictamente necesarios para la previsualización según tu JSON de ejemplo, los omitimos.
@@ -553,15 +590,28 @@ public class ProcesarVentaDialogController {
                     ventaRequest.setIdCliente(clienteSeleccionado.getIdCliente());
                 }
 
-                // Establecer el ID del vendedor (por defecto 1)
-                ventaRequest.setIdVendedor(1);
+                // Obtener el ID del vendedor actual del usuario logueado
+                int idVendedor = obtenerIdVendedorLogueado();
+                if (idVendedor <= 0) {
+                    mostrarAlerta("Error de Vendedor", "No se pudo obtener el vendedor asociado al usuario logueado. Por favor, verifique que su usuario tenga un vendedor asignado.");
+                    return;
+                }
+                ventaRequest.setIdVendedor(idVendedor);
 
                 // Establecer que se apliquen impuestos para facturas
                 ventaRequest.setAplicarImpuestos(true);
             } else {
                 // Si no requiere factura, establecer como venta sin factura
                 ventaRequest.setRequiereFactura(false);
-                ventaRequest.setIdVendedor(1); // Vendedor por defecto
+                
+                // Obtener el ID del vendedor actual del usuario logueado
+                int idVendedor = obtenerIdVendedorLogueado();
+                if (idVendedor <= 0) {
+                    mostrarAlerta("Error de Vendedor", "No se pudo obtener el vendedor asociado al usuario logueado. Por favor, verifique que su usuario tenga un vendedor asignado.");
+                    return;
+                }
+                ventaRequest.setIdVendedor(idVendedor);
+                
                 ventaRequest.setAplicarImpuestos(false); // Sin impuestos para ventas sin factura
             }
 
