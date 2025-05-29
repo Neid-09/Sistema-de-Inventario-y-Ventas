@@ -8,6 +8,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig; // Importar ApiConfig
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,9 @@ import java.util.Set;
 public class UsuarioServiceImplFX implements IUsuarioService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioServiceImplFX.class);
-    private static final String BASE_URL = "http://localhost:8080/usuarios";
-    private static final String ROLES_URL = "http://localhost:8080/roles";
+    // Usar ApiConfig para la URL base
+    private static final String BASE_URL = ApiConfig.getBaseUrl() + "/api/usuarios";
+    private static final String ROLES_URL = ApiConfig.getBaseUrl() + "/roles";
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -126,6 +128,7 @@ public class UsuarioServiceImplFX implements IUsuarioService {
         }
     }
 
+    /*
     @Override
     public void eliminarUsuario(Integer id) throws Exception {
         try {
@@ -133,6 +136,30 @@ public class UsuarioServiceImplFX implements IUsuarioService {
         } catch (Exception e) {
             logger.error("Error al eliminar usuario: {}", e.getMessage());
             throw new Exception("Error al eliminar usuario: " + e.getMessage());
+        }
+    }
+    */
+
+    // Implementación de desactivarUsuario (usa el endpoint DELETE como en el backend)
+    @Override
+    public void desactivarUsuario(Integer id) throws Exception {
+        try {
+            HttpClient.delete(BASE_URL + "/" + id);
+        } catch (Exception e) {
+            logger.error("Error al desactivar usuario: {}", e.getMessage());
+            throw new Exception("Error al desactivar usuario: " + e.getMessage());
+        }
+    }
+
+    // Implementación de activarUsuario
+    @Override
+    public void activarUsuario(Integer id) throws Exception {
+        try {
+            // El backend usa PUT para activar
+            HttpClient.put(BASE_URL + "/" + id + "/activar", "{}"); // Enviar cuerpo vacío si no se requiere payload
+        } catch (Exception e) {
+            logger.error("Error al activar usuario: {}", e.getMessage());
+            throw new Exception("Error al activar usuario: " + e.getMessage());
         }
     }
 
@@ -210,6 +237,7 @@ public class UsuarioServiceImplFX implements IUsuarioService {
         String nombre = usuarioNode.has("nombre") ? usuarioNode.get("nombre").asText() : "";
         String correo = usuarioNode.has("correo") ? usuarioNode.get("correo").asText() : "";
         String telefono = usuarioNode.has("telefono") ? usuarioNode.get("telefono").asText() : "";
+        Boolean estado = usuarioNode.has("estado") ? usuarioNode.get("estado").asBoolean() : null; // Leer estado
 
         // La contraseña no se devuelve por seguridad
         String contraseña = "";
@@ -218,16 +246,19 @@ public class UsuarioServiceImplFX implements IUsuarioService {
         RolFX rol = null;
         if (usuarioNode.has("rol") && !usuarioNode.get("rol").isNull()) {
             JsonNode rolNode = usuarioNode.get("rol");
-            rol = convertirRolDeJSON(rolNode);
+            rol = convertirRolDeJSON(rolNode); // Llamada al método que faltaba
         }
 
-        return new UsuarioFX(idUsuario, nombre, correo, telefono, contraseña, rol);
-    }
+        // Pasar estado al constructor
+        return new UsuarioFX(idUsuario, nombre, correo, telefono, contraseña, rol, estado);
+    } // Cierre del método convertirUsuarioDeJSON
 
+    // Definición del método convertirRolDeJSON que faltaba
     private RolFX convertirRolDeJSON(JsonNode rolNode) {
         Integer idRol = rolNode.has("idRol") ? rolNode.get("idRol").asInt() : null;
         String nombre = rolNode.has("nombre") ? rolNode.get("nombre").asText() : "";
-
-        return new RolFX(idRol, nombre);
+        // Aquí puedes agregar la lógica para convertir permisos si es necesario
+        return new RolFX(idRol, nombre); // Asegurar que el método retorna un RolFX
     }
-}
+
+} // Cierre de la clase UsuarioServiceImplFX

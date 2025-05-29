@@ -1,7 +1,6 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import javafx.collections.FXCollections;
@@ -10,13 +9,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class PermisosControllerFX implements Initializable {
 
     @FXML private TableView<PermisoFX> tablaPermisos;
@@ -30,13 +27,14 @@ public class PermisosControllerFX implements Initializable {
     @FXML private Button btnNuevo;
     @FXML private Button btnEliminar;
 
-    private IPermisoService permisoService;
+    private final IPermisoService permisoService;
     private ObservableList<PermisoFX> listaPermisos;
     private PermisoFX permisoSeleccionado;
     private boolean modoEdicion = false;
 
-    public PermisosControllerFX() {
-        permisoService = new PermisoServiceImplFX();
+    // Constructor para inyección de dependencias
+    public PermisosControllerFX(IPermisoService permisoService) {
+        this.permisoService = permisoService;
         listaPermisos = FXCollections.observableArrayList();
     }
 

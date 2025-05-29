@@ -4,7 +4,8 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Categoria;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.*;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.VentaReporteDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +28,18 @@ public class ReporteController {
     @Autowired
     private CategoriaService categoriaService;
 
-    @Autowired
-    private ProveedorService proveedorService;
 
     @Autowired
     private LoteService loteService;
 
     @Autowired
     private RegistMovimientService registMovimientService;
+
+    private final ReporteService reporteService;
+
+    public ReporteController(ReporteService reporteService) {
+        this.reporteService = reporteService;
+    }
 
     @GetMapping("/inventario/resumen")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_productos')")
@@ -183,5 +188,11 @@ public class ReporteController {
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(resultado);
+    }
+
+    @GetMapping("/ventas")
+    public ResponseEntity<List<VentaReporteDTO>> obtenerReporteVentas() {
+        List<VentaReporteDTO> reporte = reporteService.generarReporteVentas();
+        return ResponseEntity.ok(reporte);
     }
 }

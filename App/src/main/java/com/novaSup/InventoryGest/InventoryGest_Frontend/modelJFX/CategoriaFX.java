@@ -37,7 +37,16 @@ public class CategoriaFX {
     public Integer getDuracionGarantia() { return duracionGarantia.get(); }
 
     // Setters
-    public void setIdCategoria(Integer id) { this.idCategoria.set(id); }
+    public void setIdCategoria(Integer id) {
+        // Añadir comprobación para evitar NullPointerException si id es null
+        if (id != null) {
+            this.idCategoria.set(id);
+        } else {
+            // Opcional: establecer un valor predeterminado o manejar el caso null como prefieras
+            // Por ejemplo, podrías establecerlo a 0 o lanzar una excepción diferente si un ID nulo no es válido aquí.
+            this.idCategoria.set(0); // Ejemplo: establecer a 0 si es null
+        }
+    }
     public void setNombre(String nombre) { this.nombre.set(nombre); }
     public void setDescripcion(String descripcion) { this.descripcion.set(descripcion); }
     public void setEstado(Boolean estado) { this.estado.set(estado); }

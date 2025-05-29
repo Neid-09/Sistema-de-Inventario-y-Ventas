@@ -2,8 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCo
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.UsuarioFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.UsuarioServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IUsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -16,13 +14,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class PermisosUserCtrlFX implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(PermisosUserCtrlFX.class);
@@ -55,8 +51,8 @@ public class PermisosUserCtrlFX implements Initializable {
     @FXML private Button btnCancelar;
     @FXML private Button btnCargarPermisos;
 
-    private IUsuarioService usuarioService;
-    private IPermisoService permisoService;
+    private final IUsuarioService usuarioService;
+    private final IPermisoService permisoService;
 
     private ObservableList<UsuarioFX> listaUsuarios;
     private ObservableList<PermisoFX> permisosRol;
@@ -66,9 +62,10 @@ public class PermisosUserCtrlFX implements Initializable {
     private Set<PermisoFX> permisosOriginales;
     private UsuarioFX usuarioSeleccionado;
 
-    public PermisosUserCtrlFX() {
-        this.usuarioService = new UsuarioServiceImplFX();
-        this.permisoService = new PermisoServiceImplFX();
+    // Constructor para inyección de dependencias
+    public PermisosUserCtrlFX(IUsuarioService usuarioService, IPermisoService permisoService) {
+        this.usuarioService = usuarioService;
+        this.permisoService = permisoService;
         this.listaUsuarios = FXCollections.observableArrayList();
         this.permisosRol = FXCollections.observableArrayList();
         this.permisosDisponibles = FXCollections.observableArrayList();

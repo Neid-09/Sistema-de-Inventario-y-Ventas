@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.caja.CerrarCajaDialogControllerFX">
+    <top>
+        <Label text="Ingrese el dinero real contado en la caja." style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #333;">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </Label>
+    </top>
+    
+    <center>
+        <VBox spacing="15.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+            
+            <!-- Total Esperado -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="Total Esperado en Caja:" minWidth="180.0" />
+                <Label fx:id="valorEsperadoLabel" style="-fx-font-weight: bold; -fx-text-fill: #2E7D32;" text="[Cargando...]" />
+            </HBox>
+            
+            <!-- Dinero Real -->
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                <Label text="Dinero Real Contado:" minWidth="180.0" />
+                <TextField fx:id="dineroRealField" promptText="0.00" prefWidth="150.0" />
+            </HBox>
+        </VBox>
+    </center>
+    
+    <bottom>
+        <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 1 0 0 0;">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+            </padding>
+            <Button fx:id="cancelarButton" onAction="#handleCancelar" text="Cancelar" />
+            <Button fx:id="cerrarCajaButton" onAction="#handleAceptar" text="Cerrar Caja" defaultButton="true" style="-fx-background-color: #f44336; -fx-text-fill: white;" />
+        </HBox>
+    </bottom>
+</BorderPane>

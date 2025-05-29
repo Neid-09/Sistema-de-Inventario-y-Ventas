@@ -4,11 +4,11 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.AuditoriaStock;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.InventarioService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.InventarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProveedorService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,16 +29,13 @@ public class InventarioController {
 
     private final InventarioService inventarioService;
     private final ProductoService productoService;
-    private final ProveedorService proveedorService;
 
-    @Autowired
     public InventarioController(
             InventarioService inventarioService,
             ProductoService productoService,
             ProveedorService proveedorService) {
         this.inventarioService = inventarioService;
         this.productoService = productoService;
-        this.proveedorService = proveedorService;
     }
 
     /**
@@ -88,12 +85,13 @@ public class InventarioController {
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
 
             // Registrar la venta
-            RegistMovimient movimiento = inventarioService.registrarVentaProducto(
+            ResultadoRegistroVentaProductoDTO resultadoVentaProducto = inventarioService.registrarVentaProducto(
                     producto,
                     ventaDTO.cantidad,
                     ventaDTO.precioUnitario != null ? ventaDTO.precioUnitario : producto.getPrecioVenta(),
                     ventaDTO.motivo
             );
+            RegistMovimient movimiento = resultadoVentaProducto.getMovimiento();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(movimiento);
         } catch (IllegalArgumentException e) {

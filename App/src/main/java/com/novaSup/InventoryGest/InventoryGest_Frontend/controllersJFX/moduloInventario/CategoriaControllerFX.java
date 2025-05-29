@@ -12,18 +12,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class CategoriaControllerFX implements Initializable {
 
-    @Autowired
-    private ICategoriaService categoriaService;
+    private final ICategoriaService categoriaService;
 
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private CategoriaFX categoriaSeleccionada;
@@ -53,6 +49,11 @@ public class CategoriaControllerFX implements Initializable {
     @FXML private TextArea txtDescripcion;
     @FXML private TextField txtId;
     @FXML private TextField txtNombre;
+
+    // Constructor para inyección de dependencias
+    public CategoriaControllerFX(ICategoriaService categoriaService) {
+        this.categoriaService = categoriaService;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -190,7 +191,7 @@ public class CategoriaControllerFX implements Initializable {
             }
 
             // Guardar en la BD
-            CategoriaFX guardada = categoriaService.guardar(categoria);
+            categoriaService.guardar(categoria);
 
             // Actualizar UI
             limpiarFormulario();

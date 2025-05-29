@@ -1,18 +1,14 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.scheduler;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
-import com.novaSup.InventoryGest.InventoryGest_Backend.model.Notificacion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
-import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.LoteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Component

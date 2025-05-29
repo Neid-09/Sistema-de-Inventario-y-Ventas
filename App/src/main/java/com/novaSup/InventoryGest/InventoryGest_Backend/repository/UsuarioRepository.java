@@ -14,6 +14,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     Optional<Usuario> findByCorreo(String correo);
     long countByRolIdRol(Integer idRol);
 
+    // Nuevos métodos para filtrar por estado
+    List<Usuario> findByEstado(boolean estado);
+    List<Usuario> findByEstadoTrue();
+    List<Usuario> findByEstadoFalse();
+
     @Query("SELECT u FROM Usuario u JOIN u.rol r WHERE r.nombre = :nombreRol")
     List<Usuario> findByRolNombre(@Param("nombreRol") String nombreRol);
 

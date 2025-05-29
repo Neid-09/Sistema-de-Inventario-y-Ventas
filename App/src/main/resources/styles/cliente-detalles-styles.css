@@ -1,0 +1,124 @@
+/* Estilos para la Vista de Detalles del Cliente */
+
+.details-scroll-pane {
+    -fx-background-color: #F4F6F8; /* Fondo general ligeramente gris */
+}
+
+.details-main-vbox {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #D6DBDF;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);
+    -fx-padding: 25px;
+}
+
+.details-header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50; /* Azul oscuro */
+    -fx-padding-bottom: 15px;
+    -fx-border-color: transparent transparent #BDC3C7 transparent; /* Separador sutil debajo del título */
+    -fx-border-width: 0 0 1 0;
+}
+
+.details-titled-pane {
+    -fx-font-size: 16px;
+    -fx-text-fill: #34495E; /* Un gris azulado para el título del panel */
+}
+
+.details-titled-pane > .title {
+    -fx-background-color: #EAECEE;
+    -fx-border-color: #D6DBDF;
+    -fx-border-width: 1px;
+    -fx-padding: 8px 12px;
+}
+
+.details-titled-pane > .content {
+    -fx-background-color: #FBFCFC;
+    -fx-padding: 15px;
+    -fx-border-color: #D6DBDF;
+    -fx-border-width: 0 1px 1px 1px;
+}
+
+.details-grid {
+    /* Estilos para el GridPane si son necesarios más allá del padding del content */
+}
+
+.details-label-header {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5D6D7E; /* Gris medio */
+    -fx-padding-right: 5px;
+}
+
+.details-label-value {
+    -fx-font-size: 14px;
+    -fx-text-fill: #283747; /* Gris oscuro */
+    -fx-wrap-text: true;
+}
+
+.details-checkbox {
+    /* Estilos para los CheckBox si es necesario */
+}
+
+.details-checkbox .box {
+    -fx-border-color: #AEB6BF;
+}
+
+.details-checkbox:selected .mark {
+    -fx-background-color: #3498DB; /* Azul para el check */
+}
+
+.details-action-hbox {
+    -fx-padding-top: 15px;
+}
+
+.button-warning {
+    -fx-background-color: #F39C12; /* Naranja para advertencia/acciones especiales */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-pref-height: 36px;
+    -fx-background-radius: 4px;
+}
+.button-warning:hover {
+    -fx-background-color: #D68910;
+}
+
+.button-secondary {
+    -fx-background-color: #7F8C8D; /* Gris secundario */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-pref-height: 36px;
+    -fx-background-radius: 4px;
+}
+.button-secondary:hover {
+    -fx-background-color: #626F70;
+}
+
+.details-separator {
+    -fx-padding: 10px 0;
+}
+
+.details-table-view .column-header {
+    -fx-background-color: #ECF0F1;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495E;
+    -fx-padding: 8px;
+    -fx-border-color: #CCD1D1;
+    -fx-border-width: 0 1px 1px 0; /* Líneas de cabecera */
+}
+
+.details-table-view .table-cell {
+    -fx-padding: 6px 8px;
+    -fx-border-color: transparent #E5E7E9 transparent transparent; /* Líneas de celda verticales sutiles */
+}
+
+.details-table-view .table-row-cell:odd {
+    -fx-background-color: #FFFFFF;
+}
+
+.details-table-view .table-row-cell:even {
+    -fx-background-color: #F8F9F9;
+} 

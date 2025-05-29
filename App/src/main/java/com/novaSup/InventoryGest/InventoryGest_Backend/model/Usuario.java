@@ -31,6 +31,9 @@ public class Usuario {
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
 
+    @Column(name = "estado") // Mapea a la columna 'estado' de la BD
+    private Boolean estado; // Campo para el estado (activo/inactivo)
+
     @Transient
     private Integer idRol;
 

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" 
+            prefWidth="550.0" 
+            style="-fx-background-color: white; 
+            -fx-border-color: #e0e0e0; 
+            -fx-border-width: 1;" 
+            xmlns="http://javafx.com/javafx/23.0.2" 
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.DetalleVentasCtrlFX">
+   <VBox spacing="15" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0" AnchorPane.bottomAnchor="20.0">
+
+      <Label fx:id="idVentaLabel" text="Detalles de la Venta #..." style="-fx-font-weight: bold; -fx-font-size: 18px;" />
+      <Label fx:id="fechaVentaLabel" text="Venta realizada el..." style="-fx-text-fill: #757575; -fx-font-size: 14px;" />
+      
+      <GridPane hgap="20" vgap="15">
+         <columnConstraints>
+            <ColumnConstraints percentWidth="50" />
+            <ColumnConstraints percentWidth="50" />
+         </columnConstraints>
+         
+         <Label text="Cliente" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+         <Label text="Estado" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+         
+         <Label fx:id="nombreClienteLabel" text="[nombre cliente]" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+         <HBox alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <Label fx:id="estadoVentaLabel" text="[estado]" style="-fx-background-color: #e6f7e6; -fx-text-fill: #2e7d32; -fx-padding: 3 8; -fx-background-radius: 3;" />
+         </HBox>
+         
+         <Label text="Método de pago" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+         <Label text="Total Venta" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+         
+         <Label fx:id="tipoPagoLabel" text="[tipo pago]" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+         <Label fx:id="totalVentaSuperiorLabel" text="[total venta]" style="-fx-font-weight: bold; -fx-font-size: 18px;" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+      </GridPane>
+      
+      <VBox spacing="10">
+         <Label fx:id="cantidadTotalProductosLabel" text="Productos (...)" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
+         
+         <TableView fx:id="tablaDetallesVenta" prefHeight="200.0" style="-fx-background-color: #f9f9f9; -fx-padding: 1;">
+            <columns>
+              <TableColumn fx:id="colProducto" prefWidth="150.0" text="Producto" />
+              <TableColumn fx:id="colPrecioUnitario" prefWidth="100.0" text="Precio Unit." />
+              <TableColumn fx:id="colCantidad" prefWidth="70.0" text="Cantidad" />
+              <TableColumn fx:id="colSubtotalProducto" prefWidth="100.0" text="Subtotal" />
+            </columns>
+         </TableView>
+         
+         <Separator />
+         
+         <GridPane vgap="10" alignment="CENTER_RIGHT"> <!-- Alineado a la derecha para los totales -->
+            <columnConstraints>
+               <ColumnConstraints percentWidth="60" hgrow="SOMETIMES" /> <!-- Espacio para etiquetas -->
+               <ColumnConstraints percentWidth="40" hgrow="SOMETIMES" /> <!-- Espacio para valores -->
+            </columnConstraints>
+            
+            <Label text="Subtotal General:" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.halignment="RIGHT"/>
+            <Label fx:id="subtotalGeneralLabel" text="[Subtotal Gral.]" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.halignment="RIGHT"/>
+            
+            <Label text="Total Impuestos:" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.halignment="RIGHT"/>
+            <Label fx:id="totalImpuestosLabel" text="[Total Imp.]" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.halignment="RIGHT"/>
+
+            <Label text="Total Final:" style="-fx-font-weight: bold; -fx-font-size: 16px;" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.halignment="RIGHT"/>
+            <Label fx:id="totalFinalLabel" text="[Total Final]" style="-fx-font-weight: bold; -fx-font-size: 18px;" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.halignment="RIGHT"/>
+         </GridPane>
+      </VBox>
+      
+      <HBox spacing="10" alignment="CENTER_RIGHT" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0"> <!-- Alineado a la derecha -->
+         <Button fx:id="btnCerrar" text="Cerrar" style="-fx-background-color: #e0e0e0; -fx-text-fill: #757575;" />
+         <Button fx:id="btnModificarVenta" text="Modificar detalles de venta" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+         <Button fx:id="btnImprimirFactura" text="Ver factura" style="-fx-background-color: #2196F3; -fx-text-fill: white;" />
+      </HBox>
+   </VBox>
+</AnchorPane>

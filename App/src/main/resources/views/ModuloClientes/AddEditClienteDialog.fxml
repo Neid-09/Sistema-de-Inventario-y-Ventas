@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import java.net.URL?>
+
+<VBox fx:id="dialogPane" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="520.0" spacing="15.0" styleClass="dialog-pane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.AddEditClienteDialogController">
+   <stylesheets>
+      <URL value="@../../styles/add-edit-cliente-styles.css" />
+   </stylesheets>
+   <padding>
+      <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+   </padding>
+   <children>
+      <Label fx:id="dialogTitleLabel" text="Agregar Nuevo Cliente" styleClass="dialog-title">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <GridPane styleClass="form-grid-pane" vgap="12.0" hgap="15.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="160.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="320.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="Nombre Completo:" styleClass="form-label" GridPane.rowIndex="0" />
+            <TextField fx:id="nombreField" promptText="Ingrese el nombre completo" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Label text="Doc. Identidad:" styleClass="form-label" GridPane.rowIndex="1" />
+            <TextField fx:id="documentoIdentidadField" promptText="Ingrese el documento de identidad" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Correo Electrónico:" styleClass="form-label" GridPane.rowIndex="2" />
+            <TextField fx:id="correoField" promptText="ejemplo@correo.com" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Teléfono/Celular:" styleClass="form-label" GridPane.rowIndex="3" />
+            <TextField fx:id="telefonoField" promptText="Ingrese el número de teléfono" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Dirección Residencia:" styleClass="form-label" GridPane.rowIndex="4" />
+            <TextField fx:id="direccionField" promptText="Ingrese la dirección completa" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label text="Límite de Crédito (€):" styleClass="form-label" GridPane.rowIndex="5" />
+            <TextField fx:id="limiteCreditoField" promptText="0.00" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Label text="Identificación Fiscal:" styleClass="form-label" GridPane.rowIndex="6" />
+            <TextField fx:id="identificacionFiscalField" promptText="Ej: RUC, NIF" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Label text="Razón Social:" styleClass="form-label" GridPane.rowIndex="7" />
+            <TextField fx:id="razonSocialField" promptText="Nombre de la empresa (si aplica)" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+            <Label text="Dirección Facturación:" styleClass="form-label" GridPane.rowIndex="8" />
+            <TextField fx:id="direccionFacturacionField" promptText="Ingrese la dirección de facturación" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+            <Label text="Correo Facturación:" styleClass="form-label" GridPane.rowIndex="9" />
+            <TextField fx:id="correoFacturacionField" promptText="correo@facturacion.com" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+            <Label text="Tipo Factura (Def.):" styleClass="form-label" GridPane.rowIndex="10" />
+            <TextField fx:id="tipoFacturaDefaultField" promptText="Ej: Electrónica, Física" styleClass="form-textfield" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+            <Label text="Requiere Factura (Def.):" styleClass="form-label" GridPane.rowIndex="11" />
+            <CheckBox fx:id="requiereFacturaDefaultCheckBox" text="" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+            <Label text="Cliente Activo:" styleClass="form-label" GridPane.rowIndex="12" />
+            <CheckBox fx:id="activoCheckBox" text="" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+         </children>
+      </GridPane>
+      <HBox styleClass="action-buttons-hbox">
+         <children>
+            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleGuardar" styleClass="button-primary" text="Guardar Cliente" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancelar" styleClass="button-secondary-dialog" text="Cancelar" />
+         </children>
+         <VBox.margin>
+            <Insets top="15.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+</VBox>

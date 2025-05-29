@@ -5,11 +5,12 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.RegistMovimient;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.AuditoriaStockService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.InventarioService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.LoteService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.AuditoriaStockService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.InventarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.LoteService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RegistMovimientService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.LoteReducidoInfoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Backend.dto.ResultadoRegistroVentaProductoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,6 @@ public class InventarioServiceImpl implements InventarioService {
     private final ProductoRepository productoRepository;
     private final AuditoriaStockService auditoriaStockService;
 
-    @Autowired
     public InventarioServiceImpl(
             LoteService loteService,
             RegistMovimientService registMovimientService,
@@ -89,27 +89,42 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     @Transactional
-    public RegistMovimient registrarVentaProducto(
+    public ResultadoRegistroVentaProductoDTO registrarVentaProducto(
             Producto producto,
             Integer cantidad,
             BigDecimal precioUnitario,
             String motivo) throws Exception {
 
+        // Validar si el producto está activo
+        if (!producto.getEstado()) {
+            throw new IllegalStateException("No se puede registrar una venta para un producto inactivo: " + producto.getNombre());
+        }
+
         // Validar que haya suficiente stock
         validarStockSuficiente(producto, cantidad);
 
-        // 1. Registrar el movimiento de salida
+        // --- Obtener idProveedor del producto ---
+        Integer idProveedor = null;
+        if (producto.getProveedor() != null) {
+            idProveedor = producto.getProveedor().getIdProveedor();
+        } else if (producto.getIdProveedor() != null) { // Fallback si solo se guarda el ID directamente
+             idProveedor = producto.getIdProveedor();
+        }
+        // Considerar si se debe lanzar una excepción si el proveedor es nulo y es requerido
+
+        // 1. Registrar el movimiento de salida, incluyendo idProveedor
         RegistMovimient movimiento = registMovimientService.registrarVentaProducto(
                 producto,
                 cantidad,
                 precioUnitario,
-                motivo
+                motivo,
+                idProveedor // <--- Pasar el idProveedor obtenido
         );
 
-        // 2. Reducir la cantidad en los lotes (FIFO/FEFO)
-        loteService.reducirCantidadDeLotes(producto.getIdProducto(), cantidad);
+        // 2. Reducir la cantidad en los lotes (FIFO/FEFO) y obtener información de lotes afectados
+        List<LoteReducidoInfoDTO> lotesAfectados = loteService.reducirCantidadDeLotes(producto.getIdProducto(), cantidad);
 
-        return movimiento;
+        return new ResultadoRegistroVentaProductoDTO(movimiento, lotesAfectados); // Devolver DTO con movimiento y lotes
     }
 
     @Override
@@ -118,6 +133,11 @@ public class InventarioServiceImpl implements InventarioService {
             Producto producto,
             Integer cantidad,
             String motivo) throws Exception {
+
+        // Validar si el producto está activo
+        if (!producto.getEstado()) {
+            throw new IllegalStateException("No se puede registrar un ajuste para un producto inactivo: " + producto.getNombre());
+        }
 
         // Validar para ajustes negativos que haya suficiente stock
         if (cantidad < 0 && producto.getStock() < Math.abs(cantidad)) {
@@ -148,6 +168,11 @@ public class InventarioServiceImpl implements InventarioService {
         // 1. Buscar el lote
         Lote lote = loteService.obtenerPorId(idLote)
                 .orElseThrow(() -> new Exception("Lote no encontrado con ID: " + idLote));
+
+        // Validar si el producto asociado al lote está activo
+        if (lote.getProducto() != null && !lote.getProducto().getEstado()) {
+            throw new IllegalStateException("No se puede registrar una devolución para un producto inactivo: " + lote.getProducto().getNombre());
+        }
 
         // 2. Crear movimiento de entrada (devolución)
         BigDecimal precioUnitario = (lote.getProducto().getPrecioCosto() != null)
@@ -264,4 +289,4 @@ public class InventarioServiceImpl implements InventarioService {
         // en función del nuevo precio de compra, si es necesario
         // Por ejemplo, calcular un promedio ponderado de precios de compra
     }
-} 
+}

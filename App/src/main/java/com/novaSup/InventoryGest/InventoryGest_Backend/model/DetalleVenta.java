@@ -1,78 +1,61 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "detalle_venta")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DetalleVenta {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_detalle_venta")
+    private Integer idDetalle;
 
-    @ManyToOne
-    @JoinColumn(name = "venta_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_venta", nullable = false)
     private Venta venta;
 
-    private Long idProducto;
-    private String nombreProducto;
-    private int cantidad;
-    private BigDecimal precioUnitario;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_producto", nullable = false)
+    private Producto producto;
+
+    @OneToMany(mappedBy = "detalleVenta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DetalleVentaLoteUso> detalleLotesUsados = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Integer cantidad;
+
+    @Column(name = "precio_unitario_original", precision = 10, scale = 2, nullable = true)
+    private BigDecimal precioUnitarioOriginal;
+
+    @Column(name = "id_promocion_aplicada", nullable = true)
+    private Integer idPromocionAplicada;
+
+    @Column(name = "precio_unitario_final", precision = 10, scale = 2, nullable = false)
+    private BigDecimal precioUnitarioFinal;
+
+    @Column(precision = 12, scale = 2, nullable = false)
     private BigDecimal subtotal;
 
-    // Getters y setters
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "costo_unitario_producto", precision = 10, scale = 2, nullable = true)
+    private BigDecimal costoUnitarioProducto;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Column(name = "ganancia_detalle", precision = 12, scale = 2)
+    private BigDecimal gananciaDetalle;
 
-    public Venta getVenta() {
-        return venta;
-    }
+    @Column(name = "fecha_creacion", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Temporal(TemporalType.TIMESTAMP)
+    private java.sql.Timestamp fechaCreacion;
 
-    public void setVenta(Venta venta) {
-        this.venta = venta;
-    }
-
-    public Long getIdProducto() {
-        return idProducto;
-    }
-
-    public void setIdProducto(Long idProducto) {
-        this.idProducto = idProducto;
-    }
-
-    public String getNombreProducto() {
-        return nombreProducto;
-    }
-
-    public void setNombreProducto(String nombreProducto) {
-        this.nombreProducto = nombreProducto;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public BigDecimal getPrecioUnitario() {
-        return precioUnitario;
-    }
-
-    public void setPrecioUnitario(BigDecimal precioUnitario) {
-        this.precioUnitario = precioUnitario;
-    }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
+    // Lombok genera getters, setters, etc.
 }

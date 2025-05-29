@@ -6,13 +6,14 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.repository.RolRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.jwt.JwtTokenProvider;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.service.CustomUserDetailsService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.UsuarioService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException; // Importar DisabledException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,6 +58,10 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getCorreo());
 
+            // No es necesario verificar el estado aquí explícitamente,
+            // ya que CustomUserDetails lo maneja y AuthenticationManager
+            // lanzará DisabledException si el usuario no está activo.
+
             Usuario usuario = userDetailsService.getUserByEmail(loginRequest.getCorreo());
 
             Map<String, Object> claims = new HashMap<>();
@@ -71,12 +76,14 @@ public class AuthController {
 
             return ResponseEntity.ok(new AuthResponse(jwt, usuario));
 
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Credenciales inválidas");
+        } catch (DisabledException e) { // Capturar específicamente la excepción de usuario deshabilitado
+            return ResponseEntity.badRequest().body("La cuenta de usuario está inactiva.");
+        } catch (Exception e) { // Capturar otras excepciones de autenticación
+            return ResponseEntity.badRequest().body("Credenciales inválidas.");
         }
     }
 
-    // Corregir la ruta del endpoint (estaba duplicada)
+    // CUIDADO CON EL REGISTRO DE USUARIOS, PUEDE CREAR UN USUARIO ADMINISTRADOR SIN AUTENTICACIÓN
     @PostMapping("/registro")
     public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario) {
         try {
@@ -84,6 +91,9 @@ public class AuthController {
             if (usuarioRepository.findByCorreo(usuario.getCorreo()).isPresent()) {
                 return ResponseEntity.badRequest().body("Ya existe un usuario con ese correo");
             }
+
+            // Establecer el estado del usuario como activo por defecto
+            usuario.setEstado(true);
 
             // Si no se especifica un rol, asignar el rol por defecto
             if (usuario.getIdRol() == null) {

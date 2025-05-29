@@ -4,7 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.UsuarioService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.UsuarioService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.impl.UsuarioServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/api/usuarios")
 @CrossOrigin("*")
 public class UsuarioController {
 
@@ -30,9 +30,17 @@ public class UsuarioController {
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_usuarios')")
-    public ResponseEntity<?> listarUsuarios() {
+    public ResponseEntity<?> listarUsuarios(@RequestParam(required = false) Boolean estado) {
         try {
-            return ResponseEntity.ok(usuarioService.listarUsuarios());
+            List<Usuario> usuarios;
+            if (estado == null) {
+                usuarios = usuarioService.listarUsuarios();
+            } else if (estado) {
+                usuarios = usuarioService.listarUsuariosActivos();
+            } else {
+                usuarios = usuarioService.listarUsuariosInactivos();
+            }
+            return ResponseEntity.ok(usuarios);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -62,7 +70,22 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('editar_usuario')")
     public ResponseEntity<?> actualizarUsuario(@PathVariable Integer id, @RequestBody Usuario usuario) {
         try {
+            if (usuario.getIdUsuario() != null && !usuario.getIdUsuario().equals(id)) {
+                return ResponseEntity.badRequest().body("El ID del path no coincide con el ID del cuerpo de la petición.");
+            }
+            usuario.setIdUsuario(id);
             return ResponseEntity.ok(usuarioService.actualizarUsuario(id, usuario));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/activar")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('activar_usuario')")
+    public ResponseEntity<?> activarUsuario(@PathVariable Integer id) {
+        try {
+            usuarioService.activarUsuario(id);
+            return ResponseEntity.ok("Usuario activado correctamente");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -70,10 +93,10 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('eliminar_usuario')")
-    public ResponseEntity<?> eliminarUsuario(@PathVariable Integer id) {
+    public ResponseEntity<?> desactivarUsuario(@PathVariable Integer id) {
         try {
-            usuarioService.eliminarUsuario(id);
-            return ResponseEntity.ok("Usuario eliminado correctamente");
+            usuarioService.desactivarUsuario(id);
+            return ResponseEntity.ok("Usuario desactivado correctamente");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -119,14 +142,11 @@ public class UsuarioController {
             Usuario usuario = usuarioService.obtenerUsuarioPorId(usuarioId);
             Map<String, Object> resultado = new HashMap<>();
 
-            // 1. Permisos del rol
             Set<Permiso> permisosRol = usuario.getRol() != null ?
                     usuario.getRol().getPermisos() : new HashSet<>();
 
-            // 2. Permisos personalizados
             Set<Permiso> permisosPersonalizados = usuario.getPermisosPersonalizados();
 
-            // 3. Todos los permisos disponibles
             List<Permiso> todosLosPermisos = permisoRepository.findAll();
 
             resultado.put("permisosRol", permisosRol);

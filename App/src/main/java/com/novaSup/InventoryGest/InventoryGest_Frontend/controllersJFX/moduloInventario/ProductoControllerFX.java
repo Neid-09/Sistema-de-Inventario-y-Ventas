@@ -3,7 +3,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -22,8 +21,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class ProductoControllerFX implements Initializable {
 
     // Componentes FXML - campos de formulario
@@ -93,19 +89,15 @@ public class ProductoControllerFX implements Initializable {
     // Servicios - inyectados por constructor
     private final IProductoService productoService;
     private final ILoteService loteService;
-    private final ApplicationContext applicationContext;
     
     // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
 
-    public ProductoControllerFX(IProductoService productoService, 
-                              ILoteService loteService, 
-                              ApplicationContext applicationContext) {
+    public ProductoControllerFX(IProductoService productoService, ILoteService loteService) {
         this.productoService = productoService;
         this.loteService = loteService;
-        this.applicationContext = applicationContext;
     }
 
     @Override
@@ -518,18 +510,18 @@ public class ProductoControllerFX implements Initializable {
         try {
             // Cargar el archivo FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.VENTANA_CREATELOTE));
+
+            // Crear el controlador manualmente e inyectar dependencias
+            DialogAddLoteCtrlFX controller = new DialogAddLoteCtrlFX(this.loteService, this.productoService);
+
+            // Establecer el controlador en el FXMLLoader ANTES de cargar
+            loader.setController(controller);
+
+            // Cargar el FXML. Ahora FXMLLoader usará la instancia del controlador proporcionada.
             Parent root = loader.load();
 
-            // Obtener el controlador y configurarlo
-            DialogAddLoteCtrlFX controller = loader.getController();
-
-            // Inyectar manualmente los servicios (obtenidos del contexto de Spring)
-            controller.setServicios(
-                    applicationContext.getBean(ILoteService.class),
-                    applicationContext.getBean(IProductoService.class)
-            );
-
-            // Inicializar el controlador con el producto y la operación
+            // Inicializar el controlador con el producto DESPUÉS de cargar el FXML
+            // (para que los componentes @FXML ya estén inyectados en el controlador)
             controller.inicializar(producto);
 
             // Crear y configurar la escena
@@ -552,6 +544,12 @@ public class ProductoControllerFX implements Initializable {
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error al abrir ventana",
                     "No se pudo abrir la ventana para crear lote: " + e.getMessage());
+            // Imprimir stack trace para más detalles en la consola
+            e.printStackTrace();
+        } catch (Exception e) { // Capturar otras posibles excepciones
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Error inesperado",
+                    "Ocurrió un error inesperado al abrir la ventana: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -604,7 +602,7 @@ public class ProductoControllerFX implements Initializable {
             producto.setEstado(chkEstado.isSelected());
 
             // Actualizar
-            ProductoFX productoActualizado = productoService.actualizar(producto);
+            productoService.actualizar(producto.getIdProducto(), producto);
 
             // Mostrar mensaje de éxito y actualizar la vista
             lblMensaje.setText("Producto actualizado correctamente");
@@ -808,12 +806,6 @@ public class ProductoControllerFX implements Initializable {
             // Obtener el controlador y configurarlo
             VAjusteStockCtrlFX controller = loader.getController();
 
-            // Inyectar manualmente los servicios
-            controller.setServicios(
-                    applicationContext.getBean(ILoteService.class),
-                    applicationContext.getBean(IProductoService.class)
-            );
-
             // Inicializar el controlador con el producto
             controller.inicializar(producto);
 
@@ -895,58 +887,6 @@ public class ProductoControllerFX implements Initializable {
         }
 
         return true;
-    }
-
-    private ProductoFX obtenerProductoDesdeFormulario() {
-        ProductoFX producto = new ProductoFX();
-
-        if (!txtId.getText().isEmpty()) {
-            producto.setIdProducto(Integer.parseInt(txtId.getText()));
-        }
-
-        producto.setCodigo(txtCodigo.getText());
-        producto.setNombre(txtNombre.getText());
-        producto.setDescripcion(txtDescripcion.getText());
-
-        if (!txtPrecioCosto.getText().isEmpty()) {
-            producto.setPrecioCosto(new BigDecimal(txtPrecioCosto.getText()));
-        }
-
-        if (!txtPrecioVenta.getText().isEmpty()) {
-            producto.setPrecioVenta(new BigDecimal(txtPrecioVenta.getText()));
-        }
-
-        if (!txtStockMinimo.getText().isEmpty()) {
-            producto.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
-        }
-
-        if (!txtStockMaximo.getText().isEmpty()) {
-            producto.setStockMaximo(Integer.parseInt(txtStockMaximo.getText()));
-        }
-
-        producto.setEstado(chkEstado.isSelected());
-
-        // Configurar categoría (puede ser null)
-        CategoriaFX categoriaSeleccionada = cmbCategoria.getSelectionModel().getSelectedItem();
-        if (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null) {
-            producto.setIdCategoria(categoriaSeleccionada.getIdCategoria());
-            producto.setCategoria(categoriaSeleccionada.getNombre());
-        } else {
-            producto.setIdCategoria(null);
-            producto.setCategoria(null);
-        }
-
-        // Configurar proveedor (puede ser null)
-        ProveedorFX proveedorSeleccionado = cmbProveedor.getSelectionModel().getSelectedItem();
-        if (proveedorSeleccionado != null && proveedorSeleccionado.getIdProveedor() != null) {
-            producto.setIdProveedor(proveedorSeleccionado.getIdProveedor());
-            producto.setProveedor(proveedorSeleccionado.getNombre());
-        } else {
-            producto.setIdProveedor(null);
-            producto.setProveedor(null);
-        }
-
-        return producto;
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String header, String mensaje) {

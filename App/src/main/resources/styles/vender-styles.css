@@ -1,0 +1,985 @@
+/* Estilos generales para la vista de Vender */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #F5F7FA;
+}
+
+/* Estilo para el root pane de Vender.fxml */
+.root-pane {
+    -fx-background-color: #F5F7FA !important; /* Fondo general de la aplicación */
+}
+
+/* Barra Superior con el título "Módulo de Ventas" */
+.top-container {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-spacing: 10;
+}
+
+.header-container {
+    -fx-padding: 15px 20px 10px 20px;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+.search-buttons-container {
+    -fx-padding: 15px 20px;
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+    -fx-spacing: 15px;
+}
+
+/* Contenedor principal (GridPane) */
+.main-content-pane, .main-content-container {
+    -fx-padding: 20px;
+    -fx-background-color: #F5F7FA !important; /* Aseguramos que tenga un fondo explícito */
+}
+
+/* Sección de Productos (Izquierda) */
+.search-bar-container {
+    -fx-padding: 0 0 15px 0; /* Espacio debajo de la barra de búsqueda */
+    -fx-background-color: #FFFFFF;
+}
+
+.text-field-busqueda-modern {
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #A0A0A0;
+    -fx-pref-height: 40px;
+    -fx-border-color: #CED4DA;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px 10px;
+}
+
+/* Contenedor para los botones de utilidad */
+.utility-buttons-container {
+    -fx-padding: 10px 0 0 0; /* Espacio arriba de los botones */
+}
+
+.utility-button {
+    -fx-font-size: 13px;
+    -fx-background-color: #6C757D; /* Gris oscuro, similar al header del carrito original */
+    -fx-text-fill: white;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+}
+
+.utility-button:hover {
+    -fx-background-color: #5A6268; /* Un poco más oscuro al pasar el mouse */
+}
+
+.scroll-pane-productos {
+    -fx-background-color: transparent; /* Asegura que el fondo del scrollpane no interfiera */
+    -fx-border-color: transparent; /* Sin bordes para el scrollpane de productos */
+    -fx-fit-to-width: true; /* Importante para que el FlowPane se ajuste correctamente */
+}
+
+/* Estilo para el FlowPane que contiene las tarjetas de producto */
+.flow-pane-productos {
+    -fx-padding: 15px; /* Espaciado alrededor del conjunto de tarjetas */
+    -fx-alignment: TOP_LEFT; /* Alineación de las tarjetas */
+    /* hgap y vgap se establecen en el FXML o en el controlador */
+}
+
+.productos-container-modern {
+    -fx-padding: 5px; /* Pequeño padding interno si es necesario */
+    -fx-background-color: #FFFFFF; /* Fondo blanco para el área de productos */
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.1, 0, 1);
+}
+
+/* Estilos para las tarjetas de producto individuales */
+.producto-item-card {
+    -fx-background-color: white; /* Fondo blanco para la tarjeta */
+    -fx-border-color: #E0E0E0; /* Borde gris claro y sutil */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px; /* Esquinas redondeadas para el borde */
+    -fx-background-radius: 8px; /* Esquinas redondeadas para el fondo */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 10, 0.15, 0, 2); /* Sombra suave */
+    /* El ancho (prefWidth) se establece en el controlador JavaFX (ej. 200px) */
+    -fx-min-height: 250px; /* Altura mínima para consistencia, ajustar según contenido */
+    -fx-display: INLINE_BLOCK; /* Comportamiento de bloque en línea */
+}
+
+/* Placeholder para la imagen del producto */
+.image-placeholder {
+    /* -fx-pref-height: 120px; Se establece en el controlador */
+    -fx-background-color: #F4F6F8; /* Color de fondo gris muy claro */
+    /* -fx-border-color: #E0E0E0; */ /* Opcional: borde para el placeholder */
+    /* -fx-border-width: 0 0 1px 0; */ /* Solo borde inferior si se prefiere */
+    -fx-background-radius: 7px 7px 0 0; /* Esquinas superiores redondeadas (interior al borde de la tarjeta) */
+    /* -fx-border-radius: 8px 8px 0 0; */
+    -fx-alignment: CENTER; /* Por si se añade texto o un icono al placeholder */
+    /* Si usas ImageView directamente, puedes aplicar estilos aquí también */
+}
+
+/* Estilos para los textos dentro de la tarjeta */
+.producto-item-card .label-nombre-card {
+    -fx-font-size: 13px; /* Tamaño ajustado */
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333; /* Negro suave */
+    -fx-padding: 0 5px 0 0; /* Espacio a la derecha del nombre antes del precio */
+}
+
+.producto-item-card .label-precio-card {
+    -fx-font-size: 13px; /* Tamaño ajustado */
+    -fx-font-weight: bold;
+    -fx-text-fill: #27AE60; /* Verde para el precio */
+}
+
+.producto-item-card .label-categoria-tag {
+    -fx-font-size: 10px; /* Más pequeño para el tag */
+    -fx-text-fill: #5D6D7E; /* Gris azulado */
+    -fx-background-color: #EBF5FB; /* Fondo azul muy claro para el tag */
+    -fx-padding: 2px 6px; /* Padding interno del tag */
+    -fx-background-radius: 4px; /* Esquinas redondeadas para el tag */
+    -fx-border-radius: 4px;
+}
+
+/* Estilo para el código del producto en la tarjeta */
+.producto-item-card .label-codigo-card {
+    -fx-font-size: 10px;
+    -fx-text-fill: #7F8C8D; /* Gris más sutil para el código */
+    -fx-padding: 2px 0; /* Un poco de padding vertical */
+}
+
+/* Botón de agregar dentro de la tarjeta */
+.producto-item-card .button-agregar-card {
+    -fx-font-size: 12px;
+    -fx-text-fill: white;
+    -fx-background-color: #34495E; /* Azul oscuro/gris */
+    -fx-font-weight: bold;
+    -fx-pref-height: 30px; /* Altura ajustada */
+    -fx-background-radius: 5px; /* Esquinas redondeadas para el botón */
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.producto-item-card .button-agregar-card:hover {
+    -fx-background-color: #002d86; /* Un poco más claro al pasar el mouse */
+}
+
+.producto-item-card .label-nombre { /* Estilo anterior, podría eliminarse si .label-nombre-card lo reemplaza completamente */
+    /* ... */
+}
+.producto-item-card .label-codigo { /* Estilo anterior, ya no se usa en la tarjeta */
+    /* ... */
+}
+.producto-item-card .label-categoria { /* Estilo anterior, podría eliminarse si .label-categoria-tag lo reemplaza */
+    /* ... */
+}
+.producto-item-card .label-precio { /* Estilo anterior, podría eliminarse si .label-precio-card lo reemplaza */
+    /* ... */
+}
+.producto-item-card .button-agregar { /* Estilo anterior, podría eliminarse si .button-agregar-card lo reemplaza */
+    /* ... */
+}
+
+/* Sección del Carrito (Derecha) */
+.carrito-sidebar {
+    -fx-background-color: #FFFFFF; /* Fondo blanco para la barra lateral del carrito */
+    -fx-padding: 15px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0.1, 0, 2);
+    -fx-spacing: 15px; /* Espacio entre header, scrollpane y summary */
+}
+
+.carrito-header-modern {
+    -fx-padding: 0 0 10px 0;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E9ECEF; /* Borde inferior sutil para separar del contenido */
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 0 5px; /* Espacio a la izquierda del texto del título */
+}
+
+.carrito-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 0 5px; /* Espacio a la izquierda del texto del título */
+}
+
+.carrito-items-count {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6C757D; /* Gris para el contador de items */
+    -fx-padding: 2px 8px;
+    -fx-background-color: #E9ECEF;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-margin-left: auto; /* Empuja el contador a la derecha */
+}
+
+.scroll-pane-carrito {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.carrito-items-container-modern {
+    /* -fx-padding: 5px; */ /* Ya tiene spacing el VBox padre */
+}
+
+/* Estilos para los items en el carrito (adaptar de .carrito-item) */
+.carrito-item { /* Manteniendo y ajustando si es necesario */
+    -fx-padding: 12px 5px;
+    -fx-border-color: #E9ECEF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-background-color: transparent; /* El fondo lo da el sidebar */
+}
+.carrito-item:last-child {
+    -fx-border-width: 0; /* Sin borde para el último item */
+}
+
+.carrito-item:hover {
+    -fx-background-color: #F8F9FA; /* Ligero hover */
+}
+
+.carrito-item .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #343A40;
+}
+
+/* ... (mantener estilos de spinner y botón eliminar si se usan dentro del item) ... */
+
+/* Sección de Resumen del Carrito */
+.carrito-summary {
+    -fx-padding: 15px 5px 5px 5px; /* Padding superior para separar de la lista */
+    -fx-spacing: 8px;
+}
+
+.summary-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #495057;
+}
+
+.summary-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #343A40;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-pref-width: 100px; /* Ancho para alinear los valores */
+}
+
+.total-container-modern {
+    -fx-padding: 10px 0 0 0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #E9ECEF;
+    -fx-margin-top: 5px;
+}
+
+.summary-label-total {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #28A745; /* Verde para el total */
+}
+
+.summary-value-total {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #28A745; /* Verde para el total */
+    -fx-alignment: CENTER_RIGHT;
+    -fx-pref-width: 100px;
+}
+
+/* Estilos para el contenedor superior */
+.top-container {
+    -fx-background-color: #FFFFFF;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #E0E0E0;
+    -fx-padding: 10px 20px 15px 20px;
+}
+
+/* Estilos para el contenedor de búsqueda */
+.search-container {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+    -fx-max-width: 500px;
+}
+
+.text-field-busqueda-modern {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #A0A0A0;
+}
+
+/* Estilos para el panel de resultados de búsqueda */
+.search-results-panel {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 1px 1px 1px;
+    -fx-border-radius: 0 0 5px 5px;
+    -fx-background-radius: 0 0 5px 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 5);
+    -fx-padding: 0;
+}
+
+.search-results-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.search-results-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.search-results-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 0 0 0 1;
+}
+
+.search-results-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #CED4DA;
+    -fx-background-radius: 3px;
+}
+
+.search-results-container {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+}
+
+/* Estilos para los items de resultados de búsqueda */
+.resultado-item {
+    -fx-background-color: white;
+    -fx-border-color: #E9ECEF;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);
+    -fx-cursor: hand;
+}
+
+.resultado-item:hover {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+}
+
+.resultado-nombre {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.resultado-codigo {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6C757D;
+    -fx-padding: 2px 0 0 0;
+}
+
+.resultado-precio {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0D6EFD;
+    -fx-padding: 0 10px 0 0;
+}
+
+.resultado-stock {
+    -fx-font-size: 12px;
+    -fx-text-fill: #28A745;
+    -fx-padding: 2px 0 0 0;
+}
+
+/* Estilos para el botón agregar en las sugerencias */
+.button-agregar-resultado, .btn-agregar-sugerencia {
+    -fx-background-color: #5D87FF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 12px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+    -fx-min-height: 30px;
+    -fx-min-width: 80px;
+}
+
+.button-agregar-resultado:hover, .btn-agregar-sugerencia:hover {
+    -fx-background-color: #4B6CD6;
+}
+
+.button-agregar-resultado:pressed, .btn-agregar-sugerencia:pressed {
+    -fx-background-color: #3A539B;
+    -fx-effect: none;
+}
+
+/* Estilos para los botones de acción en la barra superior */
+.action-button {
+    -fx-background-color: #3498DB !important;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-min-height: 35px;
+    -fx-min-width: 120px;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.action-button:hover {
+    -fx-background-color: #2980B9;
+    -fx-border-color: transparent;
+}
+
+.action-button:pressed {
+    -fx-background-color: #2471A3;
+    -fx-effect: none;
+}
+
+.button-procesar-venta {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+}
+
+.button-cancelar-venta {
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #6C757D;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+}
+
+/* Estilos para la información de la venta */
+.venta-info-container {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 10px 15px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.venta-info-item {
+    -fx-spacing: 5px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.venta-info-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6C757D;
+}
+
+.venta-info-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #343A40;
+}
+
+/* Estilos para el contenedor principal */
+.main-content-container {
+    -fx-padding: 20px;
+    -fx-background-color: transparent;
+    -fx-spacing: 20px;
+}
+
+/* Estilos para la barra de estado */
+.status-bar {
+    -fx-background-color: #F8F9FA;
+    -fx-padding: 10px 20px;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #DEE2E6;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Estilos para el panel lateral */
+.side-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
+}
+
+/* Estilos para el panel de totales */
+.totales-box {
+    -fx-padding: 0;
+    -fx-spacing: 15px;
+}
+
+.total-item {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10px;
+    -fx-padding: 8px 0;
+}
+
+.total-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
+}
+
+.total-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.total-final {
+    -fx-padding: 15px 0 20px 0;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: #DEE2E6;
+}
+
+.total-label-final {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #212529;
+}
+
+.total-value-final {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0275d8;
+}
+
+/* Estilos para los botones de procesar y cancelar venta */
+.button-procesar-venta {
+    -fx-background-color: #28A745;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+}
+
+.button-procesar-venta:hover {
+    -fx-background-color: #218838;
+}
+
+.button-cancelar-venta {
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #6C757D;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 15px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-min-height: 40px;
+    -fx-alignment: center;
+    -fx-margin-top: 10px;
+}
+
+.button-cancelar-venta:hover {
+    -fx-background-color: #E9ECEF;
+}
+
+/* Estilos para el contenedor de la tabla */
+.table-container {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);
+}
+
+/* Estilos para los controles de cantidad */
+.cantidad-control, .cantidad-control-sugerencia {
+    -fx-spacing: 2px;
+    -fx-alignment: center;
+    -fx-min-height: 30px;
+    -fx-max-height: 30px;
+}
+
+.cantidad-control Button, .cantidad-control-sugerencia Button {
+    -fx-background-color: #5D87FF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-max-height: 30px;
+    -fx-background-radius: 4px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-content-display: center;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.cantidad-control Button:hover, .cantidad-control-sugerencia Button:hover {
+    -fx-background-color: #4b6cd6;
+}
+
+.cantidad-control TextField, .cantidad-control-sugerencia TextField {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-alignment: center;
+    -fx-font-size: 14px;
+    -fx-max-width: 50px;
+    -fx-min-width: 40px;
+    -fx-min-height: 30px;
+    -fx-max-height: 30px;
+}
+
+/* Estilos para el botón eliminar en la tabla */
+.button-eliminar-item {
+    -fx-background-color: #FF5C75;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-min-height: 30px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-content-display: center;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.button-eliminar-item:hover {
+    -fx-background-color: #E64C64;
+}
+
+/* Estilos para el popup de sugerencias */
+/* Estilos para el popup de sugerencias */
+.popup-background {
+    -fx-background-color: rgba(0,0,0,0.3);
+    -fx-padding: 10px;
+    -fx-background-color: white;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+.sugerencias-popup {
+    -fx-background-color: white;
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+}
+
+/* Estilos para las tarjetas de productos en las sugerencias */
+.producto-sugerido {
+    -fx-background-color: white;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px 15px;
+    -fx-spacing: 15px;
+    -fx-alignment: center-left;
+}
+
+.producto-sugerido:hover {
+    -fx-background-color: #F8F9FA;
+}
+
+.producto-info-container {
+    -fx-spacing: 2px;
+}
+
+.producto-actions-container {
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+}
+
+/* Estilos para la tabla de productos */
+.productos-table {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Estilos para los encabezados de la tabla */
+.productos-table .column-header-background {
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.productos-table .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 10px 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-width: 0 1px 0 0;
+    -fx-border-color: transparent #DEE2E6 transparent transparent;
+}
+
+.productos-table .column-header:last-visible {
+    -fx-border-width: 0;
+}
+
+/* Estilos para las celdas de la tabla */
+.productos-table .table-cell {
+    -fx-padding: 10px 15px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-width: 0;
+    -fx-font-size: 12px;
+}
+
+.productos-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: #DEE2E6;
+}
+
+/* Hacer que las columnas de la tabla sean responsivas */
+.productos-table .table-column {
+    -fx-alignment: CENTER-LEFT;
+}
+
+.productos-table .table-row-cell:selected {
+    -fx-background-color: #E1F5FE;
+}
+
+.productos-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #000000;
+}
+
+.productos-table .table-row-cell:hover {
+    -fx-background-color: #F8F9FA;
+}
+
+/* Estilo para el placeholder cuando la tabla está vacía */
+.productos-table .placeholder {
+    -fx-background-color: white;
+    -fx-padding: 20px;
+}
+
+.productos-table .placeholder .label {
+    -fx-text-fill: #6C757D;
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+}
+
+/* Estilos para el control de cantidad */
+.cantidad-control {
+    -fx-spacing: 5px;
+    -fx-alignment: CENTER;
+    -fx-background-color: #F8F9FA;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 2px;
+}
+
+/* Control de cantidad en las sugerencias */
+.cantidad-control-sugerencia {
+    -fx-spacing: 5px;
+    -fx-alignment: CENTER;
+    -fx-background-color: #F0F4F8;
+    -fx-border-color: #D0D8E0;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.sugerencias-popup {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+    -fx-max-width: 600px;
+    -fx-min-width: 500px;
+    -fx-background-insets: 0;
+}
+
+/* Tarjeta de producto sugerido */
+.producto-sugerido {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px 15px;
+    -fx-spacing: 10px;
+    -fx-border-width: 1px;
+    -fx-background-insets: 0;
+    -fx-margin: 0 0 2px 0;
+}
+
+.producto-sugerido:hover {
+    -fx-background-color: #F8F9FA;
+}
+
+/* Información del producto */
+.producto-info {
+    -fx-spacing: 2px;
+}
+
+.producto-nombre {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-text-fill: #212529;
+}
+
+.producto-codigo {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6C757D;
+    -fx-padding: 1px 0;
+}
+
+.producto-existencias {
+    -fx-font-size: 11px;
+    -fx-text-fill: #6C757D;
+}
+
+/* Control de cantidad */
+.cantidad-control-sugerencia {
+    -fx-spacing: 2px;
+    -fx-alignment: center;
+    -fx-padding: 0;
+}
+
+.cantidad-control-sugerencia .button {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-background-color: #F8F9FA;
+    -fx-text-fill: #212529;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-padding: 0;
+}
+
+.cantidad-control-sugerencia .button:hover {
+    -fx-background-color: #E0E0E0;
+}
+
+.cantidad-control-sugerencia .text-field {
+    -fx-alignment: center;
+    -fx-max-width: 40px;
+    -fx-min-width: 40px;
+    -fx-pref-width: 40px;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DEE2E6;
+    -fx-border-radius: 4px;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 2px;
+}
+
+/* Botón de agregar */
+.btn-agregar-sugerencia {
+    -fx-background-color: #212529;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 80px;
+    -fx-min-height: 28px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+.btn-agregar-sugerencia:hover {
+    -fx-background-color: #343A40;
+}
+
+.btn-agregar-sugerencia:pressed {
+    -fx-background-color: #2471A3;
+    -fx-effect: none;
+}
+
+/* Estilos para el layout horizontal en las sugerencias */
+.producto-sugerido-layout {
+    -fx-alignment: center;
+    -fx-spacing: 15;
+    -fx-fill-height: true;
+}
+
+.producto-info-container {
+    -fx-spacing: 2;
+    -fx-alignment: center-left;
+    -fx-max-width: 400px;
+    -fx-min-width: 300px;
+    -fx-pref-width: 350px;
+    -fx-hgrow: always;
+}
+
+.producto-actions-container {
+    -fx-spacing: 10;
+    -fx-alignment: center-right;
+    -fx-min-width: 150px;
+}
+
+.dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta") {}
+
+.dialog-pane .button-bar .button:contains("Confirmar y Finalizar Venta"):hover {}
+
+/* Estilo para el botón Cancelar (rojo) */
+.dialog-pane .button-bar .button:contains("Cancelar") {}
+
+.dialog-pane .button-bar .button:contains("Cancelar"):hover {}
+
+/* Estilos específicos para botones dentro del contenido si es necesario */
+#btnBuscarCliente {}
+
+#btnBuscarCliente:hover {}
+
+#btnRegistrarNuevoCliente {}
+
+#btnRegistrarNuevoCliente:hover {}
+
+/* Ajustes para el Label de Monto Total */
+#lblMontoTotal {}
+
+/* Estilos para ToggleButtons (si decides usarlos en vez de RadioButtons) */
+.toggle-button-group .toggle-button {}
+
+.toggle-button-group .toggle-button:selected {}
+
+.toggle-button-group .toggle-button:hover {}
+
+.toggle-button-group .toggle-button:selected:hover {}
+
+/* Estilos para la sección de Vuelto en ProcesarVentaDialog */
+.vuelto-seccion-label {}
+
+.vuelto-textfield {}
+
+#txtTotalRecibido {}
+
+#txtCambioEntregar {}
+
+#txtCambioEntregar.monto-insuficiente,
+#txtCambioEntregar.valor-invalido {}

@@ -21,6 +21,7 @@ public interface LoteRepository extends JpaRepository<Lote, Integer> {
     List<Lote> findByActivoFalse();
     Optional<Lote> findByIdLoteAndActivoFalse(Integer id);
     List<Lote> findByProductoIdProductoAndActivoTrueOrderByFechaVencimientoAsc(Integer idProducto);
+    List<Lote> findByProductoIdProductoAndActivoTrueOrderByFechaVencimientoAscFechaEntradaAsc(Integer idProducto);
 
     @Modifying
     @Query("UPDATE Lote l SET l.activo = false WHERE l.activo = true AND l.fechaVencimiento < :fechaActual")

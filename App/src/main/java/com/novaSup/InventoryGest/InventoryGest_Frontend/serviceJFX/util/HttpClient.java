@@ -18,12 +18,24 @@ public class HttpClient {
             .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
             .build();
 
-    // Método GET sin encabezados
+    /**
+     * Método GET que espera respuesta en formato String (generalmente JSON).
+     * @param urlStr La URL del endpoint.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String get(String urlStr) throws Exception {
         return get(urlStr, null, null);
     }
 
-    // Método GET con encabezados
+    /**
+     * Método GET con encabezados adicionales que espera respuesta en formato String.
+     * @param urlStr La URL del endpoint.
+     * @param headerName Nombre del encabezado adicional.
+     * @param headerValue Valor del encabezado adicional.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String get(String urlStr, String headerName, String headerValue) throws Exception {
         try {
             Request.Builder requestBuilder = new Request.Builder()
@@ -57,12 +69,59 @@ public class HttpClient {
         }
     }
 
-    // Método POST sin encabezados
+    /**
+     * Método GET que espera respuesta binaria (ej. PDF).
+     * @param urlStr La URL del endpoint.
+     * @return El cuerpo de la respuesta como byte[].
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
+    public static byte[] getBytes(String urlStr) throws Exception {
+        try {
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .get();
+            // No se especifica Content-Type o Accept porque la respuesta es binaria/pdf
+
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().bytes() : new byte[0];
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Método POST que espera respuesta en formato String (generalmente JSON).
+     * @param urlStr La URL del endpoint.
+     * @param jsonBody El cuerpo de la solicitud en formato JSON String.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String post(String urlStr, String jsonBody) throws Exception {
         return post(urlStr, jsonBody, null, null);
     }
 
-    // Método POST con encabezados
+    /**
+     * Método POST con encabezados adicionales que espera respuesta en formato String.
+     * @param urlStr La URL del endpoint.
+     * @param jsonBody El cuerpo de la solicitud en formato JSON String.
+     * @param headerName Nombre del encabezado adicional.
+     * @param headerValue Valor del encabezado adicional.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String post(String urlStr, String jsonBody, String headerName, String headerValue) throws Exception {
         try {
             RequestBody requestBody = jsonBody != null ?
@@ -100,12 +159,64 @@ public class HttpClient {
         }
     }
 
-    // Método PUT sin encabezados
+    /**
+     * Método POST que espera respuesta binaria (ej. PDF).
+     * @param urlStr La URL del endpoint.
+     * @param jsonBody El cuerpo de la solicitud en formato JSON String.
+     * @return El cuerpo de la respuesta como byte[].
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
+    public static byte[] postForBytes(String urlStr, String jsonBody) throws Exception {
+        try {
+            RequestBody requestBody = jsonBody != null ?
+                    RequestBody.create(jsonBody, JSON) :
+                    RequestBody.create("", JSON);
+
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(urlStr)
+                    .post(requestBody);
+            // No se especifica Content-Type o Accept porque la respuesta es binaria/pdf
+
+            // Añadir token JWT si está disponible
+            String token = LoginServiceImplFX.getToken();
+            if (token != null && !token.isEmpty()) {
+                requestBuilder.header("Authorization", "Bearer " + token);
+            }
+
+            Request request = requestBuilder.build();
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    return response.body() != null ? response.body().bytes() : new byte[0];
+                } else {
+                    String errorBody = response.body() != null ? response.body().string() : "Sin detalles de error";
+                    throw new Exception("Error HTTP " + response.code() + ": " + errorBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new Exception("Error de conexión: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Método PUT que espera respuesta en formato String (generalmente JSON).
+     * @param urlStr La URL del endpoint.
+     * @param jsonBody El cuerpo de la solicitud en formato JSON String.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String put(String urlStr, String jsonBody) throws Exception {
         return put(urlStr, jsonBody, null, null);
     }
 
-    // Método PUT con encabezados
+    /**
+     * Método PUT con encabezados adicionales que espera respuesta en formato String.
+     * @param urlStr La URL del endpoint.
+     * @param jsonBody El cuerpo de la solicitud en formato JSON String.
+     * @param headerName Nombre del encabezado adicional.
+     * @param headerValue Valor del encabezado adicional.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String put(String urlStr, String jsonBody, String headerName, String headerValue) throws Exception {
         try {
             RequestBody requestBody = jsonBody != null ?
@@ -143,12 +254,24 @@ public class HttpClient {
         }
     }
 
-    // Método DELETE sin encabezados
+    /**
+     * Método DELETE que espera respuesta en formato String (generalmente JSON).
+     * @param urlStr La URL del endpoint.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String delete(String urlStr) throws Exception {
         return delete(urlStr, null, null);
     }
 
-    // Método DELETE con encabezados
+    /**
+     * Método DELETE con encabezados adicionales que espera respuesta en formato String.
+     * @param urlStr La URL del endpoint.
+     * @param headerName Nombre del encabezado adicional.
+     * @param headerValue Valor del encabezado adicional.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String delete(String urlStr, String headerName, String headerValue) throws Exception {
         try {
             Request.Builder requestBuilder = new Request.Builder()
@@ -182,7 +305,13 @@ public class HttpClient {
         }
     }
 
-    // Método PATCH
+    /**
+     * Método PATCH que espera respuesta en formato String (generalmente JSON).
+     * @param urlStr La URL del endpoint.
+     * @param jsonBody El cuerpo de la solicitud en formato JSON String.
+     * @return El cuerpo de la respuesta como String.
+     * @throws Exception Si ocurre un error durante la solicitud.
+     */
     public static String patch(String urlStr, String jsonBody) throws Exception {
         try {
             RequestBody requestBody = jsonBody != null && !jsonBody.isEmpty() ?

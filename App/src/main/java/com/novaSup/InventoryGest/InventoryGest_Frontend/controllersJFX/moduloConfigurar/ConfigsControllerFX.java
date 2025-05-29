@@ -1,7 +1,8 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ConfiguracionFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.ConfiguracionServiceFX;
+// Importar la interfaz en lugar de la implementación
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IConfiguracionServiceFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -12,12 +13,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class ConfigsControllerFX implements Initializable {
 
     @FXML
@@ -50,13 +49,17 @@ public class ConfigsControllerFX implements Initializable {
     @FXML
     private TextField txtValor;
 
-    private ConfiguracionServiceFX configuracionService;
+    private final IConfiguracionServiceFX configuracionService; // Usar la interfaz
     private ObservableList<ConfiguracionFX> listaConfiguraciones;
     private ConfiguracionFX configuracionActual;
 
+    // Constructor para inyección de dependencias
+    public ConfigsControllerFX(IConfiguracionServiceFX configuracionService) {
+        this.configuracionService = configuracionService;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        configuracionService = new ConfiguracionServiceFX();
         listaConfiguraciones = FXCollections.observableArrayList();
 
         // Configurar columnas de la tabla

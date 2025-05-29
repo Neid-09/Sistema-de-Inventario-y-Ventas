@@ -2,8 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCo
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.PermisoServiceImplFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IPermisoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -13,13 +11,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class PPermisosRolesCtrlFX implements Initializable {
 
     @FXML
@@ -40,8 +36,8 @@ public class PPermisosRolesCtrlFX implements Initializable {
     @FXML
     private Button btnGuardar;
 
-    private IPermisoService permisoService;
-    private IRolService rolService;
+    private final IPermisoService permisoService;
+    private final IRolService rolService;
 
     private ObservableList<RolFX> listaRoles;
     private ObservableList<PermisoConEstado> listaPermisos;
@@ -49,9 +45,10 @@ public class PPermisosRolesCtrlFX implements Initializable {
     // Variable estática para comunicación entre controladores
     private static Integer rolSeleccionadoId;
 
-    public PPermisosRolesCtrlFX() {
-        this.permisoService = new PermisoServiceImplFX();
-        this.rolService = new RolServiceImplFX();
+    // Constructor para inyección de dependencias
+    public PPermisosRolesCtrlFX(IPermisoService permisoService, IRolService rolService) {
+        this.permisoService = permisoService;
+        this.rolService = rolService;
         this.listaRoles = FXCollections.observableArrayList();
         this.listaPermisos = FXCollections.observableArrayList();
     }

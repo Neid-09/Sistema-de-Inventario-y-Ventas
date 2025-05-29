@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.fxml.FXMLLoader?>
+
+<AnchorPane prefHeight="700.0" prefWidth="900.0" styleClass="root-pane-impuestos" stylesheets="@../../../styles/configuracion-impuestos-styles.css" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.impuestos.ConfigImptsCtrlFX">
+   <children>
+      <TabPane fx:id="tabPaneImpuestos" layoutX="14.0" layoutY="14.0" prefHeight="672.0" prefWidth="872.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+        <tabs>
+          <Tab fx:id="tabTiposImpuesto" text="Tipos de Impuesto">
+            <content>
+              <fx:include fx:id="tipoImpuestoTabContent" source="tipo_impuesto_tab.fxml" />
+            </content>
+          </Tab>
+          <Tab fx:id="tabTasasImpuesto" text="Tasas de Impuesto">
+            <content>
+              <fx:include fx:id="tasaImpuestoTabContent" source="tasa_impuesto_tab.fxml" />
+            </content>
+          </Tab>
+          <Tab fx:id="tabImpuestosAplicables" text="Impuestos Aplicables">
+            <content>
+              <fx:include fx:id="impuestoAplicableTabContent" source="impuesto_aplicable_tab.fxml" />
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </children>
+</AnchorPane>

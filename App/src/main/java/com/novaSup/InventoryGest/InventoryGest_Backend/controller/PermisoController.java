@@ -2,7 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Permiso;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.PermisoRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.security.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,8 +15,6 @@ public class PermisoController {
     @Autowired
     private PermisoRepository permisoRepository;
 
-    @Autowired
-    private SecurityUtil securityUtil;
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('gestionar_permisos')")

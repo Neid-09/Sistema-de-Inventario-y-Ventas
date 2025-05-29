@@ -9,15 +9,19 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ConfigurarControllerFX {
     @FXML
     private Button btnGestionarUsuarios;
 
     @FXML
     private Button btnConfiguracionesGlobales;
+
+    @FXML
+    private Button btnGestionarPermisosRoles;
+
+    @FXML
+    private Button btnConfigurarImpuestos;
 
     @FXML
     public void irGestionUsuarios(ActionEvent event) {
@@ -88,6 +92,39 @@ public class ConfigurarControllerFX {
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar la gestión de permisos y roles: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void irConfigurarImpuestos(ActionEvent event) {
+        // Verificar permiso (ejemplo: "configurar_impuestos")
+        if (!PermisosUIUtil.verificarPermisoConAlerta("configurar_impuestos")) {
+            // Si no tiene el permiso general, verificar permisos más específicos si aplica
+            // por ejemplo, si se permite ver pero no editar ciertos aspectos.
+            // Esto dependerá de tu lógica de permisos detallada.
+            // if (!PermisosUIUtil.verificarPermisoConAlerta("ver_tipos_impuesto") && 
+            //     !PermisosUIUtil.verificarPermisoConAlerta("ver_tasas_impuesto")) {
+            //     return;
+            // }
+            return; // Por ahora, si no tiene el permiso general, no accede.
+        }
+
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            MenuPrincipalControllerFX menuController = (MenuPrincipalControllerFX) stage.getUserData();
+
+            if (menuController != null) {
+                // Asegúrate de que PathsFXML.CONFIGURACION_IMPUESTOS esté definido
+                // y apunte a "/views/configuracion/ConfiguracionImpuestosView.fxml" o la ruta correcta.
+                menuController.cargarModuloEnPanel(PathsFXML.CONFIGURACION_IMPUESTOS); 
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                        "No se pudo encontrar el controlador del menú principal");
+            }
+        } catch (Exception e) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Error",
+                    "No se pudo cargar la configuración de impuestos: " + e.getMessage());
+            e.printStackTrace(); // Es útil para ver el error detallado en la consola durante el desarrollo
         }
     }
 

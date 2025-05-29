@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.PermisoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig; // Importar ApiConfig
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,8 @@ import java.util.Set;
 public class RolServiceImplFX implements IRolService {
 
     private static final Logger logger = LoggerFactory.getLogger(RolServiceImplFX.class);
-    private static final String BASE_URL = "http://localhost:8080/roles";
+    // Usar ApiConfig para la URL base
+    private static final String BASE_URL = ApiConfig.getBaseUrl() + "/roles";
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override

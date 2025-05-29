@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="700.0" prefWidth="1200.0" styleClass="root-pane" stylesheets="@../../styles/vender-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloVenta.VenderControllerFX">
+
+    <!-- Barra Superior: Título -->
+    <top>
+        <VBox spacing="0" styleClass="top-container">
+            <!-- Título -->
+            <HBox alignment="CENTER_LEFT" styleClass="header-container">
+                <Label styleClass="header-title" text="Módulo de Ventas" />
+            </HBox>
+            
+            <!-- Barra de búsqueda y botones -->
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-buttons-container">
+                <!-- Campo de búsqueda -->
+                <HBox alignment="CENTER_LEFT" maxWidth="400" spacing="5" styleClass="search-container" HBox.hgrow="NEVER">
+                    <ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+                        <image>
+                            <Image url="@../../img/moduloVentas/codigo-de-barras.png" />
+                        </image>
+                    </ImageView>
+                    <TextField fx:id="txtBusqueda" onKeyReleased="#buscarProductos" prefWidth="534.0" promptText="Buscar productos por código o nombre..." styleClass="text-field-busqueda-modern" HBox.hgrow="ALWAYS" />
+                </HBox>
+                
+                <!-- Espacio entre búsqueda y botones -->
+                <Region prefWidth="20" HBox.hgrow="NEVER" />
+                
+                <!-- Botones de acción -->
+                <Button fx:id="btnProductoComun" styleClass="action-button" text="Producto Común" />
+                <Button fx:id="btnBuscarVenta" styleClass="action-button" text="Buscar Venta" />
+                <Button fx:id="btnNuevaVenta" styleClass="action-button" text="Nueva Venta" />
+                
+                <!-- Espacio flexible para empujar todo a la izquierda -->
+                <Region HBox.hgrow="ALWAYS" />
+            </HBox>
+            
+            <!-- Las sugerencias de búsqueda ahora se muestran como tarjetas en un popup -->
+            
+            <!-- Información de la venta actual -->
+            <HBox spacing="20" styleClass="venta-info-container">
+                <HBox styleClass="venta-info-item">
+                    <Label styleClass="venta-info-label" text="Cliente:" />
+                    <Label styleClass="venta-info-value" text="Cliente General" />
+                </HBox>
+                <HBox styleClass="venta-info-item">
+                    <Label styleClass="venta-info-label" text="Vendedor:" />
+                    <Label styleClass="venta-info-value" text="Usuario Actual" />
+                </HBox>
+                <HBox styleClass="venta-info-item">
+                    <Label styleClass="venta-info-label" text="Fecha:" />
+                    <Label styleClass="venta-info-value" text="14/05/2025" />
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" styleClass="venta-info-item" HBox.hgrow="ALWAYS">
+                    <Label styleClass="venta-info-label" text="Venta #:" />
+                    <Label styleClass="venta-info-value" text="VTA-001" />
+                </HBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Contenido Principal: Tabla de productos y panel de totales -->
+    <center>
+        <HBox styleClass="main-content-container">
+            <!-- Tabla de productos (lado izquierdo) -->
+            <VBox spacing="0" styleClass="table-container" HBox.hgrow="ALWAYS">
+                <TableView fx:id="tablaProductos" styleClass="productos-table" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colCodigo" prefWidth="100" text="Código" />
+                        <TableColumn fx:id="colProducto" prefWidth="300" text="Producto" />
+                        <TableColumn fx:id="colPrecio" prefWidth="120" text="Precio" />
+                        <TableColumn fx:id="colCantidad" prefWidth="120" text="Cantidad" />
+                        <TableColumn fx:id="colSubtotal" prefWidth="120" text="Subtotal" />
+                        <TableColumn fx:id="colAcciones" prefWidth="80" text="Acciones" />
+                    </columns>
+                    <placeholder>
+                        <Label text="No hay productos agregados a la venta" />
+                    </placeholder>
+                </TableView>
+            </VBox>
+            
+            <!-- Panel lateral de totales (lado derecho) -->
+            <VBox prefWidth="300" spacing="0" styleClass="side-panel">
+                <!-- Panel de totales -->
+                <VBox spacing="10" styleClass="totales-box" VBox.vgrow="ALWAYS">
+                    <HBox styleClass="total-item">
+                        <Label styleClass="total-label" text="Subtotal:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblSubtotal" styleClass="total-value" text="0.00" />
+                    </HBox>
+                    <HBox styleClass="total-item">
+                        <Label styleClass="total-label" text="IVA (12%):" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblIVA" styleClass="total-value" text="0.00" />
+                    </HBox>
+                    <HBox styleClass="total-item total-final">
+                        <Label styleClass="total-label-final" text="TOTAL:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblTotalGeneral" styleClass="total-value-final" text="0.00" />
+                    </HBox>
+                    
+                    <!-- Espacio flexible -->
+                    <Region VBox.vgrow="ALWAYS" />
+                    
+                    <!-- Botones de acción -->
+                    <Button fx:id="btnProcesarVenta" maxWidth="Infinity" styleClass="button-procesar-venta" text="Procesar Venta" />
+                    <Button fx:id="btnCancelarVenta" maxWidth="Infinity" styleClass="button-cancelar-venta" text="Cancelar Venta" />
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+    
+    <!-- Barra de estado inferior -->
+    <bottom>
+        <HBox styleClass="status-bar">
+            <Label fx:id="lblItemsCarrito" styleClass="status-text" text="0 productos en la venta" />
+            <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                <Label styleClass="status-text" text="InventoryGest v1.0" />
+            </HBox>
+        </HBox>
+    </bottom>
+</BorderPane>

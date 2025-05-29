@@ -10,13 +10,13 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.springframework.stereotype.Service;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.ProductoDTO;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.CategoriaDTO;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.dto.ProveedorDTO;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 public class ProductoServiceImplFX implements IProductoService {
 
     private final String API_URL;
@@ -62,6 +62,52 @@ public class ProductoServiceImplFX implements IProductoService {
     }
 
     @Override
+    public ProductoFX obtenerPorCodigo(String codigo) throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/codigo/" + codigo);
+        ProductoDTO producto = objectMapper.readValue(respuesta, ProductoDTO.class);
+        return convertirAProductoFX(producto);
+    }
+
+    @Override
+    public List<ProductoFX> obtenerPorCategoria(Integer idCategoria) throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/categoria/" + idCategoria);
+        List<ProductoDTO> productos = objectMapper.readValue(respuesta,
+                new TypeReference<List<ProductoDTO>>() {});
+        return productos.stream()
+                .map(this::convertirAProductoFX)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductoFX> obtenerConStockBajo() throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/stock-bajo");
+        List<ProductoDTO> productos = objectMapper.readValue(respuesta,
+                new TypeReference<List<ProductoDTO>>() {});
+        return productos.stream()
+                .map(this::convertirAProductoFX)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductoFX> obtenerConSobrestock() throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/sobrestock");
+        List<ProductoDTO> productos = objectMapper.readValue(respuesta,
+                new TypeReference<List<ProductoDTO>>() {});
+        return productos.stream()
+                .map(this::convertirAProductoFX)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ProductoFX obtenerDetallesProducto(Integer id) throws Exception {
+        String respuesta = HttpClient.get(API_URL + "/" + id + "/detalles");
+        // Asumiendo que el endpoint devuelve un ProductoDTO o un mapa con detalles.
+        // Si devuelve un mapa, necesitarás un DTO específico o manejar el JSON directamente.
+        ProductoDTO producto = objectMapper.readValue(respuesta, ProductoDTO.class);
+        return convertirAProductoFX(producto);
+    }
+
+    @Override
     public List<ProductoFX> filtrarProductos(String nombre, String codigo, Integer idCategoria, Boolean estado) throws Exception {
         StringBuilder url = new StringBuilder(API_URL + "/filtrar?");
 
@@ -87,8 +133,6 @@ public class ProductoServiceImplFX implements IProductoService {
         }
         url.append("&estado=").append(estadoStr);
 
-        System.out.println("URL de filtrado: " + url.toString());
-
         String respuesta = HttpClient.get(url.toString());
         List<ProductoDTO> productos = objectMapper.readValue(respuesta,
                 new TypeReference<List<ProductoDTO>>() {});
@@ -107,31 +151,21 @@ public class ProductoServiceImplFX implements IProductoService {
     }
 
     @Override
-    public ProductoFX actualizar(ProductoFX producto) throws Exception {
+    public ProductoFX actualizar(Integer id, ProductoFX producto) throws Exception {
         ProductoDTO productoDTO = convertirAProductoDTO(producto);
         String json = objectMapper.writeValueAsString(productoDTO);
-        String respuesta = HttpClient.put(API_URL + "/" + producto.getIdProducto(), json);
+        String respuesta = HttpClient.put(API_URL + "/" + id, json);
         productoDTO = objectMapper.readValue(respuesta, ProductoDTO.class);
         return convertirAProductoFX(productoDTO);
     }
 
     @Override
     public void eliminar(Integer id) throws Exception {
-        try {
-            String respuesta = HttpClient.delete(API_URL + "/" + id);
-            // Si llegamos aquí, es que el producto se eliminó con éxito
-        } catch (Exception e) {
-            // Extraer el mensaje de error
-            String mensajeError = e.getMessage();
-            if (mensajeError.contains("lotes asociados")) {
-                throw new Exception("No se puede eliminar el producto porque tiene lotes asociados. Elimine primero los lotes.");
-            }
-            throw e; // Re-lanzar la excepción original si no es el caso específico
-        }
+        HttpClient.delete(API_URL + "/" + id);
     }
 
     @Override
-    public ProductoFX actualizarStock(Integer id, Integer cantidad) throws Exception {
+    public ProductoFX ajustarStock(Integer id, Integer cantidad) throws Exception {
         String respuesta = HttpClient.patch(API_URL + "/" + id + "/stock/ajustar?cantidad=" + cantidad, "");
         ProductoDTO productoDTO = objectMapper.readValue(respuesta, ProductoDTO.class);
         return convertirAProductoFX(productoDTO);
@@ -140,6 +174,20 @@ public class ProductoServiceImplFX implements IProductoService {
     @Override
     public ProductoFX cambiarEstado(Integer id, Boolean estado) throws Exception {
         String respuesta = HttpClient.put(API_URL + "/" + id + "/estado?estado=" + estado, "");
+        ProductoDTO productoDTO = objectMapper.readValue(respuesta, ProductoDTO.class);
+        return convertirAProductoFX(productoDTO);
+    }
+
+    @Override
+    public ProductoFX desactivarProducto(Integer id) throws Exception {
+        String respuesta = HttpClient.patch(API_URL + "/" + id + "/desactivar", "");
+        ProductoDTO productoDTO = objectMapper.readValue(respuesta, ProductoDTO.class);
+        return convertirAProductoFX(productoDTO);
+    }
+
+    @Override
+    public ProductoFX activarProducto(Integer id) throws Exception {
+        String respuesta = HttpClient.patch(API_URL + "/" + id + "/activar", "");
         ProductoDTO productoDTO = objectMapper.readValue(respuesta, ProductoDTO.class);
         return convertirAProductoFX(productoDTO);
     }
@@ -238,40 +286,5 @@ public class ProductoServiceImplFX implements IProductoService {
                 dto.correo,
                 dto.direccion
         );
-    }
-
-    // Clases DTO para deserialización
-    private static class ProductoDTO {
-        public Integer idProducto;
-        public String codigo;
-        public String nombre;
-        public String descripcion;
-        public BigDecimal precioCosto;
-        public BigDecimal precioVenta;
-        public Integer stock;
-        public Integer stockMinimo;
-        public Integer stockMaximo;
-        public Integer idCategoria;
-        public CategoriaDTO categoria;
-        public Integer idProveedor;
-        public ProveedorDTO proveedor;
-        public Boolean estado;
-    }
-
-    private static class CategoriaDTO {
-        public Integer idCategoria;
-        public String nombre;
-        public String descripcion;
-        public Boolean estado;
-        public Integer duracionGarantia;
-    }
-
-    private static class ProveedorDTO {
-        public Integer idProveedor;
-        public String nombre;
-        public String contacto;
-        public String telefono;
-        public String correo;
-        public String direccion;
     }
 }

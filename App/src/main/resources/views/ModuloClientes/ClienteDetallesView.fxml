@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane styleClass="details-scroll-pane" fitToHeight="true" fitToWidth="true" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes.ClienteDetallesViewController">
+   <stylesheets>
+      <URL value="@../../styles/cliente-detalles-styles.css" />
+   </stylesheets>
+   <content>
+      <VBox spacing="20.0" styleClass="details-main-vbox">
+         <padding>
+            <Insets bottom="20.0" left="25.0" right="25.0" top="20.0" />
+         </padding>
+         <children>
+            <Label text="Detalles del Cliente" styleClass="details-header-title" />
+            
+            <TitledPane text="Información General" collapsible="false" styleClass="details-titled-pane">
+               <content>
+                  <GridPane hgap="15.0" vgap="10.0" styleClass="details-grid">
+                     <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" prefWidth="150.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="220.0" />
+                        <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" prefWidth="160.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="220.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label text="ID Cliente:" styleClass="details-label-header" GridPane.rowIndex="0" />
+                        <Label fx:id="idClienteLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        
+                        <Label text="Nombre Completo:" styleClass="details-label-header" GridPane.rowIndex="1" />
+                        <Label fx:id="nombreLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        
+                        <Label text="Doc. Identidad:" styleClass="details-label-header" GridPane.rowIndex="2" />
+                        <Label fx:id="documentoIdentidadLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        
+                        <Label text="Correo Electrónico:" styleClass="details-label-header" GridPane.rowIndex="3" />
+                        <Label fx:id="correoLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        
+                        <Label text="Celular:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                        <Label fx:id="celularLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                        
+                        <Label text="Dirección:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Label fx:id="direccionLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        
+                        <Label text="Estado Activo:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="activoCheckBox" disable="true" styleClass="details-checkbox" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        
+                        <Label text="Puntos Fidelidad:" styleClass="details-label-header" GridPane.rowIndex="4" />
+                        <Label fx:id="puntosFidelidadLabel" styleClass="details-label-value" text="0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        
+                        <Label text="Límite Crédito:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Label fx:id="limiteCreditoLabel" styleClass="details-label-value" text="0.00" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+
+                        <Label text="Total Comprado:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                        <Label fx:id="totalCompradoLabel" styleClass="details-label-value" text="0.00" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+
+                        <Label text="Última Compra:" styleClass="details-label-header" GridPane.rowIndex="5" />
+                        <Label fx:id="ultimaCompraLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+                        <Label text="Fecha Registro:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                        <Label fx:id="fechaRegistroLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+
+                     </children>
+                  </GridPane>
+               </content>
+            </TitledPane>
+
+            <TitledPane text="Información de Facturación" collapsible="false" styleClass="details-titled-pane">
+               <content>
+                  <GridPane hgap="15.0" vgap="10.0" styleClass="details-grid">
+                     <columnConstraints>
+                        <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" prefWidth="150.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="220.0" />
+                        <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" prefWidth="160.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="220.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <Label text="Requiere Factura (Def.):" styleClass="details-label-header" GridPane.rowIndex="0" />
+                        <CheckBox fx:id="requiereFacturaDefaultCheckBox" disable="true" styleClass="details-checkbox" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                        <Label text="Razón Social:" styleClass="details-label-header" GridPane.rowIndex="1" />
+                        <Label fx:id="razonSocialLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <Label text="ID Fiscal:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <Label fx:id="identificacionFiscalLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                        
+                        <Label text="Dirección Facturación:" styleClass="details-label-header" GridPane.rowIndex="2" />
+                        <Label fx:id="direccionFacturacionLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                        <Label text="Correo Facturación:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <Label fx:id="correoFacturacionLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+                        <Label text="Tipo Factura (Def.):" styleClass="details-label-header" GridPane.rowIndex="3" />
+                        <Label fx:id="tipoFacturaDefaultLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                        <Label text="Fecha Actualización Datos:" styleClass="details-label-header" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <Label fx:id="fechaActualizacionLabel" styleClass="details-label-value" text="-" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                     </children>
+                  </GridPane>
+               </content>
+            </TitledPane>
+            
+            <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="details-action-hbox">
+               <children>
+                  <Button fx:id="canjearRecompensaButton" mnemonicParsing="false" styleClass="button-warning" text="Canjear Recompensa">
+                     <font><Font size="13.0" /></font>
+                  </Button>
+                  <Button fx:id="cerrarButton" mnemonicParsing="false" onAction="#handleCerrar" styleClass="button-secondary" text="Cerrar Vista"/>
+               </children>
+            </HBox>
+
+            <Separator styleClass="details-separator" />
+
+            <TitledPane animated="false" collapsible="false" text="Historial de Compras" styleClass="details-titled-pane">
+               <font><Font name="System Bold" size="14.0" /></font>
+               <content>
+                  <AnchorPane>
+                     <children>
+                        <TableView fx:id="historialComprasTable" styleClass="details-table-view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columns>
+                            <TableColumn fx:id="ventaNumCol" prefWidth="120.0" text="Nº Venta" />
+                            <TableColumn fx:id="ventaFechaCol" prefWidth="150.0" text="Fecha" />
+                            <TableColumn fx:id="ventaTotalCol" prefWidth="100.0" text="Total (€)" />
+                            <TableColumn fx:id="ventaTipoPagoCol" prefWidth="150.0" text="Tipo Pago" />
+                          </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </TitledPane>
+
+            <TitledPane animated="false" collapsible="false" text="Historial de Recompensas Canjeadas" styleClass="details-titled-pane">
+               <font><Font name="System Bold" size="14.0" /></font>
+               <content>
+                  <AnchorPane>
+                     <children>
+                        <TableView fx:id="historialRecompensasTable" styleClass="details-table-view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columns>
+                            <TableColumn fx:id="recompensaDescCol" prefWidth="350.0" text="Descripción Recompensa" />
+                            <TableColumn fx:id="recompensaPuntosCol" prefWidth="120.0" text="Puntos Usados" />
+                            <TableColumn fx:id="recompensaFechaCol" prefWidth="150.0" text="Fecha Reclamo" />
+                          </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </TitledPane>
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>

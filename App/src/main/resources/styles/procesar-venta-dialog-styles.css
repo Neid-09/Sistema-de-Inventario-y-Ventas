@@ -1,0 +1,164 @@
+/* Estilos generales */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: white;
+}
+
+/* Estilos para el panel de datos del cliente */
+#panelDatosCliente {
+    -fx-max-height: 350px;
+    -fx-pref-height: 350px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-color: white;
+}
+
+/* Estilos para el contenedor de información del cliente seleccionado */
+#clienteSeleccionadoInfo {
+    -fx-padding: 10px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-background-color: #f9f9f9;
+    -fx-max-height: 180px;
+    -fx-spacing: 5px;
+}
+
+/* Estilos para el TabPane principal */
+.tab-pane {
+    -fx-tab-min-width: 170px;
+    -fx-tab-max-width: 170px;
+    -fx-tab-min-height: 40px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+/* Eliminar el borde alrededor del contenido de las pestañas */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Estilos para las pestañas */
+.tab {
+    -fx-background-color: #f5f5f5;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 0 15px;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Pestaña seleccionada */
+.tab:selected {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1 1 0 1;
+    -fx-border-radius: 3 3 0 0;
+}
+
+/* Texto de las pestañas */
+.tab .tab-label {
+    -fx-text-fill: #666666;
+    -fx-font-weight: normal;
+    -fx-alignment: CENTER;
+}
+
+/* Texto de la pestaña seleccionada */
+.tab:selected .tab-label {
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+}
+
+/* Eliminar el botón de cierre de las pestañas */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+    -fx-opacity: 0;
+    -fx-padding: 0;
+}
+
+/* Eliminar el espacio para el botón de cierre */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container {
+    -fx-padding: 0;
+}
+
+/* Contenido de las pestañas */
+.tab-pane > .tab-content-area {
+    -fx-background-color: white;
+    -fx-padding: 15px;
+}
+
+/* Estilos para los campos de texto */
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 3px;
+    -fx-padding: 8px;
+}
+
+.text-field:focused {
+    -fx-border-color: #00b386;
+}
+
+/* Estilos para los botones */
+.button {
+    -fx-padding: 8px 15px;
+    -fx-cursor: hand;
+}
+
+/* Botón de búsqueda */
+.search-button {
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-background-radius: 3px;
+}
+
+.search-button:hover {
+    -fx-background-color: #555555;
+}
+
+/* Botón de registro */
+.register-button {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-text-fill: #333333;
+}
+
+.register-button:hover {
+    -fx-background-color: #f5f5f5;
+}
+
+/* Estilos para el popup de sugerencias de clientes */
+.cliente-sugerencia-lista {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 5);
+}
+
+.cliente-sugerencia-lista .list-cell {
+    -fx-padding: 8px 10px;
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f0f0f0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.cliente-sugerencia-lista .list-cell:hover {
+    -fx-background-color: #f5f5f5;
+    -fx-cursor: hand;
+}
+
+.cliente-sugerencia-lista .list-cell:selected {
+    -fx-background-color: #e0f2f1;
+    -fx-text-fill: #00796b;
+}
+
+.cliente-sugerencia-lista .list-view {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}

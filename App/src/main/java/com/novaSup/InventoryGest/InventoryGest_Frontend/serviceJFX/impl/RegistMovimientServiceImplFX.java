@@ -8,18 +8,19 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.EntradaProducto
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRegistMovimientService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfig;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
-import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-@Service
 public class RegistMovimientServiceImplFX implements IRegistMovimientService {
 
-    private final String API_URL = ApiConfig.getBaseUrl() + "/api/movimientos";
+    private static final String API_MOVIMIENTOS_URL = ApiConfig.getBaseUrl() + "/api/movimientos";
     private final ObjectMapper objectMapper;
 
     public RegistMovimientServiceImplFX() {
@@ -30,66 +31,31 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
 
     @Override
     public List<EntradaProductoFX> obtenerTodos() throws Exception {
-        String respuesta = HttpClient.get(API_URL);
-        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
-                new TypeReference<List<EntradaDTO>>() {});
-
-        return entradas.stream()
-                .map(this::convertirAEntradaFX)
-                .collect(Collectors.toList());
+        return fetchAndMapEntradas(API_MOVIMIENTOS_URL);
     }
 
     @Override
     public List<EntradaProductoFX> obtenerPorIdProducto(Integer idProducto) throws Exception {
-        String respuesta = HttpClient.get(API_URL + "/producto/" + idProducto);
-        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
-                new TypeReference<List<EntradaDTO>>() {});
-
-        return entradas.stream()
-                .map(this::convertirAEntradaFX)
-                .collect(Collectors.toList());
+        String url = API_MOVIMIENTOS_URL + "/producto/" + idProducto;
+        return fetchAndMapEntradas(url);
     }
 
     @Override
     public List<EntradaProductoFX> obtenerPorProveedor(Integer idProveedor) throws Exception {
-        String respuesta = HttpClient.get(API_URL + "/proveedor/" + idProveedor);
-        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
-                new TypeReference<List<EntradaDTO>>() {});
-
-        return entradas.stream()
-                .map(this::convertirAEntradaFX)
-                .collect(Collectors.toList());
+        String url = API_MOVIMIENTOS_URL + "/proveedor/" + idProveedor;
+        return fetchAndMapEntradas(url);
     }
 
     @Override
     public List<EntradaProductoFX> obtenerPorFecha(LocalDate desde, LocalDate hasta) throws Exception {
-        StringBuilder url = new StringBuilder(API_URL + "/fecha?");
-        if (desde != null) {
-            url.append("desde=").append(desde.toString());
-        }
-        if (hasta != null) {
-            if (desde != null) url.append("&");
-            url.append("hasta=").append(hasta.toString());
-        }
-
-        String respuesta = HttpClient.get(url.toString());
-        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
-                new TypeReference<List<EntradaDTO>>() {});
-
-        return entradas.stream()
-                .map(this::convertirAEntradaFX)
-                .collect(Collectors.toList());
+        String url = buildFilterUrl(null, null, desde, hasta, null);
+        return fetchAndMapEntradas(url);
     }
 
     @Override
     public List<EntradaProductoFX> obtenerPorTipoMovimiento(String tipo) throws Exception {
-        String respuesta = HttpClient.get(API_URL + "/tipo/" + tipo);
-        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
-                new TypeReference<List<EntradaDTO>>() {});
-
-        return entradas.stream()
-                .map(this::convertirAEntradaFX)
-                .collect(Collectors.toList());
+        String url = API_MOVIMIENTOS_URL + "/tipo/" + URLEncoder.encode(tipo, StandardCharsets.UTF_8);
+        return fetchAndMapEntradas(url);
     }
 
     @Override
@@ -100,63 +66,34 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
 
     @Override
     public List<EntradaProductoFX> obtenerFiltradosCompleto(Integer idProducto, Integer idProveedor, LocalDate desde,
-                                                    LocalDate hasta, String tipo) throws Exception {
-        StringBuilder url = new StringBuilder(API_URL + "/filtro?");
-        boolean hayParametro = false;
+                                                            LocalDate hasta, String tipo) throws Exception {
+        String url = buildFilterUrl(idProducto, idProveedor, desde, hasta, tipo);
+        return fetchAndMapEntradas(url);
+    }
 
-        if (idProducto != null) {
-            url.append("idProducto=").append(idProducto);
-            hayParametro = true;
-        }
+    // --- Métodos privados auxiliares ---
 
-        if (idProveedor != null) {
-            if (hayParametro) url.append("&");
-            url.append("idProveedor=").append(idProveedor);
-            hayParametro = true;
-        }
-
-        if (desde != null) {
-            if (hayParametro) url.append("&");
-            url.append("desde=").append(desde.toString());
-            hayParametro = true;
-        }
-
-        if (hasta != null) {
-            if (hayParametro) url.append("&");
-            url.append("hasta=").append(hasta.toString());
-            hayParametro = true;
-        }
-
-        if (tipo != null) {
-            if (hayParametro) url.append("&");
-            url.append("tipo=").append(tipo);
-        }
-
-        String respuesta = HttpClient.get(url.toString());
-        List<EntradaDTO> entradas = objectMapper.readValue(respuesta,
-                new TypeReference<List<EntradaDTO>>() {});
-
+    private List<EntradaProductoFX> fetchAndMapEntradas(String url) throws Exception {
+        String respuesta = HttpClient.get(url);
+        List<EntradaDTO> entradas = objectMapper.readValue(respuesta, new TypeReference<List<EntradaDTO>>() {});
         return entradas.stream()
-                .map(this::convertirAEntradaFX)
-                .collect(Collectors.toList());
+                       .map(this::convertirAEntradaFX)
+                       .collect(Collectors.toList());
     }
 
-    @Override
-    public EntradaProductoFX registrarMovimiento(Integer idProducto, Integer cantidad,
-                                                 String tipoMovimiento, BigDecimal precioUnitario,
-                                                 Integer idProveedor, String motivo) throws Exception {
-        // Nota: Este método se mantiene pero debería ser implementado en InventarioController
-        // ya que RegistMovimientController solo maneja consultas, no modificaciones
-        MovimientoDTO movimientoDTO = new MovimientoDTO(idProducto, idProveedor, cantidad,
-                tipoMovimiento, precioUnitario, motivo);
-        String json = objectMapper.writeValueAsString(movimientoDTO);
+    private String buildFilterUrl(Integer idProducto, Integer idProveedor, LocalDate desde,
+                                  LocalDate hasta, String tipo) {
+        StringJoiner params = new StringJoiner("&");
+        if (idProducto != null) params.add("idProducto=" + idProducto);
+        if (idProveedor != null) params.add("idProveedor=" + idProveedor);
+        if (desde != null) params.add("desde=" + desde.toString());
+        if (hasta != null) params.add("hasta=" + hasta.toString());
+        if (tipo != null) params.add("tipo=" + URLEncoder.encode(tipo, StandardCharsets.UTF_8));
 
-        // Aquí deberíamos usar la URL del InventarioController para registrar movimientos
-        String inventarioApiUrl = ApiConfig.getBaseUrl() + "/api/inventario/movimiento";
-        String respuesta = HttpClient.post(inventarioApiUrl, json);
-        EntradaDTO entradaDTO = objectMapper.readValue(respuesta, EntradaDTO.class);
-        return convertirAEntradaFX(entradaDTO);
+        return API_MOVIMIENTOS_URL + (params.length() > 0 ? "/filtro?" + params.toString() : "/filtro");
+         // Considerar si /filtro sin parámetros es válido o debería ser API_MOVIMIENTOS_URL
     }
+
 
     private EntradaProductoFX convertirAEntradaFX(EntradaDTO dto) {
         return new EntradaProductoFX(
@@ -188,9 +125,6 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
         public static class ProductoDTO {
             public Integer idProducto;
             public String nombre;
-            public String descripcion;
-            public BigDecimal precio;
-            public Integer stock;
         }
 
         // Clase interna para el objeto proveedor
@@ -200,23 +134,5 @@ public class RegistMovimientServiceImplFX implements IRegistMovimientService {
         }
     }
 
-    private static class MovimientoDTO {
-        public Integer idProducto;
-        public Integer idProveedor;
-        public Integer cantidad;
-        public String tipoMovimiento;
-        public BigDecimal precioUnitario;
-        public String motivo;
-
-        // Constructor completo
-        public MovimientoDTO(Integer idProducto, Integer idProveedor, Integer cantidad,
-                             String tipoMovimiento, BigDecimal precioUnitario, String motivo) {
-            this.idProducto = idProducto;
-            this.idProveedor = idProveedor;
-            this.cantidad = cantidad;
-            this.tipoMovimiento = tipoMovimiento;
-            this.precioUnitario = precioUnitario;
-            this.motivo = motivo;
-        }
-    }
+    // MovimientoDTO y registrarMovimiento eliminados por refactorización
 }

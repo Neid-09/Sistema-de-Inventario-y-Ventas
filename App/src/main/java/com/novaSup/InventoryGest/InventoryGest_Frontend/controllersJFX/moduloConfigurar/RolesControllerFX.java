@@ -2,7 +2,6 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCo
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.RolFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.RolServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IRolService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
@@ -10,18 +9,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-@Component
 public class RolesControllerFX implements Initializable {
 
     @FXML
@@ -48,13 +43,14 @@ public class RolesControllerFX implements Initializable {
     @FXML
     private Button btnAsignarPermisos;
 
-    private IRolService rolService;
+    private final IRolService rolService;
     private ObservableList<RolFX> listaRoles;
     private RolFX rolSeleccionado;
     private boolean modoEdicion = false;
 
-    public RolesControllerFX() {
-        rolService = new RolServiceImplFX();
+    // Constructor para inyección de dependencias
+    public RolesControllerFX(IRolService rolService) {
+        this.rolService = rolService;
         listaRoles = FXCollections.observableArrayList();
     }
 

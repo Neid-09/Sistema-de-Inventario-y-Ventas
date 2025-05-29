@@ -7,11 +7,9 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IP
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
-@Component
 public class DialogAddLoteCtrlFX {
 
     @FXML
@@ -35,11 +33,12 @@ public class DialogAddLoteCtrlFX {
     @FXML
     private Button btnCancelar;
 
-    private ILoteService loteService;
-    private IProductoService productoService;
+    private final ILoteService loteService;
+    private final IProductoService productoService;
     private ProductoFX productoSeleccionado;
 
-    public void setServicios(ILoteService loteService, IProductoService productoService) {
+    // Constructor para inyección de dependencias
+    public DialogAddLoteCtrlFX(ILoteService loteService, IProductoService productoService) {
         this.loteService = loteService;
         this.productoService = productoService;
     }
@@ -68,6 +67,11 @@ public class DialogAddLoteCtrlFX {
 
     @FXML
     private void guardarLote() {
+        // Asegurarse que los servicios fueron inyectados antes de usarlos
+        if (loteService == null || productoService == null) {
+            mostrarAlerta("Error interno: Servicios no inicializados.", Alert.AlertType.ERROR);
+            return;
+        }
         try {
             // Validar campos obligatorios
             if (txtNumeroLote.getText().trim().isEmpty()) {
@@ -96,12 +100,11 @@ public class DialogAddLoteCtrlFX {
             nuevoLote.setFechaVencimiento(dpFechaVencimiento.getValue());
             nuevoLote.setActivo(true);
 
-            // Guardar en la base de datos
+            // Guardar en la base de datos usando el servicio inyectado
             loteService.crear(nuevoLote);
 
-            productoService.obtenerPorId(productoSeleccionado.getIdProducto());
-
-
+            // Opcional: Refrescar el producto si es necesario (aunque el stock se actualiza en el backend)
+            // productoService.obtenerPorId(productoSeleccionado.getIdProducto());
 
             // Mostrar mensaje de éxito
             mostrarAlerta("Lote creado y stock actualizado correctamente.", Alert.AlertType.INFORMATION);

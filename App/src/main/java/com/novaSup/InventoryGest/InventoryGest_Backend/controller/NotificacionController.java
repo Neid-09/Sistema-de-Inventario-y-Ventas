@@ -1,7 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.controller;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Notificacion;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.NotificacionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.security.service.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -9,14 +9,12 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.ApiConfi
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service  // Asegúrate de que tenga esta anotación
+// Eliminar anotación
 public class ProveedorServiceImplFX implements IProveedorService {
 
     private static final Logger logger = LoggerFactory.getLogger(ProveedorServiceImplFX.class);

@@ -40,6 +40,8 @@ public class Promocion {
     @Column(name = "id_producto")
     private Integer idProducto;
 
+    private Boolean activo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_producto", insertable = false, updatable = false)
     @JsonIgnore  // Ignora esta relación al serializar

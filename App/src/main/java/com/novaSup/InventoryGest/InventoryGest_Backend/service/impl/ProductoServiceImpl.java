@@ -4,9 +4,9 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.*;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.CategoriaRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.RegistMovimientService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProductoService;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.PromocionService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.RegistMovimientService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.PromocionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -186,6 +186,11 @@ public class ProductoServiceImpl implements ProductoService {
         // ahora lo calcula desde los lotes
         return obtenerPorId(idProducto)
                 .map(producto -> {
+                    // Validar si el producto está activo
+                    if (!producto.getEstado()) {
+                        throw new IllegalStateException("No se puede actualizar el stock de un producto inactivo: " + producto.getNombre());
+                    }
+
                     actualizarStockDesdeLoterRepositorio(producto); // Esto recalcula y guarda el stock si cambió
 
                     // Verificar stock mínimo y máximo para generar notificaciones usando el método general

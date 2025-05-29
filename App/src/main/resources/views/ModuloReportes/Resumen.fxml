@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.TableColumn?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/23.0.1" 
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ModuloReportes.ResumenCtrlFX">
+    <children>
+        <VBox layoutX="14.0" layoutY="14.0" prefHeight="500.0" prefWidth="972.0" spacing="20.0" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+            <children>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="972.0" spacing="20.0">
+                    <children>
+                        <AnchorPane prefHeight="92.0" prefWidth="220.0" style="-fx-background-color:rgb(68, 203, 230); -fx-background-radius: 5;">
+                            <children>
+                                <Label layoutX="14.0" layoutY="14.0" text="Total Productos" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblTotalProductos" layoutX="14.0" layoutY="48.0" text="0.00" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="18.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </AnchorPane>
+                  <AnchorPane prefHeight="92.0" prefWidth="220.0" style="-fx-background-color:rgb(190, 176, 25); -fx-background-radius: 5;">
+                     <children>
+                        <Label layoutX="14.0" layoutY="14.0" text="Total Tarjeta" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblTotalTarjeta" layoutX="14.0" layoutY="48.0" text="0.00" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="92.0" prefWidth="220.0" style="-fx-background-color:rgb(224, 88, 43); -fx-background-radius: 5;">
+                     <children>
+                        <Label layoutX="14.0" layoutY="14.0" text="Total Efectivo" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblTotalEfectivo" layoutX="14.0" layoutY="48.0" text="0.00" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="92.0" prefWidth="220.0" style="-fx-background-color:rgb(63, 197, 18); -fx-background-radius: 5;">
+                     <children>
+                        <Label layoutX="14.0" layoutY="14.0" text="Total Vendido" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblTotalVendido" layoutX="14.0" layoutY="48.0" text="0" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </AnchorPane>
+                        <!-- Aquí puedes agregar más cuadros de resumen si es necesario -->
+                    </children>
+                </HBox>
+                <TableView fx:id="tablaResumen" prefHeight="380.0" prefWidth="972.0">
+                    <columns>
+                        <!-- Define las columnas para la tabla de resumen según tus necesidades -->
+                        <TableColumn fx:id="colCodProductos" prefWidth="200.0" text="Codigo" />
+                        <TableColumn fx:id="colProdName" prefWidth="150.0" text="Nombre" />
+                        <TableColumn fx:id="colProdCantidad" prefWidth="150.0" text="Cantidad" />
+                        <TableColumn fx:id="colProdTotal" prefWidth="150.0" text="Total" />
+                        <TableColumn fx:id="colProdPromedio" prefWidth="150.0" text="Promedio venta" />
+                    </columns>
+                </TableView>
+            </children>
+        </VBox>
+        <HBox alignment="CENTER" layoutX="14.0" layoutY="514.0" prefHeight="40.0" prefWidth="972.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+            <children>
+                <Button fx:id="btnExportarResumen" mnemonicParsing="false" style="-fx-background-color: #3498db;" text="Exportar Resumen" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</AnchorPane>

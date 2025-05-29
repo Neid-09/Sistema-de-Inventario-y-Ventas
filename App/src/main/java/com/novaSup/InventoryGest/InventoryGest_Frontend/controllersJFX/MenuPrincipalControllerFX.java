@@ -1,359 +1,294 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX;
 
-import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.NotificacionFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ICajaService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.INotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+// Ya estaba, pero para confirmar
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent; // Import MouseEvent
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import javafx.scene.shape.Rectangle; // Import para Rectangle
 
-import static com.novaSup.InventoryGest.MainApp.springContext;
+// Importar controladores de componentes
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.INotificacionCtrl;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.NotificacionController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.ISidebarController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.SidebarController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.ICajaController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.CajaController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.interfaces.INavigationController;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.menuPrincipal.components.NavigationController;
 
-@Component
 public class MenuPrincipalControllerFX implements Initializable {
 
-    @FXML
-    private HBox topBar;
+    @FXML private HBox topBar;
+
+    @FXML private Label lblUsuario;
+
+    @FXML private Button btnCerrarSesion;
+
+    @FXML private Button btnNotificaciones;
+
+    @FXML private StackPane modulosDinamicos;
+
+    @FXML private Label lblRol;
+
+    // Declare services as final fields, injected via constructor
+    private final INotificacionService notificacionService;
+    private final ICajaService cajaService; // Inyectar el servicio de caja
+    private final Callback<Class<?>, Object> controllerFactory; // To load nested FXMLs
+
+    // Controlador de Notificaciones - reemplaza todas las variables relacionadas con notificaciones
+    private INotificacionCtrl notificacionController;
 
     @FXML
-    private Label lblUsuario;
+    private VBox sidePanelVBox; // Added for the side panel
 
-    @FXML
-    private Button btnCerrarSesion;
+    // Added FXML fields for the labels inside buttons
+    @FXML private Label lblVender;
+    @FXML private Label lblReporteVentas;
+    @FXML private Label lblInventario;
+    @FXML private Label lblConsulta;
+    @FXML private Label lblCreditoClientes;
+    @FXML private Label lblMasVendido;
+    @FXML private Label lblEntradasSalidas;
+    @FXML private Label lblGarantiasServicios;
+    @FXML private Label lblConfigurar;
 
-    @FXML
-    private Button btnVender;
+    // Added FXML field for the Inicio button
+    @FXML private Button btnInicio;
 
-    @FXML
-    private Button btnInventario;
+    // Added FXML field for the Inicio button's label
+    @FXML private Label lblInicio;
 
-    @FXML
-    private Button btnNotificaciones;
+    @FXML private Button btnToggleSidebar; // Added toggle button
+    @FXML private ImageView toggleIcon; // Added icon for toggle button
 
-    @FXML
-    private Button btnEntradasSalidas;
+    //buttons for modules
+    @FXML private Button btnVender;
+    @FXML private Button btnReporteVentas;
+    @FXML private Button btnInventario;
+    @FXML private Button btnConsulta;
+    @FXML private Button btnCreditoClientes;
+    @FXML private Button btnMasVendido;
+    @FXML private Button btnEntradasSalidas;
+    @FXML private Button btnGarantiasServicios;
+    @FXML private Button btnConfiguracion;
 
-    @FXML
-    private Button btnConfiguracion;
+    // Controlador del Sidebar - reemplaza todas las variables relacionadas con sidebar
+    private ISidebarController sidebarController;
 
-    @FXML
-    private StackPane modulosDinamicos;
+    // Controlador de Caja - reemplaza todas las variables y métodos relacionados con caja
+    private ICajaController cajaController;
 
-    @FXML
-    private Label lblRol;
+    // Controlador de Navegación - reemplaza todas las funciones de navegación
+    private INavigationController navigationController;
 
-    private Popup notificacionesPopup;
-    private Label contadorNotificaciones;
+    // FXML fields para la información de la caja en el footer
+    @FXML private Label lblDineroInicial;
+    @FXML private Label lblTotalEsperadoCaja;
+    @FXML private Label lblTotalVentas;
+    @FXML private Label lblProductosVendidos;
+    @FXML private Button btnCaja;
 
-    @Autowired
-    private INotificacionService notificacionService;
 
-    private Timer timerNotificaciones;
-    private ObservableList<NotificacionFX> listaNotificaciones = FXCollections.observableArrayList();
 
+    // Constructor for dependency injection
+    public MenuPrincipalControllerFX(INotificacionService notificacionService, ICajaService cajaService, Callback<Class<?>, Object> controllerFactory) {
+        this.notificacionService = notificacionService;
+        this.cajaService = cajaService;
+        this.controllerFactory = controllerFactory;
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("Iniciando MenuPrincipalControllerFX.initialize()");
 
+        // Configurar Clip para modulosDinamicos para la animación de deslizamiento
+        Rectangle clipRect = new Rectangle();
+        clipRect.widthProperty().bind(modulosDinamicos.widthProperty());
+        clipRect.heightProperty().bind(modulosDinamicos.heightProperty());
+        modulosDinamicos.setClip(clipRect);
+
         // Diagnóstico de permisos
         PermisosUIUtil.imprimirTodosLosPermisos();
 
-        try {
-            // Configurar la ventana después de que todo esté cargado
-            Platform.runLater(() -> {
-                // Obtener la ventana actual
-                Stage stage = (Stage) btnCerrarSesion.getScene().getWindow();
+        // Establecer datos de usuario en la interfaz
+        String nombreUsuario = LoginServiceImplFX.getNombreUsuario();
+        if (nombreUsuario != null) {
+            lblUsuario.setText(nombreUsuario);
+            System.out.println("Usuario establecido: " + nombreUsuario);
 
-                // Configurar botones nativos de la ventana
-                stage.setResizable(true);
-
-                // Establecer pantalla completa
-                stage.setMaximized(true);
-
-                // Manejar el cierre de la ventana con alerta
-                stage.setOnCloseRequest(event -> {
-                    event.consume(); // Prevenir cierre automático
-                    confirmarCierre();
-                });
-
-                // Guardar referencia al controlador
-                stage.setUserData(this);
-            });
-
-            // Establecer datos de usuario en la interfaz
-            String nombreUsuario = LoginServiceImplFX.getNombreUsuario();
-            if (nombreUsuario != null) {
-                lblUsuario.setText(nombreUsuario);
-                System.out.println("Usuario establecido: " + nombreUsuario);
-
-                // Mostrar el rol del usuario
-                LoginServiceImplFX.getPermisos().stream()
-                        .filter(permiso -> permiso.startsWith("ROLE_"))
-                        .findFirst()
-                        .ifPresent(rol -> {
-                            lblRol.setText("ROL: " + rol.substring(5));
-                            System.out.println("Rol establecido: " + rol);
-                        });
-            }
-
-
-            // Inicializar el badge contador de notificaciones
-            inicializarContadorNotificaciones();
-
-            // Programar actualización periódica de notificaciones
-            programarActualizacionNotificaciones();
-
-            // Configurar permisos de botones
-            configurarPermisos();
-
-            // Cargar contenido inicial
-            Platform.runLater(() -> {
-                try {
-                    volverAlInicio();
-                    System.out.println("Módulo inicial cargado correctamente");
-                } catch (Exception e) {
-                    System.err.println("Error al cargar módulo inicial: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            });
-        } catch (Exception e) {
-            System.err.println("Error general en initialize: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-
-    @FXML
-    void irNotificaciones(ActionEvent event) {
-        if (!PermisosUIUtil.verificarPermisoConAlerta("ver_notificaciones")) {
-            return;
+            LoginServiceImplFX.getPermisos().stream()
+                    .filter(permiso -> permiso.startsWith("ROLE_"))
+                    .findFirst()
+                    .ifPresent(rol -> {
+                        lblRol.setText("ROL: " + rol.substring(5));
+                        System.out.println("Rol establecido: " + rol);
+                    });
         }
 
-        if (notificacionesPopup == null || !notificacionesPopup.isShowing()) {
-            mostrarPopupNotificaciones();
-        } else {
-            notificacionesPopup.hide();
+        if (this.notificacionService == null) {
+            System.err.println("Error crítico: INotificacionService no fue inyectado.");
+            mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "Servicio de notificaciones no disponible. Algunas funciones pueden fallar.");
+            // No retornar aquí necesariamente, pero algunas funcionalidades pueden estar degradadas.
         }
-    }
-
-    private void mostrarPopupNotificaciones() {
-        // Crear el contenido del popup
-        VBox contenido = new VBox(10);
-        contenido.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; " +
-                "-fx-padding: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 0);");
-        contenido.setPrefWidth(350);
-        contenido.setPrefHeight(400);
-
-        // Crear el título
-        Label titulo = new Label("Notificaciones");
-        titulo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        contenido.getChildren().add(titulo);
-
-        // Cargar notificaciones
-        cargarNotificaciones();
-
-        if (listaNotificaciones.isEmpty()) {
-            Label sinNotificaciones = new Label("No tienes notificaciones");
-            sinNotificaciones.setStyle("-fx-padding: 20; -fx-text-fill: #888888;");
-            contenido.getChildren().add(sinNotificaciones);
-        } else {
-            ScrollPane scrollPane = new ScrollPane();
-            scrollPane.setFitToWidth(true);
-            scrollPane.setStyle("-fx-background-color: transparent;");
-
-            VBox listaItems = new VBox(5);
-
-            for (NotificacionFX notificacion : listaNotificaciones) {
-                VBox itemNotificacion = crearItemNotificacion(notificacion);
-                listaItems.getChildren().add(itemNotificacion);
-            }
-
-            scrollPane.setContent(listaItems);
-            scrollPane.setPrefHeight(300);
-            contenido.getChildren().add(scrollPane);
+        if (this.cajaService == null) {
+             System.err.println("Error crítico: ICajaService no fue inyectado.");
+            mostrarAlerta(Alert.AlertType.ERROR, "Error Crítico", "Servicio de caja no disponible. Algunas funciones pueden fallar.");
         }
 
-        // Botón para ver todas las notificaciones (podría abrir una vista completa)
-        Button btnVerTodas = new Button("Ver todas");
-        btnVerTodas.setStyle("-fx-background-color: #083671; -fx-text-fill: white;");
-        btnVerTodas.setOnAction(e -> {
-            notificacionesPopup.hide();
-            // Aquí podrías cargar una vista completa de notificaciones
-        });
-        contenido.getChildren().add(btnVerTodas);
+        inicializarNotificaciones();
+        configurarPermisos();
+        inicializarSidebar(); // Inicializar el controlador del sidebar
+        inicializarCaja(); // Inicializar el controlador de caja
+        inicializarNavegacion(); // Inicializar el controlador de navegación
 
-        // Crear y mostrar el popup
-        notificacionesPopup = new Popup();
-        notificacionesPopup.getContent().add(contenido);
-        notificacionesPopup.setAutoHide(true);
-
-        // Mostrar el popup debajo del botón de notificaciones
-        notificacionesPopup.show(btnNotificaciones.getScene().getWindow(),
-                btnNotificaciones.localToScene(0, 0).getX() + btnNotificaciones.getScene().getX() + btnNotificaciones.getScene().getWindow().getX(),
-                btnNotificaciones.localToScene(0, 0).getY() + btnNotificaciones.getScene().getY() + btnNotificaciones.getScene().getWindow().getY() + btnNotificaciones.getHeight());
-    }
-
-    private VBox crearItemNotificacion(NotificacionFX notificacion) {
-        VBox item = new VBox(5);
-        item.setStyle("-fx-border-color: #eeeeee; -fx-border-width: 0 0 1 0; -fx-padding: 8;");
-        if (!notificacion.getLeida()) {
-            item.setStyle(item.getStyle() + "-fx-background-color: #f0f7ff;");
-        }
-
-        Label lblTitulo = new Label(notificacion.getTitulo());
-        lblTitulo.setStyle("-fx-font-weight: bold;");
-
-        Label lblMensaje = new Label(notificacion.getMensaje());
-        lblMensaje.setWrapText(true);
-
-        HBox acciones = new HBox(10);
-
-        Button btnMarcarLeida = new Button(notificacion.getLeida() ? "Marcar no leída" : "Marcar leída");
-        btnMarcarLeida.setStyle("-fx-background-color: transparent; -fx-text-fill: #083671;");
-        btnMarcarLeida.setOnAction(e -> marcarNotificacion(notificacion));
-
-        Button btnEliminar = new Button("Eliminar");
-        btnEliminar.setStyle("-fx-background-color: transparent; -fx-text-fill: #d32f2f;");
-        btnEliminar.setOnAction(e -> eliminarNotificacion(notificacion));
-
-        acciones.getChildren().addAll(btnMarcarLeida, btnEliminar);
-
-        item.getChildren().addAll(lblTitulo, lblMensaje, acciones);
-        return item;
-    }
-
-    private void marcarNotificacion(NotificacionFX notificacion) {
-        try {
-            if (notificacion.getLeida()) {
-                // Si está leída, marcarla como no leída
-                notificacionService.marcarComoNoLeida(notificacion.getIdNotificacion());
-            } else {
-                // Si no está leída, marcarla como leída
-                notificacionService.marcarComoLeida(notificacion.getIdNotificacion());
-            }
-
-            // Actualizar inmediatamente la lista y el contador
-            actualizarDespuesDeAccion();
-
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo actualizar la notificación: " + e.getMessage());
-        }
-    }
-
-    private void eliminarNotificacion(NotificacionFX notificacion) {
-        try {
-            notificacionService.eliminarNotificacion(notificacion.getIdNotificacion());
-
-            // Actualizar inmediatamente la lista y el contador
-            actualizarDespuesDeAccion();
-
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo eliminar la notificación: " + e.getMessage());
-        }
+        System.out.println("MenuPrincipalControllerFX.initialize() completado (sin configuración de stage ni carga de módulo inicial aquí).");
     }
 
     /**
-     * Método común para actualizar después de una acción (eliminar o marcar)
+     * Inicializa el controlador del sidebar con todas las referencias FXML necesarias.
      */
-    private void actualizarDespuesDeAccion() {
-        // Actualizar el contador de notificaciones
-        actualizarNotificaciones();
+    private void inicializarSidebar() {
+        // Crear el controlador del sidebar con todas las referencias FXML
+        sidebarController = new SidebarController(
+            sidePanelVBox, toggleIcon, btnInicio,
+            lblInicio, lblVender, lblReporteVentas, lblInventario, 
+            lblConsulta, lblCreditoClientes, lblMasVendido, 
+            lblEntradasSalidas, lblGarantiasServicios, lblConfigurar
+        );
+        
+        // Inicializar el controlador
+        sidebarController.initialize();
+    }
 
-        // Recargar la lista de notificaciones
-        cargarNotificaciones();
+    /**
+     * Inicializa el controlador de notificaciones.
+     */
+    private void inicializarNotificaciones() {
+        // Crear el controlador de notificaciones
+        notificacionController = new NotificacionController(
+            notificacionService, 
+            btnNotificaciones, 
+            mensaje -> mostrarAlerta(Alert.AlertType.WARNING, "Notificaciones", mensaje)
+        );
+    }
 
-        // Actualizar el popup si está visible
-        if (notificacionesPopup != null && notificacionesPopup.isShowing()) {
-            notificacionesPopup.hide();
-            mostrarPopupNotificaciones();
+    /**
+     * Inicializa el controlador de caja con el patrón de delegación.
+     */
+    private void inicializarCaja() {
+        // Crear el controlador de caja
+        cajaController = new CajaController();
+        
+        // Inicializar el controlador con todas las referencias FXML y el callback de alertas
+        cajaController.inicializar(
+            cajaService,
+            btnCaja,
+            lblDineroInicial,
+            lblTotalEsperadoCaja,
+            lblTotalVentas,
+            lblProductosVendidos,
+            this::mostrarAlerta // Callback para mostrar alertas
+        );
+        
+        // Cargar información inicial de la caja
+        cajaController.cargarInformacionCajaAbierta();
+        
+        // Configurar acción del botón de caja
+        btnCaja.setOnAction(cajaController::handleBotonCaja);
+    }
+
+    /**
+     * Inicializa el controlador de navegación con el patrón de delegación.
+     */
+    private void inicializarNavegacion() {
+        // Crear el controlador de navegación con todas las referencias necesarias
+        navigationController = new NavigationController(
+            modulosDinamicos,
+            controllerFactory,
+            sidebarController,
+            cajaController,
+            (tipo, mensaje) -> mostrarAlerta(tipo, "Navegación", mensaje), // Callback para mostrar alertas
+            btnInicio,
+            btnVender,
+            btnInventario,
+            btnCreditoClientes,
+            btnEntradasSalidas,
+            btnConfiguracion,
+            btnReporteVentas
+        );
+    }
+
+    public void postDisplaySetup(Stage stage) {
+        // Este método es llamado por LoginControllerFX DESPUÉS de que el stage se ha mostrado.
+        // Se asume que se llama desde el FX Application Thread.
+        if (stage == null) {
+            System.err.println("MenuPrincipalControllerFX.postDisplaySetup: Error - Stage es null.");
+            mostrarAlerta(Alert.AlertType.ERROR, "Error Interno", "No se pudo configurar la ventana principal (stage nulo).");
+            return;
         }
-    }
 
-    public void detenerTimers() {
-        if (timerNotificaciones != null) {
-            timerNotificaciones.cancel();
-        }
-    }
+        // Evitar reconfigurar si este controlador ya configuró esta instancia de stage.
+        // Útil si este método pudiera ser llamado múltiples veces por error.
+        if (this.equals(stage.getUserData())) {
+             System.out.println("MenuPrincipalControllerFX.postDisplaySetup: Stage ya fue configurada por este controlador. Se procederá a cargar/refrescar el módulo de inicio.");
+        } else {
+            System.out.println("MenuPrincipalControllerFX.postDisplaySetup: Configurando Stage por primera vez para este controlador.");
+            stage.setResizable(true);
+            // La maximización debe ocurrir después de que la escena esté en el stage y el stage sea visible.
+            // LoginControllerFX llama a stage.show() antes de postDisplaySetup.
+            // Si el stage ya está maximizado por LoginControllerFX, esto es redundante pero inofensivo.
+            // Si no, esto lo asegura.
+            stage.setMaximized(true);
 
-    private void inicializarContadorNotificaciones() {
-        contadorNotificaciones = new Label("0");
-        contadorNotificaciones.setStyle("-fx-background-color: red; -fx-text-fill: white; " +
-                "-fx-background-radius: 10; -fx-padding: 2 6 2 6; -fx-font-size: 10px;");
-        contadorNotificaciones.setVisible(false);
-
-        // Añadir el contador al botón de notificaciones
-        StackPane stackPane = new StackPane();
-        stackPane.getChildren().addAll(btnNotificaciones.getGraphic(), contadorNotificaciones);
-        StackPane.setAlignment(contadorNotificaciones, Pos.TOP_RIGHT);
-        btnNotificaciones.setGraphic(stackPane);
-
-        // Cargar las notificaciones iniciales
-        actualizarNotificaciones();
-    }
-
-    private void programarActualizacionNotificaciones() {
-        // Actualizar cada 60 segundos (ajustable según necesidades)
-        timerNotificaciones = new Timer(true);
-        timerNotificaciones.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> actualizarNotificaciones());
-            }
-        }, 0, 60000);
-    }
-
-    private void actualizarNotificaciones() {
-        try {
-            int cantidad = notificacionService.contarNotificacionesNoLeidas();
-            Platform.runLater(() -> {
-                contadorNotificaciones.setText(String.valueOf(cantidad));
-                contadorNotificaciones.setVisible(cantidad > 0);
+            stage.setOnCloseRequest(event -> {
+                event.consume(); // Prevenir cierre automático
+                confirmarCierre(); // Método existente para diálogo de confirmación
             });
+            stage.setUserData(this); // Guardar referencia de este controlador en el stage.
+        }
 
-            // Actualizar la lista de notificaciones si el popup está visible
-            if (notificacionesPopup != null && notificacionesPopup.isShowing()) {
-                cargarNotificaciones();
+        // Cargar el contenido inicial usando el controlador de navegación delegado
+        try {
+            if (navigationController != null) {
+                navigationController.cargarModuloInicioInicial();
+                System.out.println("MenuPrincipalControllerFX.postDisplaySetup: Llamada a navigationController.cargarModuloInicioInicial() realizada.");
+            } else {
+                System.err.println("NavigationController no inicializado, no se puede cargar módulo inicial");
+                mostrarAlerta(Alert.AlertType.ERROR, "Error de Navegación", "No se pudo inicializar el controlador de navegación");
             }
         } catch (Exception e) {
-            System.err.println("Error al actualizar notificaciones: " + e.getMessage());
+            System.err.println("MenuPrincipalControllerFX.postDisplaySetup: Error al iniciar la carga del módulo de inicio: " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "Error de Carga", "No se pudo iniciar la carga del módulo de inicio: " + e.getMessage());
         }
     }
 
-    private void cargarNotificaciones() {
-        try {
-            List<NotificacionFX> notificaciones = notificacionService.obtenerNotificaciones();
-            listaNotificaciones.setAll(notificaciones);
-        } catch (Exception e) {
-            System.err.println("Error al cargar notificaciones: " + e.getMessage());
-            // Vaciar la lista en caso de error para evitar acceder a elementos eliminados
-            listaNotificaciones.clear();
+    @FXML
+    void irNotificaciones(ActionEvent event) {
+        if (notificacionController != null) {
+            notificacionController.irNotificaciones(event);
         }
     }
-
     /**
      * Muestra diálogo de confirmación antes de cerrar la aplicación
      */
@@ -406,24 +341,34 @@ public class MenuPrincipalControllerFX implements Initializable {
     }
 
     /**
-     * Carga un módulo específico en el panel central
+     * Carga un módulo específico en el panel central usando el NavigationController.
+     * Método público para mantener compatibilidad con otros controladores que necesiten
+     * cargar módulos dinámicamente.
+     * 
      * @param rutaFXML Ruta del archivo FXML a cargar
      * @throws IOException Si hay un error al cargar el módulo
      */
     public void cargarModuloEnPanel(String rutaFXML) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
-        loader.setControllerFactory(springContext::getBean);
-        Parent root = loader.load();
-
-        // Limpiar el panel y agregar el nuevo módulo
-        modulosDinamicos.getChildren().clear();
-        modulosDinamicos.getChildren().add(root);
+        if (navigationController != null) {
+            navigationController.cargarModuloEnPanel(rutaFXML);
+        } else {
+            throw new IllegalStateException("NavigationController no está inicializado");
+        }
     }
+
+
+
+
 
     @FXML
     void cerrarSesion() {
         try {
-            detenerTimers();
+            // Limpiar recursos del controlador de notificaciones
+            if (notificacionController != null) notificacionController.cleanup();
+            // Limpiar recursos del sidebar
+            if (sidebarController != null) sidebarController.cleanup();
+            // Limpiar recursos del navegador
+            if (navigationController != null) navigationController.cleanup();
 
             // Limpiar datos de sesión
             LoginServiceImplFX.cerrarSesion();
@@ -441,9 +386,13 @@ public class MenuPrincipalControllerFX implements Initializable {
             // Centrar en pantalla
             stage.centerOnScreen();
 
-            // Cargar el login
+            // Cargar el login USANDO LA FACTORY
             FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.LOGIN_FXML));
-            loader.setControllerFactory(springContext::getBean);
+            if (this.controllerFactory != null) { // Asegurarse que la factory existe
+                loader.setControllerFactory(this.controllerFactory);
+            } else {
+                System.err.println("Advertencia: No se pudo obtener la ControllerFactory al cerrar sesión. El login podría no tener dependencias inyectadas.");
+            }
             Parent root = loader.load();
 
             Scene scene = new Scene(root);
@@ -452,46 +401,44 @@ public class MenuPrincipalControllerFX implements Initializable {
         } catch (Exception e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cerrar la sesión: " + e.getMessage());
+            e.printStackTrace(); // Print stack trace for debugging
         }
     }
 
     @FXML
     void volverAlInicio() {
-        // Limpiar el panel central para mostrar la página de inicio
-        modulosDinamicos.getChildren().clear();
+        if (navigationController != null) {
+            navigationController.volverAlInicio();
+        }
+    }
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(PathsFXML.INICIO_FXML));
-            loader.setControllerFactory(springContext::getBean);
-            Parent root = loader.load();
-            modulosDinamicos.getChildren().add(root);
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar la página de inicio: " + e.getMessage());
+
+
+    @FXML
+    void irVender() {
+        if (navigationController != null) {
+            navigationController.irVender();
         }
     }
 
     @FXML
-    void irVender() {
-        try {
-            if (PermisosUIUtil.verificarPermisoConAlerta("crear_venta")) {
-                cargarModuloEnPanel(PathsFXML.VENDER_FXML);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el módulo de ventas: " + e.getMessage());
+    void irReporteVentas() {
+        if (navigationController != null) {
+            navigationController.irReporteVentas();
         }
     }
 
     @FXML
     void irModuloInventario() {
-        try {
-            if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_inventario")) {
-                cargarModuloEnPanel(PathsFXML.MOD_INVENTARIO);
-            }
-        } catch (IOException e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error",
-                    "No se pudo cargar el módulo de inventario: " + e.getMessage());
+        if (navigationController != null) {
+            navigationController.irModuloInventario();
+        }
+    }
+
+    @FXML
+    void irModuloClientes(){
+        if (navigationController != null) {
+            navigationController.irModuloClientes();
         }
     }
 
@@ -499,7 +446,9 @@ public class MenuPrincipalControllerFX implements Initializable {
     void irModuloEntradasSalidas() {
         try {
             if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_EntradasSalidas")) {
-                cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
+                if (navigationController != null) {
+                    navigationController.cargarModuloEnPanel(PathsFXML.CONTROLSTOCK_FXML);
+                }
             }
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
@@ -511,11 +460,48 @@ public class MenuPrincipalControllerFX implements Initializable {
     void irModuloConfiguracion() {
         try {
             if (PermisosUIUtil.verificarPermisoConAlerta("acces_mod_configurar")) {
-                cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+                if (navigationController != null) {
+                    navigationController.cargarModuloEnPanel(PathsFXML.CONFIGURACION_FXML);
+                }
             }
         } catch (IOException e) {
             mostrarAlerta(Alert.AlertType.ERROR, "Error",
                     "No se pudo cargar el módulo de configuración: " + e.getMessage());
+        }
+    }
+
+    // Métodos @FXML para delegar al sidebar controller
+    
+    /**
+     * Maneja el evento de toggle (alternar) de la barra lateral.
+     * Delega la operación al controlador del sidebar.
+     */
+    @FXML
+    void handleToggleSidebar(ActionEvent event) {
+        if (sidebarController != null) {
+            sidebarController.handleToggleSidebar(event);
+        }
+    }
+    
+    /**
+     * Maneja el evento cuando el mouse entra en la barra lateral.
+     * Delega la operación al controlador del sidebar.
+     */
+    @FXML
+    void handleSidePanelMouseEnter(MouseEvent event) {
+        if (sidebarController != null) {
+            sidebarController.handleSidePanelMouseEnter(event);
+        }
+    }
+    
+    /**
+     * Maneja el evento cuando el mouse sale de la barra lateral.
+     * Delega la operación al controlador del sidebar.
+     */
+    @FXML
+    void handleSidePanelMouseExit(MouseEvent event) {
+        if (sidebarController != null) {
+            sidebarController.handleSidePanelMouseExit(event);
         }
     }
 

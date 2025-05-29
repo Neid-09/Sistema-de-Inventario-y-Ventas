@@ -1,0 +1,270 @@
+/* src/main/resources/styles/menu-styles.css */
+
+/* Estilo base para los botones de módulo */
+.module-button {
+    -fx-background-color: transparent; /* Fondo transparente por defecto */
+    -fx-text-fill: white; /* Texto blanco */
+    -fx-font-size: 13px; /* Tamaño de fuente */
+    -fx-alignment: CENTER_LEFT; /* Alinear contenido a la izquierda */
+    -fx-padding: 8px 12px; /* Padding interno (arriba/abajo, izquierda/derecha) */
+    -fx-background-radius: 5px; /* Bordes redondeados */
+    -fx-border-radius: 5px;
+    -fx-cursor: hand; /* Cursor de mano al pasar por encima */
+    -fx-pref-height: 40px; /* Altura fija */
+    -fx-pref-width: 100%; /* Ocupar todo el ancho disponible */
+    -fx-graphic-text-gap: 10px; /* Espacio entre icono y texto */
+}
+
+/* Estilo para el texto (Label) dentro de los botones de módulo */
+.module-button .label {
+    -fx-text-fill: white; /* Asegurar que el texto sea blanco */
+    -fx-font-weight: normal; /* Fuente normal */
+}
+
+/* Efecto al pasar el mouse por encima (hover) */
+.module-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1); /* Fondo blanco semitransparente */
+}
+
+/* Efecto al presionar el botón */
+.module-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Fondo un poco más opaco */
+}
+
+/* --- Estilo para el botón activo --- */
+.module-button-active,
+.inicio-button-active /* Aplicar a ambos tipos si usan clases distintas */ {
+    -fx-background-color: rgba(255, 255, 255, 0.2); /* Fondo más destacado */
+    /* Puedes añadir más estilos, como un borde izquierdo */
+    /* -fx-border-color: white transparent transparent transparent; */
+    /* -fx-border-width: 0 0 0 3; */
+}
+
+/* Ajustar hover para el botón activo para que no sea menos visible */
+.module-button-active:hover,
+.inicio-button-active:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* --- Estilo para el botón de Inicio --- */
+/* Aplicar los mismos estilos base que module-button */
+.inicio-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 13px; /* Mismo tamaño de fuente que otros módulos */
+    -fx-alignment: CENTER_LEFT; /* Alinear igual que otros módulos */
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-cursor: hand;
+    -fx-pref-height: 40px;
+    -fx-pref-width: 100%;
+    -fx-graphic-text-gap: 10px; /* Mismo espacio icono-texto */
+}
+
+/* Estilo para el texto (Label) dentro del botón de Inicio */
+.inicio-button .label {
+    -fx-text-fill: white; /* Asegurar texto blanco */
+    -fx-font-weight: normal;
+}
+
+/* Mismos efectos hover/pressed que module-button */
+.inicio-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.inicio-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Estilo para el botón de Toggle Sidebar --- */
+.toggle-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+    -fx-background-radius: 50%; /* Hacerlo circular */
+    -fx-pref-width: 30px; /* Tamaño fijo */
+    -fx-pref-height: 30px;
+    -fx-alignment: CENTER;
+}
+
+.toggle-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Estilo para los Separadores --- */
+.sidebar-separator {
+    -fx-padding: 8px 0; /* Espacio vertical alrededor del separador */
+    -fx-max-width: 80%; /* Hacer la línea un poco más corta que el ancho */
+}
+
+.sidebar-separator .line {
+    -fx-border-color: rgba(255, 255, 255, 0.3); /* Color de la línea */
+    -fx-border-width: 1 0 0 0; /* Grosor y posición (línea superior) */
+}
+
+/* Estilo para el Tooltip (opcional, para mejorar apariencia) */
+.tooltip {
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+    -fx-font-size: 11px;
+}
+
+/* Nuevos estilos para la barra inferior */
+
+/* Estilo para el label del Rol */
+.rol-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #555555; /* Color de texto gris oscuro */
+}
+
+/* Estilo para el botón de Abrir/Cerrar Caja */
+.caja-button {
+    -fx-background-color: #4CAF50; /* Verde */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 15px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.caja-button:hover {
+    -fx-background-color: #45a049;
+}
+
+.caja-button:pressed {
+    -fx-background-color: #397d39;
+}
+
+/* Estilos para los labels de información de ventas */
+.info-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333; /* Color de texto oscuro */
+    -fx-font-weight: bold;
+}
+
+.info-value-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #0066cc; /* Color azul para los valores */
+}
+
+/* Estilos para la barra superior (perfil y notificaciones) */
+
+/* Estilo para el StackPane contenedor del icono y el contador - Si se usa en FXML, mantener */
+.notification-stack-pane {
+    -fx-alignment: center; /* Centrar el contenido del stack (icono y contador) */
+    -fx-padding: 0; /* Eliminar padding por defecto */
+}
+
+/* Estilo para el Label del contador de notificaciones (aplicado en Java) */
+.notification-count-label {
+    -fx-background-color: red;
+    -fx-background-radius: 10px; /* Hacerlo circular */
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 1px 5px; /* Ajustar padding para tamaño del círculo */
+    -fx-min-width: 18px; /* Asegurar tamaño mínimo */
+    -fx-alignment: center; /* Centrar el número */
+    -fx-translate-x: 9px; /* Mover a la derecha del icono */
+    -fx-translate-y: -9px; /* Mover hacia arriba del icono */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 1); /* Sombra sutil */
+}
+
+/* Estilo para el botón de Notificaciones */
+.alert-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent; /* Asegurar borde transparente por defecto */
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.alert-button:hover {
+    -fx-background-color: transparent; /* Asegurar fondo transparente al pasar el mouse */
+    -fx-border-color: transparent; /* Asegurar borde transparente al pasar el mouse */
+}
+
+.alert-button:pressed {
+    -fx-background-color: transparent; /* Asegurar fondo transparente al presionar */
+    -fx-border-color: transparent; /* Asegurar borde transparente al presionar */
+}
+
+/* Asegurar que el borde de foco sea transparente */
+.alert-button:focused {
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent; /* Opcional: puede ayudar dependiendo del tema */
+    -fx-background-color: transparent; /* Asegurar que no aparezca un fondo al enfocar */
+}
+
+.alert-button:focused:hover {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
+
+/* Estilo para el nombre de usuario */
+.user-name-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333; /* Color similar al del sistema de ventas */
+}
+
+/* Estilo para el label del Rol */
+.rol-label {
+    -fx-font-size: 10px; /* Reducir un poco el tamaño */
+    -fx-text-fill: #555555; /* Un gris un poco más oscuro */
+}
+
+/* Estilo para el botón Cerrar Sesión */
+.logout-button {
+    -fx-background-color: #f0f0f0; /* Gris muy claro */
+    -fx-text-fill: #555555; /* Texto gris oscuro */
+    -fx-font-size: 12px;
+    -fx-padding: 4px 8px; /* Ajustar padding */
+    -fx-background-radius: 4px;
+    -fx-border-color: #d0d0d0; /* Borde gris */
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1); /* Sombra más sutil */
+}
+
+.logout-button:hover {
+    -fx-background-color: #ff6666; /* Rojo claro */
+    -fx-text-fill: white; /* Texto blanco para contraste */
+    -fx-border-color: #ff4444; /* Borde rojo */
+}
+
+.logout-button:pressed {
+    -fx-background-color: #ff4444;
+    -fx-border-color: #ff2222;
+}
+
+/* Ajustar el espaciado en el HBox principal de la barra superior si es necesario */
+#topBar {
+    -fx-spacing: 20px; /* Ajustar espacio */
+    -fx-alignment: center_left; /* Mantener alineación a la izquierda para logo/título */
+}
+
+/* Ajustar alineación y espaciado del HBox contenedor de los elementos de la derecha */
+#topBar > HBox {
+     -fx-alignment: center_right;
+     -fx-spacing: 15px; /* Espacio entre notificaciones, perfil y cerrar sesión */
+}
+
+/* Ajustar alineación del HBox contenedor del perfil (icono, nombre, rol) */
+#topBar > HBox > HBox {
+    -fx-alignment: center_left;
+    -fx-spacing: 5px; /* Espacio entre icono y texto */
+}
+
+/* Ajustar alineación y espaciado del VBox contenedor del nombre y rol */
+#topBar > HBox > HBox > VBox {
+     -fx-alignment: center_left;
+     -fx-spacing: 0px; /* Espacio entre nombre y rol */
+}

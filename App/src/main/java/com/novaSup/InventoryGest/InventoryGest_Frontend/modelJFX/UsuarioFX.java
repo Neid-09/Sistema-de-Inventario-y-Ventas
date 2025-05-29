@@ -6,6 +6,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.BooleanProperty; // Importar BooleanProperty
+import javafx.beans.property.SimpleBooleanProperty; // Importar SimpleBooleanProperty
 
 public class UsuarioFX {
     private final IntegerProperty idUsuario;
@@ -14,6 +16,7 @@ public class UsuarioFX {
     private final StringProperty telefono;
     private final StringProperty contraseña;
     private final ObjectProperty<RolFX> rol;
+    private final BooleanProperty estado; // Nueva propiedad estado
 
     public UsuarioFX() {
         this.idUsuario = new SimpleIntegerProperty();
@@ -22,9 +25,11 @@ public class UsuarioFX {
         this.telefono = new SimpleStringProperty();
         this.contraseña = new SimpleStringProperty();
         this.rol = new SimpleObjectProperty<>();
+        this.estado = new SimpleBooleanProperty(); // Inicializar estado
     }
 
-    public UsuarioFX(Integer idUsuario, String nombre, String correo, String telefono, String contraseña, RolFX rol) {
+    // Constructor actualizado para incluir estado
+    public UsuarioFX(Integer idUsuario, String nombre, String correo, String telefono, String contraseña, RolFX rol, Boolean estado) {
         // Si idUsuario es null, inicializa la propiedad sin valor
         if (idUsuario == null) {
             this.idUsuario = new SimpleIntegerProperty();
@@ -37,6 +42,7 @@ public class UsuarioFX {
         this.telefono = new SimpleStringProperty(telefono);
         this.contraseña = new SimpleStringProperty(contraseña);
         this.rol = new SimpleObjectProperty<>(rol);
+        this.estado = new SimpleBooleanProperty(estado != null ? estado : false); // Inicializar estado, default a false si es null
     }
 
     // Getters y setters
@@ -110,6 +116,19 @@ public class UsuarioFX {
 
     public void setRol(RolFX rol) {
         this.rol.set(rol);
+    }
+
+    // Getters y setters para estado
+    public boolean isEstado() {
+        return estado.get();
+    }
+
+    public BooleanProperty estadoProperty() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado.set(estado);
     }
 
 }

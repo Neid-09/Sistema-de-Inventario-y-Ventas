@@ -3,24 +3,29 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" prefHeight="400" prefWidth="600" spacing="20" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ConfigurarControllerFX">
+<VBox alignment="CENTER" prefHeight="600" prefWidth="800" spacing="25" styleClass="root-pane" stylesheets="@../styles/modulo-configurar-styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.ConfigurarControllerFX">
 
     <padding>
-        <Insets bottom="30" left="30" right="30" top="30" />
+        <Insets bottom="40" left="50" right="50" top="40" />
     </padding>
 
-    <Label style="-fx-text-fill: #286299;" text="Configuración del sistema">
+    <Label styleClass="title-label" text="Configuración del Sistema">
         <font>
-            <Font size="22.0" />
+            <Font name="System Bold" size="22.0" />
         </font>
     </Label>
 
-    <Button fx:id="btnGestionarUsuarios" onAction="#irGestionUsuarios" prefWidth="200" text="Gestionar Usuarios" />
-   <Button fx:id="btnConfiguracionesGlobales" onAction="#irConfiguracionesGlobales" prefWidth="200" text="Configuraciones Globales" />
-    <Button fx:id="btnGestionarPermisosRoles" onAction="#irGestionPermisosRoles" prefWidth="200" text="Gestionar Permisos y Roles" />
+    <Button fx:id="btnGestionarUsuarios" onAction="#irGestionUsuarios" styleClass="config-button" text="Gestionar Usuarios" />
+    <Button fx:id="btnConfiguracionesGlobales" onAction="#irConfiguracionesGlobales" styleClass="config-button" text="Configuraciones Globales" />
+    <Button fx:id="btnGestionarPermisosRoles" onAction="#irGestionPermisosRoles" styleClass="config-button" text="Gestionar Permisos y Roles" />
+    <Button fx:id="btnConfigurarImpuestos" onAction="#irConfigurarImpuestos" styleClass="config-button" text="Configurar Impuestos" />
 
-    <Label style="-fx-text-fill: gray; -fx-font-style: italic;" text="⚠️ Esta sección está en desarrollo..." />
+    <Separator prefWidth="200.0" />
+
+    <Label styleClass="info-label" text="Módulo de configuración para administradores del sistema." />
+    <Label styleClass="info-label" text="⚠️ Algunas funcionalidades pueden requerir permisos específicos." />
 </VBox>

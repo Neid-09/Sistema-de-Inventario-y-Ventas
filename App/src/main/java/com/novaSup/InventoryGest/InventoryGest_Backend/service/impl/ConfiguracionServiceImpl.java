@@ -2,8 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Configuracion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ConfiguracionRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ConfiguracionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ConfiguracionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,8 +11,11 @@ import java.util.Optional;
 @Service
 public class ConfiguracionServiceImpl implements ConfiguracionService {
 
-    @Autowired
-    private ConfiguracionRepository configuracionRepository;
+    private final ConfiguracionRepository configuracionRepository;
+
+    public ConfiguracionServiceImpl(ConfiguracionRepository configuracionRepository) {
+        this.configuracionRepository = configuracionRepository;
+    }
 
     @Override
     public List<Configuracion> listarConfiguraciones() {

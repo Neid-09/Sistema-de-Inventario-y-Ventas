@@ -1,9 +1,9 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.MenuPrincipalControllerFX;
-import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.impl.LoginServiceImplFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,12 +11,10 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-@Component
 public class PermisosRolesCtrlFX implements Initializable {
 
     @FXML
@@ -30,6 +28,10 @@ public class PermisosRolesCtrlFX implements Initializable {
 
     @FXML
     private Button btnPermisosUsuarios;
+
+    // Constructor para inyección de dependencias (remove unused services)
+    public PermisosRolesCtrlFX() {
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

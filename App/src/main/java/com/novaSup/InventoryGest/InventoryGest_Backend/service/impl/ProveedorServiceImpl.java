@@ -3,8 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Proveedor;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProveedorRepository;
-import com.novaSup.InventoryGest.InventoryGest_Backend.service.ProveedorService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProveedorService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +12,11 @@ import java.util.Optional;
 @Service
 public class ProveedorServiceImpl implements ProveedorService {
 
-    @Autowired
-    private ProveedorRepository proveedorRepository;
+    private final ProveedorRepository proveedorRepository;
+
+    public ProveedorServiceImpl(ProveedorRepository proveedorRepository) {
+        this.proveedorRepository = proveedorRepository;
+    }
 
     @Override
     public List<Proveedor> obtenerTodos() {
