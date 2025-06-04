@@ -4,6 +4,7 @@ import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoVentaInfo;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IFacturaService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IImpuestoAplicableServiceFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVendedorService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
@@ -31,6 +32,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +47,7 @@ public class VenderControllerFX implements Initializable {
     private final IClienteService clienteService;
     private final IFacturaService facturaService;
     private final IVendedorService vendedorService;
+    private final IImpuestoAplicableServiceFX impuestoAplicableService;
 
     private Runnable onVentaExitosaCallback;
 
@@ -90,6 +94,8 @@ public class VenderControllerFX implements Initializable {
     @FXML
     private TableColumn<ProductoFX, Integer> colCantidad;
     @FXML
+    private TableColumn<ProductoFX, String> colImpuestos;
+    @FXML
     private TableColumn<ProductoFX, String> colSubtotal;
     @FXML
     private TableColumn<ProductoFX, Void> colAcciones;
@@ -97,12 +103,13 @@ public class VenderControllerFX implements Initializable {
     private List<ProductoFX> todosLosProductos;
     private NumberFormat formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CO"));
 
-    public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService, IClienteService clienteService, IFacturaService facturaService, IVendedorService vendedorService) {
+    public VenderControllerFX(IProductoService productoService, IVentaSerivice ventaService, IClienteService clienteService, IFacturaService facturaService, IVendedorService vendedorService, IImpuestoAplicableServiceFX impuestoAplicableService) {
         this.clienteService = clienteService;
         this.productoService = productoService;
         this.ventaService = ventaService;
         this.facturaService = facturaService;
         this.vendedorService = vendedorService;
+        this.impuestoAplicableService = impuestoAplicableService;
     }
 
     @Override
@@ -217,12 +224,13 @@ public class VenderControllerFX implements Initializable {
         tablaProductos.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         
         // Configurar el ancho de las columnas para que se ajusten al ancho de la tabla
-        colCodigo.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
-        colProducto.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.30));
-        colPrecio.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
-        colCantidad.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
-        colSubtotal.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.15));
-        colAcciones.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.10));
+        colCodigo.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.12));
+        colProducto.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.25));
+        colPrecio.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.13));
+        colCantidad.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.13));
+        colImpuestos.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.12));
+        colSubtotal.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.13));
+        colAcciones.prefWidthProperty().bind(tablaProductos.widthProperty().multiply(0.12));
         
         // Configurar columna de cantidad con control personalizado
         colCantidad.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getStock()));
@@ -276,6 +284,13 @@ public class VenderControllerFX implements Initializable {
                     setGraphic(cantidadControl);
                 }
             }
+        });
+        
+        // Configurar columna de impuestos
+        colImpuestos.setCellValueFactory(cellData -> {
+            ProductoFX producto = cellData.getValue();
+            BigDecimal montoImpuestos = calcularImpuestosProducto(producto);
+            return new javafx.beans.property.SimpleStringProperty(formatoMoneda.format(montoImpuestos));
         });
         
         // Configurar columna de subtotal
@@ -589,6 +604,7 @@ public class VenderControllerFX implements Initializable {
 
     private void actualizarTotalCarrito() {
         BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal totalImpuestos = BigDecimal.ZERO;
         int cantidadItems = 0;
 
         // Calcular totales basados en los productos de la tabla
@@ -598,20 +614,68 @@ public class VenderControllerFX implements Initializable {
             BigDecimal subtotalProducto = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
             subtotal = subtotal.add(subtotalProducto);
             cantidadItems += cantidad;
+            
+            // Calcular impuestos dinámicos para cada producto
+            BigDecimal impuestosProducto = calcularImpuestosProducto(producto);
+            totalImpuestos = totalImpuestos.add(impuestosProducto);
         }
 
-        // Calcular IVA (12%)
-        BigDecimal iva = subtotal.multiply(new BigDecimal("0.12")).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal total = subtotal.add(iva);
+        BigDecimal total = subtotal.add(totalImpuestos);
 
         // Actualizar etiquetas
         lblSubtotal.setText(formatoMoneda.format(subtotal));
-        lblIVA.setText(formatoMoneda.format(iva));
+        lblIVA.setText(formatoMoneda.format(totalImpuestos));
         lblTotalGeneral.setText(formatoMoneda.format(total));
         lblItemsCarrito.setText(cantidadItems + " productos en la venta");
 
         // Refrescar la tabla
         tablaProductos.refresh();
+    }
+
+    /**
+     * Calcula los impuestos aplicables para un producto específico
+     * @param producto Producto para el cual calcular impuestos
+     * @return Monto total de impuestos para el producto
+     */
+    private BigDecimal calcularImpuestosProducto(ProductoFX producto) {
+        try {
+            // Obtener la fecha actual
+            String fechaActual = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            
+            // Obtener impuestos aplicables para el producto
+            var impuestosAplicables = impuestoAplicableService.obtenerImpuestosPorProductoYFecha(
+                producto.getIdProducto(), fechaActual);
+            
+            BigDecimal subtotalProducto = producto.getPrecioVenta().multiply(BigDecimal.valueOf(producto.getStock()));
+            BigDecimal totalImpuestos = BigDecimal.ZERO;
+            
+            // Calcular el total de impuestos diferenciando entre porcentuales y fijos
+            for (var impuesto : impuestosAplicables) {
+                if (impuesto.getTasaImpuesto() != null && 
+                    impuesto.getTasaImpuesto().getTipoImpuesto() != null) {
+                    
+                    BigDecimal tasa = BigDecimal.valueOf(impuesto.getTasaImpuesto().getTasa());
+                    BigDecimal montoImpuesto;
+                    
+                    // Verificar si el impuesto es porcentual o fijo
+                    if (impuesto.getTasaImpuesto().getTipoImpuesto().isEsPorcentual()) {
+                        // Impuesto porcentual: (subtotal * tasa) / 100
+                        montoImpuesto = subtotalProducto.multiply(tasa.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+                    } else {
+                        // Impuesto fijo: aplicar la tasa directamente
+                        montoImpuesto = tasa;
+                    }
+                    
+                    montoImpuesto = montoImpuesto.setScale(2, RoundingMode.HALF_UP);
+                    totalImpuestos = totalImpuestos.add(montoImpuesto);
+                }
+            }
+            
+            return totalImpuestos;
+        } catch (Exception e) {
+            // En caso de error, devolver 0
+            return BigDecimal.ZERO;
+        }
     }
 
     private void mostrarError(String titulo, String mensaje) {
@@ -691,12 +755,20 @@ public class VenderControllerFX implements Initializable {
             // para que ProcesarVentaDialogController pueda acceder a él
             dialogPane.getScene().getWindow().setUserData(dialog);
             
-            // Calcular el total de la venta para mostrar en el diálogo
-            BigDecimal total = BigDecimal.ZERO;
+            // Calcular el total de la venta para mostrar en el diálogo (incluyendo impuestos dinámicos)
+            BigDecimal subtotal = BigDecimal.ZERO;
+            BigDecimal totalImpuestos = BigDecimal.ZERO;
+            
             for (ProductoFX producto : tablaProductos.getItems()) {
-                BigDecimal subtotal = producto.getPrecioVenta().multiply(new BigDecimal(producto.getStock()));
-                total = total.add(subtotal);
+                BigDecimal subtotalProducto = producto.getPrecioVenta().multiply(new BigDecimal(producto.getStock()));
+                subtotal = subtotal.add(subtotalProducto);
+                
+                // Calcular impuestos dinámicos para cada producto
+                BigDecimal impuestosProducto = calcularImpuestosProducto(producto);
+                totalImpuestos = totalImpuestos.add(impuestosProducto);
             }
+            
+            BigDecimal total = subtotal.add(totalImpuestos);
             
             // Aquí se inyectan los servicios necesarios para el controlador del diálogo
             /* 
