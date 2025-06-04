@@ -1,0 +1,346 @@
+/* Estilos para el módulo de inventario */
+
+/* Contenedor principal del inventario */
+.inventory-main {
+    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+}
+
+/* Estilo para los elementos del menú */
+.menu-item {
+    -fx-padding: 5px;
+    -fx-alignment: center;
+}
+
+/* Estilo base para los botones principales del menú */
+.menu-button {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 12px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 6, 0, 0, 2);
+    /* Tamaños base para pantallas medianas */
+    -fx-pref-width: 100px;
+    -fx-pref-height: 100px;
+    -fx-min-width: 80px;
+    -fx-min-height: 80px;
+    -fx-max-width: 150px;
+    -fx-max-height: 150px;
+}
+
+/* Efecto hover para botones principales */
+.menu-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #083671, #0a4e8a);
+    -fx-border-color: #083671;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(8,54,113,0.3), 12, 0, 0, 4);
+}
+
+/* Efecto pressed para botones principales */
+.menu-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #062851, #083671);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+    -fx-effect: dropshadow(gaussian, rgba(8,54,113,0.4), 6, 0, 0, 1);
+}
+
+/* Estilo para botones alternativos (más pequeños) */
+.menu-button-alt {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    -fx-border-color: #6c757d;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 1);
+    /* Tamaños base para pantallas medianas */
+    -fx-pref-width: 80px;
+    -fx-pref-height: 80px;
+    -fx-min-width: 60px;
+    -fx-min-height: 60px;
+    -fx-max-width: 120px;
+    -fx-max-height: 120px;
+}
+
+/* Efecto hover para botones alternativos */
+.menu-button-alt:hover {
+    -fx-background-color: linear-gradient(to bottom, #6c757d, #495057);
+    -fx-border-color: #495057;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(108,117,125,0.3), 10, 0, 0, 3);
+}
+
+/* Efecto pressed para botones alternativos */
+.menu-button-alt:pressed {
+    -fx-background-color: linear-gradient(to bottom, #495057, #343a40);
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+    -fx-effect: dropshadow(gaussian, rgba(108,117,125,0.4), 4, 0, 0, 1);
+}
+
+/* Estilos para las etiquetas de los menús */
+.menu-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+    -fx-padding: 4px 0 0 0;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* Estilos para los iconos principales */
+.main-icon {
+    -fx-fit-height: 50px;
+    -fx-fit-width: 50px;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+}
+
+/* Estilos para los iconos alternativos */
+.alt-icon {
+    -fx-fit-height: 40px;
+    -fx-fit-width: 40px;
+    -fx-preserve-ratio: true;
+    -fx-smooth: true;
+}
+
+/* Estilo para encabezados de sección */
+.section-header {
+    -fx-text-fill: #495057;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 0;
+}
+
+/* Estilo para el separator */
+.separator {
+    -fx-padding: 8px 0;
+}
+
+.separator .line {
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* Animaciones suaves para las transiciones */
+.menu-button, .menu-button-alt {
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* Estilo para el área de estado en la parte inferior */
+.status-area {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 6px;
+}
+
+/* Estilo para el label de estado */
+#lblStatus {
+    -fx-font-size: 10px;
+    -fx-text-fill: #6c757d;
+    -fx-font-style: italic;
+}
+
+/* Responsive design - Pantallas pequeñas (hasta 600px) */
+@media screen and (max-width: 600px) {
+    .menu-button {
+        -fx-pref-width: 70px;
+        -fx-pref-height: 70px;
+        -fx-min-width: 60px;
+        -fx-min-height: 60px;
+        -fx-max-width: 80px;
+        -fx-max-height: 80px;
+        -fx-padding: 8px;
+    }
+    
+    .menu-button-alt {
+        -fx-pref-width: 55px;
+        -fx-pref-height: 55px;
+        -fx-min-width: 45px;
+        -fx-min-height: 45px;
+        -fx-max-width: 65px;
+        -fx-max-height: 65px;
+        -fx-padding: 6px;
+    }
+    
+    .main-icon {
+        -fx-fit-height: 30px;
+        -fx-fit-width: 30px;
+    }
+    
+    .alt-icon {
+        -fx-fit-height: 25px;
+        -fx-fit-width: 25px;
+    }
+    
+    .button-container {
+        -fx-spacing: 15px;
+    }
+    
+    .center-container {
+        -fx-padding: 10px;
+        -fx-spacing: 8px;
+    }
+    
+    .menu-label {
+        -fx-font-size: 9px;
+    }
+    
+    .section-header {
+        -fx-font-size: 12px;
+    }
+}
+
+/* Responsive design - Pantallas medianas (601px - 1024px) */
+@media screen and (min-width: 601px) and (max-width: 1024px) {
+    .menu-button {
+        -fx-pref-width: 90px;
+        -fx-pref-height: 90px;
+        -fx-padding: 10px;
+    }
+    
+    .menu-button-alt {
+        -fx-pref-width: 70px;
+        -fx-pref-height: 70px;
+        -fx-padding: 8px;
+    }
+    
+    .main-icon {
+        -fx-fit-height: 45px;
+        -fx-fit-width: 45px;
+    }
+    
+    .alt-icon {
+        -fx-fit-height: 35px;
+        -fx-fit-width: 35px;
+    }
+    
+    .button-container {
+        -fx-spacing: 25px;
+    }
+    
+    .center-container {
+        -fx-padding: 20px;
+        -fx-spacing: 15px;
+    }
+    
+    .menu-label {
+        -fx-font-size: 11px;
+    }
+}
+
+/* Responsive design - Pantallas grandes (1025px - 1440px) */
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+    .menu-button {
+        -fx-pref-width: 120px;
+        -fx-pref-height: 120px;
+        -fx-padding: 15px;
+    }
+    
+    .menu-button-alt {
+        -fx-pref-width: 95px;
+        -fx-pref-height: 95px;
+        -fx-padding: 12px;
+    }
+    
+    .main-icon {
+        -fx-fit-height: 60px;
+        -fx-fit-width: 60px;
+    }
+    
+    .alt-icon {
+        -fx-fit-height: 50px;
+        -fx-fit-width: 50px;
+    }
+    
+    .button-container {
+        -fx-spacing: 35px;
+    }
+    
+    .center-container {
+        -fx-padding: 30px;
+        -fx-spacing: 20px;
+    }
+    
+    .menu-label {
+        -fx-font-size: 13px;
+    }
+    
+    .section-header {
+        -fx-font-size: 16px;
+    }
+}
+
+/* Responsive design - Pantallas extra grandes (más de 1440px) */
+@media screen and (min-width: 1441px) {
+    .menu-button {
+        -fx-pref-width: 140px;
+        -fx-pref-height: 140px;
+        -fx-padding: 18px;
+    }
+    
+    .menu-button-alt {
+        -fx-pref-width: 110px;
+        -fx-pref-height: 110px;
+        -fx-padding: 15px;
+    }
+    
+    .main-icon {
+        -fx-fit-height: 70px;
+        -fx-fit-width: 70px;
+    }
+    
+    .alt-icon {
+        -fx-fit-height: 60px;
+        -fx-fit-width: 60px;
+    }
+    
+    .button-container {
+        -fx-spacing: 45px;
+    }
+    
+    .center-container {
+        -fx-padding: 40px;
+        -fx-spacing: 25px;
+    }
+    
+    .menu-label {
+        -fx-font-size: 14px;
+    }
+    
+    .section-header {
+        -fx-font-size: 18px;
+    }
+}
+
+/* Estilo para el contenedor central */
+.center-container {
+    -fx-padding: 15px;
+    -fx-spacing: 12px;
+    -fx-alignment: center;
+}
+
+/* Estilo para los contenedores de botones */
+.button-container {
+    -fx-spacing: 20px;
+    -fx-alignment: center;
+}
+
+/* Estilo especial para cuando un botón está deshabilitado */
+.menu-button:disabled, .menu-button-alt:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+.menu-button:disabled:hover, .menu-button-alt:disabled:hover {
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    -fx-border-color: #dee2e6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+}
