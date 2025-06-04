@@ -33,28 +33,37 @@ import java.util.ResourceBundle;
 public class ProductoControllerFX implements Initializable {
 
     // Componentes FXML - campos de formulario
-    @FXML private TextField txtId;
-    @FXML private TextField txtCodigo;
-    @FXML private TextField txtNombre;
-    @FXML private TextArea txtDescripcion;
-    @FXML private TextField txtPrecioCosto;
-    @FXML private TextField txtPrecioVenta;
-    //@FXML private TextField txtStock;
-    @FXML private TextField txtStockMinimo;
-    @FXML private TextField txtStockMaximo;
-    @FXML private ComboBox<CategoriaFX> cmbCategoria;
-    @FXML private ComboBox<ProveedorFX> cmbProveedor;
-    @FXML private CheckBox chkEstado;
+    @FXML
+    private TextField txtId;
+    @FXML
+    private TextField txtCodigo;
+    @FXML
+    private TextField txtNombre;
+    @FXML
+    private TextArea txtDescripcion;
+    @FXML
+    private TextField txtPrecioCosto;
+    @FXML
+    private TextField txtPrecioVenta;
+    // @FXML private TextField txtStock;
+    @FXML
+    private TextField txtStockMinimo;
+    @FXML
+    private TextField txtStockMaximo;
+    @FXML
+    private ComboBox<CategoriaFX> cmbCategoria;
+    @FXML
+    private ComboBox<ProveedorFX> cmbProveedor;
+    @FXML
+    private CheckBox chkEstado;
 
-    //Componentes FXNL - Botones
+    // Componentes FXNL - Botones
     @FXML
     private Button btnActualizar;
     @FXML
     private Button btnAumentarStock;
     @FXML
     private Button btnAjusteStock;
-    @FXML
-    private Button btnDisminuirStock;
     @FXML
     private Button btnEliminar;
     @FXML
@@ -69,35 +78,45 @@ public class ProductoControllerFX implements Initializable {
     private Button btnVerDetalles;
 
     // Componentes FXML - filtros
-    @FXML private TextField txtFiltroNombre;
-    @FXML private TextField txtFiltroCodigo;
-    @FXML private ComboBox<CategoriaFX> cmbFiltroCategoria;
-    @FXML private ComboBox<String> cmbFiltroEstado;
+    @FXML
+    private TextField txtFiltroNombre;
+    @FXML
+    private TextField txtFiltroCodigo;
+    @FXML
+    private ComboBox<CategoriaFX> cmbFiltroCategoria;
+    @FXML
+    private ComboBox<String> cmbFiltroEstado;
 
     // Componentes FXML - tabla
-    @FXML private TableView<ProductoFX> tablaProductos;
-    @FXML private TableColumn<ProductoFX, String> colCodigo;
-    @FXML private TableColumn<ProductoFX, String> colNombre;
-    @FXML private TableColumn<ProductoFX, String> colCategoria;
-    @FXML private TableColumn<ProductoFX, BigDecimal> colPrecioVenta;
-    @FXML private TableColumn<ProductoFX, Integer> colStock;
-    @FXML private TableColumn<ProductoFX, String> colEstado;
-
-    // Componentes FXML - otros
-    @FXML private Label lblMensaje;
-    @FXML private TextField txtCantidadMovimiento;
+    @FXML
+    private TableView<ProductoFX> tablaProductos;
+    @FXML
+    private TableColumn<ProductoFX, String> colCodigo;
+    @FXML
+    private TableColumn<ProductoFX, String> colNombre;
+    @FXML
+    private TableColumn<ProductoFX, String> colCategoria;
+    @FXML
+    private TableColumn<ProductoFX, BigDecimal> colPrecioVenta;
+    @FXML
+    private TableColumn<ProductoFX, Integer> colStock;
+    @FXML
+    private TableColumn<ProductoFX, String> colEstado; // Componentes FXML - otros
+    @FXML
+    private Label lblMensaje;
 
     // Servicios - inyectados por constructor
     private final IProductoService productoService;
     private final ILoteService loteService;
     private final IInventarioService inventarioService;
-    
+
     // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
 
-    public ProductoControllerFX(IProductoService productoService, ILoteService loteService, IInventarioService inventarioService) {
+    public ProductoControllerFX(IProductoService productoService, ILoteService loteService,
+            IInventarioService inventarioService) {
         this.productoService = productoService;
         this.loteService = loteService;
         this.inventarioService = inventarioService;
@@ -118,18 +137,17 @@ public class ProductoControllerFX implements Initializable {
     }
 
     /**
-     * Método para configurar la visibilidad de elementos según los permisos del usuario
+     * Método para configurar la visibilidad de elementos según los permisos del
+     * usuario
      * Se debe llamar en el método initialize()
      */
     private void configurarPermisos() {
         // Configurar permisos para operaciones CRUD básicas
         PermisosUIUtil.configurarBoton(btnGuardar, "crear_producto");
         PermisosUIUtil.configurarBoton(btnActualizar, "editar_producto");
-        PermisosUIUtil.configurarBoton(btnEliminar, "eliminar_producto");
-
-        // Configurar permisos para operaciones de stock
+        PermisosUIUtil.configurarBoton(btnEliminar, "eliminar_producto"); // Configurar permisos para operaciones de
+                                                                          // stock
         PermisosUIUtil.configurarBoton(btnAumentarStock, "ajustar_stock");
-        PermisosUIUtil.configurarBoton(btnDisminuirStock, "ajustar_stock");
 
         // Configurar permisos para otras acciones
         PermisosUIUtil.configurarBoton(btnVerDetalles, "ver_productos");
@@ -215,30 +233,20 @@ public class ProductoControllerFX implements Initializable {
             }
         });
 
-
         txtStockMinimo.textProperty().addListener((obs, oldText, newText) -> {
             if (!newText.matches("\\d*")) {
                 txtStockMinimo.setText(oldText);
             }
         });
-
         txtStockMaximo.textProperty().addListener((obs, oldText, newText) -> {
             if (!newText.matches("\\d*")) {
                 txtStockMaximo.setText(oldText);
-            }
-        });
-
-        txtCantidadMovimiento.textProperty().addListener((obs, oldText, newText) -> {
-            if (!newText.matches("\\d*")) {
-                txtCantidadMovimiento.setText(oldText);
             }
         });
     }
 
     @FXML
     public void cargarDatos() {
-
-
 
         lblMensaje.setText("Cargando datos...");
 
@@ -254,7 +262,8 @@ public class ProductoControllerFX implements Initializable {
                 List<CategoriaFX> categorias = productoService.obtenerCategorias();
 
                 // Añadir opción "Sin categoría"
-                CategoriaFX sinCategoria = new CategoriaFX(null, "Sin categoría", "Productos sin categoría asignada", true, 0);
+                CategoriaFX sinCategoria = new CategoriaFX(null, "Sin categoría", "Productos sin categoría asignada",
+                        true, 0);
 
                 // Cargar proveedores
                 List<ProveedorFX> proveedores = productoService.obtenerProveedores();
@@ -310,7 +319,8 @@ public class ProductoControllerFX implements Initializable {
         String nombre = txtFiltroNombre.getText() != null ? txtFiltroNombre.getText().trim() : "";
         String codigo = txtFiltroCodigo.getText() != null ? txtFiltroCodigo.getText().trim() : "";
 
-        // Obtener categoría seleccionada - considerar nulo si es la opción "Todas las categorías"
+        // Obtener categoría seleccionada - considerar nulo si es la opción "Todas las
+        // categorías"
         CategoriaFX categoriaSeleccionada = cmbFiltroCategoria.getSelectionModel().getSelectedItem();
         Integer idCategoria = null;
         if (categoriaSeleccionada != null && categoriaSeleccionada.getIdCategoria() != null
@@ -379,7 +389,6 @@ public class ProductoControllerFX implements Initializable {
         chkEstado.setSelected(true);
         cmbCategoria.getSelectionModel().selectFirst(); // "Sin categoría"
         cmbProveedor.getSelectionModel().selectFirst(); // "Sin proveedor"
-        txtCantidadMovimiento.clear();
         tablaProductos.getSelectionModel().clearSelection();
         lblMensaje.setText("");
 
@@ -452,10 +461,10 @@ public class ProductoControllerFX implements Initializable {
             producto.setStock(0);
 
             // Otros campos
-            producto.setStockMinimo(txtStockMinimo.getText().isEmpty() ? 0 :
-                    Integer.parseInt(txtStockMinimo.getText()));
-            producto.setStockMaximo(txtStockMaximo.getText().isEmpty() ? 0 :
-                    Integer.parseInt(txtStockMaximo.getText()));
+            producto.setStockMinimo(
+                    txtStockMinimo.getText().isEmpty() ? 0 : Integer.parseInt(txtStockMinimo.getText()));
+            producto.setStockMaximo(
+                    txtStockMaximo.getText().isEmpty() ? 0 : Integer.parseInt(txtStockMaximo.getText()));
 
             // Categoría y proveedor
             if (cmbCategoria.getValue() != null) {
@@ -520,7 +529,8 @@ public class ProductoControllerFX implements Initializable {
             // Establecer el controlador en el FXMLLoader ANTES de cargar
             loader.setController(controller);
 
-            // Cargar el FXML. Ahora FXMLLoader usará la instancia del controlador proporcionada.
+            // Cargar el FXML. Ahora FXMLLoader usará la instancia del controlador
+            // proporcionada.
             Parent root = loader.load();
 
             // Inicializar el controlador con el producto DESPUÉS de cargar el FXML
@@ -562,7 +572,8 @@ public class ProductoControllerFX implements Initializable {
             // Validar que haya un producto seleccionado
             if (txtId.getText().isEmpty()) {
                 lblMensaje.setText("Debe seleccionar un producto para actualizar");
-                mostrarAlerta(Alert.AlertType.ERROR, "Error", "Selección requerida", "Debe seleccionar un producto para actualizar");
+                mostrarAlerta(Alert.AlertType.ERROR, "Error", "Selección requerida",
+                        "Debe seleccionar un producto para actualizar");
                 return;
             }
 
@@ -587,10 +598,10 @@ public class ProductoControllerFX implements Initializable {
             producto.setStock(productoActual.getStock());
 
             // Otros campos
-            producto.setStockMinimo(txtStockMinimo.getText().isEmpty() ? 0 :
-                    Integer.parseInt(txtStockMinimo.getText()));
-            producto.setStockMaximo(txtStockMaximo.getText().isEmpty() ? 0 :
-                    Integer.parseInt(txtStockMaximo.getText()));
+            producto.setStockMinimo(
+                    txtStockMinimo.getText().isEmpty() ? 0 : Integer.parseInt(txtStockMinimo.getText()));
+            producto.setStockMaximo(
+                    txtStockMaximo.getText().isEmpty() ? 0 : Integer.parseInt(txtStockMaximo.getText()));
 
             // Categoría y proveedor
             if (cmbCategoria.getValue() != null) {
@@ -609,12 +620,14 @@ public class ProductoControllerFX implements Initializable {
 
             // Mostrar mensaje de éxito y actualizar la vista
             lblMensaje.setText("Producto actualizado correctamente");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Operación completada", "Producto actualizado correctamente");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Operación completada",
+                    "Producto actualizado correctamente");
             cargarDatos();
 
         } catch (Exception e) {
             lblMensaje.setText("Error al actualizar el producto: " + e.getMessage());
-            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Ha ocurrido un error", "Error al actualizar el producto: " + e.getMessage());
+            mostrarAlerta(Alert.AlertType.ERROR, "Error", "Ha ocurrido un error",
+                    "Error al actualizar el producto: " + e.getMessage());
         }
     }
 
@@ -653,7 +666,8 @@ public class ProductoControllerFX implements Initializable {
                 } catch (Exception e) {
                     Platform.runLater(() -> {
                         lblMensaje.setText("Error al eliminar: " + e.getMessage());
-                        mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo eliminar el producto", e.getMessage());
+                        mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo eliminar el producto",
+                                e.getMessage());
                     });
                 }
             }).start();
@@ -699,67 +713,6 @@ public class ProductoControllerFX implements Initializable {
             mostrarAlerta(Alert.AlertType.ERROR, "Error", "Ha ocurrido un error",
                     "No se pudo cargar el producto para aumentar el stock: " + e.getMessage());
         }
-    }
-
-
-    //ESTE ESTA SOLO PARA TESTEAR QUE SE REDUZCA LOS PRODUCTOS, EL DISMINUIR SE VINCULARA YA CON EL MODULO DE VENDER
-    @FXML
-    public void disminuirStock() {
-        // Verificar permisos antes de proceder
-        if (!PermisosUIUtil.verificarPermisoConAlerta("ajustar_stock")) {
-            return;
-        }
-
-        if (txtId.getText().isEmpty()) {
-            lblMensaje.setText("Debe seleccionar un producto para disminuir stock.");
-            return;
-        }
-
-        if (txtCantidadMovimiento.getText().isEmpty()) {
-            lblMensaje.setText("Debe ingresar una cantidad.");
-            return;
-        }
-
-        Integer idProducto = Integer.parseInt(txtId.getText());
-        Integer cantidadAReducir = Integer.parseInt(txtCantidadMovimiento.getText());
-
-        if (cantidadAReducir <= 0) {
-            lblMensaje.setText("La cantidad debe ser un número positivo.");
-            return;
-        }
-
-        // Mostrar confirmación
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Confirmar operación");
-        confirmacion.setHeaderText("¿Está seguro de disminuir " + cantidadAReducir + " unidades del stock?");
-        confirmacion.setContentText("Esta operación reducirá la cantidad de los lotes más próximos a vencer.");
-
-        confirmacion.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                // Ejecutar en segundo plano
-                new Thread(() -> {
-                    try {
-                        // Llamar al método que reduce la cantidad de lotes
-                        loteService.reducirCantidadDeLotes(idProducto, cantidadAReducir);
-
-                        // Obtener el producto actualizado para mostrar en el formulario
-                        ProductoFX productoActualizado = productoService.obtenerPorId(idProducto);
-
-                        Platform.runLater(() -> {
-                            lblMensaje.setText("Stock disminuido correctamente. Se han actualizado los lotes correspondientes.");
-                            cargarProductoEnFormulario(productoActualizado);
-                            txtCantidadMovimiento.clear();
-                            cargarDatos();
-                        });
-                    } catch (Exception e) {
-                        Platform.runLater(() -> {
-                            lblMensaje.setText("Error al disminuir stock: " + e.getMessage());
-                            mostrarAlerta(Alert.AlertType.ERROR, "Error", "No se pudo disminuir el stock", e.getMessage());
-                        });
-                    }
-                }).start();
-            }
-        });
     }
 
     @FXML
@@ -836,8 +789,6 @@ public class ProductoControllerFX implements Initializable {
         }
     }
 
-
-
     @FXML
     public void mostrarDetalles() {
         ProductoFX seleccionado = tablaProductos.getSelectionModel().getSelectedItem();
@@ -856,9 +807,14 @@ public class ProductoControllerFX implements Initializable {
         detalles.append("Stock: ").append(seleccionado.getStock()).append("\n");
         detalles.append("Stock Mínimo: ").append(seleccionado.getStockMinimo()).append("\n");
         detalles.append("Stock Máximo: ").append(seleccionado.getStockMaximo()).append("\n");
-        detalles.append("Categoría: ").append(seleccionado.getCategoria() != null ? seleccionado.getCategoria() : "Sin categoría").append("\n");
-        detalles.append("Proveedor: ").append(seleccionado.getProveedor() != null ? seleccionado.getProveedor() : "Sin proveedor").append("\n");
-        detalles.append("Estado: ").append(seleccionado.getEstado() != null && seleccionado.getEstado() ? "Activo" : "Inactivo");
+        detalles.append("Categoría: ")
+                .append(seleccionado.getCategoria() != null ? seleccionado.getCategoria() : "Sin categoría")
+                .append("\n");
+        detalles.append("Proveedor: ")
+                .append(seleccionado.getProveedor() != null ? seleccionado.getProveedor() : "Sin proveedor")
+                .append("\n");
+        detalles.append("Estado: ")
+                .append(seleccionado.getEstado() != null && seleccionado.getEstado() ? "Activo" : "Inactivo");
 
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Detalles del Producto");
