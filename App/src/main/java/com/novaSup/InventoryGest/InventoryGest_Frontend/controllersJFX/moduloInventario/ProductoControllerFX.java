@@ -3,6 +3,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloIn
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.CategoriaFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProductoFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ProveedorFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IInventarioService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.ILoteService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IProductoService;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.util.PermisosUIUtil;
@@ -89,15 +90,17 @@ public class ProductoControllerFX implements Initializable {
     // Servicios - inyectados por constructor
     private final IProductoService productoService;
     private final ILoteService loteService;
+    private final IInventarioService inventarioService;
     
     // Colecciones de datos
     private ObservableList<ProductoFX> listaProductos = FXCollections.observableArrayList();
     private ObservableList<CategoriaFX> listaCategorias = FXCollections.observableArrayList();
     private ObservableList<ProveedorFX> listaProveedores = FXCollections.observableArrayList();
 
-    public ProductoControllerFX(IProductoService productoService, ILoteService loteService) {
+    public ProductoControllerFX(IProductoService productoService, ILoteService loteService, IInventarioService inventarioService) {
         this.productoService = productoService;
         this.loteService = loteService;
+        this.inventarioService = inventarioService;
     }
 
     @Override
@@ -808,6 +811,8 @@ public class ProductoControllerFX implements Initializable {
 
             // Inicializar el controlador con el producto
             controller.inicializar(producto);
+
+            controller.setServices(inventarioService);
 
             // Crear y configurar la escena
             Scene scene = new Scene(root);
