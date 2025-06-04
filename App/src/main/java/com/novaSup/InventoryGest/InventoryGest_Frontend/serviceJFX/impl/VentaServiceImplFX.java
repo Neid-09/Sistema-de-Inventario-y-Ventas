@@ -40,4 +40,10 @@ public class VentaServiceImplFX implements IVentaSerivice {
         String response = HttpClient.get(API_BASE_URL + VENTAS_ENDPOINT);
         return objectMapper.readValue(response, new TypeReference<List<VentaFX>>() {});
     }
+
+    @Override
+    public List<VentaFX> listarVentasPorCliente(Integer clienteId) throws Exception {
+        String response = HttpClient.get(API_BASE_URL + VENTAS_ENDPOINT + "/cliente/" + clienteId);
+        return objectMapper.readValue(response, new TypeReference<List<VentaFX>>() {});
+    }
 }

@@ -12,4 +12,6 @@ public interface IVentaSerivice {
     VentaFX obtenerVentaPorId(Integer id) throws Exception;
 
     List<VentaFX> listarVentas() throws Exception;
+
+    List<VentaFX> listarVentasPorCliente(Integer clienteId) throws Exception;
 }
