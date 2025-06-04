@@ -1,6 +1,7 @@
 package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Lote;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.LoteRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.ProductoRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService; // Importar NotificacionService
@@ -35,11 +36,11 @@ public class StockServiceImpl {
         return lotes.stream()
                 .mapToInt(Lote::getCantidad)
                 .sum();
-    }
-
-    /**
+    }    /**
      * Actualiza el stock de un producto en la base de datos
      * Si el producto está inactivo, no se actualizará el stock
+     * Después de actualizar el stock, verifica inmediatamente los niveles
+     * y envía notificaciones si es necesario (stock bajo o sobrestock)
      */
     @Transactional
     public void actualizarStockProducto(Integer idProducto) {
@@ -53,10 +54,59 @@ public class StockServiceImpl {
 
             int stockCalculado = calcularStockProducto(idProducto);
             if (producto.getStock() != stockCalculado) {
+                int stockAnterior = producto.getStock();
                 producto.setStock(stockCalculado);
                 productoRepository.save(producto);
+                
+                // Verificación inmediata de niveles de stock después del cambio
+                verificarYNotificarNivelesStock(producto, stockAnterior, stockCalculado);
             }
         });
+    }    /**
+     * Verifica los niveles de stock de un producto y envía notificaciones inmediatas
+     * si se detecta stock bajo o sobrestock
+     */
+    private void verificarYNotificarNivelesStock(Producto producto, int stockAnterior, int stockActual) {
+        try {
+            // Solo procesar si el producto está activo
+            if (!producto.getEstado()) {
+                return;
+            }
+
+            // Verificar stock bajo (solo si se configuró un mínimo y el stock actual está por debajo)
+            if (producto.getStockMinimo() != null && stockActual <= producto.getStockMinimo()) {
+                // Solo notificar si el stock cambió de estar bien a estar bajo, o si disminuyó aún más
+                if (stockAnterior > producto.getStockMinimo() || stockActual < stockAnterior) {
+                    notificacionService.notificarUsuariosRelevantes(
+                            "Stock Bajo: " + producto.getNombre(),
+                            "El producto '" + producto.getNombre() + "' (Código: " + producto.getCodigo() +
+                                    ") tiene un stock actual de " + stockActual +
+                                    " unidades, por debajo del mínimo de " + producto.getStockMinimo() + " unidades.",
+                            "STOCK_BAJO",
+                            producto.getIdProducto()
+                    );
+                }
+            }
+
+            // Verificar sobrestock (solo si se configuró un máximo y el stock actual está por encima)
+            if (producto.getStockMaximo() != null && stockActual > producto.getStockMaximo()) {
+                // Solo notificar si el stock cambió de estar bien a sobrestock, o si aumentó aún más
+                if (stockAnterior <= producto.getStockMaximo() || stockActual > stockAnterior) {
+                    notificacionService.notificarUsuariosRelevantes(
+                            "Sobrestock: " + producto.getNombre(),
+                            "El producto '" + producto.getNombre() + "' (Código: " + producto.getCodigo() +
+                                    ") tiene un stock actual de " + stockActual +
+                                    " unidades, superando el máximo recomendado de " + producto.getStockMaximo() + " unidades.",
+                            "SOBRESTOCK",
+                            producto.getIdProducto()
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            // Log del error pero no fallar la actualización del stock
+            System.err.println("Error al verificar niveles de stock para notificaciones: " + e.getMessage());
+        }
     }
 
     /**

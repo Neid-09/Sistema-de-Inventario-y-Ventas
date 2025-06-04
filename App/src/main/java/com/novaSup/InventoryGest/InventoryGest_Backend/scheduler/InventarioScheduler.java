@@ -5,7 +5,6 @@ import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.LoteService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.ProductoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,74 +13,67 @@ import java.util.List;
 @Component
 public class InventarioScheduler {
 
-    @Autowired
-    private ProductoService productoService;
+    private final ProductoService productoService;
+    private final LoteService loteService;
+    private final NotificacionService notificacionService;
 
-    @Autowired
-    private LoteService loteService;
+    public InventarioScheduler(ProductoService productoService, 
+                              LoteService loteService, 
+                              NotificacionService notificacionService) {
+        this.productoService = productoService;
+        this.loteService = loteService;
+        this.notificacionService = notificacionService;
+    }    
+    
+    // NOTA: Las verificaciones de stock bajo y sobrestock han sido movidas
+    // para ejecutarse inmediatamente después de cada movimiento de inventario
+    // en lugar de en horarios programados para mayor eficiencia y respuesta inmediata.
 
-    @Autowired
-    private NotificacionService notificacionService;
 
-    // Verificar productos con bajo stock diariamente a las 8:00 AM
-    @Scheduled(cron = "0 0 8 * * *") // Ejecutar diariamente a las 8:00 AM
-    public void verificarProductosBajoStock() {
-        List<Producto> productosBajoStock = productoService.obtenerConStockBajo();
-        if (!productosBajoStock.isEmpty()) {
-            notificacionService.notificarUsuariosRelevantes(
-                    "Productos con bajo stock",
-                    "Hay " + productosBajoStock.size() + " productos con stock por debajo del mínimo",
-                    "STOCK_BAJO",
-                    null  // No hay referencia específica
-            );
-        }
-    }
-
-    // Verificar productos con sobrestock diariamente a las 10:00 AM
-    @Scheduled(cron = "0 0 10 * * *") // Ejecutar diariamente a las 10:00 AM
-    public void verificarProductosSobrestock() {
-        List<Producto> productosConSobrestock = productoService.obtenerConSobrestock();
-
-        for (Producto producto : productosConSobrestock) {
-            notificacionService.notificarUsuariosRelevantes(
-                    "Sobrestock: " + producto.getNombre(),
-                    "El producto " + producto.getNombre() + " (Código: " +
-                            producto.getCodigo() + ") tiene un stock de " +
-                            producto.getStock() + " unidades, superando el máximo recomendado.",
-                    "ALERTA_SOBRESTOCK",
-                    producto.getIdProducto()
-            );
-        }
-    }
-
-    // Verificar lotes próximos a vencer cada día a las 9:00 AM
-    @Scheduled(cron = "0 0 9 * * *") // Ejecutar diariamente a las 9:00 AM
+    // Verificar lotes próximos a vencer a las 5:30 PM todos los días
+    @Scheduled(cron = "0 30 17 * * *") // A las 5:30 PM (17:30 en formato 24h)
     public void verificarLotesProximosAVencer() {
+        System.out.println("Ejecutando verificación de lotes próximos a vencer a las 5:30 PM...");
         int diasMargen = 15; // Días de margen, podría ser configurable
         List<Lote> lotesProximosVencer = loteService.obtenerLotesProximosVencer(diasMargen);
 
         for (Lote lote : lotesProximosVencer) {
             String nombreProducto = lote.getProducto() != null ? lote.getProducto().getNombre() : "Desconocido";
-            String numeroLote = lote.getNumeroLote() != null ? lote.getNumeroLote() : "N/A";
-            String fechaVencimientoStr = lote.getFechaVencimiento() != null ? lote.getFechaVencimiento().toString() : "N/A";
-
-            notificacionService.notificarUsuariosRelevantes(
-                    "Lote próximo a vencer: " + nombreProducto,
-                    "El lote '" + numeroLote + "' del producto '" + nombreProducto +
-                            "' vencerá el " + fechaVencimientoStr + ".",
-                    "LOTE_PROXIMO_VENCER", // Tipo de notificación más específico
-                    lote.getIdLote() // Referencia al lote específico
+            
+            notificacionService.notificarLoteProximoAVencer(
+                    lote.getIdLote(),
+                    nombreProducto,
+                    lote.getFechaVencimiento()
             );
         }
-        // Ya no se envía una notificación general, sino una por cada lote.
-        // if (!lotesProximosVencer.isEmpty()) {
-        //     notificacionService.notificarUsuariosRelevantes(
-        //             "Lotes próximos a vencer",
-        //             "Hay " + lotesProximosVencer.size() + " lotes que vencerán en los próximos " + diasMargen + " días",
-        //             "LOTES_VENCER",
-        //             null  // No hay referencia específica
-        //     );
-        // }
+    }    // Resumen diario de notificaciones a las 8:00 PM todos los días
+    // NOTA: El stock bajo y sobrestock se verifican en tiempo real después de cada movimiento,
+    // pero se incluyen en el resumen solo para información estadística
+    @Scheduled(cron = "0 0 20 * * *") // A las 8:00 PM (20:00 en formato 24h)
+    public void resumenDiarioNotificaciones() {
+        System.out.println("Ejecutando resumen diario de notificaciones a las 8:00 PM...");
+        
+        // Verificar todos los tipos de alertas para el resumen nocturno
+        List<Producto> productosBajoStock = productoService.obtenerConStockBajo();
+        List<Producto> productosConSobrestock = productoService.obtenerConSobrestock();
+        List<Lote> lotesProximosVencer = loteService.obtenerLotesProximosVencer(15);
+        
+        // Enviar resumen solo si hay alertas
+        if (!productosBajoStock.isEmpty() || !productosConSobrestock.isEmpty() || !lotesProximosVencer.isEmpty()) {
+            String resumen = String.format(
+                "Resumen del día: %d productos con stock bajo, %d productos con sobrestock, %d lotes próximos a vencer",
+                productosBajoStock.size(),
+                productosConSobrestock.size(),
+                lotesProximosVencer.size()
+            );
+            
+            notificacionService.notificarUsuariosRelevantes(
+                "Resumen diario de inventario",
+                resumen,
+                "RESUMEN_DIARIO",
+                null
+            );
+        }
     }
 
 }
