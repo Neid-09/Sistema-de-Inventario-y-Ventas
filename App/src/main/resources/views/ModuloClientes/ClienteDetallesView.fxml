@@ -138,19 +138,18 @@
                </children>
             </HBox>
 
-            <Separator styleClass="details-separator" />
-
-            <TitledPane animated="false" collapsible="false" text="Historial de Compras" styleClass="details-titled-pane">
+            <Separator styleClass="details-separator" />            <TitledPane animated="false" collapsible="false" text="Historial de Compras" styleClass="details-titled-pane">
                <font><Font name="System Bold" size="14.0" /></font>
                <content>
-                  <AnchorPane>
+                  <AnchorPane minHeight="350.0" prefHeight="450.0">
                      <children>
                         <TableView fx:id="historialComprasTable" styleClass="details-table-view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn fx:id="ventaNumCol" prefWidth="120.0" text="Nº Venta" />
-                            <TableColumn fx:id="ventaFechaCol" prefWidth="150.0" text="Fecha" />
-                            <TableColumn fx:id="ventaTotalCol" prefWidth="100.0" text="Total (€)" />
-                            <TableColumn fx:id="ventaTipoPagoCol" prefWidth="150.0" text="Tipo Pago" />
+                            <TableColumn fx:id="ventaNumCol" prefWidth="150.0" text="Nº Venta" />
+                            <TableColumn fx:id="ventaFechaCol" prefWidth="170.0" text="Fecha" />
+                            <TableColumn fx:id="ventaTotalCol" prefWidth="120.0" text="Total ($)" />
+                            <TableColumn fx:id="ventaTipoPagoCol" prefWidth="130.0" text="Tipo Pago" />
+                            <TableColumn fx:id="ventaProductosCol" prefWidth="350.0" text="Productos" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -159,18 +158,16 @@
                      </children>
                   </AnchorPane>
                </content>
-            </TitledPane>
-
-            <TitledPane animated="false" collapsible="false" text="Historial de Recompensas Canjeadas" styleClass="details-titled-pane">
+            </TitledPane>            <TitledPane animated="false" collapsible="false" text="Historial de Recompensas Canjeadas" styleClass="details-titled-pane">
                <font><Font name="System Bold" size="14.0" /></font>
                <content>
-                  <AnchorPane>
+                  <AnchorPane minHeight="200.0" prefHeight="250.0">
                      <children>
                         <TableView fx:id="historialRecompensasTable" styleClass="details-table-view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn fx:id="recompensaDescCol" prefWidth="350.0" text="Descripción Recompensa" />
-                            <TableColumn fx:id="recompensaPuntosCol" prefWidth="120.0" text="Puntos Usados" />
-                            <TableColumn fx:id="recompensaFechaCol" prefWidth="150.0" text="Fecha Reclamo" />
+                            <TableColumn fx:id="recompensaDescCol" prefWidth="400.0" text="Descripción Recompensa" />
+                            <TableColumn fx:id="recompensaPuntosCol" prefWidth="150.0" text="Puntos Usados" />
+                            <TableColumn fx:id="recompensaFechaCol" prefWidth="200.0" text="Fecha Reclamo" />
                           </columns>
                            <columnResizePolicy>
                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
