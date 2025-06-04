@@ -8,7 +8,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-//TODO: VERIFICAR SI ESTA BIEN YA QUE SOLO MODIFIQUE PARTES DE CONTROLADOR Y NO DE VENTANA
 
 public class VAjusteStockCtrlFX {
 
