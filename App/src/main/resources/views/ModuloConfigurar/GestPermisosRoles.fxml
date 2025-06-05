@@ -1,22 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.PermisosRolesCtrlFX">
-
-    <!-- Zona Superior -->
+<BorderPane xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" 
+    fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloConfigurar.PermisosRolesCtrlFX"
+    styleClass="permisos-roles-root"
+    stylesheets="@../../styles/gestion-permisos-roles-styles.css">
+    
+    <!-- Zona Superior: Título principal -->
     <top>
-        <Label text="Gestión de Permisos y Roles" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-padding: 10;"/>
+        <VBox alignment="CENTER" spacing="8">
+            <padding>
+                <Insets top="20" bottom="10" left="20" right="20"/>
+            </padding>
+            
+            <Label text="🔐 Gestión de Permisos y Roles" styleClass="permisos-roles-title"/>
+            <Label text="Administra los permisos y roles del sistema de manera segura" styleClass="subtitle-label"/>
+            
+            <!-- Separador visual -->
+            <Region styleClass="visual-separator">
+                <VBox.margin>
+                    <Insets top="5" bottom="10"/>
+                </VBox.margin>
+            </Region>
+        </VBox>
     </top>
-
-    <!-- Zona Central: Botones de Navegación -->
+    
+    <!-- Zona Central: Botones de navegación -->
     <center>
-        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 20;">
-            <Button fx:id="btnGestionPermisos" text="Gestión de Permisos" styleClass="menu-button" maxWidth="300" />
-            <Button fx:id="btnGestionRoles" text="Gestión de Roles" styleClass="menu-button" maxWidth="300" />
-            <Button fx:id="btnPlantillasRoles" text="Plantillas de Permisos para Roles" styleClass="menu-button" maxWidth="300" />
-            <Button fx:id="btnPermisosUsuarios" text="Permisos Específicos para Usuarios" styleClass="menu-button" maxWidth="300" />
+        <VBox alignment="CENTER" spacing="0">
+            <padding>
+                <Insets top="20" bottom="20" left="30" right="30"/>
+            </padding>
+            
+            <!-- Contenedor principal de botones -->
+            <VBox alignment="CENTER" spacing="15" styleClass="permisos-roles-container">
+                
+                <!-- Botón Gestión de Permisos -->
+                <Button fx:id="btnGestionPermisos" text="🛡️ Gestión de Permisos" 
+                    styleClass="menu-button"/>
+                
+                <!-- Botón Gestión de Roles -->
+                <Button fx:id="btnGestionRoles" text="👥 Gestión de Roles" 
+                    styleClass="menu-button"/>
+                
+                <!-- Botón Plantillas de Roles -->
+                <Button fx:id="btnPlantillasRoles" text="📋 Plantillas de Permisos para Roles" 
+                    styleClass="menu-button"/>
+                
+                <!-- Botón Permisos de Usuarios -->
+                <Button fx:id="btnPermisosUsuarios" text="🔑 Permisos Específicos para Usuarios" 
+                    styleClass="menu-button"/>
+            </VBox>
         </VBox>
     </center>
+    
+    <!-- Zona Inferior: Información adicional -->
+    <bottom>
+        <HBox alignment="CENTER">
+            <padding>
+                <Insets top="10" bottom="15" left="20" right="20"/>
+            </padding>
+            
+            <Label text="💡 Selecciona una opción para comenzar a gestionar la seguridad del sistema" 
+                styleClass="bottom-info"/>
+        </HBox>
+    </bottom>
 
 </BorderPane>
