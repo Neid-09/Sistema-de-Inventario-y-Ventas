@@ -123,6 +123,29 @@ public class ReporteController {
         return ResponseEntity.ok(resultado);
     }
 
+    @GetMapping("/productos/sobrestock")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_productos')")
+    public ResponseEntity<?> obtenerProductosSobrestock() {
+        List<Producto> productosSobrestock = productoService.obtenerConSobrestock();
+
+        List<Map<String, Object>> resultado = productosSobrestock.stream().map(p -> {
+            Map<String, Object> datos = new HashMap<>();
+            datos.put("idProducto", p.getIdProducto());
+            datos.put("codigo", p.getCodigo());
+            datos.put("nombre", p.getNombre());
+            datos.put("stock", p.getStock());
+            datos.put("stockMaximo", p.getStockMaximo());
+            datos.put("diferencia", p.getStock() - p.getStockMaximo());
+            datos.put("precioCosto", p.getPrecioCosto());
+            datos.put("precioVenta", p.getPrecioVenta());
+            datos.put("valorExceso", p.getPrecioCosto().multiply(BigDecimal.valueOf(p.getStock() - p.getStockMaximo())));
+
+            return datos;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(resultado);
+    }
+
     @GetMapping("/lotes/proximos-vencer")
     @PreAuthorize("hasRole('ROLE_ADMINISTRADOR') or hasAuthority('ver_productos')")
     public ResponseEntity<?> obtenerLotesProximosVencer(

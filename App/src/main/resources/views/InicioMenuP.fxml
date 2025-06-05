@@ -1,62 +1,208 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.inicioMenuPControllerFX">
-
-    <center>
-        <VBox alignment="CENTER" spacing="30" style="-fx-background-color: white; -fx-padding: 20;">
-            <!-- Título de bienvenida -->
-            <Label text="¡Bienvenido al Sistema de Gestión de Inventario!" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #083671;" />
-
-            <!-- Imagen central -->
-            <ImageView fitHeight="200.0" fitWidth="200.0" preserveRatio="true">
-                <image>
-                    <Image url="@../img/menuPrincipal/logoProvicional.jpg" />
-                </image>
-            </ImageView>
-
-            <Separator prefWidth="500" />
-
-            <!-- Funcionalidades principales -->
-            <HBox alignment="CENTER" spacing="40">
-                <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #f0f8ff; -fx-padding: 15; -fx-background-radius: 5;">
-                    <ImageView fitHeight="60.0" fitWidth="60.0" preserveRatio="true">
+<VBox fillWidth="true" spacing="15" style="-fx-background-color: #f5f7fa;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.inicioMenuPControllerFX">
+    
+    <padding>
+        <Insets bottom="15" left="15" right="15" top="15" />
+    </padding>    
+    <!-- Header compacto con información del sistema -->
+    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);">
+        <VBox spacing="3">
+            <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #083671;" text="📊 Dashboard del Sistema" />
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label fx:id="lblFecha" style="-fx-font-size: 12; -fx-text-fill: #64748b;" text="Cargando fecha..." />
+                <Label style="-fx-font-size: 12; -fx-text-fill: #94a3b8;" text="•" />
+                <Label fx:id="lblEstadoSistemaHeader" style="-fx-font-size: 12; -fx-text-fill: #22c55e;" text="🟢 Sistema en línea" />
+            </HBox>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <VBox alignment="CENTER_RIGHT" spacing="3">
+            <Button fx:id="btnActualizar" style="-fx-background-color: #083671; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 12; -fx-font-size: 12; -fx-font-weight: 500; -fx-cursor: hand;" text="🔄 Actualizar" />
+            <Label fx:id="lblUltimaActualizacion" style="-fx-font-size: 10; -fx-text-fill: #94a3b8;" text="Última actualización: Ahora" />
+        </VBox>
+    </HBox>
+    
+    <!-- Métricas principales - Grid 3x2 compacto -->
+    <GridPane alignment="CENTER" hgap="10" prefHeight="140" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints vgrow="SOMETIMES" />
+        </rowConstraints>
+        <VBox prefHeight="75" spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C); -fx-background-radius: 18; -fx-pref-width: 45; -fx-pref-height: 45;">
+                    <ImageView fitHeight="22" fitWidth="22" preserveRatio="true">
                         <image>
                             <Image url="@../img/menuPrincipal/inventario.png" />
                         </image>
                     </ImageView>
-                    <Label text="Gestión de Productos" style="-fx-font-weight: bold;" />
-                    <Label text="Administra tu catálogo de productos" textAlignment="CENTER" wrapText="true" />
-                </VBox>
-
-                <VBox alignment="CENTER" spacing="10" style="-fx-background-color: #f0f8ff; -fx-padding: 15; -fx-background-radius: 5;">
-                    <ImageView fitHeight="60.0" fitWidth="60.0" preserveRatio="true">
-                        <image>
-                            <Image url="@../img/menuPrincipal/entradaSalidas.png" />
-                        </image>
-                    </ImageView>
-                    <Label text="Control de Stock" style="-fx-font-weight: bold;" />
-                    <Label text="Registra movimientos de inventario" textAlignment="CENTER" wrapText="true" />
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="lblTotalProductos" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="0" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: 500;" text="Total Productos" />
                 </VBox>
             </HBox>
-
-            <Label fx:id="lblFecha" text="Fecha actual" style="-fx-font-style: italic;" />
         </VBox>
-    </center>
 
-    <bottom>
-        <HBox alignment="CENTER" style="-fx-padding: 10;">
-            <Label text="Seleccione una opción del menú lateral para comenzar" />
-        </HBox>
-    </bottom>
-</BorderPane>
+        <VBox prefHeight="75" spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #2196F3, #1976D2); -fx-background-radius: 18; -fx-pref-width: 45; -fx-pref-height: 45;">
+                    <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: white;" text="✓" />
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="lblProductosActivos" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #2196F3;" text="0" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: 500;" text="Productos Activos" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <VBox prefHeight="75" spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" GridPane.columnIndex="2" GridPane.rowIndex="0">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #FF9800, #F57C00); -fx-background-radius: 18; -fx-pref-width: 45; -fx-pref-height: 45;">
+                    <ImageView fitHeight="22" fitWidth="22" preserveRatio="true">
+                        <image>
+                            <Image url="@../img/inventario/categorias.png" />
+                        </image>
+                    </ImageView>
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="lblTotalCategorias" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #FF9800;" text="0" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: 500;" text="Categorías" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- Segunda fila de métricas - Valoración financiera -->
+        <VBox prefHeight="75" spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #9C27B0, #7B1FA2); -fx-background-radius: 18; -fx-pref-width: 45; -fx-pref-height: 45;">
+                    <Label style="-fx-font-size: 20;" text="💸" />
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="lblValorTotalCosto" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #9C27B0;" text="0.00" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: 500;" text="Valor Costo" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <VBox prefHeight="75" spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C); -fx-background-radius: 18; -fx-pref-width: 45; -fx-pref-height: 45;">
+                    <Label style="-fx-font-size: 20;" text="💰" />
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="lblValorTotalVenta" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="0.00" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: 500;" text="Valor Venta" />
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <VBox prefHeight="75" spacing="8" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #00BCD4, #0097A7); -fx-background-radius: 18; -fx-pref-width: 45; -fx-pref-height: 45;">
+                    <Label style="-fx-font-size: 20;" text="📈" />
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="lblMargenGanancia" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #00BCD4;" text="0.00" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: 500;" text="Margen" />
+                </VBox>
+            </HBox>
+        </VBox>
+      <columnConstraints>
+         <ColumnConstraints />
+         <ColumnConstraints />
+         <ColumnConstraints />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints />
+         <RowConstraints />
+      </rowConstraints>
+    </GridPane>
+    
+    <!-- Alertas de Stock - Más compacto -->
+    <HBox spacing="10" prefHeight="100">
+        <!-- Stock Crítico -->
+        <VBox spacing="8" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.15), 8, 0, 0, 2); -fx-border-color: #f44336; -fx-border-width: 0 0 0 3;" 
+              HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #f44336, #d32f2f); -fx-background-radius: 18; -fx-pref-width: 40; -fx-pref-height: 40;">
+                    <Label text="⚠" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: white;" />
+                </StackPane>                        
+                <VBox spacing="2">
+                    <HBox alignment="CENTER_LEFT" spacing="6">
+                        <Label fx:id="lblStockCritico" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #f44336;" />
+                        <Label text="🚨 Stock Crítico" style="-fx-font-size: 10; -fx-text-fill: #64748b; -fx-font-weight: 500;" />
+                    </HBox>
+                    <ProgressBar fx:id="progressStockCritico" progress="0" prefWidth="160" prefHeight="5" style="-fx-accent: #f44336;" />
+                    <Label fx:id="lblDetalleStockCritico" text="Productos por debajo del mínimo" style="-fx-font-size: 9; -fx-text-fill: #f44336;" />
+                </VBox>
+            </HBox>
+        </VBox>
+        
+        <!-- Sobrestock -->
+        <VBox spacing="8" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(255,152,0,0.15), 8, 0, 0, 2); -fx-border-color: #FF9800; -fx-border-width: 0 0 0 3;" 
+              HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <StackPane style="-fx-background-color: linear-gradient(to bottom, #FF9800, #F57C00); -fx-background-radius: 18; -fx-pref-width: 40; -fx-pref-height: 40;">
+                    <Label text="📦" style="-fx-font-size: 16;" />
+                </StackPane>
+                <VBox spacing="2">
+                    <HBox alignment="CENTER_LEFT" spacing="6">
+                        <Label fx:id="lblSobrestock" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #FF9800;" />
+                        <Label text="📦 Sobrestock" style="-fx-font-size: 10; -fx-text-fill: #64748b; -fx-font-weight: 500;" />
+                    </HBox>
+                    <ProgressBar fx:id="progressSobrestock" progress="0" prefWidth="160" prefHeight="5" style="-fx-accent: #FF9800;" />
+                    <Label fx:id="lblDetalleSobrestock" text="Productos por encima del máximo" style="-fx-font-size: 9; -fx-text-fill: #FF9800;" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </HBox>
+
+    <!-- Productos que requieren atención - Con Scroll -->
+    <HBox spacing="10" VBox.vgrow="ALWAYS">
+        <!-- Lista Stock Crítico -->
+        <VBox spacing="8" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" 
+              HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="6">
+                <Label text="🚨" style="-fx-font-size: 12;" />
+                <Label text="Productos con Stock Crítico" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #f44336;" />
+            </HBox>
+            <ScrollPane fx:id="scrollStockCritico" prefHeight="200" style="-fx-background-color: transparent; -fx-background: transparent;" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+                <VBox fx:id="vboxStockCritico" spacing="4" style="-fx-padding: 2;" />
+            </ScrollPane>
+        </VBox>
+
+        <!-- Lista Sobrestock -->
+        <VBox spacing="8" style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" 
+              HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="6">
+                <Label text="📦" style="-fx-font-size: 12;" />
+                <Label text="Productos con Sobrestock" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #FF9800;" />
+            </HBox>
+            <ScrollPane fx:id="scrollSobrestock" prefHeight="200" style="-fx-background-color: transparent; -fx-background: transparent;" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+                <VBox fx:id="vboxSobrestock" spacing="4" style="-fx-padding: 2;" />
+            </ScrollPane>
+        </VBox>        
+    </HBox>
+
+</VBox>
