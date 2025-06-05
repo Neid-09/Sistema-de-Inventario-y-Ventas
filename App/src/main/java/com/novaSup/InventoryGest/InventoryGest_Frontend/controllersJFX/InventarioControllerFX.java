@@ -21,13 +21,7 @@ public class InventarioControllerFX implements Initializable {
     private Button btnLotes;
 
     @FXML
-    private Button btnMovimientos;
-
-    @FXML
     private Button btnProductos;
-
-    @FXML
-    private Button btnPromociones;
 
     @FXML
     private Button btnProveedores;
@@ -74,7 +68,6 @@ public class InventarioControllerFX implements Initializable {
         PermisosUIUtil.configurarBoton(btnCategorias, "gestionar_categorias");
         PermisosUIUtil.configurarBoton(btnProductos, "gestionar_productos");
         PermisosUIUtil.configurarBoton(btnProveedores, "gestionar_proveedores");
-        PermisosUIUtil.configurarBoton(btnMovimientos, "gestionar_movimientos");
        // PermisosUIUtil.configurarBoton(btnReportes, "ver_reportes_inventario");
 
         // Si hay más botones o controles que requieran permisos específicos
@@ -107,11 +100,6 @@ public class InventarioControllerFX implements Initializable {
     }
 
     @FXML
-    void irGestionMovimientos(ActionEvent event) {
-
-    }
-
-    @FXML
     void irGestionProductos(ActionEvent event) {
         try {
             // Obtener el Stage actual
@@ -134,10 +122,6 @@ public class InventarioControllerFX implements Initializable {
         }
     }
 
-    @FXML
-    void irGestionPromociones(ActionEvent event) {
-
-    }
     @FXML
     void irGestionProveedores(ActionEvent event) {
         try {

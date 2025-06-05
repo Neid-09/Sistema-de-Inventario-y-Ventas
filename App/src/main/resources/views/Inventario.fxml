@@ -10,49 +10,49 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="600.0" prefWidth="800.0" styleClass="inventory-main" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.InventarioControllerFX">
+<BorderPane prefHeight="600.0" prefWidth="800.0" styleClass="inventory-main" stylesheets="@../styles/inventario-styles.css" xmlns="http://javafx.com/javafx/23.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.InventarioControllerFX">
 
     <top>
-        <HBox alignment="CENTER" spacing="15" style="-fx-background-color: #2c3e50; -fx-padding: 15px;">
+        <HBox alignment="CENTER" spacing="15" style="-fx-background-color: #083671; -fx-padding: 15px;">
             <Label alignment="CENTER" contentDisplay="CENTER" text="GESTIÓN DE INVENTARIO" textAlignment="CENTER" textFill="WHITE">
                 <font>
                     <Font name="System Bold" size="24.0" />
                 </font>
             </Label>
         </HBox>
-    </top>
-
-    <center>
-        <VBox alignment="CENTER" spacing="20" style="-fx-padding: 30px;">
+    </top>    <center>
+        <VBox alignment="CENTER" spacing="15" styleClass="center-container">
             <!-- Secciones principales -->
-            <HBox alignment="CENTER" spacing="30">
-                <VBox alignment="CENTER" spacing="10" styleClass="menu-item">
+            <Label styleClass="section-header" text="Gestión Principal">
+                <font>
+                    <Font name="System Bold" size="16.0" />
+                </font>
+            </Label>
+            
+            <HBox alignment="CENTER" spacing="25" styleClass="button-container">
+                <VBox alignment="CENTER" spacing="8" styleClass="menu-item">
                     <Button fx:id="btnProductos" onAction="#irGestionProductos" styleClass="menu-button">
-                        <graphic>
-                            <ImageView fitHeight="64.0" fitWidth="64.0">
-                                <Image url="@../images/productos.png" />
+                        <graphic>                            <ImageView styleClass="main-icon">
+                                <Image url="@../img/inventario/productos.png" />
                             </ImageView>
                         </graphic>
                     </Button>
                     <Label styleClass="menu-label" text="Productos" />
                 </VBox>
 
-                <VBox alignment="CENTER" spacing="10" styleClass="menu-item">
+                <VBox alignment="CENTER" spacing="8" styleClass="menu-item">
                     <Button fx:id="btnCategorias" onAction="#irGestionCategorias" styleClass="menu-button">
-                        <graphic>
-                            <ImageView fitHeight="64.0" fitWidth="64.0">
-                                <Image url="@../images/categorias.png" />
+                        <graphic>                            <ImageView styleClass="main-icon">
+                                <Image url="@../img/inventario/categorias.png" />
                             </ImageView>
                         </graphic>
-                    </Button>
-                    <Label styleClass="menu-label" text="Categorías" />
+                    </Button>                    <Label styleClass="menu-label" text="Categorías" />
                 </VBox>
 
-                <VBox alignment="CENTER" spacing="10" styleClass="menu-item">
+                <VBox alignment="CENTER" spacing="8" styleClass="menu-item">
                     <Button fx:id="btnProveedores" onAction="#irGestionProveedores" styleClass="menu-button">
-                        <graphic>
-                            <ImageView fitHeight="64.0" fitWidth="64.0">
-                                <Image url="@../images/proveedores.png" />
+                        <graphic>                            <ImageView styleClass="main-icon">
+                                <Image url="@../img/inventario/proveedores.png" />
                             </ImageView>
                         </graphic>
                     </Button>
@@ -60,53 +60,29 @@
                 </VBox>
             </HBox>
 
-            <Separator />
-            <Label styleClass="section-header" text="Opciones adicionales">
+            <Separator styleClass="separator" />
+            
+            <Label styleClass="section-header" text="Gestión Complementaria">
                 <font>
-                    <Font name="System Bold" size="16.0" />
+                    <Font name="System Bold" size="14.0" />
                 </font>
             </Label>
 
-            <!-- Secciones opcionales -->
-            <HBox alignment="CENTER" spacing="30">
-                <VBox alignment="CENTER" spacing="10" styleClass="menu-item">
+            <!-- Secciones complementarias -->
+            <HBox alignment="CENTER" spacing="20" styleClass="button-container">
+                <VBox alignment="CENTER" spacing="6" styleClass="menu-item">
                     <Button fx:id="btnLotes" onAction="#irGestionLotes" styleClass="menu-button-alt">
-                        <graphic>
-                            <ImageView fitHeight="48.0" fitWidth="48.0">
-                                <Image url="@../images/lotes.png" />
+                        <graphic>                            <ImageView styleClass="alt-icon">
+                                <Image url="@../img/inventario/lotes.png" />
                             </ImageView>
                         </graphic>
                     </Button>
                     <Label styleClass="menu-label" text="Lotes" />
                 </VBox>
-
-                <VBox alignment="CENTER" spacing="10" styleClass="menu-item">
-                    <Button fx:id="btnMovimientos" onAction="#irGestionMovimientos" styleClass="menu-button-alt">
-                        <graphic>
-                            <ImageView fitHeight="48.0" fitWidth="48.0">
-                                <Image url="@../images/movimientos.png" />
-                            </ImageView>
-                        </graphic>
-                    </Button>
-                    <Label styleClass="menu-label" text="Movimientos" />
-                </VBox>
-
-                <VBox alignment="CENTER" spacing="10" styleClass="menu-item">
-                    <Button fx:id="btnPromociones" onAction="#irGestionPromociones" styleClass="menu-button-alt">
-                        <graphic>
-                            <ImageView fitHeight="48.0" fitWidth="48.0">
-                                <Image url="@../images/promociones.png" />
-                            </ImageView>
-                        </graphic>
-                    </Button>
-                    <Label styleClass="menu-label" text="Promociones" />
-                </VBox>
             </HBox>
         </VBox>
-    </center>
-
-    <bottom>
-        <HBox alignment="CENTER" style="-fx-padding: 10px;">
+    </center>    <bottom>
+        <HBox alignment="CENTER" styleClass="status-area">
             <Label fx:id="lblStatus" text="Sistema listo" />
         </HBox>
     </bottom>

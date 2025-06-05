@@ -2,6 +2,7 @@ package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloCl
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IClienteService;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
 import com.novaSup.InventoryGest.InventoryGest_Frontend.utils.PathsFXML; // Importar PathsFXML
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,12 +51,14 @@ public class GestionClientesControllerFX implements Initializable {
     // Los Labels individuales para detalles (lblDetailNombre, etc.) se manejan dinámicamente.
 
     private final IClienteService clienteService;
+    private final IVentaSerivice ventaService;
     private ObservableList<ClienteFX> masterData = FXCollections.observableArrayList();
     private FilteredList<ClienteFX> filteredData;
     private SortedList<ClienteFX> sortedData;
 
-    public GestionClientesControllerFX(IClienteService clienteService) {
+    public GestionClientesControllerFX(IClienteService clienteService, IVentaSerivice ventaService) {
         this.clienteService = clienteService;
+        this.ventaService = ventaService;
     }
 
     @Override
@@ -306,6 +309,7 @@ public class GestionClientesControllerFX implements Initializable {
             
             Stage detailsStage = new Stage();
             controller.setStage(detailsStage); // Pasar el Stage al controlador de detalles
+            controller.setVentaService(ventaService); // Pasar el servicio de ventas
             controller.setCliente(selectedCliente);
 
             detailsStage.setTitle("Detalles del Cliente: " + selectedCliente.getNombre());

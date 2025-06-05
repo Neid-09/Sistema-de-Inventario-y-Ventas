@@ -2,10 +2,13 @@ package com.novaSup.InventoryGest.InventoryGest_Backend.service.impl;
 
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Notificacion;
 import com.novaSup.InventoryGest.InventoryGest_Backend.model.Producto;
+import com.novaSup.InventoryGest.InventoryGest_Backend.model.Usuario;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.NotificacionRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.repository.UsuarioRepository;
 import com.novaSup.InventoryGest.InventoryGest_Backend.service.interfaz.NotificacionService;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -13,6 +16,8 @@ import java.util.*;
 
 @Service
 public class NotificacionServiceImpl implements NotificacionService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(NotificacionServiceImpl.class);
 
     private final NotificacionRepository notificacionRepository;
 
@@ -112,15 +117,30 @@ public class NotificacionServiceImpl implements NotificacionService {
                 "ALERTA_SOBRESTOCK",
                 producto.getIdProducto()
         );
-    }
-
-    @Override
+    }    @Override
     public void notificarUsuariosRelevantes(String titulo, String mensaje, String tipo, Integer idReferencia) {
+        System.out.println("=== TESTING NOTIFICACION ===");
+        System.out.println("Título: " + titulo);
+        System.out.println("Mensaje: " + mensaje);
+        System.out.println("Tipo: " + tipo);
+        System.out.println("ID Referencia: " + idReferencia);
+        System.out.println("==========================");
+        
+        logger.info("Iniciando notificación: título='{}', tipo='{}', idReferencia={}", titulo, tipo, idReferencia);
+        
         // Lista para almacenar IDs de usuarios ya notificados
         List<Integer> idsUsuariosNotificados = new ArrayList<>();
 
-        // 1. Notificar a administradores
-        usuarioRepository.findByRolNombre("ADMINISTRADOR").forEach(admin -> {
+        // 1. Notificar a administradores (probar ambos nombres de rol)
+        List<Usuario> administradores = usuarioRepository.findByRolNombre("Administrador");
+        if (administradores.isEmpty()) {
+            logger.warn("No se encontraron administradores con rol 'Administrador', intentando con 'ADMINISTRADOR'");
+            administradores = usuarioRepository.findByRolNombre("ADMINISTRADOR");
+        }
+        
+        logger.info("Encontrados {} administradores para notificar", administradores.size());
+        
+        administradores.forEach(admin -> {
             Notificacion notificacion = new Notificacion();
             notificacion.setIdUsuario(admin.getIdUsuario());
             notificacion.setTitulo(titulo);

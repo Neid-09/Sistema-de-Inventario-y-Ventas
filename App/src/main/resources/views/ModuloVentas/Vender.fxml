@@ -83,6 +83,7 @@
                         <TableColumn fx:id="colProducto" prefWidth="300" text="Producto" />
                         <TableColumn fx:id="colPrecio" prefWidth="120" text="Precio" />
                         <TableColumn fx:id="colCantidad" prefWidth="120" text="Cantidad" />
+                        <TableColumn fx:id="colImpuestos" prefWidth="120" text="Impuestos" />
                         <TableColumn fx:id="colSubtotal" prefWidth="120" text="Subtotal" />
                         <TableColumn fx:id="colAcciones" prefWidth="80" text="Acciones" />
                     </columns>
@@ -97,14 +98,14 @@
                 <!-- Panel de totales -->
                 <VBox spacing="10" styleClass="totales-box" VBox.vgrow="ALWAYS">
                     <HBox styleClass="total-item">
+                        <Label styleClass="total-label" text="Cantidad en impuesto:" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="lblIVA" styleClass="total-value" text="0.00" />
+                    </HBox>
+                    <HBox styleClass="total-item">
                         <Label styleClass="total-label" text="Subtotal:" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Label fx:id="lblSubtotal" styleClass="total-value" text="0.00" />
-                    </HBox>
-                    <HBox styleClass="total-item">
-                        <Label styleClass="total-label" text="IVA (12%):" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Label fx:id="lblIVA" styleClass="total-value" text="0.00" />
                     </HBox>
                     <HBox styleClass="total-item total-final">
                         <Label styleClass="total-label-final" text="TOTAL:" />

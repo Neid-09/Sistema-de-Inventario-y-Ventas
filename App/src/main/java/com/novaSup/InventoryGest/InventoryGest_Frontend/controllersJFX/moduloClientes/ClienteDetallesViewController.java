@@ -1,14 +1,23 @@
 package com.novaSup.InventoryGest.InventoryGest_Frontend.controllersJFX.moduloClientes;
 
 import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.ClienteFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.modelJFX.VentaFX;
+import com.novaSup.InventoryGest.InventoryGest_Frontend.serviceJFX.interfaces.IVentaSerivice;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClienteDetallesViewController {
 
@@ -31,30 +40,39 @@ public class ClienteDetallesViewController {
     @FXML private Label ultimaCompraLabel;
     @FXML private Label fechaRegistroLabel;
     @FXML private Label fechaActualizacionLabel;
-    @FXML private CheckBox activoCheckBox; // Usar CheckBox no editable para booleanos
-
-    // Datos de Facturación
+    @FXML private CheckBox activoCheckBox; // Usar CheckBox no editable para booleanos    // Datos de Facturación
     @FXML private CheckBox requiereFacturaDefaultCheckBox;
     @FXML private Label razonSocialLabel;
     @FXML private Label identificacionFiscalLabel;
     @FXML private Label direccionFacturacionLabel;
     @FXML private Label correoFacturacionLabel;
-    @FXML private Label tipoFacturaDefaultLabel;
+    @FXML private Label tipoFacturaDefaultLabel;    // Historial de Compras
+    @FXML private TableView<VentaFX> historialComprasTable;
+    @FXML private TableColumn<VentaFX, String> ventaNumCol;
+    @FXML private TableColumn<VentaFX, String> ventaFechaCol;
+    @FXML private TableColumn<VentaFX, String> ventaTotalCol;
+    @FXML private TableColumn<VentaFX, String> ventaTipoPagoCol;
+    @FXML private TableColumn<VentaFX, String> ventaProductosCol;
 
     // Contenedor si los detalles se añaden dinámicamente (alternativa a labels individuales)
     // @FXML private VBox detailsContainer; 
 
     private ClienteFX clienteMostrado;
-
-    // Método opcional si necesitas acceso al Stage (ej. para cerrarlo desde el controlador)
+    private IVentaSerivice ventaService;    // Método opcional si necesitas acceso al Stage (ej. para cerrarlo desde el controlador)
     public void setStage(Stage stage) {
         this.stage = stage;
+    }
+
+    public void setVentaService(IVentaSerivice ventaService) {
+        this.ventaService = ventaService;
     }
 
     public void setCliente(ClienteFX cliente) {
         this.clienteMostrado = cliente;
         if (clienteMostrado != null) {
             poblarDetalles();
+            configurarTablaHistorial();
+            cargarHistorialCompras();
         }
     }
 
@@ -100,9 +118,7 @@ public class ClienteDetallesViewController {
 
     private String formatValue(String value) {
         return (value != null && !value.trim().isEmpty()) ? value : "N/A";
-    }
-
-    @FXML
+    }    @FXML
     private void handleCerrar() {
         if (stage != null) {
             stage.close();
@@ -112,6 +128,82 @@ public class ClienteDetallesViewController {
             // Stage currentStage = (Stage) btnCerrar.getScene().getWindow();
             // currentStage.close();
             logger.warn("Stage no fue inyectado en ClienteDetallesViewController, no se puede cerrar mediante handleCerrar sin un control de referencia.");
+        }
+    }
+
+    private void configurarTablaHistorial() {
+        try {
+            // Configurar las columnas de la tabla de historial
+            ventaNumCol.setCellValueFactory(new PropertyValueFactory<>("numeroVenta"));
+            ventaFechaCol.setCellValueFactory(cellData -> {
+                VentaFX venta = cellData.getValue();
+                if (venta.getFecha() != null) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                    return new javafx.beans.property.SimpleStringProperty(venta.getFecha().format(formatter));
+                }
+                return new javafx.beans.property.SimpleStringProperty("N/A");
+            });
+            ventaTotalCol.setCellValueFactory(cellData -> {
+                VentaFX venta = cellData.getValue();
+                if (venta.getTotal() != null) {
+                    return new javafx.beans.property.SimpleStringProperty("$" + venta.getTotal().toPlainString());
+                }
+                return new javafx.beans.property.SimpleStringProperty("$0.00");            });
+            ventaTipoPagoCol.setCellValueFactory(new PropertyValueFactory<>("tipoPago"));
+            
+            // Configurar columna de productos
+            ventaProductosCol.setCellValueFactory(cellData -> {
+                VentaFX venta = cellData.getValue();
+                if (venta.getDetalles() != null && !venta.getDetalles().isEmpty()) {
+                    StringBuilder productos = new StringBuilder();
+                    venta.getDetalles().forEach(detalle -> {
+                        if (productos.length() > 0) {
+                            productos.append(", ");
+                        }
+                        productos.append(detalle.getNombreProducto())
+                                .append(" (x")
+                                .append(detalle.getCantidad())
+                                .append(")");
+                    });
+                    return new javafx.beans.property.SimpleStringProperty(productos.toString());
+                }
+                return new javafx.beans.property.SimpleStringProperty("Sin productos");
+            });
+        } catch (Exception e) {
+            logger.error("Error al configurar tabla de historial de compras: ", e);
+        }
+    }    private void cargarHistorialCompras() {
+        if (ventaService == null || clienteMostrado == null || clienteMostrado.getIdCliente() == null) {
+            logger.warn("No se puede cargar historial: servicio de ventas o cliente no disponible");
+            return;
+        }
+
+        try {
+            List<VentaFX> ventasList = ventaService.listarVentasPorCliente(clienteMostrado.getIdCliente());
+            ObservableList<VentaFX> ventas = FXCollections.observableArrayList(ventasList != null ? ventasList : new ArrayList<>());
+            historialComprasTable.setItems(ventas);
+            
+            // Configurar placeholder cuando no hay datos
+            if (ventas.isEmpty()) {
+                Label placeholderLabel = new Label("No hay historial de compras para este cliente");
+                placeholderLabel.setStyle("-fx-text-fill: #666666; -fx-font-size: 14px;");
+                historialComprasTable.setPlaceholder(placeholderLabel);
+            }
+            
+            logger.info("Historial de compras cargado para cliente ID: {} - {} ventas encontradas", 
+                       clienteMostrado.getIdCliente(), 
+                       ventas.size());
+                         // Debug: Imprimir detalles de las ventas
+            for (VentaFX venta : ventas) {
+                logger.debug("Venta encontrada - ID: {}, Fecha: {}, Total: {}, Tipo Pago: {}", 
+                           venta.getIdVenta(), venta.getFecha(), venta.getTotal(), venta.getTipoPago());
+            }
+        } catch (Exception e) {
+            logger.error("Error al cargar historial de compras para cliente ID {}: ", clienteMostrado.getIdCliente(), e);
+            historialComprasTable.setItems(FXCollections.observableArrayList());
+            Label errorLabel = new Label("Error al cargar el historial de compras");
+            errorLabel.setStyle("-fx-text-fill: #d32f2f; -fx-font-size: 14px;");
+            historialComprasTable.setPlaceholder(errorLabel);
         }
     }
 } 

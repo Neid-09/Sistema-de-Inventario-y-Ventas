@@ -304,7 +304,7 @@ public class MenuPrincipalControllerFX implements Initializable {
             stage.close();
         }
     }
-
+    // TODO: Aqui se configura la visibilidad de los botones según los permisos del usuario.
     private void configurarPermisos() {
         // Verificar si el usuario es administrador
         boolean esAdmin = PermisosUIUtil.tienePermiso("ROLE_ADMINISTRADOR");
@@ -317,6 +317,12 @@ public class MenuPrincipalControllerFX implements Initializable {
             btnEntradasSalidas.setDisable(false);
             btnConfiguracion.setDisable(false);
             btnNotificaciones.setDisable(false);
+            btnConsulta.setVisible(false);
+            btnConsulta.setManaged(false);
+            btnGarantiasServicios.setVisible(false);
+            btnGarantiasServicios.setManaged(false);
+            btnMasVendido.setVisible(false);
+            btnMasVendido.setManaged(false);
         } else {
             // Configurar según permisos específicos con los nombres correctos
             PermisosUIUtil.configurarBoton(btnVender, "crear_venta");
@@ -324,6 +330,12 @@ public class MenuPrincipalControllerFX implements Initializable {
             PermisosUIUtil.configurarBoton(btnEntradasSalidas, "acces_mod_EntradasSalidas"); // O el permiso más adecuado
             PermisosUIUtil.configurarBoton(btnConfiguracion, "acces_mod_configurar"); // O el permiso más adecuado
             PermisosUIUtil.configurarBoton(btnNotificaciones, "ver_notificaciones");
+            btnConsulta.setVisible(false);
+            btnConsulta.setManaged(false);
+            btnGarantiasServicios.setVisible(false);
+            btnGarantiasServicios.setManaged(false);
+            btnMasVendido.setVisible(false);
+            btnMasVendido.setManaged(false);
         }
 
         // Configurar visibilidad de la etiqueta de rol

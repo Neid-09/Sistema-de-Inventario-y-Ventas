@@ -115,10 +115,42 @@
     -fx-border-color: transparent #E5E7E9 transparent transparent; /* Líneas de celda verticales sutiles */
 }
 
+/* Remover el foco por defecto de JavaFX */
+.details-table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: white;
+}
+
+/* Mejorar la apariencia general de la tabla */
+.details-table-view {
+    -fx-selection-bar: #3498DB;
+    -fx-selection-bar-non-focused: #85C1E9;
+}
+
 .details-table-view .table-row-cell:odd {
     -fx-background-color: #FFFFFF;
 }
 
 .details-table-view .table-row-cell:even {
     -fx-background-color: #F8F9F9;
-} 
+}
+
+/* Estilos para la fila seleccionada */
+.details-table-view .table-row-cell:selected {
+    -fx-background-color: #3498DB; /* Azul para la fila seleccionada */
+    -fx-text-fill: white; /* Texto blanco para contraste */
+}
+
+.details-table-view .table-row-cell:selected .table-cell {
+    -fx-text-fill: white; /* Asegurar que el texto de las celdas sea blanco */
+}
+
+/* Estilos para cuando se pasa el mouse por encima */
+.details-table-view .table-row-cell:hover {
+    -fx-background-color: #AED6F1; /* Azul claro para hover */
+}
+
+/* Evitar que el hover afecte la fila seleccionada */
+.details-table-view .table-row-cell:selected:hover {
+    -fx-background-color: #2980B9; /* Azul más oscuro para fila seleccionada con hover */
+}

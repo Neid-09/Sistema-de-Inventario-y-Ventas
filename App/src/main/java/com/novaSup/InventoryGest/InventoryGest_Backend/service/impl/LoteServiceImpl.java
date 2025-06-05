@@ -448,14 +448,12 @@ public class LoteServiceImpl implements LoteService {
         // Verificar si el producto está activo
         if (!producto.getEstado()) { // Use getEstado()
             throw new IllegalArgumentException("No se puede crear un lote de ajuste para un producto inactivo.");
-        }
-
-        if (cantidad == 0) {
+        }        if (cantidad == 0) {
             throw new IllegalArgumentException("La cantidad de ajuste no puede ser cero");
         }
         
-        // Registrar el movimiento de ajuste
-        registrarMovimientoAjuste(producto, cantidad, motivo);
+        // NOTA: El registro de movimiento ya se realiza en InventarioServiceImpl.registrarAjusteInventario()
+        // por lo tanto NO lo registramos aquí para evitar duplicación
 
         // Generar número de lote para ajuste
         String numeroLote = "AJUSTE-" + generarNumeroLote();

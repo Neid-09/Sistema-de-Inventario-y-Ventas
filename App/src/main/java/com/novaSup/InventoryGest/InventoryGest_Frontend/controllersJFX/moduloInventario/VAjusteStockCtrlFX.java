@@ -8,7 +8,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-//TODO: VERIFICAR SI ESTA BIEN YA QUE SOLO MODIFIQUE PARTES DE CONTROLADOR Y NO DE VENTANA
 
 public class VAjusteStockCtrlFX {
 
@@ -21,7 +20,7 @@ public class VAjusteStockCtrlFX {
     @FXML private Button btnCancelar;
 
     private ProductoFX producto;
-    private final IInventarioService inventarioService;
+    private IInventarioService inventarioService;
 
     // Listas de motivos según el tipo de ajuste
     private final ObservableList<String> motivosAumentar = FXCollections.observableArrayList(
@@ -33,7 +32,7 @@ public class VAjusteStockCtrlFX {
     );
 
     // Constructor para inyección de dependencias
-    public VAjusteStockCtrlFX(IInventarioService inventarioService) {
+    public void setServices(IInventarioService inventarioService) {
         this.inventarioService = inventarioService;
     }
 

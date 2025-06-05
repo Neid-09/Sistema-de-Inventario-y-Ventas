@@ -11,19 +11,17 @@ public class NotificacionFX {
     private final ObjectProperty<LocalDateTime> fecha;
     private final BooleanProperty leida;
     private final StringProperty tipo;
-    private final IntegerProperty idReferencia;
-
-    public NotificacionFX(Integer idNotificacion, Integer idUsuario, String titulo,
+    private final IntegerProperty idReferencia;    public NotificacionFX(Integer idNotificacion, Integer idUsuario, String titulo,
                           String mensaje, LocalDateTime fecha, Boolean leida,
                           String tipo, Integer idReferencia) {
-        this.idNotificacion = new SimpleIntegerProperty(idNotificacion);
-        this.idUsuario = new SimpleIntegerProperty(idUsuario);
-        this.titulo = new SimpleStringProperty(titulo);
-        this.mensaje = new SimpleStringProperty(mensaje);
+        this.idNotificacion = new SimpleIntegerProperty(idNotificacion != null ? idNotificacion : 0);
+        this.idUsuario = new SimpleIntegerProperty(idUsuario != null ? idUsuario : 0);
+        this.titulo = new SimpleStringProperty(titulo != null ? titulo : "");
+        this.mensaje = new SimpleStringProperty(mensaje != null ? mensaje : "");
         this.fecha = new SimpleObjectProperty<>(fecha);
-        this.leida = new SimpleBooleanProperty(leida);
-        this.tipo = new SimpleStringProperty(tipo);
-        this.idReferencia = new SimpleIntegerProperty(idReferencia);
+        this.leida = new SimpleBooleanProperty(leida != null ? leida : false);
+        this.tipo = new SimpleStringProperty(tipo != null ? tipo : "");
+        this.idReferencia = new SimpleIntegerProperty(idReferencia != null ? idReferencia : -1);
     }
 
     // Getters y setters
@@ -53,9 +51,12 @@ public class NotificacionFX {
 
     public String getTipo() { return tipo.get(); }
     public StringProperty tipoProperty() { return tipo; }
-    public void setTipo(String value) { tipo.set(value); }
-
-    public Integer getIdReferencia() { return idReferencia.get(); }
+    public void setTipo(String value) { tipo.set(value); }    public Integer getIdReferencia() { 
+        int value = idReferencia.get();
+        return value == -1 ? null : value; 
+    }
     public IntegerProperty idReferenciaProperty() { return idReferencia; }
-    public void setIdReferencia(Integer id) { idReferencia.set(id); }
+    public void setIdReferencia(Integer id) { 
+        idReferencia.set(id != null ? id : -1); 
+    }
 }
